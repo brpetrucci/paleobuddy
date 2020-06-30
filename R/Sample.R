@@ -87,6 +87,10 @@ Sample<-function(S,TE,TS,rr,tmax){
     # add to the vector
     sampled<-c(sampled,Now)
   }
+  
+  # finally, we invert time so that it goes from tmax to 0
+  sampled <- tmax - sampled
+  
   return(sampled)
 }
   
