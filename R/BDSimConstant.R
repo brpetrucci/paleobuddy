@@ -7,16 +7,16 @@
 #' \code{tmax} to 0, to be consistent with the literature, though one can 
 #' easily invert that by subtracting the results from \code{tmax}.
 #'
-#' @parameter \code{N0} initial number of species, usually 1. Good parameter to
+#' @param \code{N0} initial number of species, usually 1. Good param to
 #' tweak if one is observing a low sample size when testing.
 #'
-#' @parameter \code{p} speciation rate. Must be constant. No error check since 
+#' @param \code{p} speciation rate. Must be constant. No error check since 
 #' in the package this function will only be called by \code{BDSim}, which will
 #' only call it if the rate is constant. 
 #'
-#' @parameter \code{q} extinction rate, similar to above.
+#' @param \code{q} extinction rate, similar to above.
 #'
-#' @parameter \code{tmax} ending time of simulation. Any species still living 
+#' @param \code{tmax} ending time of simulation. Any species still living 
 #' after \code{tmax} is considered extant, and any species that would be 
 #' generated after \code{tmax} is not born.
 #'

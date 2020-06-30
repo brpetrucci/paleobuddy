@@ -6,44 +6,44 @@
 #' intervals and whether one wants the true return times or a range based on 
 #' \code{IntVec}.
 #' 
-#' @parameter \code{TE} a vector of extinction times, usually an output of 
+#' @param \code{TE} a vector of extinction times, usually an output of 
 #' \code{BDSim}.
 #' 
-#' @parameter \code{TS} a vector of speciation times.
+#' @param \code{TS} a vector of speciation times.
 #'
-#' @parameter \code{IntVec} a vector of time intervals corresponding to 
+#' @param \code{IntVec} a vector of time intervals corresponding to 
 #' geological time ranges. If \code{returnTrue} is false, \code{SampleClade} 
 #' returns the member of \code{IntVec} right after the true occurrence time. 
 #' In this way, we simulate the granularity in real world fossil records. If 
 #' \code{returnTrue} is true, this is ignored.
 #'
-#' @parameter \code{rr} a sampling rate function. May be a constant, a 
+#' @param \code{rr} a sampling rate function. May be a constant, a 
 #' time-dependent function, a function dependent on time and environment, or a 
 #' vector of rates corresponding to the times in \code{rshifts}. If 
 #' \code{env_rr} and \code{rshifts} are NULL, it will be either treated as an 
 #' exponential rate, if \code{rshape} is 0, or a weibull scale, if 
 #' \code{rshape} > 0.
 #' 
-#' @parameter \code{tmax} the maximum simulation time, used by 
+#' @param \code{tmax} the maximum simulation time, used by 
 #' \code{rexp_var}.
 #'
-#' @parameter \code{rshape} a shape for weibull distributions. Sampling is not 
+#' @param \code{rshape} a shape for weibull distributions. Sampling is not 
 #' usually modelled as a Weibull, but we provide this feature while a more 
 #' common age-dependent sampling model is not implemented.
 #'
-#' @parameter \code{env_rr} a matrix containing time points and values of an
+#' @param \code{env_rr} a matrix containing time points and values of an
 #' enviromental variable, like temperature, for each time point. This will be
 #' used to create a sampling rate, so \code{rr} must be a function of time and
 #' said variable if \code{env_rr} is not NULL.
 #'
-#' @parameter \code{rshifts} vector of rate shifts. First element must be 
+#' @param \code{rshifts} vector of rate shifts. First element must be 
 #' starting time for simulation (0). Vector must have the same length as 
 #' \code{rr} E.g. \code{rr = c(0.15, 0.1, 0.2)}, \code{pshifts = c(0, 20, 30)} 
 #' means r will be 0.15 from 0 to 20, 0.1 from 20 to 30, and 0.2 from 30 to 
 #' \code{tmax}. Note that using this method for step-function rates is 
 #' currently slower than using \code{ifelse}.
 #'
-#' @parameter \code{returnTrue} if set to true, a list of true ocurrence times
+#' @param \code{returnTrue} if set to true, a list of true ocurrence times
 #' for each species will be returned. If set to true, we call \code{Grid} to 
 #' take the list of samples and return a list of upper bounds for occurrences.
 #'

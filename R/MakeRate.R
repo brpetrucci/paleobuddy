@@ -7,12 +7,12 @@
 #' of rates, the user must supply the accompanying vector of rate shifts 
 #' \code{fshifts} to create a step function rate. Finally, if \code{ff} takes 
 #' an environmental variable as well, the user must supply a dataframe of time 
-#' vs. the environmental parameter, \code{env_f}. Note that an error is 
+#' vs. the environmental param, \code{env_f}. Note that an error is 
 #' returned if the user suplies \code{fshifts} AND \code{env_f}. If one wants a
 #' step function modified by an environmental variable, use \code{ifelse} to 
 #' give \code{ff(t, env)} (see examples below).
 #'
-#' @parameter \code{ff} the baseline function with which to make the rate. 
+#' @param \code{ff} the baseline function with which to make the rate. 
 #' It can be 
 #' 1. a constant, if one wishes to create constant birth-death rates;
 #' 2. a function of time, if one wishes their birth-death rate to vary with
@@ -22,12 +22,12 @@
 #' 3. a vector of rates, which must be accompanied by a corresponding vector 
 #' of shifts \code{fshifts}.
 #'
-#' @parameter \code{env_f} a dataframe representing an environmental variable
+#' @param \code{env_f} a dataframe representing an environmental variable
 #' (time, CO2 etc) with time. The first column must be time, second column the 
 #' values of the variable. See below; one good resource for these dataframes is
 #' \href{https://cran.r-project.org/web/packages/RPANDA/}{RPANDA}.
 #'
-#' @parameter \code{fshifts} a vector of rate shifts. The first element must 
+#' @param \code{fshifts} a vector of rate shifts. The first element must 
 #' be the first time point for the simulation. Note that supplying
 #' \code{fshifts} when \code{ff} is not a rates vector will return an error.
 #'

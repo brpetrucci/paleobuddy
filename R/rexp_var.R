@@ -6,26 +6,26 @@
 #' number of waiting times to return. This can serve both for an exponential
 #' distribution, and a weibull distribution with varying parameters.
 #'
-#' @parameter \code{n} the number of times to return. The default is 1, but 
+#' @param \code{n} the number of times to return. The default is 1, but 
 #' we allow for a higher \code{n} to be consistent with the \code{rexp} 
 #' function.
 #'
-#' @parameter \code{lambda} the rate parameter for the exponential 
+#' @param \code{lambda} the rate parameter for the exponential 
 #' distribution. If shape is not NULL, \code{lambda} is a scale for the Weibull.
 #' In both cases we allow for any time-varying function. If one wants a 
 #' constant, please use \code{lambda <- function(t) {return(constant)}}.
 #'
-#' @parameter \code{now} the current time. Needed so that we consider only the 
+#' @param \code{now} the current time. Needed so that we consider only the 
 #' interval between the current time and the maximum time for the time-varying
 #' rate. Notice this does means the waiting time is >= \code{now}, so one must
 #' subtract \code{now} from the waiting time when using it.
 #'
-#' @parameter \code{tmax} the simulation ending time. If the waiting time 
+#' @param \code{tmax} the simulation ending time. If the waiting time 
 #' would be too high, we return \code{2*tmax} to signify the event never 
 #' happens. The function only considers the rate between \code{now} and 
 #' \code{tmax}.
 #'
-#' @parameter \code{shape} the shape of a weibull distribution. If not NULL, 
+#' @param \code{shape} the shape of a weibull distribution. If not NULL, 
 #' the distribution is taken to be a weibull. Otherwise, it is considered an 
 #' exponential.
 #' 
@@ -33,11 +33,11 @@
 #' for \code{uniroot} to find a root. Time-varying shape is implemented, but
 #' not yet thoroughly tested.
 #' 
-#' @parameter \code{TS} if shape is given, there must be a TS parameter to 
+#' @param \code{TS} if shape is given, there must be a TS parameter to 
 #' account for the scaling between simulation and species time. Supplying one 
 #' without the other leads to an error.
 #' 
-#' @parameter \code{fast} if set to FALSE, waiting times larger than the max 
+#' @param \code{fast} if set to FALSE, waiting times larger than the max 
 #' simulation time will not be thrown away. Needed when testing the function
 #'
 #' @return a vector of waiting times for the exponential or weibull

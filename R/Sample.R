@@ -4,20 +4,20 @@
 #' \code{Sample} takes a species number, a vector of speciation and extinction
 #' times, a sampling rate with possible shape and a maximum time for simulation.
 #'
-#' @parameter \code{S} the species number to be sampled. Since \code{Sample} 
+#' @param \code{S} the species number to be sampled. Since \code{Sample} 
 #' will be called by a wrapper using \code{lapply}, it is through \code{S} 
 #' that we apply this function.
 #' 
-#' @parameter \code{TE} a vector of extinction times, usually an output of
+#' @param \code{TE} a vector of extinction times, usually an output of
 #' \code{BDSim}.
 #' 
-#' @parameter \code{TS} a vector of speciation times.
+#' @param \code{TS} a vector of speciation times.
 #' 
-#' @parameter \code{rr} a sampling rate function, usually created by 
+#' @param \code{rr} a sampling rate function, usually created by 
 #' \code{MakeRate}. Can be an exponential rate or a weibull scale, if 
 #' \code{rshape} is not 0.
 #'
-#' @parameter \code{tmax} the maximum simulation time, used by 
+#' @param \code{tmax} the maximum simulation time, used by 
 #' \code{rexp_var}.
 #'
 #' @return a list of occurrences for that species, expected to be around

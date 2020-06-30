@@ -6,15 +6,15 @@
 #' on that interval. This allows for efficient testing of the diversity curves
 #' produced by \code{PaleoBuddy} simulations.
 #'
-#' @parameter \code{ff} a rate for the exponential distribution that can be 
+#' @param \code{ff} a rate for the exponential distribution that can be 
 #' any function of time. One can also supply data for an environmental 
-#' variable (see below for the \code{env_f} parameter) and get the expected 
+#' variable (see below for the \code{env_f} param) and get the expected 
 #' number of species for a hybrid function of time and said variable. Finally,
 #' one can instead supply a vector of rates to \code{ff} and a vector of shifts
 #' to \code{fshifts} and get a step function. It is more efficient to create a 
 #' stepfunction using \code{ifelse} however (see examples below).
 #'
-#' @parameter \code{N0} the initial number of species is by default 1, but one
+#' @param \code{N0} the initial number of species is by default 1, but one
 #' can change to any positive number. We allow for negative initial values as 
 #' well, but of course that will not help in testing the package.
 #'
@@ -23,14 +23,14 @@
 #' biological context \code{ff} is diversification rate, not speciation (unless
 #' extinction is 0, of course).
 #'
-#' @parameter \code{t} a time vector over which to consider the distribution.
+#' @param \code{t} a time vector over which to consider the distribution.
 #'
-#' @parameter \code{env_f} a two dimensional dataframe with time as a first 
+#' @param \code{env_f} a two dimensional dataframe with time as a first 
 #' column and the desired environmental variable as a second. Note that 
 #' supplying a function with one argument and a non-NULL \code{env_f}, and vice
 #' versa, will return an error.
 #'
-#' @parameter \code{fshifts} a vector of rate shifts. Then used with the rates
+#' @param \code{fshifts} a vector of rate shifts. Then used with the rates
 #' vector to create a step function for the rates. If supplied without a rates 
 #' vector, and vice versa, will return an error.
 #'

@@ -3,10 +3,10 @@
 #' \code{Grid} takes the time interval vector in question and the list of 
 #' occurrences for a species.
 #'
-#' @parameter \code{samp} the list containing the occurrence times for a given 
+#' @param \code{samp} the list containing the occurrence times for a given 
 #' species.
 #'
-#' @parameter \code{IntVec} a vector of time intervals corresponding to 
+#' @param \code{IntVec} a vector of time intervals corresponding to 
 #' geological time ranges. If \code{returnTrue} is false, \code{SampleClade} 
 #' returns the member of \code{IntVec} right after the true occurrence time. 
 #' In this way, we simulate the granularity in real world fossil records. 

@@ -6,27 +6,27 @@
 #' environmental variable), a maximum simulation time and possibly a shape for
 #' age-dependent speciation and/or extinction.
 #'
-#' @parameter \code{N0} initial number of species, usually 1. Good parameter to 
+#' @param \code{N0} initial number of species, usually 1. Good param to 
 #' tweak if one is observing a low sample size when testing.
 #'
-#' @parameter \code{pp} function to hold the speciation rate over time. 
+#' @param \code{pp} function to hold the speciation rate over time. 
 #' \code{BDSim} supplies this function with a \code{pp} ready to be used, so 
 #' that the only other information \code{BDSimGeneral} needs is a shape in case 
 #' the rate is to be age-dependent.
 #'
-#' @parameter \code{qq} similar to above, but for extinction rate.
+#' @param \code{qq} similar to above, but for extinction rate.
 #'
-#' @parameter \code{tmax} ending time of simulation. Any species still living 
+#' @param \code{tmax} ending time of simulation. Any species still living 
 #' after \code{tmax} is considered extant, and any species that would be 
 #' generated after \code{tmax} is not born.
 #'
-#' @parameter \code{sshape} shape parameter for the Weibull distribution for 
+#' @param \code{sshape} shape param for the Weibull distribution for 
 #' age-dependent speciation. Default is 0, where \code{pp} will be considered a
 #' time-dependent exponential rate. For \code{sshape != NULL}, \code{pp} will
 #' be considered a scale, and \code{rexp_var} will draw a Weibull distribution 
 #' instead.
 #'
-#' @parameter \code{eshape} similar as above, but for extinction rate.
+#' @param \code{eshape} similar as above, but for extinction rate.
 #'
 #' @return a list of vectors, as follows
 #' 

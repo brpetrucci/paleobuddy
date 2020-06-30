@@ -15,11 +15,13 @@
 #' @return A \code{phylo} object.
 #' 
 #' @examples
+#'
 #' #Generating a phylogeny using constant rates
 library(ape)
 sim=BDSim(N0 = 1, pp = 0.5, qq = 0.4, tmax = 10);
 plot(PB2phylo(sim))
-#' 
+#'
+
 PB2phylo=function(sim){
   
   if(length(sim$TE)<2){

@@ -7,45 +7,45 @@
 #' options to alter the rates, and calls \code{BDSimConstant} or 
 #' \code{BDSimGeneral} with the rates.
 #'
-#' @parameter \code{N0} initial number of species, usually 1. Good parameter 
+#' @param \code{N0} initial number of species, usually 1. Good param 
 #' to tweak if one is observing a low sample size when testing.
 #'
-#' @parameter \code{pp} function to hold the speciation rate over time. It 
+#' @param \code{pp} function to hold the speciation rate over time. It 
 #' could be a function of time (to be an exponential rate or weibull scale), a
 #' function of time and an environmental variable, or a vector of rates to be
 #' accompanied by a vector of rate shifts \code{pshifts}. 
 #'
-#' @parameter \code{qq} similar as above, but for extinction rate.
+#' @param \code{qq} similar as above, but for extinction rate.
 #' 
 #' Note: \code{pp} and \code{qq} must always be greater than 0
 #'
-#' @parameter \code{tmax} ending time of simulation. Any species still living 
+#' @param \code{tmax} ending time of simulation. Any species still living 
 #' after tmax is considered extant, and any species that would be generated 
 #' after \code{tmax} is not born.
 #'
-#' @parameter \code{sshape} shape parameter for the Weibull distribution for 
+#' @param \code{sshape} shape param for the Weibull distribution for 
 #' age-dependent speciation. Default is 0, where \code{pp} will be considered a 
 #' time-dependent exponential rate. For \code{sshape != NULL}, \code{pp} will
 #' be considered a scale, and \code{rexp_var} will draw a Weibull distribution
 #' instead.
 #'
-#' @parameter \code{eshape} similar as above, but for extinction rate.
+#' @param \code{eshape} similar as above, but for extinction rate.
 #'
-#' @parameter \code{env_pp} a matrix containing time points and values of an
+#' @param \code{env_pp} a matrix containing time points and values of an
 #' enviromental variable, like temperature, for each time point. This will be
 #' used to create a speciation rate, so \code{pp} must be a function of time 
 #' and said variable.
 #'
-#' @parameter \code{env_qq} similar as above, but for extinction rate.
+#' @param \code{env_qq} similar as above, but for extinction rate.
 #'
-#' @parameter \code{pshifts} vector of rate shifts. First element must be 
+#' @param \code{pshifts} vector of rate shifts. First element must be 
 #' starting time for simulation (0). It must have the same length as \code{pp}.
 #' E.g. \code{pp = c(0.1, 0.2, 0.1)}, \code{pshifts = c(0, 10, 20)} means p 
 #' will be 0.1 from 0 to 10, 0.2 from 10 to 20, and 0.1 from 20 to \code{tmax}.
 #' Note that using this  method for step-function rates is currently slower than using 
 #' \code{ifelse}.
 #' 
-#' @parameter \code{qshifts} similar as above, but for extinction rate.
+#' @param \code{qshifts} similar as above, but for extinction rate.
 #'
 #' @return the return list of either \code{BDSimConstant} or 
 #' \code{BDSimGeneral}, which have the same elements, as follows
