@@ -17,7 +17,7 @@
 #'
 #' @parameter \code{qq} similar as above, but for extinction rate.
 #' 
-#' Note: \code{pp} and \code{qq} must always be greater than 0
+#' Note: \code{pp} an \code{qq} must always be greater than 0
 #'
 #' @parameter \code{tmax} ending time of simulation. Any species still living 
 #' after tmax is considered extant, and any species that would be generated 
