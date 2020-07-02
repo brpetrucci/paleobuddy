@@ -70,7 +70,83 @@
 #'
 #' since both \code{BDSimConstant} and \code{BDSimGeneral} have been tested in
 #' their respective man pages, we will spend some time here giving examples of
-#' possible combinations of diversification scenarios``
+#' possible combinations of diversification scenarios.
+#' 
+#' consider first the simplest regimen, constant speciation and extinction
+N0 <- 1
+p <- 0.11
+q <- 0.08
+tmax <- 40
+sim <- BDSim(N0, p, q, tmax) # this must be run until we have more than 1 sp
+#' we can plot the phylogeny to take a look
+library(ape)
+phy <- PB2phylo(sim)
+plot.phylo(phy)
+#'
+#' now let us complicate speciation more, maybe a linear function
+N0 <- 1
+p <- function(t) {
+  return(0.09+0.005*t)
+}
+q <- 0.08
+tmax <- 40
+sim <- BDSim(N0, p, q, tmax)
+#'
+#' what if we want q to be a step function?
+q <- c(0.08, 0.07, 0.08)
+qshifts <- c(0, 20, 35)
+#' let's take a look at how MakeRate will make it a step function
+qq <- MakeRate(q, fshifts=qshifts)
+#' note that this is slower than creating a step function with ifelse()
+plot(seq(0, tmax, 0.1), qq(seq(0, tmax, 0.1)), type='l')
+#' looking good, we will keep everything else the same
+p <- function(t) {
+  return(0.09+0.005*t)
+}
+N0 <- 1
+tmax <- 40
+sim <- BDSim(N0, p, q, tmax, qshifts=qshifts)
+#' 
+#' we can supply a shape parameter to try age-dependent rates
+N0 <- 1
+p <- 10
+sshape <- 2
+q <- 0.08
+tmax <- 40
+sim <- BDSim(N0, p, q, tmax, sshape=sshape)
+#'
+#' finally, we can also have a rate dependent on an environmental variable, 
+#' like RPANDA's temperature data
+library(RPANDA)
+data(InfTemp)
+N0 <- 1
+p <- function(t) {
+  return(1 + 0.25*t)
+}
+#' note the scale for the age-dependency can be a time-varying function
+sshape <- 2
+q <- function(t, env) {
+  return(0.15 * exp(-0.01 * env))
+}
+env_q <- InfTemp
+tmax <- 40
+sim <- BDSim(N0, p, q, tmax, sshape=sshape, env_q=InfTemp)
+#'
+#' one can mix and match all of these scenarios as they wish - age-dependency
+#' and constant rates, age-dependent and temperature-dependent rates, etc. The
+#' only combination that is not allowed is a vector rate and environmental
+#' data, but one can get around that as follows,
+N0 <- 1
+p <- function(t, env) {
+  ifelse(t < 20, env,
+         ifelse(t < 30, env/2, 2*env/3))
+}
+sshape <- 1.5
+env_p <- InfTemp
+q <- 0.08
+tmax <- 40
+sim <- BDSim(N0, p, q, tmax, sshape=sshape, env_pp=env_p)
+#' 
 
 BDSim<-function(N0,pp,qq,tmax,sshape=NULL,eshape=NULL,env_pp=NULL,env_qq=NULL,
                 pshifts=NULL,qshifts=NULL){

@@ -12,15 +12,19 @@
 #' step function modified by an environmental variable, use \code{ifelse} to 
 #' give \code{ff(t, env)} (see examples below).
 #'
-#' @param \code{ff} the baseline function with which to make the rate. 
-#' It can be 
-#' 1. a constant, if one wishes to create constant birth-death rates;
-#' 2. a function of time, if one wishes their birth-death rate to vary with
-#' time. Note that this can be any function of time, but one should not supply
-#' a function that depends on more than one variable without an accompanying
-#' \code{env_f} - that will result in an error;
-#' 3. a vector of rates, which must be accompanied by a corresponding vector 
-#' of shifts \code{fshifts}.
+#' @param \code{ff} the baseline function with which to make the rate.
+#' It can be a
+#' 
+#' \describe{
+#' \item{\code{Constant}}{For constant birth-death rates}
+#' 
+#' \item{\code{Function of time}}{For rates that vary with time. Note that this 
+#' can be any function of time, but one should not supply a function that 
+#' depends on more than one variable without an accompanying \code{env_f} - 
+#' that will result in an error}
+#' 
+#' \item{\code{Vector of rates}}{To create step function rates. Note this must
+#' be accompanied by a corresponding vector of shifts \code{fshifts}}
 #'
 #' @param \code{env_f} a dataframe representing an environmental variable
 #' (time, CO2 etc) with time. The first column must be time, second column the 
@@ -28,8 +32,11 @@
 #' \href{https://cran.r-project.org/web/packages/RPANDA/}{RPANDA}.
 #'
 #' @param \code{fshifts} a vector of rate shifts. The first element must 
-#' be the first time point for the simulation. Note that supplying
-#' \code{fshifts} when \code{ff} is not a rates vector will return an error.
+#' be the first time point for the simulation. This may be 0 or tmax. Since
+#' functions in PaleoBuddy run from 0 to tmax, if \code{fshifts} runs from past
+#' to present, in other words \code{fshifts[2] < fshifts[1]}, we take 
+#' \code{tmax-fshifts} as the shifts vector. Note that supplying \code{fshifts}
+#' when \code{ff} is not a rates vector will return an error.
 #'
 #' @return returns a constant or time-varying function (depending on input)
 #' that can then be used as a rate in the other \code{PaleoBuddy} functions. 
@@ -175,6 +182,10 @@ MakeRate<-function(ff,env_f=NULL,fshifts=NULL) {
   if (!is.null(fshifts)){
     
     flist<-ff
+    
+    # if user gave a list from past to present, make it from present to past
+    if (fshifts[2] < fshifts[1])
+    fshifts<-tmax - fshifts
     
     # create the step function
     f<-function(t){

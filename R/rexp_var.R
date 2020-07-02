@@ -38,7 +38,7 @@
 #' without the other leads to an error.
 #' 
 #' @param \code{fast} if set to FALSE, waiting times larger than the max 
-#' simulation time will not be thrown away. Needed when testing the function
+#' simulation time will not be thrown away. Needed when testing the function.
 #'
 #' @return a vector of waiting times for the exponential or weibull
 #' distribution with the given rates.
@@ -220,7 +220,7 @@ rexp_var<-function(n=1, lambda, now, tmax, shape = NULL, TS = NULL, fast=TRUE){
       
       # calculate the probability that the event will happen at all
       total <- 1-exp(-(integrate(
-        Vectorize(function(x) 1/lambda(x+TS)), lower=spnow, upper=tmax,
+        Vectorize(function(x) 1/lambda(x+TS)), lower=spnow, upper=tmax-TS,
         subdivisions=2000)$value)^shape(tmax))
 
       #if the probability is lower than p, the event will not happen
