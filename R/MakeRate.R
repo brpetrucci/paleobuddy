@@ -1,135 +1,140 @@
 #' Returns a rate based on a time-varying function, environmental variable
 #' and/or vectors of rates and shifts
 #'
-#' \code{MakeRate} takes a function \code{ff}, which could be a constant, a 
+#' \code{MakeRate} takes a function \code{ff}, which could be a constant, a
 #' function of time or a vector of rates. If it is a constant or a time-varying
 #' function, nothing else need be supplied. Otherwise, if \code{ff} is a vector
-#' of rates, the user must supply the accompanying vector of rate shifts 
-#' \code{fshifts} to create a step function rate. Finally, if \code{ff} takes 
-#' an environmental variable as well, the user must supply a dataframe of time 
-#' vs. the environmental param, \code{env_f}. Note that an error is 
+#' of rates, the user must supply the accompanying vector of rate shifts
+#' \code{fshifts} to create a step function rate. Finally, if \code{ff} takes
+#' an environmental variable as well, the user must supply a dataframe of time
+#' vs. the environmental param, \code{env_f}. Note that an error is
 #' returned if the user suplies \code{fshifts} AND \code{env_f}. If one wants a
-#' step function modified by an environmental variable, use \code{ifelse} to 
+#' step function modified by an environmental variable, use \code{ifelse} to
 #' give \code{ff(t, env)} (see examples below).
 #'
-#' @param \code{ff} the baseline function with which to make the rate.
+#' @param ff the baseline function with which to make the rate.
 #' It can be a
-#' 
+#'
 #' \describe{
 #' \item{\code{Constant}}{For constant birth-death rates}
-#' 
-#' \item{\code{Function of time}}{For rates that vary with time. Note that this 
-#' can be any function of time, but one should not supply a function that 
-#' depends on more than one variable without an accompanying \code{env_f} - 
+#'
+#' \item{\code{Function of time}}{For rates that vary with time. Note that this
+#' can be any function of time, but one should not supply a function that
+#' depends on more than one variable without an accompanying \code{env_f} -
 #' that will result in an error}
-#' 
+#'
 #' \item{\code{Vector of rates}}{To create step function rates. Note this must
-#' be accompanied by a corresponding vector of shifts \code{fshifts}}
-#' 
-#' @param \code{tmax} a number corresponding to the maximum simulation time. 
+#' be accompanied by a corresponding vector of shifts \code{fshifts}}}
+#'
+#' @param tmax a number corresponding to the maximum simulation time.
 #' Needed to ensure \code{fshifts} runs the correct way.
 #'
-#' @param \code{env_f} a dataframe representing an environmental variable
-#' (time, CO2 etc) with time. The first column must be time, second column the 
+#' @param env_f a dataframe representing an environmental variable
+#' (time, CO2 etc) with time. The first column must be time, second column the
 #' values of the variable. See below; one good resource for these dataframes is
 #' \href{https://cran.r-project.org/web/packages/RPANDA/}{RPANDA}.
 #'
-#' @param \code{fshifts} a vector of rate shifts. The first element must 
+#' @param fshifts a vector of rate shifts. The first element must
 #' be the first time point for the simulation. This may be 0 or tmax. Since
 #' functions in PaleoBuddy run from 0 to tmax, if \code{fshifts} runs from past
-#' to present, in other words \code{fshifts[2] < fshifts[1]}, we take 
+#' to present, in other words \code{fshifts[2] < fshifts[1]}, we take
 #' \code{tmax-fshifts} as the shifts vector. Note that supplying \code{fshifts}
 #' when \code{ff} is not a rates vector will return an error.
 #'
 #' @return returns a constant or time-varying function (depending on input)
-#' that can then be used as a rate in the other \code{PaleoBuddy} functions. 
-#' The returned function will invariably be either a number or a function of 
-#' one variable only, usually set as time. 
+#' that can then be used as a rate in the other \code{PaleoBuddy} functions.
+#' The returned function will invariably be either a number or a function of
+#' one variable only, usually set as time.
 #'
 #' @author written by Bruno do Rosario Petrucci; environmental variable
-#' function inspired by \code{RPANDA} by Hélène Morlon.
+#' function inspired by \code{RPANDA} by H?l?ne Morlon.
 #'
 #' @examples
-
-#' let us start simple: create a constant rate
-r <- MakeRate(0.5)
-plot(1:50, rep(r, 50), type='l')
 #'
-#' something a bit more complex: a linear rate
-ff <- function(t) {
-  return(0.01*t)
-}
-r <- MakeRate(ff)
-plot(1:50, r(1:50), type='l')
+#' # let us start simple: create a constant rate
+#' r <- MakeRate(0.5)
+#' plot(1:50, rep(r, 50), type='l')
 #'
-#' remember: this can be any time-varying function!
-ff <- function(t) {
-  return(sin(t)*0.01)
-}
-r <- MakeRate(ff)
-plot(1:50, r(1:50), type='l')
+#' # something a bit more complex: a linear rate
+#' ff <- function(t) {
+#'   return(0.01*t)
+#' }
+#' r <- MakeRate(ff)
+#' plot(1:50, r(1:50), type='l')
 #'
-#' we can use ifelse() to make a step function like this
-ff <- function(t) {
-  return(ifelse(t < 10, 0.1,
-                ifelse(t < 20, 0.3,
-                       ifelse(t < 30, 0.2,
-                              ifelse(t < 40, 0.05, 0)))))
-}
-r <- MakeRate(ff)
-plot(1:50, r(1:50), type='l')
-#' important note: this method of creating a step function might be annoying,
-#' but when running thousands of simulations it will provide a much faster
-#' integration than when using our method of transforming a rates and shifts
-#' vector into a function of time...
+#' # remember: this can be any time-varying function!
+#' ff <- function(t) {
+#'   return(sin(t)*0.01)
+#' }
+#' r <- MakeRate(ff)
+#' plot(1:50, r(1:50), type='l')
 #'
-#' ...which we can do as follows
-ff <- c(0.1, 0.2, 0.3, 0.2)
-fshifts <- c(0, 10, 20, 35)
-r <- MakeRate(ff, fshifts = fshifts)
-plot(1:50, r(1:50),type='l')
-#' as mentioned above, while this works well it will be a pain to integrate.
-#' Furthermore, it is impractical to supply a rate and a shifts vector and
-#' have an environmental dependency, so in cases where one looks to run
-#' more than a couple dozen simulations, and when one is looking to have a
-#' step function modified by an environmental variable, consider using ifelse()
+#' # we can use ifelse() to make a step function like this
+#' ff <- function(t) {
+#'   return(ifelse(t < 10, 0.1,
+#'                 ifelse(t < 20, 0.3,
+#'                        ifelse(t < 30, 0.2,
+#'                               ifelse(t < 40, 0.05, 0)))))
+#' }
+#' r <- MakeRate(ff)
+#' plot(1:50, r(1:50), type='l')
 #'
-#' finally let us see what we can do with environmental variables
+#' # important note: this method of creating a step function might be annoying,
+#' # but when running thousands of simulations it will provide a much faster
+#' # integration than when using our method of transforming a rates and shifts
+#' # vector into a function of time...
 #'
-#' RPANDA supplies us with some really useful environmental dataframes
-library(RPANDA)
-#' to use as an example, let us try temperature
-data(InfTemp)
-
-ff <- function(t, env) {
-  return(0.05*env)
-}
-r <- MakeRate(ff, env_f = InfTemp)
-plot(1:50, r(1:50), type='l')
+#' # ...which we can do as follows
+#' ff <- c(0.1, 0.2, 0.3, 0.2)
+#' fshifts <- c(0, 10, 20, 35)
+#' r <- MakeRate(ff, fshifts = fshifts)
+#' plot(1:50, r(1:50),type='l')
 #'
-#' we can also have a function that depends on both time AND temperature
-ff <- function(t, env) {
-  return(0.001*exp(0.1*t) + 0.05*env)
-}
-r <- MakeRate(ff, env_f = InfTemp)
-plot(1:50, r(1:50), type='l')
+#' # as mentioned above, while this works well it will be a pain to integrate.
+#' # Furthermore, it is impractical to supply a rate and a shifts vector and
+#' # have an environmental dependency, so in cases where one looks to run
+#' # more than a couple dozen simulations, and when one is looking to have a
+#' # step function modified by an environmental variable, consider using ifelse()
 #'
-#' as mentioned above, we could also use ifelse() to construct a step function
-#' that is modulated by temperature
-ff <- function(t, env) {
-  return(ifelse(t < 10, 0.1 + 0.01*env,
-                ifelse(t < 30, 0.2 - 0.005*env,
-                       ifelse(t <= 50, 0.1 + 0.005*env, 0))))
-}
-r <- MakeRate(ff, env_f = InfTemp)
-plot(1:50, r(1:50), type='l')
+#' # finally let us see what we can do with environmental variables
 #'
+#' # RPANDA supplies us with some really useful environmental dataframes
+#' library(RPANDA)
 #'
+#' # to use as an example, let us try temperature
+#' data(InfTemp)
+#'
+#' ff <- function(t, env) {
+#'   return(0.05*env)
+#' }
+#' r <- MakeRate(ff, env_f = InfTemp)
+#' plot(1:50, r(1:50), type='l')
+#'
+#' # we can also have a function that depends on both time AND temperature
+#' ff <- function(t, env) {
+#'   return(0.001*exp(0.1*t) + 0.05*env)
+#' }
+#' r <- MakeRate(ff, env_f = InfTemp)
+#' plot(1:50, r(1:50), type='l')
+#'
+#' # as mentioned above, we could also use ifelse() to construct a step function
+#' # that is modulated by temperature
+#' ff <- function(t, env) {
+#'   return(ifelse(t < 10, 0.1 + 0.01*env,
+#'                 ifelse(t < 30, 0.2 - 0.005*env,
+#'                        ifelse(t <= 50, 0.1 + 0.005*env, 0))))
+#' }
+#' r <- MakeRate(ff, env_f = InfTemp)
+#' plot(1:50, r(1:50), type='l')
+#'
+#' @name MakeRate
+#' @rdname MakeRate
+#' @export
 
 MakeRate<-function(ff,tmax, env_f=NULL,fshifts=NULL) {
   # may use this soon
   nargs = ifelse(is.numeric(ff), length(ff), length(formals(ff)))
-  
+
   # let us first check for some errors
   if (is.numeric(ff)) {
     # if ff is constant, we should not see any env_f or fshifts
@@ -140,29 +145,29 @@ MakeRate<-function(ff,tmax, env_f=NULL,fshifts=NULL) {
         return(Vectorize(function(t) ff))
       }
     }
-    
+
     # if length(ff) > 1 we have a rates vector, so we must have a shifts vector
     else if (is.null(fshifts)) {
       stop("rate vector supplied without a shift vector")
     }
-    
+
     # if they are not the same size, we have a problem
     else if (length(ff) != length(fshifts)) {
       stop("rate vector and shifts vector must have the same length")
     }
-    
+
     # if we have a rates vector and shifts vector, should not have env_f
     else if (!is.null(env_f)) {
       stop("rates and shifts supplied with environmental variable;
            use ifelse()")
     }
   }
-  
-  
+
+
   else if (!is.null(fshifts)) {
     stop("shifts vector supplied without a rates vector")
   }
-  
+
   else if (nargs > 1 || (nargs == 0 && !is.numeric(ff))) {
     # ff should not have more than two arguments or less than 1
     if (nargs > 2 || nargs == 0) {
@@ -180,58 +185,58 @@ MakeRate<-function(ff,tmax, env_f=NULL,fshifts=NULL) {
   else if (nargs == 1 && !is.null(env_f)) {
     stop("environmental variable supplied with one argument function")
   }
-  
+
   # check if there are shifts - i.e. if the rate is a step function
   if (!is.null(fshifts)){
-    
+
     flist<-ff
-    
+
     # if user gave a list from past to present, make it from present to past
     if (fshifts[2] < fshifts[1]) {
       fshifts<-tmax - fshifts
     }
-    
+
     # create the step function
     f<-function(t){
-      
+
       if (t<0){
         return(0)
       }
-      
+
       else {
-        # get the rate for this time by subtracting the shifts 
+        # get the rate for this time by subtracting the shifts
         # and finding where the subtraction is positive
-        return(flist[tail(which(t-fshifts>=0), n=1)])
+        return(flist[utils::tail(which(t-fshifts>=0), n=1)])
       }
     }
-    
+
     # vectorize the function so we can integrate it
     f <- Vectorize(f)
   }
-  
+
   # if we want it to be dependent on environmental variables
   else if (!is.null(env_f)){
     # find degrees of freedom
     df <- smooth.spline(x=env_f[,1], env_f[,2])$df
-    
+
     # now that we have the degrees of freedom, perform the spline
     spline_result <- smooth.spline(env_f[,1],env_f[,2], df=df)
-    
+
     # use predict to find the rate at all times
     env_func <- function(t){
       predict(spline_result,t)$y
     }
-    
+
     # make it a function of time only
     f<-function(t){
       return(ff(t,env_func(t)))
     }
   }
-  
+
   # otherwise it is either constant or a function of time, so return itself
   else {
     f <- ff
   }
-  
+
   return(f)
 }
