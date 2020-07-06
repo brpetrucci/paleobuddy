@@ -25,6 +25,9 @@
 #' 
 #' \item{\code{Vector of rates}}{To create step function rates. Note this must
 #' be accompanied by a corresponding vector of shifts \code{fshifts}}
+#' 
+#' @param \code{tmax} a number corresponding to the maximum simulation time. 
+#' Needed to ensure \code{fshifts} runs the correct way.
 #'
 #' @param \code{env_f} a dataframe representing an environmental variable
 #' (time, CO2 etc) with time. The first column must be time, second column the 
@@ -123,7 +126,7 @@ plot(1:50, r(1:50), type='l')
 #'
 #'
 
-MakeRate<-function(ff,env_f=NULL,fshifts=NULL) {
+MakeRate<-function(ff,tmax, env_f=NULL,fshifts=NULL) {
   # may use this soon
   nargs = ifelse(is.numeric(ff), length(ff), length(formals(ff)))
   
@@ -184,8 +187,9 @@ MakeRate<-function(ff,env_f=NULL,fshifts=NULL) {
     flist<-ff
     
     # if user gave a list from past to present, make it from present to past
-    if (fshifts[2] < fshifts[1])
-    fshifts<-tmax - fshifts
+    if (fshifts[2] < fshifts[1]) {
+      fshifts<-tmax - fshifts
+    }
     
     # create the step function
     f<-function(t){

@@ -1,67 +1,91 @@
-#' Returns a list of occurrences for a species \code{S} during their lifespan,
-#' following a Poisson Point process
+#' Returns a list of time-point occurrences for a species \code{S} during their lifespan, following a Poisson Point process
 #'
-#' \code{Sample} takes a species number, a vector of speciation and extinction
-#' times, a sampling rate with possible shape and a maximum time for simulation.
+#' \code{Sample} takes a species number, a vector of speciation and extinction times, a sampling rate with possible shape and a maximum time for simulation.
 #'
-#' @param \code{S} the species number to be sampled. Since \code{Sample} 
-#' will be called by a wrapper using \code{lapply}, it is through \code{S} 
-#' that we apply this function.
-#' 
-#' @param \code{TE} a vector of extinction times, usually an output of
-#' \code{BDSim}.
-#' 
-#' @param \code{TS} a vector of speciation times.
-#' 
-#' @param \code{rr} a sampling rate function, usually created by 
-#' \code{MakeRate}. Can be an exponential rate or a weibull scale, if 
-#' \code{rshape} is not 0.
-#'
-#' @param \code{tmax} the maximum simulation time, used by 
+#' @parameter \code{S} the species number to be sampled. Since \code{Sample} will be called by a wrapper using \code{lapply}, it is through \code{S} that we apply this function.
+#' @parameter \code{TE} a vector of extinction times, usually an output of \code{BDSim}.
+#' @parameter \code{TS} a vector of speciation times, usually an output of \code{BDSim}.
+#' @parameter \code{rr} a sampling rate function. Can be created by \code{MakeRate} but also alternative methods. It can also be an exponential rate or a weibull scale, if \code{rshape} is differrnt from \code{NULL}.
+#' @parameter \code{tmax} the maximum simulation time, used by 
 #' \code{rexp_var}.
-#'
-#' @return a list of occurrences for that species, expected to be around
-#' \code{\int_TS[S]^TE[S] rr(t)dt} occurrences.
-#'
-#' @author written by Bruno do Rosario Petrucci.
+#' @return a list of occurrences for that species, expected to be around \code{\int_TS[S]^TE[S] rr(t)dt} occurrences.
+#' @author written by Bruno do Rosario Petrucci and Matheus Januario.
 #' 
 #' @examples
-#' 
-#' to start we need a simulation, let us generate a simple one
-sim <- BDSim(1, 0.1, 0.09, 50)
 #'
-#' let's first sample with constant rate
-r <- 1 # this means we expect t occurrences, where t is the species duration
-nrep <- 1000 # sample 1000 times
-sample_1 <- lapply(1:nrep, function(x) {if (x %% 100 == 0) print(x);
-  return(Sample(1, sim$TE, sim$TS, r, tmax=50))})
-#' after sampling the first species, we can take a look at the 
-#' mean number of occurrences; it should be (TE[1]-TS[1])*1
-nOcc_1 <- c()
-for (i in 1:nrep) {
-  nOcc_1 <- c(nOcc_1, length(sample_1[[i]]))
+#' Note: all examples use just 1 lineage and very large preservation rates just to be clearer to the reader. Most of times preservation will never be this high
+#'
+#' let us start with a linear increase in preservation rate
+#'
+sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+while((sim$TS[1]-sim$TE[1])<10){ #in case first simulation has short-lived lineage which will obscure the pattern
+  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
 }
-boxplot(nOcc_1)
-abline(h=(r * (sim$TE[1] - sim$TS[1])))
-#' as you can see, the median of the boxplot feels right where we want
+#'
+#preservation function
+r<-function(t) {
+  return(50+t*30)
+}
+#'
+t<-seq(0, 10, by=.1)
+# visualizing from the past to the present
+plot(x=t, y=rev(r(t)), main="Simulated preservation", type="l", col="red", xlab="Mya", ylab="preservation rate", xlim=c(10, sim$TE[1]))
+#'
+occs<-Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tmax = 10)
+hist(occs,
+     xlim=c(10, sim$TE[1]), #changing axis
+     xlab="Mya") #informative labels
+lines(t, rev(r(t)))
+#'
+#' now let us try a step function
 #' 
-#' let us try a more complicated r,
-r <- function(t) 1+0.1*t
-sample_2 <- lapply(1:nrep, function(x) {if (x %% 100 == 0) print(x);
-  return(Sample(1, sim$TE, sim$TS, r, tmax=50))})
-nOcc_2 <- c()
-for (i in 1:nrep) {
-  nOcc_2 <- c(nOcc_2, length(sample_2[[i]]))
+sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+while((sim$TS[1]-sim$TE[1])<10){ #in case first simulation has short-lived lineage which will obscure the pattern
+  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
 }
-boxplot(nOcc_2)
-abline(h=integrate(r, tmax-sim$TS[1], tmax-sim$TE[1])$value)
-#' r could be any function of time, but to avoid redundancy regarding tests of
-#' BDSim() and rexp_var() we will stop here
+#'
+#' we can create the sampling rate here from a few vectors
+rlist <- c(50, 20, 80)
+rshifts <- c(0, 4, 8) # this could be c(10, 6, 2) and would produce the same function
+#'
+r <- MakeRate(rlist, tmax=10, fshifts=rshifts)
+#'
+t<-seq(0, 10, by=.1)
+plot(x=t, y=rev(r(t)), main="Simulated preservation", type="l", col="red", xlab="Mya", ylab="preservation rate", xlim=c(10, sim$TE[1]))
+#'
+occs<-Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tmax = 10)
+hist(occs,
+     xlim=c(10, sim$TE[1]), #changing axis
+     xlab="Mya") #informative labels
+abline(v=c(6,2), col="red") #frontiers of each regime
+#'
+#' we can create a step function in a different way as well
+sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+while((sim$TS[1]-sim$TE[1])<10){ #in case first simulation has short-lived lineage which will obscure the pattern
+  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+}
+#'
+#preservation function
+r<-function(t) {
+  ifelse(t < 4, 50,#preservation rates at first regime (4 - 0 Mya)
+         ifelse(t < 8, 20, #preservation rates at second regime (8 - 5 Mya)
+                80)) #preservation rates at third regime (after 8 Mya)
+}
+#'
+t<-seq(0, 10, by=.1)
+plot(x=t, y=rev(r(t)), main="Simulated preservation", type="l", col="red", xlab="Mya", ylab="preservation rate", xlim=c(10, sim$TE[1]))
+#'
+occs<-Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tmax = 10)
+hist(occs,
+     xlim=c(10, sim$TE[1]), #changing axis
+     xlab="Mya") #informative labels
+abline(v=c(6, 2), col="red") #frontiers of each regime
+#'
 
 Sample<-function(S,TE,TS,rr,tmax){
   TE <- tmax - TE
   TS <- tmax - TS
-
+  
   # start when the species was born, end when it died
   Now<-ifelse(TS[S]<0,0,TS[S])
   End<-ifelse(TE[S]>tmax,tmax,TE[S])
@@ -93,4 +117,3 @@ Sample<-function(S,TE,TS,rr,tmax){
   
   return(sampled)
 }
-  
