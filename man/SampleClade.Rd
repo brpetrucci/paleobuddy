@@ -111,10 +111,9 @@ for(i in 1:length(ids)){
   # the histogram should have the curve right over it
   hist(mids[dt$Species==ids[i]], main=paste0("spp = ", sp, "; duration ~ ",
   round(sim$TS[sp]-sim$TE[sp], digits = 2), "my"),
-       xlab="My", breaks=seq(round(sim$TS[i]), round(sim$TE[i]), -1),
+       xlab="My", breaks=seq(ceiling(sim$TS[i]), floor(sim$TE[i]), -1),
        xlim=c(sim$TS[i], sim$TE[i]))
 
-  mid<-par[sp]
   abline(h=r)
 }
 
@@ -140,9 +139,8 @@ for(i in 1:length(ids)){
 
   hist(mids[dt$Species==ids[i]], main=paste0("spp = ", sp, "; duration ~ ",
   round(sim$TS[sp]-sim$TE[sp], digits = 2), "my"),
-       xlab="My", breaks=seq(round(sim$TS[i]), round(sim$TE[i]), -1),
+       xlab="My", breaks=seq(ceiling(sim$TS[i]), floor(sim$TE[i]), -1),
        xlim=c(sim$TS[i], sim$TE[i]))
-  mid=par[sp]
   t <- seq(sim$TE[i], sim$TS[i], 0.1)
   lines(t, rev(r(t)))
 }
@@ -174,9 +172,8 @@ for(i in 1:length(ids)){
 
   hist(mids[dt$Species==ids[i]], main=paste0("spp = ", sp, "; duration ~ ",
   round(sim$TS[sp]-sim$TE[sp], digits = 2), "my"),
-       xlab="My", breaks=seq(round(sim$TS[i]), round(sim$TE[i]), -1),
+       xlab="My", breaks=seq(ceiling(sim$TS[i]), floor(sim$TE[i]), -1),
        xlim=c(sim$TS[i], sim$TE[i]))
-  mid=par[sp]
   t <- seq(sim$TE[i], sim$TS[i], 0.1)
   lines(t, rev(r(t)))
 }
@@ -213,9 +210,8 @@ for(i in 1:length(ids)){
 
   hist(mids[dt$Species==ids[i]], main=paste0("spp = ", sp, "; duration ~ ",
   round(sim$TS[sp]-sim$TE[sp], digits = 2), "my"),
-       xlab="My", breaks=seq(round(sim$TS[i]), round(sim$TE[i]), -1),
+       xlab="My", breaks=seq(ceiling(sim$TS[i]), floor(sim$TE[i]), -1),
        xlim=c(sim$TS[i], sim$TE[i]))
-  mid=par[sp]
   t <- seq(sim$TE[i], sim$TS[i], 0.1)
   lines(t, rev(rr(t)))
 }
@@ -232,7 +228,7 @@ while((sim$TS[1]-sim$TE[1])<10){
 # preservation function in respect to age
 # here we will use the PERT function. It is described in Silvestro et al 2014
 
-dPERT<-function(t,s,e,sp,a=3,b=3, log=F){
+dPERT<-function(t,s,e,sp,a=3,b=3, log=FALSE){
 
   if(e>=s){
     message("There is no PERT with e>=s")
@@ -276,9 +272,8 @@ for(i in 1:length(ids)){
   hist(mids[dt$Species==ids[i]],  probability = TRUE,
        main=paste0("spp = ", sp, "; duration ~ ",
        round(sim$TS[sp]-sim$TE[sp], digits = 2), "my"))
-  mid<-par[sp]#+par1[sp]
   curve(dPERT(x, s = sim$TS[sp], e = sim$TE[sp], sp=sp),from = sim$TE[sp],
-  to = sim$TS[sp], add=T, col="red", n = 100)
+  to = sim$TS[sp], add=TRUE, col="red", n = 100)
 }
 # note that the sampling at fossil stages distorts the quantiles of the
 # distribution, even with the high preservation rate and the high resolution
@@ -351,9 +346,8 @@ for(i in 1:length(ids)){
   hist(mids[dt$Species==ids[i]],  probability = TRUE,
        main=paste0("spp = ", sp, "; duration ~ ",
        round(sim$TS[sp]-sim$TE[sp], digits = 2), "my"))
-  mid<-par[sp]#+par1[sp]
   curve(dTRImod2(x, e=sim$TE[sp], s=sim$TS[sp], sp=sp),from = sim$TE[sp],
-  to = sim$TS[sp], add=T, col="red", n = 100)
+  to = sim$TS[sp], add=TRUE, col="red", n = 100)
 }
 # note that the sampling at fossil stages distorts the quantiles of the
 # distribution, even with the high preservation rate and the high

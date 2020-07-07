@@ -26,13 +26,13 @@
 #' after tmax is considered extant, and any species that would be generated
 #' after \code{tmax} is not born.
 #'
-#' @param sshape shape param for the Weibull distribution for
+#' @param pshape shape param for the Weibull distribution for
 #' age-dependent speciation. Default is 0, where \code{pp} will be considered a
-#' time-dependent exponential rate. For \code{sshape != NULL}, \code{pp} will
+#' time-dependent exponential rate. For \code{pshape != NULL}, \code{pp} will
 #' be considered a scale, and \code{rexp_var} will draw a Weibull distribution
 #' instead.
 #'
-#' @param eshape similar as above, but for extinction rate.
+#' @param qshape similar as above, but for extinction rate.
 #'
 #' @param env_pp a matrix containing time points and values of an
 #' enviromental variable, like temperature, for each time point. This will be
@@ -118,10 +118,10 @@
 #' # we can supply a shape parameter to try age-dependent rates
 #' N0 <- 1
 #' p <- 10
-#' sshape <- 2
+#' pshape <- 2
 #' q <- 0.08
 #' tmax <- 40
-#' sim <- BDSim(N0, p, q, tmax, sshape=sshape)
+#' sim <- BDSim(N0, p, q, tmax, pshape=pshape)
 #'
 #' # finally, we can also have a rate dependent on an environmental variable,
 #' # like temperature data in RPANDA
@@ -135,13 +135,13 @@
 #'
 #' # note the scale for the age-dependency can be a time-varying function
 #'
-#' sshape <- 1.5
+#' pshape <- 1.5
 #' q <- function(t, env) {
 #'   return(0.15 * exp(-0.01 * env))
 #' }
 #' env_q <- InfTemp
 #' tmax <- 40
-#' sim <- BDSim(N0, p, q, tmax, sshape=sshape, env_q=InfTemp)
+#' sim <- BDSim(N0, p, q, tmax, pshape=pshape, env_q=InfTemp)
 #'
 #' # one can mix and match all of these scenarios as they wish - age-dependency
 #' # and constant rates, age-dependent and temperature-dependent rates, etc. The
@@ -152,22 +152,22 @@
 #'   ifelse(t < 20, env,
 #'          ifelse(t < 30, env/2, 2*env/3))
 #' }
-#' sshape <- 2
+#' pshape <- 2
 #' env_p <- InfTemp
 #' q <- 0.08
 #' tmax <- 40
-#' sim <- BDSim(N0, p, q, tmax, sshape=sshape, env_pp=env_p)
+#' sim <- BDSim(N0, p, q, tmax, pshape=pshape, env_pp=env_p)
 #'
 #' @name BDSim
 #' @rdname BDSim
 #' @export
 
-BDSim<-function(N0,pp,qq,tmax,sshape=NULL,eshape=NULL,env_pp=NULL,env_qq=NULL,
+BDSim<-function(N0,pp,qq,tmax,pshape=NULL,qshape=NULL,env_pp=NULL,env_qq=NULL,
                 pshifts=NULL,qshifts=NULL){
   # if we have ONLY numbers for pp and qq, it is constant
   if ((is.numeric(pp)&length(pp)==1)&
       (is.numeric(qq)&length(qq)==1&
-       (is.null(c(sshape,eshape,env_pp,env_qq,pshifts,qshifts))))) {
+       (is.null(c(pshape,qshape,env_pp,env_qq,pshifts,qshifts))))) {
     p<-pp
     q<-qq
     # call BDSimConstant
@@ -181,6 +181,6 @@ BDSim<-function(N0,pp,qq,tmax,sshape=NULL,eshape=NULL,env_pp=NULL,env_qq=NULL,
     q<-MakeRate(qq,tmax,env_qq,qshifts)
 
     # call BDSimGeneral
-    return(BDSimGeneral(N0,p,q,tmax,sshape,eshape))
+    return(BDSimGeneral(N0,p,q,tmax,pshape,qshape))
   }
 }

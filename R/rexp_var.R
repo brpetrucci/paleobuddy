@@ -253,7 +253,10 @@ rexp_var<-function(n=1, lambda, now, tmax, shape = NULL, TS = NULL, fast=TRUE){
           subdivisions=2000)$value)^shape(t))})
 
         # finding the t where this is 0
-        vars[i]<-uniroot(f,c(spnow,tmax),extendInt="yes")$root-spnow
+        vars[i]<-suppressWarnings(uniroot(f,c(spnow,tmax),extendInt="yes"))$root-spnow
+        # if lambda is really high and the integral goes to +-infinity (computationally
+        # speaking), uniroot substitutes it for a really high/low value instead. Since
+        # this does not change our results, we accept it and simply suppress the warning
       }
     }
     else {
@@ -268,7 +271,10 @@ rexp_var<-function(n=1, lambda, now, tmax, shape = NULL, TS = NULL, fast=TRUE){
           1-p-exp(-integrate(Vectorize(function(x) lambda(x)),lower=now,upper=t,
                              subdivisions=2000)$value)})
 
-        vars[i]<-uniroot(f,c(0,tmax),extendInt="yes")$root-now
+        # if lambda is really high and the integral goes to +-infinity (computationally
+        # speaking), uniroot substitutes it for a really high/low value instead. Since
+        # this does not change our results, we accept it and simply suppress the warning
+        vars[i]<-suppressWarnings(uniroot(f, c(0,tmax), extendInt="yes"))$root-now
       }
     }
   }

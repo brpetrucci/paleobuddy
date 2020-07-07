@@ -20,13 +20,19 @@
 #' after \code{tmax} is considered extant, and any species that would be
 #' generated after \code{tmax} is not born.
 #'
-#' @param sshape shape param for the Weibull distribution for
+#' @param pshape shape param for the Weibull distribution for
 #' age-dependent speciation. Default is 0, where \code{pp} will be considered a
-#' time-dependent exponential rate. For \code{sshape != NULL}, \code{pp} will
+#' time-dependent exponential rate. For \code{pshape != NULL}, \code{pp} will
 #' be considered a scale, and \code{rexp_var} will draw a Weibull distribution
 #' instead.
 #'
-#' @param eshape similar as above, but for extinction rate.
+#' @param qshape similar as above, but for extinction rate.
+#'
+#' @param fast when \code{TRUE}, sets \code{rexp_var} to throw away waiting times
+#' higher than the maximum simulation time. Should be \code{FALSE} for unbiased
+#' testing. User might also se it to \code{FALSE} for more accurate waiting times.
+#'
+#' @param
 #'
 #' @return a list of vectors, as follows
 #'
@@ -54,7 +60,7 @@
 #' @rdname BDSimGeneral
 #' @export
 
-BDSimGeneral<-function(N0,pp,qq,tmax,sshape=NULL,eshape=NULL){
+BDSimGeneral<-function(N0,pp,qq,tmax,pshape=NULL,qshape=NULL,fast=TRUE){
   # create vectors to hold times of speciation, extinction, parents and status
   TS<-rep(-0.01,N0)
   TE<-rep(NA,N0)
@@ -75,11 +81,11 @@ BDSimGeneral<-function(N0,pp,qq,tmax,sshape=NULL,eshape=NULL){
     # count t from tNow (to consider the rates as functions), so that
     # now we need to subtract tNow
     WaitTimeS<-ifelse(pp(tNow)>0,
-                      rexp_var(1,pp,tNow,tmax,sshape,
-                               ifelse(TS[Scount]<0,0,TS[Scount])),Inf)
+                      rexp_var(1,pp,tNow,tmax,pshape,
+                               ifelse(TS[Scount]<0,0,TS[Scount]), fast),Inf)
     WaitTimeE<-ifelse(qq(tNow)>0,
-                      rexp_var(1,qq,tNow,tmax,eshape,
-                               ifelse(TS[Scount]<0,0,TS[Scount])),Inf)
+                      rexp_var(1,qq,tNow,tmax,qshape,
+                               ifelse(TS[Scount]<0,0,TS[Scount]), fast),Inf)
 
     # if the time of extinction is after the end of the simulation, make it tmax
     tExp<-min(tNow+WaitTimeE, tmax)
@@ -98,8 +104,8 @@ BDSimGeneral<-function(N0,pp,qq,tmax,sshape=NULL,eshape=NULL){
 
       # get a new speciation waiting time, and include it in the vector
       WaitTimeS<-ifelse(pp(tNow)>0,
-                        rexp_var(1,pp,tNow,tmax,sshape,
-                                 ifelse(TS[Scount]<0,0,TS[Scount])),Inf)
+                        rexp_var(1,pp,tNow,tmax,pshape,
+                                 ifelse(TS[Scount]<0,0,TS[Scount]), fast),Inf)
     }
 
     # reached the time of extinction

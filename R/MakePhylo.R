@@ -28,9 +28,9 @@
 #' plot.phylo(drop.fossil(phy))
 #'
 #' # this works for sim generated with any of the scenarios in \code{BDSim}, of course
-#' sim<-BDSim(N0=1, pp=function(t) 0.12+0.01*t,qq=10, tmax=10, eshape=1.3)
+#' sim<-BDSim(N0=1, pp=function(t) 0.12+0.01*t,qq=10, tmax=10, qshape=1.3)
 #' while(length(sim$TE) < 2){ #in case first simulation has only one species
-#'   sim<-BDSim(N0=1, pp=function(t) 0.12+0.01*t,qq=10, tmax=10, eshape=1.3)
+#'   sim<-BDSim(N0=1, pp=function(t) 0.12+0.01*t,qq=10, tmax=10, qshape=1.3)
 #' }
 #' phy<-MakePhylo(sim)
 #' plot.phylo(phy)
@@ -118,7 +118,7 @@ MakePhylo<-function(sim){
     if(sum(edge[,1] %in% cur.node)>1){ #this means that the function reached the end of the lineage of the cur.node
       #the warning here only "affects" a a condition which is never satisfied (jump when there is previous opened edge).
       #I supressed it because it is anoying
-      suppressWarnings({prev.node= max(edge[!(duplicated(edge[,1])|duplicated(edge[,1], fromLast=TRUE)),1])})
+      suppressWarnings({prev.node<-max(edge[!(duplicated(edge[,1])|duplicated(edge[,1], fromLast=TRUE)),1])})
       jump<-1
     }
 

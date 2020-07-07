@@ -308,7 +308,7 @@
 #' # we dont have the "md" parameter (see example 3) as it corresponds to
 #' # the last quarter of the duration of each lineage
 #'
-#' checking:
+#' # checking:
 #' for(sp in 1:length(sim$TE)){
 #'   hist(unlist(occs[[sp]]), breaks=100, probability = TRUE,
 #'   main=paste0("spp ", sp, " ; duration ~ ",
