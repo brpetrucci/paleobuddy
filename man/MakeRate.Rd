@@ -59,7 +59,7 @@ give \code{ff(t, env)} (see examples below).
 
 # let us start simple: create a constant rate
 r <- MakeRate(0.5)
-plot(1:50, rep(r, 50), type='l')
+plot(1:50, r(1:50), type='l')
 
 # something a bit more complex: a linear rate
 ff <- function(t) {

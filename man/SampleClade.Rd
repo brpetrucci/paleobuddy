@@ -273,7 +273,7 @@ for(i in 1:length(ids)){
 
   sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 
-  hist(mids[dt$Species==ids[i]],  probability = T,
+  hist(mids[dt$Species==ids[i]],  probability = TRUE,
        main=paste0("spp = ", sp, "; duration ~ ",
        round(sim$TS[sp]-sim$TE[sp], digits = 2), "my"))
   mid<-par[sp]#+par1[sp]
@@ -348,7 +348,7 @@ for(i in 1:length(ids)){
 
   sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 
-  hist(mids[dt$Species==ids[i]],  probability = T,
+  hist(mids[dt$Species==ids[i]],  probability = TRUE,
        main=paste0("spp = ", sp, "; duration ~ ",
        round(sim$TS[sp]-sim$TE[sp], digits = 2), "my"))
   mid<-par[sp]#+par1[sp]

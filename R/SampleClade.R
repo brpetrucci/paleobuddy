@@ -263,7 +263,7 @@
 #'
 #'   sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 #'
-#'   hist(mids[dt$Species==ids[i]],  probability = T,
+#'   hist(mids[dt$Species==ids[i]],  probability = TRUE,
 #'        main=paste0("spp = ", sp, "; duration ~ ",
 #'        round(sim$TS[sp]-sim$TE[sp], digits = 2), "my"))
 #'   mid<-par[sp]#+par1[sp]
@@ -338,7 +338,7 @@
 #'
 #'   sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 #'
-#'   hist(mids[dt$Species==ids[i]],  probability = T,
+#'   hist(mids[dt$Species==ids[i]],  probability = TRUE,
 #'        main=paste0("spp = ", sp, "; duration ~ ",
 #'        round(sim$TS[sp]-sim$TE[sp], digits = 2), "my"))
 #'   mid<-par[sp]#+par1[sp]
@@ -368,7 +368,7 @@ SampleClade<-function(S, sim, rr,tmax,env_rr=NULL,rshifts=NULL,returnTrue=FALSE,
   }
 
   # adjusting stages
-  stages<-sort(stages, decreasing = T)
+  stages<-sort(stages, decreasing = TRUE)
 
   # sample using Poisson process:
   if(is.null(dFUN)){ # independent of age (i.e. occurrences uniformly distributed through the lineage's age)

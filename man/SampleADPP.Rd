@@ -70,39 +70,39 @@ while((sim$TS[1]-sim$TE[1])<10){ # in case first simulation has short-lived
 # here we will use the PERT function. It is described in:
 # Silvestro et al 2014
 
-dPERT=function(t,s,e,sp,a=3,b=3, log=F){
+dPERT<-function(t,s,e,sp,a=3,b=3, log=FALSE){
 
   if(e>=s){
     message("There is no PERT with e>=s")
     return(rep(NaN, times=length(t)))
   }
-  id1=which(t<=e | t>=s)
-  id2=which(!(t<=e | t>=s))
-  t=t[id2]
+  id1<-which(t<=e | t>=s)
+  id2<-which(!(t<=e | t>=s))
+  t<-TRUE[id2]
 
-  res=vector()
+  res<-vector()
   if(log){
-    res[id1]=-Inf
+    res[id1]<--Inf
   }else{
-    res[id1]=0
+    res[id1]<-0
   }
 
   if(log){
-    res[id2]=log(((s-t)^2)*((-e+t)^2)/((s-e)^5*beta(a,b)))
+    res[id2]<-log(((s-t)^2)*((-e+t)^2)/((s-e)^5*beta(a,b)))
   } else{
-    res[id2]=((s-t)^2)*((-e+t)^2)/((s-e)^5*beta(a,b))
+    res[id2]<-((s-t)^2)*((-e+t)^2)/((s-e)^5*beta(a,b))
   }
   return(res)
 }
 
-dPERTmax=function(s,e,sp){
+dPERTmax<-function(s,e,sp){
   return(((s-e)/2)+e)
 }
 
-occs=SampleADPP(S=1, TE = sim$TE, TS = sim$TS, rr = 5000, dFUN = dPERT,
+occs<-SampleADPP(S=1, TE = sim$TE, TS = sim$TS, rr = 5000, dFUN = dPERT,
 dFUNmax = dPERTmax)
-hist(unlist(occs), breaks=100, probability = T)
-curve(dPERT(x, s = sim$TS[1], e=sim$TE[1]),20, 0, add=T, col="red")
+hist(unlist(occs), breaks=100, probability = TRUE)
+curve(dPERT(x, s = sim$TS[1], e=sim$TE[1]),20, 0, add=TRUE, col="red")
 
 # now we can test the simpler scenario of uniform sampling probablity
 # through the duration of a species (= homogeneous poisson process)
@@ -115,23 +115,23 @@ while((sim$TS[1]-sim$TE[1])<10){ # in case first simulation has short-lived
 
 # preservation function in respect to age
 # occurrences are uniformly distributed
-custom.uniform=function(t,s,e,sp){
+custom.uniform<-function(t,s,e,sp){
 
   if(e>=s){
     message("There is no PERT with e>=s")
     return(rep(NaN, times=length(t)))
   }
 
-  res=dunif(x = t, min = e, max = s)
+  res<-dunif(x = t, min = e, max = s)
 
   return(res)
 }
 
 # we will not give a dFUNmax function this time. SampleADPP() will try to find
 # the maximum density with a very simple numerical simulation
-occs=SampleADPP(S=1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 5000, dFUN = custom.uniform)
-hist(unlist(occs[[1]]), breaks=100, probability = T)
-curve(dunif(x, min=sim$TE[1], max=sim$TS[1]),10, 0, add=T, col="red")
+occs<-SampleADPP(S=1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 5000, dFUN = custom.uniform)
+hist(unlist(occs[[1]]), breaks=100, probability = TRUE)
+curve(dunif(x, min=sim$TE[1], max=sim$TS[1]),10, 0, add=TRUE, col="red")
 
 # now, a hat-shaped increase through the duration of a species with more
 # parameters than TS and TE:
@@ -146,9 +146,9 @@ while((sim$TS[1]-sim$TE[1])<10){ # in case first simulation has short-lived
 # here we will use the triangular distribution. We have some empirical evidence
 # that taxa occurrences might present triangular shape, see Zliobaite et al 2017
 
-dTRI=function(t,s,e,sp,md){
+dTRI<-function(t,s,e,sp,md){
 
-  # please note ths functin is inverted. The correspondence would be:
+  # please note ths function is inverted. The correspondence would be:
   # s=b maximum
   # e=a minimum
   # md=c distribution's mode
@@ -166,30 +166,30 @@ dTRI=function(t,s,e,sp,md){
   }
 
   # needed to vectorize the function:
-  id1=which(t>=e & t<md)
-  id2=which(t==md)
-  id3=which(t>md & t<=s)
-  id4=which( !(1:length(t) \%in\% c(id1,id2,id3)))
+  id1<-which(t>=e & t<md)
+  id2<-which(t==md)
+  id3<-which(t>md & t<=s)
+  id4<-which( !(1:length(t) \%in\% c(id1,id2,id3)))
 
   # actually vetorizing function
-  res=vector()
+  res<-vector()
 
-  res[id1]=(2*(t[id1]-e))/((s-e)*(md-e)) #(t=>e & t<md)
-  res[id2]=2/(s-e) #(t==md)
-  res[id3]=(2*(s-t[id3]))/((s-e)*(s-md)) #(md<t & t<=s)
-  res[id4]=0 #outside fucntion's limits
+  res[id1]<-(2*(t[id1]-e))/((s-e)*(md-e)) #(t=>e & t<md)
+  res[id2]<-2/(s-e) #(t==md)
+  res[id3]<-(2*(s-t[id3]))/((s-e)*(s-md)) #(md<t & t<=s)
+  res[id4]<-0 #outside fucntion's limits
 
   return(res)
 }
 
-dTRImax=function(s,e,sp,md){
+dTRImax<-function(s,e,sp,md){
 # the "dFUNmax" function must have the same parameters then the dFUN function,
 # even if they do not use them
   return(2/(s-e))
 }
 
 # now we are providing the mode for the triangular sampling
-occs=SampleADPP(S=1, TE = sim$TE, TS = sim$TS, rr = 5000, dFUN = dTRI,
+occs<-SampleADPP(S=1, TE = sim$TE, TS = sim$TS, rr = 5000, dFUN = dTRI,
 dFUNmax = dTRImax, md=8)
 
 # please note in the original parametrization, the "md" parameter (mode) is
@@ -199,8 +199,8 @@ dFUNmax = dTRImax, md=8)
 # the reason we only plot the first lienage in this specific example
 # (many lineages might not be alive in the "md" moment in time).
 
-hist(unlist(occs[[1]]), breaks=100, probability = T)
-curve(dTRI(x, e=sim$TE[1], s=sim$TS[1], md = 8),10, 0, add=T, col="red")
+hist(unlist(occs[[1]]), breaks=100, probability = TRUE)
+curve(dTRI(x, e=sim$TE[1], s=sim$TS[1], md = 8),10, 0, add=TRUE, col="red")
 
 # we can also have a hat-shaped increase through the duration of a species
 # with more parameters than TS and TE, but with the parameters relate to
@@ -213,7 +213,7 @@ while((sim$TS[1]-sim$TE[1])<10){
 
 # preservation function in respect to age, with the "mde" of the triangle
 # being exaclty at the last quarter of the duration of EACH lineage
-dTRImod1=function(t,s,e,sp){
+dTRImod1<-function(t,s,e,sp){
 # note that now we don't have the "md" parameter here,
 # but it is calculated inside the function
 
@@ -223,44 +223,44 @@ dTRImod1=function(t,s,e,sp){
   }
 
   # here is another difference from the function in example 3
-  md=((s-e)/4)+e # md is at the last quarter of the duration of the lineage
+  md<-((s-e)/4)+e # md is at the last quarter of the duration of the lineage
   # please note that the same logic can be used to sample parameters
   # internally in the function, running for instance:
-  # md=runif(n = 1, min = e, max = s)
+  # md<-runif(n = 1, min = e, max = s)
 
   if(md<e | md>s){
     message("There is no TRI with md outside [s, e] interval")
     return(rep(NaN, times=length(t)))
   }
 
-  id1=which(t>=e & t<md)
-  id2=which(t==md)
-  id3=which(t>md & t<=s)
-  id4=which( !(1:length(t) \%in\% c(id1,id2,id3)))
+  id1<-which(t>=e & t<md)
+  id2<-which(t==md)
+  id3<-which(t>md & t<=s)
+  id4<-which( !(1:length(t) \%in\% c(id1,id2,id3)))
 
-  res=vector()
+  res<-vector()
 
-  res[id1]=(2*(t[id1]-e))/((s-e)*(md-e))
-  res[id2]=2/(s-e)
-  res[id3]=(2*(s-t[id3]))/((s-e)*(s-md))
-  res[id4]=0
+  res[id1]<-(2*(t[id1]-e))/((s-e)*(md-e))
+  res[id2]<-2/(s-e)
+  res[id3]<-(2*(s-t[id3]))/((s-e)*(s-md))
+  res[id4]<-0
 
   return(res) #for more details in this function, see example 3
 }
 
-dTRImaxmod1=function(s,e,sp){
+dTRImaxmod1<-function(s,e,sp){
   return(2/(s-e))
 }
 
-occs=SampleADPP(S=1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 5000,
+occs<-SampleADPP(S=1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 5000,
 dFUN = dTRImod1, dFUNmax = dTRImaxmod1)
 
 # we do not have the "md" parameter (see example 3) as it corresponds to
 # the last quarter of the duration of each lineage
 
-hist(unlist(occs[[1]]), breaks=100, probability = T)
-mid=((sim$TS[1]-sim$TE[1])/4)+sim$TE[1]
-curve(dTRI(x, e=sim$TE[1], s=sim$TS[1], md = mid),10, 0, add=T, col="red")
+hist(unlist(occs[[1]]), breaks=100, probability = TRUE)
+mid<-((sim$TS[1]-sim$TE[1])/4)+sim$TE[1]
+curve(dTRI(x, e=sim$TE[1], s=sim$TS[1], md = mid),10, 0, add=TRUE, col="red")
 
 # finally, a hat-shaped increase through the duration of a species with more
 # parameters than TS and TE, but the parameters relate to each specific lineage.
@@ -274,7 +274,7 @@ while(length(sim$TE)<20){
 
 # preservation function in respect to age, with the "mode" of the triangle
 # being exactly at the last quarter of the duration of EACH lineage.
-dTRImod2=function(t,s,e,sp){
+dTRImod2<-function(t,s,e,sp){
 
   if(e>=s){
     message("There is no TRI with e>=s")
@@ -282,34 +282,34 @@ dTRImod2=function(t,s,e,sp){
   }
 
   # here is another difference from the function in example 3 and 4
-  md=par[sp]+par1[sp]
+  md<-par[sp]+par1[sp]
 
   if(md<e | md>s){
     message("There is no TRI with md outside [s, e] interval")
     return(rep(NaN, times=length(t)))
   }
 
-  id1=which(t>=e & t<md)
-  id2=which(t==md)
-  id3=which(t>md & t<=s)
-  id4=which( !(1:length(t) \%in\% c(id1,id2,id3)))
+  id1<-which(t>=e & t<md)
+  id2<-which(t==md)
+  id3<-which(t>md & t<=s)
+  id4<-which( !(1:length(t) \%in\% c(id1,id2,id3)))
 
-  res=vector()
+  res<-vector()
 
-  res[id1]=(2*(t[id1]-e))/((s-e)*(md-e))
-  res[id2]=2/(s-e)
-  res[id3]=(2*(s-t[id3]))/((s-e)*(s-md))
-  res[id4]=0
+  res[id1]<-(2*(t[id1]-e))/((s-e)*(md-e))
+  res[id2]<-2/(s-e)
+  res[id3]<-(2*(s-t[id3]))/((s-e)*(s-md))
+  res[id4]<-0
 
   return(res) #for more details in this function, see example 3 and 4
 }
 
-dTRImaxmod2=function(s,e,sp){
+dTRImaxmod2<-function(s,e,sp){
   return(2/(s-e))
 }
-par=runif(n = length(sim$TE), min = sim$TE, max = sim$TS)
-par1=(((sim$TS-sim$TE)/2)+sim$TE)-par
-occs=SampleADPP(S=1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 5000,
+par<-runif(n = length(sim$TE), min = sim$TE, max = sim$TS)
+par1<-(((sim$TS-sim$TE)/2)+sim$TE)-par
+occs<-SampleADPP(S=1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 5000,
 dFUN = dTRImod2, dFUNmax = dTRImaxmod2)
 
 # we dont have the "md" parameter (see example 3) as it corresponds to
@@ -317,11 +317,11 @@ dFUN = dTRImod2, dFUNmax = dTRImaxmod2)
 
 checking:
 for(sp in 1:length(sim$TE)){
-  hist(unlist(occs[[sp]]), breaks=100, probability = T,
+  hist(unlist(occs[[sp]]), breaks=100, probability = TRUE,
   main=paste0("spp ", sp, " ; duration ~ ",
   round(sim$TS[sp]-sim$TE[sp], digits = 2)))
   mid=par[sp]+par1[sp]
-  curve(dTRI(x, e=sim$TE[sp], s=sim$TS[sp], md = mid),10, 0, add=T,
+  curve(dTRI(x, e=sim$TE[sp], s=sim$TS[sp], md = mid),10, 0, add=TRUE,
   col="red", n = 100)
   abline(v=mid, col="red")
 }
