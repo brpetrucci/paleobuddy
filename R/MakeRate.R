@@ -46,14 +46,13 @@
 #' The returned function will invariably be either a number or a function of
 #' one variable only, usually set as time.
 #'
-#' @author written by Bruno do Rosario Petrucci; environmental variable
-#' function inspired by \code{RPANDA} by H?l?ne Morlon.
+#' @author written by Bruno do Rosario Petrucci
 #'
 #' @examples
 #'
 #' # let us start simple: create a constant rate
 #' r <- MakeRate(0.5)
-#' plot(1:50, r(1:50), type='l')
+#' plot(1:50, rep(r, 50), type='l')
 #'
 #' # something a bit more complex: a linear rate
 #' ff <- function(t) {
@@ -99,17 +98,16 @@
 #' # finally let us see what we can do with environmental variables
 #'
 #' # RPANDA supplies us with some really useful environmental dataframes
-#' library(RPANDA)
-#'
 #' # to use as an example, let us try temperature
-#' data(InfTemp)
+#' if (requireNamespace("RPANDA", quietly=TRUE)) {
+#'   data(InfTemp, package="RPANDA")
 #'
-#' ff <- function(t, env) {
-#'   return(0.05*env)
+#'   ff <- function(t, env) {
+#'     return(0.05*env)
+#'   }
+#'   r <- MakeRate(ff, env_f = InfTemp)
+#'   plot(1:50, r(1:50), type='l')
 #' }
-#' r <- MakeRate(ff, env_f = InfTemp)
-#' plot(1:50, r(1:50), type='l')
-#'
 #' # we can also have a function that depends on both time AND temperature
 #' ff <- function(t, env) {
 #'   return(0.001*exp(0.1*t) + 0.05*env)
@@ -138,11 +136,11 @@ MakeRate<-function(ff,tmax, env_f=NULL,fshifts=NULL) {
   # let us first check for some errors
   if (is.numeric(ff)) {
     # if ff is constant, we should not see any env_f or fshifts
-    if (length(ff) == 1) {
+    if (nargs == 1) {
       if (!is.null(env_f) || !is.null(fshifts)) {
         stop("constant rate with environmental variable or shifts")
       } else {
-        return(Vectorize(function(t) ff))
+        return(ff)
       }
     }
 

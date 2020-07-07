@@ -327,19 +327,22 @@ SampleADPP<-function(S, TS, TE, rr, dFUN, dFUNmax=NULL, ...){
 
   # setting things and checking inputs
   print.message<-TRUE
-  if(sum(c("t", "s", "e", "sp") %in% formalArgs(dFUN))<3){
+  if(sum(c("t", "s", "e", "sp") %in% names(formals(dFUN)))<3){
     stop("dFUN must have \"t\", \"s\", \"e\", and  \"sp\" parameters")
   }
 
   if(!(is.null(dFUNmax))){ # if dFUNmax is provided by user
     if(!(is.numeric(dFUNmax))){ #if it is a function
 
-      if(sum(c("t", "s", "e", "sp") %in% formalArgs(dFUNmax))<3){
+      if(sum(c("t", "s", "e", "sp") %in% names(formals(dFUNmax)))<3){
         stop("dFUNmax must have \"t\", \"s\", \"e\", and  \"sp\" parameters")
       }
 
-      if(sum(formalArgs(dFUNmax) %in% formalArgs(dFUN)[-which(formalArgs(dFUN)=="t")])<length(formalArgs(dFUNmax))){
-        stop("dFUN and dFUNmax must have the same arguments (with the exception of \"t\" argument for dFUN\")")
+      if(sum(names(formals(dFUNmax)) %in% names(formals(dFUN))
+             [-which(names(formals(dFUN))=="t")])
+         <length(names(formals(dFUNmax)))){
+        stop("dFUN and dFUNmax must have the same arguments
+             (with the exception of \"t\" argument for dFUN\")")
       }
 
     }

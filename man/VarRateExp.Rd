@@ -51,8 +51,8 @@ produced by \code{PaleoBuddy} simulations.
 # let us create a vector of times to use in these examples.
 T <- seq(0, 50, 0.1)
 
-# we will proceed with the same examples as the \\code{MakeRate} function.
-# note that here \\code{ff} means the diversification rate, if we want to
+# we will proceed with the same examples as the \code{MakeRate} function.
+# note that here \code{ff} means the diversification rate, if we want to
 # interpret this in a species birth-death context.
 
 # let us start simple: create a constant rate
@@ -149,41 +149,41 @@ plot(T, div, type='l')
 # finally let us see what we can do with environmental variables
 
 # RPANDA supplies us with some really useful environmental dataframes
-library(RPANDA)
-
 # to use as an example, let us try temperature
-data(InfTemp)
+if (requireNamespace("RPANDA", quietly=TRUE)) {
+  data(InfTemp, package="RPANDA")
 
-ff <- function(t, env) {
-  return(0.002*env)
+  ff <- function(t, env) {
+    return(0.002*env)
+  }
+  r <- MakeRate(ff, env_f = InfTemp)
+  plot(T, r(T), type='l')
+
+  div <- VarRateExp(ff, t=T, env_f=InfTemp)
+  plot(T, div, type='l')
+
+  # we can also have a function that depends on both time AND temperature
+  ff <- function(t, env) {
+    return(0.03 * env - 0.01 * t)
+  }
+  r <- MakeRate(ff, env_f = InfTemp)
+  plot(T, r(T), type='l')
+
+  div <- VarRateExp(ff, t=T, env_f=InfTemp)
+  plot(T, div, type='l')
+
+  # as mentioned above, we could also use ifelse() to construct a step function
+  # that is modulated by temperature
+  ff <- function(t, env) {
+    return(ifelse(t < 10, 0.1 + 0.01*env,
+                  ifelse(t < 30, 0.2 - 0.005*env,
+                         ifelse(t <= 50, 0.1 + 0.005*env, 0))))
+  }
+  r <- MakeRate(ff, env_f = InfTemp)
+  plot(T, r(T), type='l')
+
+  div <- VarRateExp(ff, t=T, env_f = InfTemp)
+  plot(T, div, type='l')
 }
-r <- MakeRate(ff, env_f = InfTemp)
-plot(T, r(T), type='l')
-
-div <- VarRateExp(ff, t=T, env_f=InfTemp)
-plot(T, div, type='l')
-
-# we can also have a function that depends on both time AND temperature
-ff <- function(t, env) {
-  return(0.03 * env - 0.01 * t)
-}
-r <- MakeRate(ff, env_f = InfTemp)
-plot(T, r(T), type='l')
-
-div <- VarRateExp(ff, t=T, env_f=InfTemp)
-plot(T, div, type='l')
-
-# as mentioned above, we could also use ifelse() to construct a step function
-# that is modulated by temperature
-ff <- function(t, env) {
-  return(ifelse(t < 10, 0.1 + 0.01*env,
-                ifelse(t < 30, 0.2 - 0.005*env,
-                       ifelse(t <= 50, 0.1 + 0.005*env, 0))))
-}
-r <- MakeRate(ff, env_f = InfTemp)
-plot(T, r(T), type='l')
-
-div <- VarRateExp(ff, t=T, env_f = InfTemp)
-plot(T, div, type='l')
 
 }

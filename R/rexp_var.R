@@ -47,154 +47,160 @@
 #' an exponentially distributed variable t using \code{1-p = exp(t)} came from
 #' \code{baseR}'s own \code{rexp} and \href{https://rdrr.io/cran/ape/f/}{APE}.
 #'
+#' @import stats
+#'
 #' @examples
 #'
 #' # Note: to effectively test, you must pass \code{fast=FALSE} to the function.
 #'
-#' # use the \code{fitdistrplus} package to see if our distributions fit what we expect
-#' library(fitdistrplus)
+#' # use the \code{fitdistrplus} package to see if our distributions fit what
+#' # we expect
+#' if (requireNamespace("fitdistrplus", quietly=TRUE)) {
+#'   # let us start by checking a simple exponential variable
+#'   lambda <- 0.1
+#'   now <- 0
+#'   tmax <- 40
+#'   dis <- rexp_var(n=10000, lambda, now, tmax, fast=FALSE)
+#'   rate <- unname(fitdistrplus::fitdist(dis, distr="exp")$estimate)
 #'
-#' # let us start by checking a simple exponential variable
-#' lambda <- 0.1
-#' now <- 0
-#' tmax <- 40
-#' dis <- rexp_var(n=10000, lambda, now, tmax, fast=FALSE)
-#' rate <- unname(fitdist(dis, distr="exp")$estimate)
+#'   print(paste("rate: ",paste(rate, paste(", expected: ", lambda))))
 #'
-#' print(paste("rate: ",paste(rate, paste(", expected: ", lambda))))
+#'   # another simple exponential
+#'   lambda <- 0.5
+#'   dis <- rexp_var(n=10000, lambda, now, tmax, fast=FALSE)
+#'   rate <- unname(fitdistrplus::fitdist(dis, distr="exp")$estimate)
+#'   print(paste("rate: ", paste(rate, paste(", expected: ", lambda))))
 #'
-#' # another simple exponential
-#' lambda <- 0.5
-#' dis <- rexp_var(n=10000, lambda, now, tmax, fast=FALSE)
-#' rate <- unname(fitdist(dis, distr="exp")$estimate)
-#' print(paste("rate: ", paste(rate, paste(", expected: ", lambda))))
+#'   # now let us try a linear function
+#'   lambda <- function(t) {
+#'     return(0.01 * t + 0.1)
+#'   }
+#'   dis <- rexp_var(n=10000, lambda, now, tmax, fast=FALSE)
+#'   rate <- unname(fitdistrplus::fitdist(dis, distr="exp")$estimate)
 #'
-#' # now let us try a linear function
-#' lambda <- function(t) {
-#'   return(0.01 * t + 0.1)
-#' }
-#' dis <- rexp_var(n=10000, lambda, now, tmax, fast=FALSE)
-#' rate <- unname(fitdist(dis, distr="exp")$estimate)
-#'
-#' # we can integrate to find the mean rate
-#' f <- Vectorize(function(t) {
-#'   ifelse(lambda(t) == Inf, 0,
-#'          exp(-integrate(function(x) lambda(x),
-#'                         lower=0, upper=t, subdivisions=2000)$value))})
-#' mean <- 1/integrate(f, 0, Inf)$value
-#' print(paste("rate: ", paste(rate, paste(", expected: ", mean))))
-#'
-#' # and we can also integrate to find the mean directly
-#' p <- Vectorize(function(t) {
-#'   return(
+#'   # we can integrate to find the mean rate
+#'   f <- Vectorize(function(t) {
 #'     ifelse(lambda(t) == Inf, 0,
-#'            lambda(t)*exp(-integrate(Vectorize(
-#'              function(x) lambda(x)), lower=0, upper=t)$value))
-#'   )
-#' })
-#' mean<-integrate(function(t) t*p(t), 0, Inf)$value
-#' print(paste("mean: ", paste(mean(dis), paste(", expected: ", mean))))
+#'            exp(-integrate(function(x) lambda(x),
+#'                           lower=0, upper=t, subdivisions=2000)$value))})
+#'   mean <- 1/integrate(f, 0, Inf)$value
+#'   print(paste("rate: ", paste(rate, paste(", expected: ", mean))))
 #'
-#' # what if lambda is exponential?
-#' lambda <- function(t) {
-#'   return(0.01 * exp(0.1*t) + 0.02)
-#' }
-#' dis <- rexp_var(n=10000, lambda, now, tmax, fast=FALSE)
-#' rate <- unname(fitdist(dis, distr="exp")$estimate)
-#' f <- Vectorize(function(t) {
-#'   ifelse(lambda(t) == Inf, 0,
-#'          exp(-integrate(function(x) lambda(x),
-#'                         lower=0, upper=t, subdivisions=2000)$value))})
+#'   # and we can also integrate to find the mean directly
+#'   p <- Vectorize(function(t) {
+#'     return(
+#'       ifelse(lambda(t) == Inf, 0,
+#'              lambda(t)*exp(-integrate(Vectorize(
+#'                function(x) lambda(x)), lower=0, upper=t)$value))
+#'     )
+#'   })
+#'   mean<-integrate(function(t) t*p(t), 0, Inf)$value
+#'   print(paste("mean: ", paste(mean(dis), paste(", expected: ", mean))))
 #'
-#' mean <- 1/integrate(f, 0, Inf)$value
-#' print(paste("rate: ", paste(rate, paste(", expected: ", mean))))
-#'
-#' p <- Vectorize(function(t) {
-#'   return(
+#'   # what if lambda is exponential?
+#'   lambda <- function(t) {
+#'     return(0.01 * exp(0.1*t) + 0.02)
+#'   }
+#'   dis <- rexp_var(n=10000, lambda, now, tmax, fast=FALSE)
+#'   rate <- unname(fitdistrplus::fitdist(dis, distr="exp")$estimate)
+#'   f <- Vectorize(function(t) {
 #'     ifelse(lambda(t) == Inf, 0,
-#'            lambda(t)*exp(-integrate(Vectorize(
-#'              function(x) lambda(x)), lower=0, upper=t)$value))
-#'   )
-#' })
-#' mean <- integrate(function(t) t*p(t), 0, Inf)$value
-#' print(paste("rate: ", paste(mean(dis), paste(", expected: ", mean))))
+#'            exp(-integrate(function(x) lambda(x),
+#'                           lower=0, upper=t, subdivisions=2000)$value))})
 #'
-#' # now we can also test the age dependency
-#' lambda <- 2
-#' shape <- 1
-#' dis <- rexp_var(n=5000, lambda, now, tmax, shape = shape, TS = 0, fast=FALSE)
+#'   mean <- 1/integrate(f, 0, Inf)$value
+#'   print(paste("rate: ", paste(rate, paste(", expected: ", mean))))
 #'
-#' e_shape <- unname(fitdist(dis, distr = "weibull")$estimate)[1]
-#' e_scale <- unname(fitdist(dis, distr = "weibull")$estimate)[2]
+#'   p <- Vectorize(function(t) {
+#'     return(
+#'       ifelse(lambda(t) == Inf, 0,
+#'              lambda(t)*exp(-integrate(Vectorize(
+#'                function(x) lambda(x)), lower=0, upper=t)$value))
+#'     )
+#'   })
+#'   mean <- integrate(function(t) t*p(t), 0, Inf)$value
+#'   print(paste("rate: ", paste(mean(dis), paste(", expected: ", mean))))
 #'
-#' print(paste("shape: ", paste(e_shape, paste(", expected: ", shape))))
-#' print(paste("scale: ", paste(e_scale, paste(", expected: ", lambda))))
+#'   # now we can also test the age dependency
+#'   lambda <- 2
+#'   shape <- 1
+#'   dis <- rexp_var(n=5000, lambda, now, tmax, shape = shape, TS = 0, fast=FALSE)
 #'
-#' # shape = 1 is an exponential, we could do better
-#' lambda <- 10
-#' shape <- 2
-#' dis <- rexp_var(n=10000, lambda, now, tmax, shape = shape, TS = 0, fast=FALSE)
+#'   e_shape <- unname(fitdistrplus::fitdist(dis, distr = "weibull")$estimate)[1]
+#'   e_scale <- unname(fitdistrplus::fitdist(dis, distr = "weibull")$estimate)[2]
 #'
-#' e_shape <- unname(fitdist(dis, distr = "weibull")$estimate)[1]
-#' e_scale <- unname(fitdist(dis, distr = "weibull")$estimate)[2]
+#'   print(paste("shape: ", paste(e_shape, paste(", expected: ", shape))))
+#'   print(paste("scale: ", paste(e_scale, paste(", expected: ", lambda))))
 #'
-#' print(paste("shape: ", paste(e_shape, paste(", expected: ", shape))))
-#' print(paste("scale: ", paste(e_scale, paste(", expected: ", lambda))))
+#'   # shape = 1 is an exponential, we could do better
+#'   lambda <- 10
+#'   shape <- 2
+#'   dis <- rexp_var(n=10000, lambda, now, tmax, shape = shape, TS = 0, fast=FALSE)
 #'
-#' # fitdist gets a bit weird with shape less than 1, so we need some extra
-#' # arguments to get a fit
-#' lambda <- 10
-#' shape <- 0.5
-#' dis <- rexp_var(n=10000, lambda, now, tmax, shape = shape, TS = 0, fast=FALSE)
+#'   e_shape <- unname(fitdistrplus::fitdist(dis, distr = "weibull")$estimate)[1]
+#'   e_scale <- unname(fitdistrplus::fitdist(dis, distr = "weibull")$estimate)[2]
 #'
-#' e_shape <- unname(fitdist(dis, distr = "weibull", start=list(shape=1,scale=1),
-#'                           method="mge", gof="CvM")$estimate)[1]
-#' e_scale <- unname(fitdist(dis, distr = "weibull", start=list(shape=1,scale=1),
-#'                           method="mge", gof="CvM")$estimate)[2]
+#'   print(paste("shape: ", paste(e_shape, paste(", expected: ", shape))))
+#'   print(paste("scale: ", paste(e_scale, paste(", expected: ", lambda))))
 #'
-#' print(paste("shape: ", paste(e_shape, paste(", expected: ", shape))))
-#' print(paste("scale: ", paste(e_scale, paste(", expected: ", lambda))))
+#'   # fitdist gets a bit weird with shape less than 1,
+#'   # so we need some extra arguments to get a fit
+#'   lambda <- 10
+#'   shape <- 0.5
+#'   dis <- rexp_var(n=10000, lambda, now, tmax, shape = shape, TS = 0, fast=FALSE)
 #'
-#' # when lambda and shape vary, we might need to do some more to test
-#' lambda <- function(t) {
-#'   return(0.25*t + 5)
+#'   e_shape <- unname(fitdistrplus::fitdist(dis, distr = "weibull",
+#'                                          start=list(shape=1,scale=1),
+#'                               method="mge", gof="CvM")$estimate)[1]
+#'   e_scale <- unname(fitdistrplus::fitdist(dis, distr = "weibull",
+#'                                           start=list(shape=1,scale=1),
+#'                               method="mge", gof="CvM")$estimate)[2]
+#'
+#'   print(paste("shape: ", paste(e_shape, paste(", expected: ", shape))))
+#'   print(paste("scale: ", paste(e_scale, paste(", expected: ", lambda))))
+#'
+#'   # when lambda and shape vary, we might need to do some more to test
+#'   lambda <- function(t) {
+#'     return(0.25*t + 5)
+#'   }
+#'   shape <- 3
+#'   dis <- rexp_var(n=5000, lambda, now, tmax, shape = shape, TS = 0, fast=FALSE)
+#'
+#'   # we will integrate the distribution to find the mean directly
+#'   p <- Vectorize(function(t) {
+#'     res<-shape/lambda(t)*(integrate(
+#'       Vectorize(function(x) 1/lambda(x)), lower = 0, upper = t,
+#'       subdivisions=2000)$value)^(shape-1)*
+#'       exp(-(integrate(Vectorize(function(x) 1/lambda(x)), 0, t,
+#'                       subdivisions=2000)$value)^shape)
+#'     # na simply means R doesn't know how to multiply 0 by infinity, but we just
+#'     # need to make it 0 since t*exp(-t) goes to 0 when t goes to infinity
+#'     return(res)
+#'   })
+#'   mean <- integrate(function(t) t*p(t), 0, Inf)$value
+#'   print(paste("rate: ", paste(mean(dis), paste(", expected: ", mean))))
+#'
+#'   # lambda can be any function of time, remember
+#'   lambda <- function(t) {
+#'     return(0.2*exp(0.1*t) + 5)
+#'   }
+#'   shape <- 3
+#'   dis <- rexp_var(n=10000, lambda, now, tmax, shape = shape, TS = 0, fast=FALSE)
+#'
+#'   p <- Vectorize(function(t) {
+#'     res<-shape/lambda(t)*(integrate(
+#'       Vectorize(function(x) 1/lambda(x)), lower = 0, upper = t,
+#'       subdivisions=2000)$value)^(shape-1)*
+#'       exp(-(integrate(Vectorize(function(x) 1/lambda(x)), 0, t,
+#'                       subdivisions=2000)$value)^shape)
+#'     # na simply means R doesn't know how to multiply 0 by infinity, but we just
+#'     # need to make it 0 since t*exp(-t) goes to 0 when t goes to infinity
+#'     return(ifelse(is.na(res), 0, res))
+#'   })
+#'   mean <- integrate(function(t) t*p(t), 0, Inf)$value
+#'   print(paste("rate: ", paste(mean(dis), paste(", expected: ", mean))))
 #' }
-#' shape <- 3
-#' dis <- rexp_var(n=5000, lambda, now, tmax, shape = shape, TS = 0, fast=FALSE)
 #'
-#' # we will integrate the distribution to find the mean directly
-#' p <- Vectorize(function(t) {
-#'   res<-shape/lambda(t)*(integrate(
-#'     Vectorize(function(x) 1/lambda(x)), lower = 0, upper = t,
-#'     subdivisions=2000)$value)^(shape-1)*
-#'     exp(-(integrate(Vectorize(function(x) 1/lambda(x)), 0, t,
-#'                     subdivisions=2000)$value)^shape)
-#'   # na simply means R doesn't know how to multiply 0 by infinity, but we just
-#'   # need to make it 0 since t*exp(-t) goes to 0 when t goes to infinity
-#'   return(res)
-#' })
-#' mean <- integrate(function(t) t*p(t), 0, Inf)$value
-#' print(paste("rate: ", paste(mean(dis), paste(", expected: ", mean))))
-#'
-#' # lambda can be any function of time, remember
-#' lambda <- function(t) {
-#'   return(0.2*exp(0.1*t) + 5)
-#' }
-#' shape <- 3
-#' dis <- rexp_var(n=10000, lambda, now, tmax, shape = shape, TS = 0, fast=FALSE)
-#'
-#' p <- Vectorize(function(t) {
-#'   res<-shape/lambda(t)*(integrate(
-#'     Vectorize(function(x) 1/lambda(x)), lower = 0, upper = t,
-#'     subdivisions=2000)$value)^(shape-1)*
-#'     exp(-(integrate(Vectorize(function(x) 1/lambda(x)), 0, t,
-#'                     subdivisions=2000)$value)^shape)
-#'   # na simply means R doesn't know how to multiply 0 by infinity, but we just
-#'   # need to make it 0 since t*exp(-t) goes to 0 when t goes to infinity
-#'   return(ifelse(is.na(res), 0, res))
-#' })
-#' mean <- integrate(function(t) t*p(t), 0, Inf)$value
-#' print(paste("rate: ", paste(mean(dis), paste(", expected: ", mean))))
 #'
 #' @name rexp_var
 #' @rdname rexp_var

@@ -40,5 +40,5 @@ binneredSample <- binner(sampled1, bins3)
 
 }
 \author{
-written by Matheus Januario.
+written by Matheus Januario and Bruno do Rosario Petrucci
 }

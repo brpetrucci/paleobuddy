@@ -9,7 +9,7 @@
 #'
 #' @return a list of upper bounds for the occurrence times of a species.
 #'
-#' @author written by Matheus Januario.
+#' @author written by Matheus Januario and Bruno do Rosario Petrucci
 #'
 #' @examples
 #'

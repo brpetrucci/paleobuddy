@@ -4,8 +4,18 @@
 \alias{BDSim}
 \title{General rate Birth-Death simulation}
 \usage{
-BDSim(N0, pp, qq, tmax, pshape = NULL, qshape = NULL, env_pp = NULL,
-  env_qq = NULL, pshifts = NULL, qshifts = NULL)
+BDSim(
+  N0,
+  pp,
+  qq,
+  tmax,
+  pshape = NULL,
+  qshape = NULL,
+  env_pp = NULL,
+  env_qq = NULL,
+  pshifts = NULL,
+  qshifts = NULL
+)
 }
 \arguments{
 \item{N0}{initial number of species, usually 1. Good param
@@ -74,7 +84,7 @@ options to alter the rates, and calls \code{BDSimConstant} or
 }
 \examples{
 
-# since both \\code{BDSimConstant} and \\code{BDSimGeneral} have been tested in
+# since both \code{BDSimConstant} and \code{BDSimGeneral} have been tested in
 # their respective man pages, we will spend some time here giving examples of
 # possible combinations of diversification scenarios.
 
@@ -85,9 +95,10 @@ q <- 0.08
 tmax <- 40
 sim <- BDSim(N0, p, q, tmax) # this must be run until we have more than 1 sp
 # we can plot the phylogeny to take a look
-library(ape)
-phy <- MakePhylo(sim)
-plot.phylo(phy)
+if (requireNamespace("ape", quietly=TRUE)) {
+  phy <- MakePhylo(sim)
+  ape::plot.phylo(phy)
+}
 
 # now let us complicate speciation more, maybe a linear function
 N0 <- 1
@@ -129,22 +140,23 @@ sim <- BDSim(N0, p, q, tmax, pshape=pshape)
 # finally, we can also have a rate dependent on an environmental variable,
 # like temperature data in RPANDA
 
-library(RPANDA)
-data(InfTemp)
-N0 <- 1
-p <- function(t) {
-  return(1 + 0.25*t)
-}
+if (requireNamespace("RPANDA", quietly=TRUE)) {
+  data(InfTemp, package="RPANDA")
+  N0 <- 1
+  p <- function(t) {
+    return(1 + 0.25*t)
+  }
 
-# note the scale for the age-dependency can be a time-varying function
+  # note the scale for the age-dependency can be a time-varying function
 
-pshape <- 1.5
-q <- function(t, env) {
-  return(0.15 * exp(-0.01 * env))
+  pshape <- 1.5
+  q <- function(t, env) {
+    return(0.15 * exp(-0.01 * env))
+  }
+  env_q <- InfTemp
+ tmax <- 40
+ sim <- BDSim(N0, p, q, tmax, pshape=pshape, env_q=InfTemp)
 }
-env_q <- InfTemp
-tmax <- 40
-sim <- BDSim(N0, p, q, tmax, pshape=pshape, env_q=InfTemp)
 
 # one can mix and match all of these scenarios as they wish - age-dependency
 # and constant rates, age-dependent and temperature-dependent rates, etc. The

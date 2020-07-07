@@ -5,11 +5,6 @@
 #' options to alter the rates, and calls \code{BDSimConstant} or
 #' \code{BDSimGeneral} with the rates.
 #'
-#' @import stats
-#' @import methods
-#' @import ape
-#' @import RPANDA
-#' @import fitdistrplus
 #' @param N0 initial number of species, usually 1. Good param
 #' to tweak if one is observing a low sample size when testing.
 #'
@@ -82,9 +77,10 @@
 #' tmax <- 40
 #' sim <- BDSim(N0, p, q, tmax) # this must be run until we have more than 1 sp
 #' # we can plot the phylogeny to take a look
-#' library(ape)
-#' phy <- MakePhylo(sim)
-#' plot.phylo(phy)
+#' if (requireNamespace("ape", quietly=TRUE)) {
+#'   phy <- MakePhylo(sim)
+#'   ape::plot.phylo(phy)
+#' }
 #'
 #' # now let us complicate speciation more, maybe a linear function
 #' N0 <- 1
@@ -126,22 +122,23 @@
 #' # finally, we can also have a rate dependent on an environmental variable,
 #' # like temperature data in RPANDA
 #'
-#' library(RPANDA)
-#' data(InfTemp)
-#' N0 <- 1
-#' p <- function(t) {
-#'   return(1 + 0.25*t)
-#' }
+#' if (requireNamespace("RPANDA", quietly=TRUE)) {
+#'   data(InfTemp, package="RPANDA")
+#'   N0 <- 1
+#'   p <- function(t) {
+#'     return(1 + 0.25*t)
+#'   }
 #'
-#' # note the scale for the age-dependency can be a time-varying function
+#'   # note the scale for the age-dependency can be a time-varying function
 #'
-#' pshape <- 1.5
-#' q <- function(t, env) {
-#'   return(0.15 * exp(-0.01 * env))
+#'   pshape <- 1.5
+#'   q <- function(t, env) {
+#'     return(0.15 * exp(-0.01 * env))
+#'   }
+#'   env_q <- InfTemp
+#'  tmax <- 40
+#'  sim <- BDSim(N0, p, q, tmax, pshape=pshape, env_q=InfTemp)
 #' }
-#' env_q <- InfTemp
-#' tmax <- 40
-#' sim <- BDSim(N0, p, q, tmax, pshape=pshape, env_q=InfTemp)
 #'
 #' # one can mix and match all of these scenarios as they wish - age-dependency
 #' # and constant rates, age-dependent and temperature-dependent rates, etc. The
@@ -166,8 +163,8 @@ BDSim<-function(N0,pp,qq,tmax,pshape=NULL,qshape=NULL,env_pp=NULL,env_qq=NULL,
                 pshifts=NULL,qshifts=NULL){
   # if we have ONLY numbers for pp and qq, it is constant
   if ((is.numeric(pp)&length(pp)==1)&
-      (is.numeric(qq)&length(qq)==1&
-       (is.null(c(pshape,qshape,env_pp,env_qq,pshifts,qshifts))))) {
+      (is.numeric(qq)&length(qq)==1)&
+       (is.null(c(pshape,qshape,env_pp,env_qq,pshifts,qshifts)))) {
     p<-pp
     q<-qq
     # call BDSimConstant

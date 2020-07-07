@@ -4,9 +4,19 @@
 \alias{SampleClade}
 \title{Sampling a subset of species}
 \usage{
-SampleClade(S, sim, rr, tmax, env_rr = NULL, rshifts = NULL,
-  returnTrue = FALSE, stages = NULL, dFUN = NULL, dFUNmax = NULL,
-  ...)
+SampleClade(
+  S,
+  sim,
+  rr,
+  tmax,
+  env_rr = NULL,
+  rshifts = NULL,
+  returnTrue = FALSE,
+  stages = NULL,
+  dFUN = NULL,
+  dFUNmax = NULL,
+  ...
+)
 }
 \arguments{
 \item{S}{a species number (i.e. its identity) vector to be sampled. Could be
@@ -87,7 +97,7 @@ and whether one wants the true return times or a range based on \code{IntVec}.
 
 # note: for more detailed examples on the construction of the age-dependent
 # preservation model, see the detailed examples in the help page of the
-# \\code{Sample}  and \\code{SampleADPP} functions
+# \code{Sample}  and \code{SampleADPP} functions
 
 # first we can try constant sampling
 sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
@@ -153,7 +163,7 @@ while((sim$TS[1]-sim$TE[1])<10){
 
 rlist <- c(100, 50, 120)
 rshifts <- c(0, 4, 8) # this could also be c(10, 6, 2)
-# this makes the simulation slower than when using \\code{ifelse} to make a
+# this makes the simulation slower than when using \code{ifelse} to make a
 # step function, but it is an option
 
 # make it a function so we can plot it
@@ -178,46 +188,47 @@ for(i in 1:length(ids)){
   lines(t, rev(r(t)))
 }
 
-# finally, \\code{SampleClade} also accepts an environmental variable
-library(RPANDA)
-data(InfTemp)
+# finally, \code{SampleClade} also accepts an environmental variable
+if (requireNamespace("RPANDA", quietly=TRUE)) {
+  data(InfTemp, package="RPANDA")
 
-sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-while((sim$TS[1]-sim$TE[1])<10){
   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-}
+  while((sim$TS[1]-sim$TE[1])<10){
+    sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+  }
 
-env_r <- InfTemp
-# we can make sampling dependent on the temperature
-r <- function(t, env) {
-  return(25*env)
-}
+  env_r <- InfTemp
+  # we can make sampling dependent on the temperature
+  r <- function(t, env) {
+    return(25*env)
+  }
 
-# make it a function so we can plot it
-rr <- MakeRate(r, env_f=env_r)
-# let us check r is high enough to see a pattern
-plot(1:10, rr(1:10), type='l', main="Sampling rate", xlab="My", ylab="r")
+  # make it a function so we can plot it
+  rr <- MakeRate(r, env_f=env_r)
+  # let us check r is high enough to see a pattern
+  plot(1:10, rr(1:10), type='l', main="Sampling rate", xlab="My", ylab="r")
 
-stages=seq(from=10, to = 0, by = -.1)
+  stages=seq(from=10, to = 0, by = -.1)
 
-dt<-SampleClade(1:length(sim$TE), sim, r, tmax=10, env_rr=env_r,
-stages=stages)
-ids<-unique(dt$Species)
-mids<-(dt$MaxT-dt$MinT)+dt$MinT
+  dt<-SampleClade(1:length(sim$TE), sim, r, tmax=10, env_rr=env_r,
+  stages=stages)
+  ids<-unique(dt$Species)
+  mids<-(dt$MaxT-dt$MinT)+dt$MinT
 
-for(i in 1:length(ids)){
-  sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
+  for(i in 1:length(ids)){
+    sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 
-  hist(mids[dt$Species==ids[i]], main=paste0("spp = ", sp, "; duration ~ ",
-  round(sim$TS[sp]-sim$TE[sp], digits = 2), "my"),
-       xlab="My", breaks=seq(ceiling(sim$TS[i]), floor(sim$TE[i]), -1),
-       xlim=c(sim$TS[i], sim$TE[i]))
-  t <- seq(sim$TE[i], sim$TS[i], 0.1)
-  lines(t, rev(rr(t)))
+    hist(mids[dt$Species==ids[i]], main=paste0("spp = ", sp, "; duration ~ ",
+    round(sim$TS[sp]-sim$TE[sp], digits = 2), "my"),
+         xlab="My", breaks=seq(ceiling(sim$TS[i]), floor(sim$TE[i]), -1),
+         xlim=c(sim$TS[i], sim$TE[i]))
+    t <- seq(sim$TE[i], sim$TS[i], 0.1)
+    lines(t, rev(rr(t)))
+  }
 }
 
 # we will now do some tests with age-dependent rates. For more details,
-# check \\code{SampleADPP}.
+# check \code{SampleADPP}.
 
 # let us start with a hat-shaped increase through the duration of a species
 sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)

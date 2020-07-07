@@ -169,41 +169,42 @@
 #' }
 #'
 #' # finally, \code{SampleClade} also accepts an environmental variable
-#' library(RPANDA)
-#' data(InfTemp)
+#' if (requireNamespace("RPANDA", quietly=TRUE)) {
+#'   data(InfTemp, package="RPANDA")
 #'
-#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-#' while((sim$TS[1]-sim$TE[1])<10){
 #'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-#' }
+#'   while((sim$TS[1]-sim$TE[1])<10){
+#'     sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+#'   }
 #'
-#' env_r <- InfTemp
-#' # we can make sampling dependent on the temperature
-#' r <- function(t, env) {
-#'   return(25*env)
-#' }
+#'   env_r <- InfTemp
+#'   # we can make sampling dependent on the temperature
+#'   r <- function(t, env) {
+#'     return(25*env)
+#'   }
 #'
-#' # make it a function so we can plot it
-#' rr <- MakeRate(r, env_f=env_r)
-#' # let us check r is high enough to see a pattern
-#' plot(1:10, rr(1:10), type='l', main="Sampling rate", xlab="My", ylab="r")
+#'   # make it a function so we can plot it
+#'   rr <- MakeRate(r, env_f=env_r)
+#'   # let us check r is high enough to see a pattern
+#'   plot(1:10, rr(1:10), type='l', main="Sampling rate", xlab="My", ylab="r")
 #'
-#' stages=seq(from=10, to = 0, by = -.1)
+#'   stages=seq(from=10, to = 0, by = -.1)
 #'
-#' dt<-SampleClade(1:length(sim$TE), sim, r, tmax=10, env_rr=env_r,
-#' stages=stages)
-#' ids<-unique(dt$Species)
-#' mids<-(dt$MaxT-dt$MinT)+dt$MinT
+#'   dt<-SampleClade(1:length(sim$TE), sim, r, tmax=10, env_rr=env_r,
+#'   stages=stages)
+#'   ids<-unique(dt$Species)
+#'   mids<-(dt$MaxT-dt$MinT)+dt$MinT
 #'
-#' for(i in 1:length(ids)){
-#'   sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   for(i in 1:length(ids)){
+#'     sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 #'
-#'   hist(mids[dt$Species==ids[i]], main=paste0("spp = ", sp, "; duration ~ ",
-#'   round(sim$TS[sp]-sim$TE[sp], digits = 2), "my"),
-#'        xlab="My", breaks=seq(ceiling(sim$TS[i]), floor(sim$TE[i]), -1),
-#'        xlim=c(sim$TS[i], sim$TE[i]))
-#'   t <- seq(sim$TE[i], sim$TS[i], 0.1)
-#'   lines(t, rev(rr(t)))
+#'     hist(mids[dt$Species==ids[i]], main=paste0("spp = ", sp, "; duration ~ ",
+#'     round(sim$TS[sp]-sim$TE[sp], digits = 2), "my"),
+#'          xlab="My", breaks=seq(ceiling(sim$TS[i]), floor(sim$TE[i]), -1),
+#'          xlim=c(sim$TS[i], sim$TE[i]))
+#'     t <- seq(sim$TE[i], sim$TS[i], 0.1)
+#'     lines(t, rev(rr(t)))
+#'   }
 #' }
 #'
 #' # we will now do some tests with age-dependent rates. For more details,

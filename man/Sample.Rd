@@ -104,6 +104,9 @@ hist(occs,
      xlab="Mya") # informative labels
 abline(v=c(6, 2), col="red") # frontiers of each regime
 
+# one could also use an environmental function to generate a sampling rate,
+# see MakeRate()
+
 }
 \author{
 written by Bruno do Rosario Petrucci and Matheus Januario.

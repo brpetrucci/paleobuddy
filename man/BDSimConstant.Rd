@@ -67,13 +67,14 @@ DivVar<-function(t, div, qq){
                                 integrate(Vectorize(function(x)
                                   exp(-Int(x, div))*qq(x)), 0, t)$value))
 }
-# and some parameters we will need
-N0 <- 1
+# and a time parameter we will need
 tmax <- 40
 Time <- 1:tmax
 
 # now we can test a couple scenarios
 # first, extinction 0
+N0 <- 1
+tmax <- 40
 p <- 0.1
 q <- 0
 SimList <- lapply(1:10000, function(x) BDSimConstant(N0, p, q, tmax))
@@ -95,6 +96,8 @@ plot(Time, log(MeanVar), type='l')
 lines(Time, log(ExpectedVar), type='l', col='RED')
 
 # now let us try to turn extinction up a bit
+N0 <- 1
+tmax <- 40
 p <- 0.1
 q <- 0.04
 SimList <- lapply(1:10000, function(x) BDSimConstant(N0, p, q, tmax))
@@ -115,6 +118,7 @@ lines(Time, log(ExpectedVar), type='l', col='RED')
 
 # we can also try a pure-death process, starting with more species
 N0 <- 100
+tmax <- 40
 p <- 0
 q <- 0.02
 SimList <- lapply(1:10000, function(x) BDSimConstant(N0, p, q, tmax))

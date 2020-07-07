@@ -17,15 +17,18 @@
 #' @examples
 #'
 #' #Generating a phylogeny using constant rates
-#' library(ape)
 #' sim<-BDSim(N0 = 1, pp = 0.2, qq = 0.05, tmax = 10)
 #' while(length(sim$TE) < 2){ #in case first simulation has only one species
 #'   sim<-BDSim(N0 = 1, pp = 0.2, qq = 0.05, tmax = 10)
 #' }
 #' phy<-MakePhylo(sim)
-#' plot.phylo(phy)
-#' # we can also plot only the molecular phylogeny
-#' plot.phylo(drop.fossil(phy))
+#'
+#' # we need ape to plot it
+#' if (requireNamespace("ape", quietly=TRUE)) {
+#'   ape::plot.phylo(phy)
+#'   # we can also plot only the molecular phylogeny
+#'   ape::plot.phylo(ape::drop.fossil(phy))
+#' }
 #'
 #' # this works for sim generated with any of the scenarios in \code{BDSim}, of course
 #' sim<-BDSim(N0=1, pp=function(t) 0.12+0.01*t,qq=10, tmax=10, qshape=1.3)
@@ -33,7 +36,10 @@
 #'   sim<-BDSim(N0=1, pp=function(t) 0.12+0.01*t,qq=10, tmax=10, qshape=1.3)
 #' }
 #' phy<-MakePhylo(sim)
-#' plot.phylo(phy)
+#'
+#' if (requireNamespace("ape", quietly=TRUE)) {
+#'   ape::plot.phylo(phy)
+#' }
 #'
 #' @name MakePhylo
 #' @rdname MakePhylo
@@ -50,7 +56,7 @@ MakePhylo<-function(sim){
     #all.dir.daugthers returns the name of each direct daugther species
     #x = a simulation from PaleoBuddy
     #lin = a numeric specyfing the name of a lineage
-    return(which(x$PAR ==lin))
+    return(which(x$PAR==lin))
   }
 
 
