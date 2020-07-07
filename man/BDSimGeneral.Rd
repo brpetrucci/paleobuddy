@@ -5,7 +5,8 @@
 \title{Returns information of a simulated clade for general speciation and
 extinction rates}
 \usage{
-BDSimGeneral(N0, pp, qq, tmax, sshape = NULL, eshape = NULL)
+BDSimGeneral(N0, pp, qq, tmax, pshape = NULL, qshape = NULL,
+  fast = TRUE)
 }
 \arguments{
 \item{N0}{initial number of species, usually 1. Good param to
@@ -22,13 +23,17 @@ the rate is to be age-dependent.}
 after \code{tmax} is considered extant, and any species that would be
 generated after \code{tmax} is not born.}
 
-\item{sshape}{shape param for the Weibull distribution for
+\item{pshape}{shape param for the Weibull distribution for
 age-dependent speciation. Default is 0, where \code{pp} will be considered a
-time-dependent exponential rate. For \code{sshape != NULL}, \code{pp} will
+time-dependent exponential rate. For \code{pshape != NULL}, \code{pp} will
 be considered a scale, and \code{rexp_var} will draw a Weibull distribution
 instead.}
 
-\item{eshape}{similar as above, but for extinction rate.}
+\item{qshape}{similar as above, but for extinction rate.}
+
+\item{fast}{when \code{TRUE}, sets \code{rexp_var} to throw away waiting times
+higher than the maximum simulation time. Should be \code{FALSE} for unbiased
+testing. User might also se it to \code{FALSE} for more accurate waiting times.}
 }
 \value{
 a list of vectors, as follows

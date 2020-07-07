@@ -33,9 +33,9 @@ plot.phylo(phy)
 plot.phylo(drop.fossil(phy))
 
 # this works for sim generated with any of the scenarios in \\code{BDSim}, of course
-sim<-BDSim(N0=1, pp=function(t) 0.12+0.01*t,qq=10, tmax=10, eshape=1.3)
+sim<-BDSim(N0=1, pp=function(t) 0.12+0.01*t,qq=10, tmax=10, qshape=1.3)
 while(length(sim$TE) < 2){ #in case first simulation has only one species
-  sim<-BDSim(N0=1, pp=function(t) 0.12+0.01*t,qq=10, tmax=10, eshape=1.3)
+  sim<-BDSim(N0=1, pp=function(t) 0.12+0.01*t,qq=10, tmax=10, qshape=1.3)
 }
 phy<-MakePhylo(sim)
 plot.phylo(phy)

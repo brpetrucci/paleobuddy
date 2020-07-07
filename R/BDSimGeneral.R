@@ -32,8 +32,6 @@
 #' higher than the maximum simulation time. Should be \code{FALSE} for unbiased
 #' testing. User might also se it to \code{FALSE} for more accurate waiting times.
 #'
-#' @param
-#'
 #' @return a list of vectors, as follows
 #'
 #' \describe{
