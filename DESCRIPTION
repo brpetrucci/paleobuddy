@@ -21,6 +21,7 @@ Imports:
 Suggests:
 	ape,
 	RPANDA,
+	picante,
 	fitdistrplus
 License: MIT + file LICENSE
 Encoding: UTF-8

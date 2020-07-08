@@ -98,7 +98,7 @@ tmax <- 40
 Time <- 1:tmax
 
 # now we can test a couple scenarios
-
+\dontrun{
 # first, even though this is BDSimGeneral, we can try constant rates
 N0 <- 1
 tmax <- 40
@@ -236,11 +236,10 @@ abline(h=q)
 # the only test possible be a direct calculation of the expected longevity.
 # Since we have done that in the tests for rexp_var(), we will not repeat it
 # here.
-
+}
 # finally, we could have environmental dependency on a rate. For that, we need
 # RPANDA
-if (requireNamespace("RPANDA", quietly=TRUE) &
-    requireNamespace("ape", quietly=TRUE)) {
+if (requireNamespace("RPANDA", quietly=TRUE)) {
   N0 <- 1
   tmax <- 40
   p_t <- function(t, temp) {
@@ -307,14 +306,15 @@ if (requireNamespace("RPANDA", quietly=TRUE) &
     # needs to be a molecular phylogeny
     phy <- ape::drop.fossil(MakePhylo(sim))
 
-    tot_time <- max(ape::node.age(phy)$ages)
-    env_fit <- RPANDA::fit_env(phy,InfTemp,tot_time,f.l,f.m,lpar,mpar,df=dof,dt=1e-3, fix.mu=TRUE)
+    tot_time <- max(picante::node.age(phy)$ages)
+    env_fit <- RPANDA::fit_env(phy,InfTemp,tot_time,f.l,f.m,lpar,
+                               mpar,df=dof,dt=1e-3, fix.mu=TRUE)
     par_matrix <- rbind(par_matrix, env_fit$lamb_par)
   }
 
-  # one must remember that functions in RPANDA go from present to past, as opposed
-  # to our functions. So we can test by comparing the value of our rates with the
-  # estimates at the given time points
+  # one must remember that functions in RPANDA go from present to past, as
+  # opposed to our functions. So we can test by comparing the value of our
+  # rates with the estimates at the given time points
 
   # first get tempearature temp at the time points
   find_t <- function(A, t) {
