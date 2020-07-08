@@ -16,7 +16,9 @@ the starting species in the simulation (i.e. those for which the parent is
 }
 \value{
 A \code{list} object with (named) sim objects corresponding to the
-clades originated from species in S.
+clades originated from species in S. For each clade, an extra list
+\code{sim$LIN} is included so the user can identify the order of species
+in the return with the order of species in the original simulation.
 }
 \description{
 \code{findLineages} finds and separates monophyletic clades from simulations
@@ -47,7 +49,8 @@ for(i in 1:length(test)){
   }else{
     if(requireNamespace("ape", quietly = TRUE)) {
       p=ape::plot.phylo(MakePhylo(test[[i]]),
-                        main="red = extinction events \n blue = speciation events");
+                        main="red = extinction events \n
+                        blue = speciation events");
       ape::axisPhylo()
     }
 
@@ -55,8 +58,8 @@ for(i in 1:length(test)){
     for(j in 2:length(test[[i]]$TS)){
       # the subtraction is just to adjust the wt with the plot scale
       lines(x=c(
-        sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TS[j],
-        sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TS[j]),
+        sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TS[j],
+        sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TS[j]),
         y=c(p$y.lim[1],p$y.lim[2]),lwd=2, col="blue")
     }
 
@@ -64,8 +67,8 @@ for(i in 1:length(test)){
     for(j in 1:length(sim$TE)){
       # the subtraction is just to adjust the wt with the plot scale
       lines(x=c(
-        sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TE[j],
-        sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TE[j]),
+        sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TE[j],
+        sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TE[j]),
         y=c(p$y.lim[1],p$y.lim[2]),lwd=2, col="red")
     }
   }
@@ -99,8 +102,8 @@ for(i in 1:length(test)){
     for(j in 2:length(test[[i]]$TS)){
       # the subtraction is just to adjust the wt with the plot scale
       lines(x=c(
-        sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TS[j],
-        sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TS[j]),
+        sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TS[j],
+        sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TS[j]),
         y=c(p$y.lim[1],p$y.lim[2]),lwd=2, col="blue")
     }
 
@@ -108,8 +111,8 @@ for(i in 1:length(test)){
     for(j in 1:length(sim$TE)){
       # the subtraction is just to adjust the wt with the plot scale
       lines(x=c(
-        sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TE[j],
-        sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TE[j]),
+        sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TE[j],
+        sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TE[j]),
         y=c(p$y.lim[1],p$y.lim[2]),lwd=2, col="red")
     }
   }

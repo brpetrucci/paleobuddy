@@ -14,7 +14,9 @@
 #' @author written by Bruno Petrucci and Matheus Januario.
 #'
 #' @return A \code{list} object with (named) sim objects corresponding to the
-#' clades originated from species in S.
+#' clades originated from species in S. For each clade, an extra list
+#' \code{sim$LIN} is included so the user can identify the order of species
+#' in the return with the order of species in the original simulation.
 #'
 #' @examples
 #'
@@ -40,7 +42,8 @@
 #'   }else{
 #'     if(requireNamespace("ape", quietly = TRUE)) {
 #'       p=ape::plot.phylo(MakePhylo(test[[i]]),
-#'                         main="red = extinction events \n blue = speciation events");
+#'                         main="red = extinction events \n
+#'                         blue = speciation events");
 #'       ape::axisPhylo()
 #'     }
 #'
@@ -48,8 +51,8 @@
 #'     for(j in 2:length(test[[i]]$TS)){
 #'       # the subtraction is just to adjust the wt with the plot scale
 #'       lines(x=c(
-#'         sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TS[j],
-#'         sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TS[j]),
+#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TS[j],
+#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TS[j]),
 #'         y=c(p$y.lim[1],p$y.lim[2]),lwd=2, col="blue")
 #'     }
 #'
@@ -57,8 +60,8 @@
 #'     for(j in 1:length(sim$TE)){
 #'       # the subtraction is just to adjust the wt with the plot scale
 #'       lines(x=c(
-#'         sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TE[j],
-#'         sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TE[j]),
+#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TE[j],
+#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TE[j]),
 #'         y=c(p$y.lim[1],p$y.lim[2]),lwd=2, col="red")
 #'     }
 #'   }
@@ -92,8 +95,8 @@
 #'     for(j in 2:length(test[[i]]$TS)){
 #'       # the subtraction is just to adjust the wt with the plot scale
 #'       lines(x=c(
-#'         sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TS[j],
-#'         sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TS[j]),
+#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TS[j],
+#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TS[j]),
 #'         y=c(p$y.lim[1],p$y.lim[2]),lwd=2, col="blue")
 #'     }
 #'
@@ -101,8 +104,8 @@
 #'     for(j in 1:length(sim$TE)){
 #'       # the subtraction is just to adjust the wt with the plot scale
 #'       lines(x=c(
-#'         sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TE[j],
-#'         sort(test[[i]]$TS, decreasing = T)[2]-test[[i]]$TE[j]),
+#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TE[j],
+#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TE[j]),
 #'         y=c(p$y.lim[1],p$y.lim[2]),lwd=2, col="red")
 #'     }
 #'   }
@@ -160,7 +163,79 @@ findLineages <- function(sim, S=NULL) {
 
   # find lineages for each species
   for (s in S) {
-    final[[paste0("clade_", s)]] = helper_findLineage(sim, s)
+    final[[paste0("clade_", s)]] = .findLineage(sim, s)
   }
   return(final)
+}
+
+#' Helper function for findLineages
+#'
+#' \code{.findLineage} takes a simulation object, usually from \code{BDSim},
+#' and a species number, and returns the simulation object that has that
+#' species as a common ancestor.
+#'
+#' @param sim a simulation from the \code{BDSim} function. The
+#' function accept simulations with any number of starting species.
+#'
+#' @param s a species number. The function will return a sim object whose common
+#' ancestor is the species s, and s will be renumbered to species 1 in the result.
+#'
+#' @author written by Bruno Petrucci.
+#'
+#' @return a \code{sim} object with \code{s} as the mother species, including
+#' all descendants of \code{s}. An extra list \code{sim$LIN} is included so the
+#' user can identify the order of species in the return with the order of species
+#' in the original simulation.
+#'
+
+.findLineage <- function(sim, s) {
+  # if s is not on the simulation, we have a problem
+  if (s > length(sim$TE)) {
+    stop("This species is not on the simulation")
+  }
+
+  # lineage starts with a species
+  lin <- c(s)
+
+  # daughters of the first species of the lineage
+  dau <- which(sim$PAR == s)
+
+  # while species in the lineage have daughters
+  while (length(dau) > 0) {
+    # append the daughters to the lineage
+    lin <- c(lin, dau)
+
+    # find the daughters of the previous daughters
+    dau <- which(sim$PAR %in% dau)
+  }
+
+  # make vectors for the clade
+  TE <- sim$TE[lin]
+  TS <- sim$TS[lin]
+  PAR <- sim$PAR[lin]
+  EXTANT <- sim$EXTANT[lin]
+
+  # PAR here still follows the identifications on the original sim, so we need
+  # to rename the species
+  if(length(PAR)>1){
+    # if the first species is not already unparented, it will be now
+    PAR[1] = NA
+
+    # first species of the clade (the one that generated the second) is 1
+    PAR[PAR==PAR[2]] = 1
+
+    # every other species follows the order in lin, to preserve the order
+    # of TE and TS
+    for (p in unique(PAR[PAR != 1 & !is.na(PAR)])) {
+      PAR[PAR==p] = which(lin==p)
+    }
+  }
+
+  # append it to a sim
+  # note the inclusion of lin - this way, a user can tell which species in sim1
+  # corresponded to which species in sim
+  sim1 <- list(TE=TE, TS=TS, PAR=PAR,
+               EXTANT=EXTANT, LIN=lin)
+
+  return(sim1)
 }
