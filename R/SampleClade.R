@@ -368,12 +368,16 @@ SampleClade<-function(S, sim, rr,tmax,env_rr=NULL,rshifts=NULL,returnTrue=FALSE,
   # sample using Poisson process:
   if(is.null(dFUN)){ # independent of age (i.e. occurrences uniformly distributed through the lineage's age)
     point_estimates<-lapply(S,Sample,TE=TE,TS=TS,rr=rr,tmax=tmax)
+    zero_occs<-which(lapply(point_estimates, length)==0)
+    message(paste0(length(zero_occs), " species left no fossil"))
   } else{ #dependent of age (i.e. occurrences distributed through the lineage's age accourding to the function provided by the user)
     point_estimates<-SampleADPP(S, TS=TS, TE=TE, rr=rr, dFUN = dFUN, dFUNmax = dFUNmax, ...)
   }
 
-  #wrapping data:
-  if(!returnTrue){ # output as fossil occurrence binned within stages/bins
+  # wrapping data
+
+  # output as fossil occurrence binned within stages/bins
+  if(!returnTrue){
 
     res<-data.frame(matrix(nrow=0, ncol=4))
     colnames(res)<-c("Species", "Extant", "MaxT", "MinT")
@@ -393,7 +397,8 @@ SampleClade<-function(S, sim, rr,tmax,env_rr=NULL,rshifts=NULL,returnTrue=FALSE,
 
     # and the species column
     res$Species<-paste0("spp_", res$Species)
-  } else{ # output as the "true" times of preservation of each lineage
+  } else{
+    # output as the "true" times of preservation of each lineage
     # if returnTrue=TRUE, get a a data frame with the real sampling times only
     res<-data.frame(matrix(nrow=length(unlist(point_estimates)), ncol=3))
     colnames(res)<-c("Species", "Extant", "SampT")

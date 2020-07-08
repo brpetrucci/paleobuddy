@@ -54,7 +54,7 @@
 #'
 #' # see how the rate looks
 #' r <- MakeRate(0.5)
-#' plot(T, r(T), type='l')
+#' plot(T, rep(r, length(T)), type='l')
 #'
 #' # get the diversity and plot it
 #' div <- VarRateExp(ff, t=T)

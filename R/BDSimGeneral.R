@@ -361,12 +361,12 @@ BDSimGeneral<-function(N0,pp,qq,tmax,pshape=NULL,qshape=NULL,fast=TRUE,trueExt=F
     # now we need to subtract tNow
     WaitTimeS<-ifelse(is.numeric(pp), rexp(1, pp),
                       ifelse(pp(tNow)>0,
-                      rexp_var(1,pp,tNow,tmax,pshape,
-                               ifelse(TS[Scount]<0,0,TS[Scount]), fast),Inf))
+                             rexp_var(1,pp,tNow,tmax,pshape,
+                                      ifelse(TS[Scount]<0,0,TS[Scount]), fast),Inf))
     WaitTimeE<-ifelse(is.numeric(qq), rexp(1, qq),
                       ifelse(qq(tNow)>0,
-                      rexp_var(1,qq,tNow,tmax,qshape,
-                               ifelse(TS[Scount]<0,0,TS[Scount]), fast),Inf))
+                             rexp_var(1,qq,tNow,tmax,qshape,
+                                      ifelse(TS[Scount]<0,0,TS[Scount]), fast),Inf))
 
     tExp<-tNow+WaitTimeE
 
@@ -385,8 +385,8 @@ BDSimGeneral<-function(N0,pp,qq,tmax,pshape=NULL,qshape=NULL,fast=TRUE,trueExt=F
       # get a new speciation waiting time, and include it in the vector
       WaitTimeS<-ifelse(is.numeric(pp), rexp(1, pp),
                         ifelse(pp(tNow)>0,
-                        rexp_var(1,pp,tNow,tmax,pshape,
-                                 ifelse(TS[Scount]<0,0,TS[Scount]), fast),Inf))
+                               rexp_var(1,pp,tNow,tmax,pshape,
+                                        ifelse(TS[Scount]<0,0,TS[Scount]), fast),Inf))
     }
 
     # reached the time of extinction
