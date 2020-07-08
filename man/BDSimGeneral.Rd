@@ -254,6 +254,7 @@ if (requireNamespace("RPANDA", quietly=TRUE)) {
   q <- 0.01
 
   # using RPANDA to get the temperature data
+  data(InfTemp, package="RPANDA")
 
   p <- MakeRate(p_t, tmax, env_f=InfTemp)
   # since we need many species to be able to test this effectively using

@@ -114,7 +114,7 @@
 #'  ape::plot.phylo(MakePhylo(sim), main="original")
 #'  ape::axisPhylo()
 #'  ape::plot.phylo(MakePhylo(findClades(sim)[[1]]), main="after findClades()")
-#'  ape::axisPhylo()     
+#'  ape::axisPhylo()
 #'  #those should be equal
 #' }
 #' @name findClades
@@ -158,10 +158,8 @@ findClades <- function(sim) {
 
       # every other species follows the order in lin, to preserve the order
       # of TE and TS
-      for (i in 2:length(PAR)) {
-        if (!is.na(PAR[i-1]) & PAR[i] > PAR[i-1]) {
-          PAR[PAR==PAR[i]] = which(lin==PAR[i])
-        }
+      for (p in unique(PAR[PAR != 1 & !is.na(PAR)])) {
+        PAR[PAR==p] = which(lin==p)
       }
     }
 
