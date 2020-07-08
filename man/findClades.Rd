@@ -121,7 +121,7 @@ if (requireNamespace("ape", quietly = TRUE)) {
  ape::plot.phylo(MakePhylo(sim), main="original")
  ape::axisPhylo()
  ape::plot.phylo(MakePhylo(findClades(sim)[[1]]), main="after findClades()")
- ape::axisPhylo()     
+ ape::axisPhylo()
  #those should be equal
 }
 }

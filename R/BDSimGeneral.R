@@ -88,8 +88,7 @@
 #' tmax <- 40
 #' p <- 0.11
 #' q <- 0.08
-#' SimList <- lapply(1:10000, function(x){ if ((x-1) %% 100 == 0) {print(x)}
-#'   BDSimGeneral(N0, p, q, tmax)})
+#' SimList <- lapply(1:10000, function(x) BDSimGeneral(N0, p, q, tmax))
 #'
 #' # let us make vectors to hold the average diversity and variance
 #' pp <- Vectorize(function(t) p)
@@ -124,8 +123,7 @@
 #'   return(0.05+0.005*t)
 #' }
 #' q <- 0.05
-#' SimList <- lapply(1:1000, function(x){ if ((x-1) %% 100 == 0) {print(x)}
-#'   BDSimGeneral(N0, p, q, tmax)})
+#' SimList <- lapply(1:1000, function(x) BDSimGeneral(N0, p, q, tmax))
 #'
 #' # let us make vectors to hold the average diversity and variance
 #' pp <- Vectorize(function(t) p(t))
@@ -159,8 +157,7 @@
 #' qlist <- c(0.04, 0.06, 0.07)
 #' qshifts <- c(0, 20, 30)
 #' q <- MakeRate(qlist, tmax, fshifts=qshifts)
-#' SimList <- lapply(1:1000, function(x){ if ((x-1) %% 100 == 0) {print(x)}
-#'   BDSimGeneral(N0, p, q, tmax)})
+#' SimList <- lapply(1:1000, function(x) BDSimGeneral(N0, p, q, tmax))
 #'
 #' # let us make vectors to hold the average diversity and variance
 #' pp <- Vectorize(function(t) p(t))
@@ -192,11 +189,8 @@
 #' p <- 0.15
 #' q <- 10
 #' qshape <- 1
-#' b <- Sys.time()
-#' SimList <- lapply(1:1000, function(x){ if ((x-1) %% 100 == 0) {print(x)}
-#'   BDSimGeneral(N0, p, q, tmax, qshape=qshape, fast=FALSE, trueExt=TRUE)})
-#' e <- Sys.time()
-#' l <- e - b
+#' SimList <- lapply(1:1000, function(x)
+#'   BDSimGeneral(N0, p, q, tmax, qshape=qshape, fast=FALSE, trueExt=TRUE))
 #'
 #' # now we can use fitdistrplus to check that, on average, the longevities simulated
 #' # follow a Weibull distribution
@@ -229,7 +223,8 @@
 #'
 #' # finally, we could have environmental dependency on a rate. For that, we need
 #' # RPANDA
-#' if (requireNamespace("RPANDA", quietly=TRUE)) {
+#' if (requireNamespace("RPANDA", quietly=TRUE) &
+#'     requireNamespace("ape", quietly=TRUE)) {
 #'   N0 <- 1
 #'   tmax <- 40
 #'   p_t <- function(t, temp) {
@@ -244,11 +239,7 @@
 #'   # since we need many species to be able to test this effectively using
 #'   # RPANDA, and the rates become really noisy with temperature, we set
 #'   # only 100 simulations to finish it in a reasonable time
-#'   b<-Sys.time()
-#'   SimList <- lapply(1:100, function(x){ print(x)
-#'     BDSimGeneral(N0, p, q, tmax)})
-#'   e<-Sys.time()
-#'   print(paste("Took ", e-b))
+#'   SimList <- lapply(1:100, function(x) BDSimGeneral(N0, p, q, tmax))
 #'
 #'   # let us make vectors to hold the average diversity and variance
 #'   pp <- Vectorize(function(t) p(t))
@@ -300,7 +291,7 @@
 #'     # needs to be a molecular phylogeny
 #'     phy <- ape::drop.fossil(MakePhylo(sim))
 #'
-#'     tot_time <- max(node.age(phy)$ages)
+#'     tot_time <- max(ape::node.age(phy)$ages)
 #'     env_fit <- RPANDA::fit_env(phy,InfTemp,tot_time,f.l,f.m,lpar,mpar,df=dof,dt=1e-3, fix.mu=TRUE)
 #'     par_matrix <- rbind(par_matrix, env_fit$lamb_par)
 #'   }
