@@ -5,7 +5,7 @@
 \title{Returns a rate based on a time-varying function, environmental variable
 and/or vectors of rates and shifts}
 \usage{
-MakeRate(ff, tmax, env_f = NULL, fshifts = NULL)
+MakeRate(ff, tMax, env_f = NULL, fShifts = NULL)
 }
 \arguments{
 \item{ff}{the baseline function with which to make the rate.
@@ -16,30 +16,30 @@ It can be a
 
 \item{\code{Function of time}}{For rates that vary with time. Note that this
 can be any function of time, but one should not supply a function that
-depends on more than one variable without an accompanying \code{env_f} -
+depends on more than one variable without an accompanying \code{envF} -
 that will result in an error}
 
 \item{\code{Vector of rates}}{To create step function rates. Note this must
-be accompanied by a corresponding vector of shifts \code{fshifts}}}}
+be accompanied by a corresponding vector of shifts \code{fShifts}}}}
 
-\item{tmax}{a number corresponding to the maximum simulation time.
-Needed to ensure \code{fshifts} runs the correct way.}
+\item{tMax}{a number corresponding to the maximum simulation time.
+Needed to ensure \code{fShifts} runs the correct way.}
 
-\item{env_f}{a dataframe representing an environmental variable
+\item{fShifts}{a vector of rate shifts. The first element must
+be the first time point for the simulation. This may be 0 or tMax. Since
+functions in paleobuddy run from 0 to tMax, if \code{fShifts} runs from past
+to present, in other words \code{fShifts[2] < fShifts[1]}, we take
+\code{tMax-fShifts} as the shifts vector. Note that supplying \code{fShifts}
+when \code{ff} is not a rates vector will return an error.}
+
+\item{envF}{a dataframe representing an environmental variable
 (time, CO2 etc) with time. The first column must be time, second column the
 values of the variable. See below; one good resource for these dataframes is
 \href{https://cran.r-project.org/web/packages/RPANDA/}{RPANDA}.}
-
-\item{fshifts}{a vector of rate shifts. The first element must
-be the first time point for the simulation. This may be 0 or tmax. Since
-functions in PaleoBuddy run from 0 to tmax, if \code{fshifts} runs from past
-to present, in other words \code{fshifts[2] < fshifts[1]}, we take
-\code{tmax-fshifts} as the shifts vector. Note that supplying \code{fshifts}
-when \code{ff} is not a rates vector will return an error.}
 }
 \value{
 returns a constant or time-varying function (depending on input)
-that can then be used as a rate in the other \code{PaleoBuddy} functions.
+that can then be used as a rate in the other \code{paleobuddy} functions.
 The returned function will invariably be either a number or a function of
 one variable only, usually set as time.
 }
@@ -48,10 +48,10 @@ one variable only, usually set as time.
 function of time or a vector of rates. If it is a constant or a time-varying
 function, nothing else need be supplied. Otherwise, if \code{ff} is a vector
 of rates, the user must supply the accompanying vector of rate shifts
-\code{fshifts} to create a step function rate. Finally, if \code{ff} takes
+\code{fShifts} to create a step function rate. Finally, if \code{ff} takes
 an environmental variable as well, the user must supply a dataframe of time
-vs. the environmental param, \code{env_f}. Note that an error is
-returned if the user suplies \code{fshifts} AND \code{env_f}. If one wants a
+vs. the environmental param, \code{envF}. Note that an error is
+returned if the user suplies \code{fShifts} AND \code{envF}. If one wants a
 step function modified by an environmental variable, use \code{ifelse} to
 give \code{ff(t, env)} (see examples below).
 }
@@ -92,8 +92,8 @@ plot(1:50, r(1:50), type='l')
 
 # ...which we can do as follows
 ff <- c(0.1, 0.2, 0.3, 0.2)
-fshifts <- c(0, 10, 20, 35)
-r <- MakeRate(ff, fshifts = fshifts)
+fShifts <- c(0, 10, 20, 35)
+r <- MakeRate(ff, fShifts = fShifts)
 plot(1:50, r(1:50),type='l')
 
 # as mentioned above, while this works well it will be a pain to integrate.
@@ -106,20 +106,20 @@ plot(1:50, r(1:50),type='l')
 
 # RPANDA supplies us with some really useful environmental dataframes
 # to use as an example, let us try temperature
-if (requireNamespace("RPANDA", quietly=TRUE)) {
+if (requireNamespace("RPANDA", quietly = TRUE)) {
   data(InfTemp, package="RPANDA")
 
   ff <- function(t, env) {
     return(0.05*env)
   }
-  r <- MakeRate(ff, env_f = InfTemp)
+  r <- MakeRate(ff, envF = InfTemp)
   plot(1:50, r(1:50), type='l')
 }
 # we can also have a function that depends on both time AND temperature
 ff <- function(t, env) {
   return(0.001*exp(0.1*t) + 0.05*env)
 }
-r <- MakeRate(ff, env_f = InfTemp)
+r <- MakeRate(ff, envF = InfTemp)
 plot(1:50, r(1:50), type='l')
 
 # as mentioned above, we could also use ifelse() to construct a step function
@@ -129,7 +129,7 @@ ff <- function(t, env) {
                 ifelse(t < 30, 0.2 - 0.005*env,
                        ifelse(t <= 50, 0.1 + 0.005*env, 0))))
 }
-r <- MakeRate(ff, env_f = InfTemp)
+r <- MakeRate(ff, envF = InfTemp)
 plot(1:50, r(1:50), type='l')
 
 }

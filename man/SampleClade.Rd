@@ -30,21 +30,19 @@ rates corresponding to the times in \code{rshifts}. If \code{env_rr} and
 \code{rshifts} are NULL, it will be treated as an exponential rate.
 Must be a constant if \code{dFUN} is not \code{NULL}.}
 
-\item{tmax}{the maximum simulation time, used by \code{rexp_var}.}
-
 \item{env_rr}{a matrix containing time points and values of an enviromental
 variable, like temperature, for each time point. This will be used to create
 a sampling rate, so \code{rr} must be a function of time and said variable
 if \code{env_rr} is not NULL.}
 
 \item{rshifts}{vector of rate shifts. First element must be starting time for
-simulation (0, or tmax). Vector must have the same length as \code{rr} E.g.
-\code{rr = c(0.15, 0.1, 0.2)}, \code{pshifts = c(0, 20, 30)} means r will be
-0.15 from 0 to 20, 0.1 from 20 to 30, and 0.2 from 30 to \code{tmax}.
+simulation (0, or tMax). Vector must have the same length as \code{rr} E.g.
+\code{rr = c(0.15, 0.1, 0.2)}, \code{pShifts = c(0, 20, 30)} means r will be
+0.15 from 0 to 20, 0.1 from 20 to 30, and 0.2 from 30 to \code{tMax}.
 
 Note that using this method for step-function rates is currently slower than
-using \code{ifelse}. Using \code{c(0, 10, tmax)} is the
-same as \code{c(tmax, tmax - 10, 0)}.}
+using \code{ifelse}. Using \code{c(0, 10, tMax)} is the
+same as \code{c(tMax, tMax - 10, 0)}.}
 
 \item{returnTrue}{if set to true, a list of true ocurrence times for each
 species will be returned. If set to true, we call \code{binner} to take the
@@ -82,6 +80,8 @@ maximum density.
 Note that if it is not provided, 1 will be used instead, leading to longer running times.}
 
 \item{...}{additional parameters related to \code{dFUN} and \code{dFUNmax}.}
+
+\item{tMax}{the maximum simulation time, used by \code{rexp_var}.}
 }
 \value{
 a list of occurrences for that species, expected to be around
@@ -91,7 +91,7 @@ by the function provided by the user.
 \description{
 \code{SampleClade} takes times of speciation and extinction, information to
 create a sampling rate with \code{MakeRate}, a vector of geologic time intervals,
-and whether one wants the true return times or a range based on \code{IntVec}.
+and whether one wants the true return times or a range based on \code{bins}.
 }
 \examples{
 
@@ -100,22 +100,22 @@ and whether one wants the true return times or a range based on \code{IntVec}.
 # \code{Sample}  and \code{SampleADPP} functions
 
 # first we can try constant sampling
-sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-while((sim$TS[1]-sim$TE[1])<10){
-  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+while((sim$TS[1]-sim$TE[1])<10) {
+  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
 }
 
 r <- 100 # high so we can see the pattern
 # the resolution of the fossil dataset:
-stages=seq(from=10, to = 0, # from simulation's tmax to present
+stages=seq(from=10, to = 0, # from simulation's tMax to present
            by = -.1)
 # note that we will provide a very high resolution to test the function
 
-dt<-SampleClade(1:length(sim$TE), sim, r, tmax=10, stages=stages)
+dt<-SampleClade(1:length(sim$TE), sim, r, tMax=10, stages=stages)
 ids<-unique(dt$Species)
 mids<-(dt$MaxT-dt$MinT)+dt$MinT
 
-for(i in 1:length(ids)){
+for (i in 1:length(ids)) {
 
   sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
   # the histogram should have the curve right over it
@@ -128,9 +128,9 @@ for(i in 1:length(ids)){
 }
 
 # now let us try a linearly increasing r
-sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-while((sim$TS[1]-sim$TE[1])<10){
-  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+while((sim$TS[1]-sim$TE[1])<10) {
+  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
 }
 
 r <- function(t) {
@@ -144,7 +144,7 @@ dt<-SampleClade(1:length(sim$TE), sim, r, tmax=10, stages=stages)
 ids<-unique(dt$Species)
 mids<-(dt$MaxT-dt$MinT)+dt$MinT
 
-for(i in 1:length(ids)){
+for (i in 1:length(ids)) {
   sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 
   hist(mids[dt$Species==ids[i]], main=paste0("spp = ", sp, "; duration ~ ",
@@ -157,7 +157,7 @@ for(i in 1:length(ids)){
 
 # sampling could be any function of time, of course, such as a step function
 sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-while((sim$TS[1]-sim$TE[1])<10){
+while((sim$TS[1]-sim$TE[1])<10) {
   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
 }
 
@@ -167,7 +167,7 @@ rshifts <- c(0, 4, 8) # this could also be c(10, 6, 2)
 # step function, but it is an option
 
 # make it a function so we can plot it
-r <- MakeRate(rlist, 10, fshifts=rshifts)
+r <- MakeRate(rlist, 10, fShifts=rshifts)
 
 stages=seq(from=10, to = 0,
            by = -.1)
@@ -177,7 +177,7 @@ rshifts=rshifts, stages=stages)
 ids<-unique(dt$Species)
 mids<-(dt$MaxT-dt$MinT)+dt$MinT
 
-for(i in 1:length(ids)){
+for (i in 1:length(ids)) {
   sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 
   hist(mids[dt$Species==ids[i]], main=paste0("spp = ", sp, "; duration ~ ",
@@ -189,11 +189,11 @@ for(i in 1:length(ids)){
 }
 
 # finally, \code{SampleClade} also accepts an environmental variable
-if (requireNamespace("RPANDA", quietly=TRUE)) {
+if (requireNamespace("RPANDA", quietly = TRUE)) {
   data(InfTemp, package="RPANDA")
 
   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-  while((sim$TS[1]-sim$TE[1])<10){
+  while((sim$TS[1]-sim$TE[1])<10) {
     sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
   }
 
@@ -215,7 +215,7 @@ if (requireNamespace("RPANDA", quietly=TRUE)) {
   ids<-unique(dt$Species)
   mids<-(dt$MaxT-dt$MinT)+dt$MinT
 
-  for(i in 1:length(ids)){
+  for (i in 1:length(ids)) {
     sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 
     hist(mids[dt$Species==ids[i]], main=paste0("spp = ", sp, "; duration ~ ",
@@ -232,16 +232,16 @@ if (requireNamespace("RPANDA", quietly=TRUE)) {
 
 # let us start with a hat-shaped increase through the duration of a species
 sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-while((sim$TS[1]-sim$TE[1])<10){
+while((sim$TS[1]-sim$TE[1])<10) {
   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
 }
 
 # preservation function in respect to age
 # here we will use the PERT function. It is described in Silvestro et al 2014
 
-dPERT<-function(t,s,e,sp,a=3,b=3, log=FALSE){
+dPERT<-function(t,s,e,sp,a=3,b=3, log=FALSE) {
 
-  if(e>=s){
+  if (e>=s) {
     message("There is no PERT with e>=s")
     return(rep(NaN, times=length(t)))
   }
@@ -250,21 +250,21 @@ dPERT<-function(t,s,e,sp,a=3,b=3, log=FALSE){
   t<-t[id2]
 
   res<-vector()
-  if(log){
+  if (log) {
     res[id1]<--Inf
-  }else{
+  } else {
     res[id1]<-0
   }
 
-  if(log){
+  if (log) {
     res[id2]<-log(((s-t)^2)*((-e+t)^2)/((s-e)^5*beta(a,b)))
-  } else{
+  } else {
     res[id2]<-((s-t)^2)*((-e+t)^2)/((s-e)^5*beta(a,b))
   }
   return(res)
 }
 
-dPERTmax<-function(s,e,sp){
+dPERTmax<-function(s,e,sp) {
   return(((s-e)/2)+e)
 }
 
@@ -276,7 +276,7 @@ dFUN = dPERT, dFUNmax = dPERTmax)
 ids<-unique(dt$Species)
 mids<-(dt$MaxT-dt$MinT)+dt$MinT
 
-for(i in 1:length(ids)){
+for (i in 1:length(ids)) {
 
   sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 
@@ -293,7 +293,7 @@ for(i in 1:length(ids)){
 # now, a hat-shaped increase through the duration of a species dependent on two parameters
 
 sim<-BDSim(N0 = 1, pp = 0.1, qq = 0.1, tmax = 10)
-while(length(sim$TE)<20){
+while(length(sim$TE)<20) {
   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
 }
 
@@ -302,16 +302,16 @@ while(length(sim$TE)<20){
 # function. In this model, preservation responds to the age of a lineage
 # (in absolute time) and a "mode" of the triangle. This mode, in this example,
 # is the result of the interaction between two parameters: par and par1
-dTRImod2<-function(t,s,e,sp){
+dTRImod2<-function(t,s,e,sp) {
 
-  if(e>=s){
+  if (e>=s) {
     message("There is no TRI with e>=s")
     return(rep(NaN, times=length(t)))
   }
 
   md<-par[sp]+par1[sp]
 
-  if(md<e | md>s){
+  if (md<e | md>s) {
     message("There is no TRI with md outside [s, e] interval")
     return(rep(NaN, times=length(t)))
   }
@@ -332,11 +332,11 @@ dTRImod2<-function(t,s,e,sp){
               # help page of the SampleADPP() function
 }
 
-dTRImaxmod2<-function(s,e,sp){
+dTRImaxmod2<-function(s,e,sp) {
   return(2/(s-e))
 }
 # a random point inside each lineage's duration
-par<-runif(n = length(sim$TE), min = sim$TE, max = sim$TS)
+par<-runif (n = length(sim$TE), min = sim$TE, max = sim$TS)
 
 # a distance between "par" and the lineage's duration middle
 par1<-(((sim$TS-sim$TE)/2)+sim$TE)-par
@@ -350,7 +350,7 @@ dFUN = dTRImod2, dFUNmax = dTRImaxmod2)
 ids<-unique(dt$Species)
 mids<-(dt$MaxT-dt$MinT)+dt$MinT
 
-for(i in 1:length(ids)){
+for (i in 1:length(ids)) {
 
   sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 

@@ -4,7 +4,7 @@
 \alias{Sample}
 \title{Species sampling}
 \usage{
-Sample(S, TE, TS, rr, tmax)
+Sample(S, TE, TS, rr, tMax)
 }
 \arguments{
 \item{S}{the species number to be sampled. Since \code{Sample} will be
@@ -18,7 +18,7 @@ that we apply this function.}
 \item{rr}{a sampling rate function. Can be created by \code{MakeRate} for
 simplicity, but can be any time-varying function.}
 
-\item{tmax}{the maximum simulation time, used by \code{rexp_var}.}
+\item{tMax}{the maximum simulation time, used by \code{rexp_var}.}
 }
 \value{
 a list of occurrences for that species.
@@ -34,10 +34,10 @@ a list of occurrences for that species.
 
 # let us start with a linear increase in preservation rate
 
-sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-while((sim$TS[1]-sim$TE[1])<10){ # in case first simulation has short-lived
+sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
+while((sim$TS[1]-sim$TE[1])<10) { # in case first simulation has short-lived
                                  # lineage which will obscure the pattern
-  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
 }
 
 # preservation function
@@ -50,7 +50,7 @@ t<-seq(0, 10, by=.1)
 plot(x=t, y=rev(r(t)), main="Simulated preservation", type="l", col="red",
 xlab="Mya", ylab="preservation rate", xlim=c(10, sim$TE[1]))
 
-occs<-Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tmax = 10)
+occs<-Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
 hist(occs,
      xlim=c(10, sim$TE[1]), #changing axis
      xlab="Mya") #informative labels
@@ -58,33 +58,33 @@ lines(t, rev(r(t)))
 
 # now let us try a step function
 
-sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-while((sim$TS[1]-sim$TE[1])<10){ # in case first simulation has short-lived
+sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+while((sim$TS[1]-sim$TE[1])<10) { # in case first simulation has short-lived
                                  # lineage which will obscure the pattern
-  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
 }
 
 # we can create the sampling rate here from a few vectors
 rlist <- c(50, 20, 80)
 rshifts <- c(0, 4, 8) # this could be c(10, 6, 2) and would produce the same function
 
-r <- MakeRate(rlist, tmax=10, fshifts=rshifts)
+r <- MakeRate(rlist, tMax=10, fShifts=rshifts)
 
 t<-seq(0, 10, by=.1)
 plot(x=t, y=rev(r(t)), main="Simulated preservation", type="l", col="red",
 xlab="Mya", ylab="preservation rate", xlim=c(10, sim$TE[1]))
 
-occs<-Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tmax = 10)
+occs<-Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
 hist(occs,
      xlim=c(10, sim$TE[1]), #changing axis
      xlab="Mya") #informative labels
 abline(v=c(6,2), col="red") # frontiers of each regime
 
 # we can create a step function in a different way as well
-sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-while((sim$TS[1]-sim$TE[1])<10){ # in case first simulation has short-lived lineage
+sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+while((sim$TS[1]-sim$TE[1])<10) { # in case first simulation has short-lived lineage
                                  # which will obscure the pattern
-  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
 }
 
 # preservation function
@@ -98,7 +98,7 @@ t<-seq(0, 10, by=.1)
 plot(x=t, y=rev(r(t)), main="Simulated preservation", type="l", col="red",
 xlab="Mya", ylab="preservation rate", xlim=c(10, sim$TE[1]))
 
-occs<-Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tmax = 10)
+occs<-Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
 hist(occs,
      xlim=c(10, sim$TE[1]), # changing axis
      xlab="Mya") # informative labels

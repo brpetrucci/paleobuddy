@@ -2,24 +2,23 @@
 % Please edit documentation in R/BDSimConstant.R
 \name{BDSimConstant}
 \alias{BDSimConstant}
-\title{Returns the information for a simulated clade given constant speciation
-and extinction rates}
+\title{Constant rate Birth-Death simulation}
 \usage{
-BDSimConstant(N0 = 1, p, q, tmax)
+BDSimConstant(n0 = 1, pp, qq, tMax)
 }
 \arguments{
-\item{N0}{initial number of species, usually 1. Good param to
-tweak if one is observing a low sample size when testing.}
+\item{n0}{initial number of species, usually 1. Good parameter
+to tweak if one is observing a low sample size when testing.}
 
-\item{p}{speciation rate. Must be constant. No error check since
-in the package this function will only be called by \code{BDSim}, which will
-only call it if the rate is constant.}
+\item{pp}{speciation rate. Must be constant.}
 
-\item{q}{extinction rate, similar to above.}
+\item{qq}{extinction rate, similar to above.
 
-\item{tmax}{ending time of simulation. Any species still living
-after \code{tmax} is considered extant, and any species that would be
-generated after \code{tmax} is not born.}
+Note: \code{pp} and \code{qq} must always be greater than 0}
+
+\item{tMax}{ending time of simulation. Any species still living
+after tMax is considered extant, and any species that would be generated
+after \code{tMax} is not born.}
 }
 \value{
 a list of vectors, as follows
@@ -28,115 +27,203 @@ a list of vectors, as follows
 \item{\code{TE}}{list of extinction times, with -0.01 as the time of
 extinction for extant species.}
 
-\item{\code{TS}}{list of speciation times, with tmax+0.01 as the time of
+\item{\code{TS}}{list of speciation times, with tMax+0.01 as the time of
 speciation for species that started the simulation.}
 
 \item{\code{PAR}}{list of parents. Species that started the simulation have
 NA, while species that were generated during the simulation have their
 parent's number. Species are numbered as they are born.}
 
-\item{\code{EXTANT}}{list of booleans representing whether a species is
+\item{\code{EXTANT}}{list of booleans representing whether each species is
 extant.}}
 }
 \description{
 \code{BDSimConstant} takes a rate, a maximum simulation time and an initial
-number of species and returns the history of the clade originated from that
-number of species with rates equal to the given rates. Time runs from
-\code{tmax} to 0, to be consistent with the literature, though one can
-easily invert that by subtracting the results from \code{tmax}.
+number of species and returns the history of the clade originated from those
+species using a birth-death process with constant rates equal to the given 
+rates. It then generates the speciation and extinction times, parent and 
+status information for the species in the simulation. Time runs from 
+\code{tMax} to 0, to be consistent with the literature, though one can easily 
+invert that by subtracting the results from \code{tMax}.
 }
 \examples{
 
 # first we define a function to calculate the mean diversity and var at time t
-SimMean<-function(t, SimList){
-  SimExtantT<-as.numeric(lapply(1:length(SimList),function(y){
-    TS <- tmax - SimList[[y]]$TS
-    TE <- tmax - SimList[[y]]$TE
-    length(which(TS<=t&TE>=t))}))
-  return(list(mean=mean(SimExtantT), var=(var(SimExtantT))))
+sim.mean<-function(t, simList) {
+  # apply to each replicate of the simulation
+  simExtantT<-as.numeric(lapply(1:length(simList), function(y) {
+    
+    # invert extinction and speciation times, so that we may consider functions
+    # running from past to present
+    TS <- tMax - simList[[y]]$TS
+    TE <- tMax - simList[[y]]$TE
+    
+    # find how many species are alive at time t
+    length(which(TS <= t & TE >= t))}))
+  return(list(mean = mean(simExtantT), var = (var(simExtantT))))
 }
-# note the tmax -, rescaling the vectors so we can work only with functions
-# going forward in time
 
-# also, we need functions to calculate the expected var at time t
-Int<-function(t, div) {
+# also, we need functions to calculate the expected variance at time t
+int<-function(t, div) {
+  # integrate diversity from 0 to time t
   return(integrate(div, 0, t)$value)
 }
-DivVar<-function(t, div, qq){
-  return(N0*exp(Int(t, div))*(exp(Int(t, div)) - 1 + 2*exp(Int(t,div))*
+# formula for the variance - see Kendall 1948
+div.var<-function(t, div, qq) {
+  return(n0*exp(int(t, div))*(exp(int(t, div)) - 1 + 2*exp(int(t, div))*
                                 integrate(Vectorize(function(x)
-                                  exp(-Int(x, div))*qq(x)), 0, t)$value))
+                                  exp(-int(x, div))*qq(x)), 0, t)$value))
 }
-# and a time parameter we will need
-tmax <- 40
-Time <- 1:tmax
+
+# and a time parameter we will need for plotting
+tMax <- 40
+time <- 1:tMax
 
 # now we can test a couple scenarios
 # first, extinction 0
-N0 <- 1
-tmax <- 40
+
+# initial number of species
+n0 <- 1
+
+# maximum simulation time
+tMax <- 40
+
+# speciation
 p <- 0.1
+
+# extinction
 q <- 0
-SimList <- lapply(1:10000, function(x) BDSimConstant(N0, p, q, tmax))
+
+\dontrun{ 
+# run the simulations
+simList <- lapply(1:10000, function(x) BDSimConstant(n0, p, q, tMax))
+
 
 # let us make vectors to hold the average diversity and variance
+
+# function for diversity
 div <- Vectorize(function(t) p - q)
+
+# function for extinction - needed for the variance
 qq <- Vectorize(function(t) q)
 
-MeanDiv <- unlist(lapply(Time, function(x) SimMean(x, SimList=SimList)$mean))
-ExpectedDiv <- VarRateExp(div, 1, Time)
+# calculate the mean diversity at our time points
+meanDiv <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$mean))
 
-MeanVar <- unlist(lapply(Time, function(x) SimMean(x, SimList=SimList)$var))
-ExpectedVar <- unlist(lapply(Time, function(x) DivVar(x, div, qq)))
+# calculate the expected diversity for the sime time points
+expectedDiv <- VarRateExp(div, 1, time)
+
+# do the same with variance
+meanVar <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$var))
+expectedVar <- unlist(lapply(time, function(x) div.var(x, div, qq)))
 
 # and now let us check out the plots
-plot(Time, log(MeanDiv), type='l')
-lines(Time, log(ExpectedDiv), col='RED')
-plot(Time, log(MeanVar), type='l')
-lines(Time, log(ExpectedVar), type='l', col='RED')
+
+# mean diversity, compared with expected
+plot(time, log(meanDiv), type = 'l', main = "Species diversity", 
+     xlab = "Time (My)", ylab = "log(Diversity)")
+lines(time, log(expectedDiv), col = 'RED')
+legend(x = 5, y = log(max(meanDiv)), legend = c("Expected", "Observed"),
+       col = c("RED", "BLACK"), lty = c(1,1))
+
+# same for variance
+plot(time, log(meanVar), type = 'l',  main = "Species diversity variance", 
+     xlab = "Time (My)", ylab = "log(Variance)")
+lines(time, log(expectedVar), type = 'l', col='RED')
+legend(x = 5, y = log(max(meanVar)), legend = c("Expected", "Observed"),
+       col = c("RED", "BLACK"), lty = c(1,1))
+}
 
 # now let us try to turn extinction up a bit
-N0 <- 1
-tmax <- 40
+
+# initial number of species
+n0 <- 1
+
+# maximum simulation time
+tMax <- 40
+
+# speciation
 p <- 0.1
+
+# extinction
 q <- 0.04
-SimList <- lapply(1:10000, function(x) BDSimConstant(N0, p, q, tmax))
 
-div <- Vectorize(function(t) p - q)
-qq <- Vectorize(function(t) q)
+\dontrun{
+# run the simulations
+simList <- lapply(1:10000, function(x) BDSimConstant(n0, p, q, tMax))
 
-MeanDiv <- unlist(lapply(Time, function(x) SimMean(x, SimList=SimList)$mean))
-ExpectedDiv <- VarRateExp(div, N0, Time)
+# calculate the mean diversity at our time points
+meanDiv <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$mean))
 
-MeanVar <- unlist(lapply(Time, function(x) SimMean(x, SimList=SimList)$var))
-ExpectedVar <- unlist(lapply(Time, function(x) DivVar(x, div, qq)))
+# calculate the expected diversity for the sime time points
+expectedDiv <- VarRateExp(div, 1, time)
 
-plot(Time, log(MeanDiv), type='l')
-lines(Time, log(ExpectedDiv), col='RED')
-plot(Time, log(MeanVar), type='l')
-lines(Time, log(ExpectedVar), type='l', col='RED')
+# do the same with variance
+meanVar <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$var))
+expectedVar <- unlist(lapply(time, function(x) div.var(x, div, qq)))
 
-# we can also try a pure-death process, starting with more species
-N0 <- 100
-tmax <- 40
+# and now let us check out the plots
+
+# mean diversity, compared with expected
+plot(time, log(meanDiv), type = 'l', main = "Species diversity", 
+     xlab = "Time (My)", ylab = "log(Diversity)")
+lines(time, log(expectedDiv), col = 'RED')
+legend(x = 5, y = log(max(meanDiv)), legend = c("Expected", "Observed"),
+       col = c("RED", "BLACK"), lty = c(1,1))
+
+# same for variance
+plot(time, log(meanVar), type = 'l',  main = "Species diversity variance", 
+     xlab = "Time (My)", ylab = "log(Variance)")
+lines(time, log(expectedVar), type = 'l', col='RED')
+legend(x = 5, y = log(max(meanVar)), legend = c("Expected", "Observed"),
+       col = c("RED", "BLACK"), lty = c(1,1))
+}
+
+# we can also try a pure-death process
+
+# initial number of species - note the high number, so we get an appreciable
+# sample size
+n0 <- 100
+
+# maximum simulation time
+tMax <- 40
+
+# speciation
 p <- 0
+
+# extinction
 q <- 0.02
-SimList <- lapply(1:10000, function(x) BDSimConstant(N0, p, q, tmax))
 
-div <- Vectorize(function(t) p - q)
-qq <- Vectorize(function(t) q)
+\dontrun{
+# run the simulations
+simList <- lapply(1:10000, function(x) BDSimConstant(n0, p, q, tMax))
 
-MeanDiv <- unlist(lapply(Time, function(x) SimMean(x, SimList=SimList)$mean))
-ExpectedDiv <- VarRateExp(div, N0, Time)
+# calculate the mean diversity at our time points
+meanDiv <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$mean))
 
-MeanVar <- unlist(lapply(Time, function(x) SimMean(x, SimList=SimList)$var))
-ExpectedVar <- unlist(lapply(Time, function(x) DivVar(x, div, qq)))
+# calculate the expected diversity for the sime time points
+expectedDiv <- VarRateExp(div, 1, time)
 
-plot(Time, log(MeanDiv), type='l')
-lines(Time, log(ExpectedDiv), col='RED')
-plot(Time, log(MeanVar), type='l')
-lines(Time, log(ExpectedVar), type='l', col='RED')
+# do the same with variance
+meanVar <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$var))
+expectedVar <- unlist(lapply(time, function(x) div.var(x, div, qq)))
 
+# and now let us check out the plots
+
+# mean diversity, compared with expected
+plot(time, log(meanDiv), type = 'l', main = "Species diversity", 
+     xlab = "Time (My)", ylab = "log(Diversity)")
+lines(time, log(expectedDiv), col = 'RED')
+legend(x = 30, y = log(max(meanDiv)), legend = c("Expected", "Observed"),
+       col = c("RED", "BLACK"), lty = c(1,1))
+
+# same for variance
+plot(time, log(meanVar), type = 'l',  main = "Species diversity variance", 
+     xlab = "Time (My)", ylab = "log(Variance)")
+lines(time, log(expectedVar), type = 'l', col='RED')
+legend(x = 30, y = log(max(meanVar)) - 2, legend = c("Expected", "Observed"),
+       col = c("RED", "BLACK"), lty = c(1,1))
+}
 # all the cases seem to agree pretty well with expectations
 
 }

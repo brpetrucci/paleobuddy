@@ -2,10 +2,9 @@
 % Please edit documentation in R/rexp_var.R
 \name{rexp_var}
 \alias{rexp_var}
-\title{Returns a wait time for an exponential or weibull distribution with constant
-or time-varying parameters}
+\title{General rate exponential and Weibull waiting times}
 \usage{
-rexp_var(n = 1, lambda, now, tmax, shape = NULL, TS = NULL, fast = TRUE)
+rexp_var(n = 1, lambda, now, tMax, shape = NULL, TS = NULL, fast = TRUE)
 }
 \arguments{
 \item{n}{the number of times to return. The default is 1, but
@@ -13,22 +12,22 @@ we allow for a higher \code{n} to be consistent with the \code{rexp}
 function.}
 
 \item{lambda}{the rate parameter for the exponential
-distribution. If shape is not NULL, \code{lambda} is a scale for the Weibull.
-In both cases we allow for any time-varying function. If one wants a
-constant, please use \code{lambda <- function(t) {return(constant)}}.}
+distribution. If shape is not \code{NULL}, \code{lambda} is a scale for the
+Weibull. In both cases we allow for any time-varying function. If one wants
+a constant \code{c}, please use \code{lambda <- Vectorize(function(t) c)}.}
 
-\item{now}{the current time. Needed so that we consider only the
-interval between the current time and the maximum time for the time-varying
-rate. Notice this does means the waiting time is >= \code{now}, so one must
-subtract \code{now} from the waiting time when using it.}
+\item{now}{the current time. Needed so that we consider only the interval
+between the current time and the maximum time for the time-varying rate.
+Notice this does means the waiting time is >= \code{now}, so we also
+subtract \code{now} from the waiting time before returning.}
 
-\item{tmax}{the simulation ending time. If the waiting time
-would be too high, we return \code{2*tmax} to signify the event never
-happens. The function only considers the rate between \code{now} and
-\code{tmax}.}
+\item{tMax}{the simulation ending time. If the waiting time would be too
+high, we return \code{2*tMax} to signify the event never happens, if 
+\code{FAST == TRUE}. The function only considers the rate between \code{now}
+and \code{tMax}.}
 
-\item{shape}{the shape of a weibull distribution. If not NULL,
-the distribution is taken to be a weibull. Otherwise, it is considered an
+\item{shape}{the shape of a weibull distribution. If not \code{NULL}, the 
+distribution dis taken to be a weibull. Otherwise, it is considered an
 exponential.
 
 Notes: if \code{shape} is really low it may be impossible
@@ -49,8 +48,9 @@ distribution with the given rates.
 \description{
 \code{rexp_var} uses a rate (that could be constant or time-varying), a range
 of time and optionally a shape for age dependent rates. It also takes a
-number of waiting times to return. This can serve both for an exponential
-distribution, and a weibull distribution with varying parameters.
+number of waiting times to return, and whether the user wishes to throw away
+waiting times that pass \code{tMax}. It returns a time from an exponential
+distribution, or a weibull distribution, if \code{shape != NULL}.
 }
 \examples{
 
@@ -58,19 +58,19 @@ distribution, and a weibull distribution with varying parameters.
 
 # use the \code{fitdistrplus} package to see if our distributions fit what
 # we expect
-if (requireNamespace("fitdistrplus", quietly=TRUE)) {
+if (requireNamespace("fitdistrplus", quietly = TRUE)) {
   # let us start by checking a simple exponential variable
   lambda <- 0.1
   now <- 0
-  tmax <- 40
-  dis <- rexp_var(n=10000, lambda, now, tmax, fast=FALSE)
+  tMax <- 40
+  dis <- rexp_var(n=10000, lambda, now, tMax, fast=FALSE)
   rate <- unname(fitdistrplus::fitdist(dis, distr="exp")$estimate)
 
   print(paste("rate: ",paste(rate, paste(", expected: ", lambda))))
 
   # another simple exponential
   lambda <- 0.5
-  dis <- rexp_var(n=10000, lambda, now, tmax, fast=FALSE)
+  dis <- rexp_var(n=10000, lambda, now, tMax, fast=FALSE)
   rate <- unname(fitdistrplus::fitdist(dis, distr="exp")$estimate)
   print(paste("rate: ", paste(rate, paste(", expected: ", lambda))))
 
@@ -78,7 +78,7 @@ if (requireNamespace("fitdistrplus", quietly=TRUE)) {
   lambda <- function(t) {
     return(0.01 * t + 0.1)
   }
-  dis <- rexp_var(n=10000, lambda, now, tmax, fast=FALSE)
+  dis <- rexp_var(n=10000, lambda, now, tMax, fast=FALSE)
   rate <- unname(fitdistrplus::fitdist(dis, distr="exp")$estimate)
 
   # we can integrate to find the mean rate
@@ -104,7 +104,7 @@ if (requireNamespace("fitdistrplus", quietly=TRUE)) {
   lambda <- function(t) {
     return(0.01 * exp(0.1*t) + 0.02)
   }
-  dis <- rexp_var(n=10000, lambda, now, tmax, fast=FALSE)
+  dis <- rexp_var(n=10000, lambda, now, tMax, fast=FALSE)
   rate <- unname(fitdistrplus::fitdist(dis, distr="exp")$estimate)
   f <- Vectorize(function(t) {
     ifelse(lambda(t) == Inf, 0,
@@ -127,7 +127,7 @@ if (requireNamespace("fitdistrplus", quietly=TRUE)) {
   # now we can also test the age dependency
   lambda <- 2
   shape <- 1
-  dis <- rexp_var(n=5000, lambda, now, tmax, shape = shape, TS = 0, fast=FALSE)
+  dis <- rexp_var(n=5000, lambda, now, tMax, shape = shape, TS = 0, fast=FALSE)
 
   e_shape <- unname(fitdistrplus::fitdist(dis, distr = "weibull")$estimate)[1]
   e_scale <- unname(fitdistrplus::fitdist(dis, distr = "weibull")$estimate)[2]
@@ -138,7 +138,7 @@ if (requireNamespace("fitdistrplus", quietly=TRUE)) {
   # shape = 1 is an exponential, we could do better
   lambda <- 10
   shape <- 2
-  dis <- rexp_var(n=10000, lambda, now, tmax, shape = shape, TS = 0, fast=FALSE)
+  dis <- rexp_var(n=10000, lambda, now, tMax, shape = shape, TS = 0, fast=FALSE)
 
   e_shape <- unname(fitdistrplus::fitdist(dis, distr = "weibull")$estimate)[1]
   e_scale <- unname(fitdistrplus::fitdist(dis, distr = "weibull")$estimate)[2]
@@ -150,7 +150,7 @@ if (requireNamespace("fitdistrplus", quietly=TRUE)) {
   # so we need some extra arguments to get a fit
   lambda <- 10
   shape <- 0.5
-  dis <- rexp_var(n=10000, lambda, now, tmax, shape = shape, TS = 0, fast=FALSE)
+  dis <- rexp_var(n=10000, lambda, now, tMax, shape = shape, TS = 0, fast=FALSE)
 
   e_shape <- unname(fitdistrplus::fitdist(dis, distr = "weibull",
                                          start=list(shape=1,scale=1),
@@ -167,7 +167,7 @@ if (requireNamespace("fitdistrplus", quietly=TRUE)) {
     return(0.25*t + 5)
   }
   shape <- 3
-  dis <- rexp_var(n=5000, lambda, now, tmax, shape = shape, TS = 0, fast=FALSE)
+  dis <- rexp_var(n=5000, lambda, now, tMax, shape = shape, TS = 0, fast=FALSE)
 
   # we will integrate the distribution to find the mean directly
   p <- Vectorize(function(t) {
@@ -188,7 +188,7 @@ if (requireNamespace("fitdistrplus", quietly=TRUE)) {
     return(0.2*exp(0.1*t) + 5)
   }
   shape <- 3
-  dis <- rexp_var(n=10000, lambda, now, tmax, shape = shape, TS = 0, fast=FALSE)
+  dis <- rexp_var(n=10000, lambda, now, tMax, shape = shape, TS = 0, fast=FALSE)
 
   p <- Vectorize(function(t) {
     res<-shape/lambda(t)*(integrate(

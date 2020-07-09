@@ -14,7 +14,7 @@
 #' @param rr a sampling rate function. Can be created by \code{MakeRate} for
 #' simplicity, but can be any time-varying function.
 #'
-#' @param tmax the maximum simulation time, used by \code{rexp_var}.
+#' @param tMax the maximum simulation time, used by \code{rexp_var}.
 #'
 #' @return a list of occurrences for that species.
 #'
@@ -27,10 +27,10 @@
 #'
 #' # let us start with a linear increase in preservation rate
 #'
-#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-#' while((sim$TS[1]-sim$TE[1])<10){ # in case first simulation has short-lived
+#' sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' while((sim$TS[1]-sim$TE[1])<10) { # in case first simulation has short-lived
 #'                                  # lineage which will obscure the pattern
-#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' }
 #'
 #' # preservation function
@@ -43,7 +43,7 @@
 #' plot(x=t, y=rev(r(t)), main="Simulated preservation", type="l", col="red",
 #' xlab="Mya", ylab="preservation rate", xlim=c(10, sim$TE[1]))
 #'
-#' occs<-Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tmax = 10)
+#' occs<-Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
 #' hist(occs,
 #'      xlim=c(10, sim$TE[1]), #changing axis
 #'      xlab="Mya") #informative labels
@@ -51,33 +51,33 @@
 #'
 #' # now let us try a step function
 #'
-#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-#' while((sim$TS[1]-sim$TE[1])<10){ # in case first simulation has short-lived
+#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' while((sim$TS[1]-sim$TE[1])<10) { # in case first simulation has short-lived
 #'                                  # lineage which will obscure the pattern
-#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' }
 #'
 #' # we can create the sampling rate here from a few vectors
 #' rlist <- c(50, 20, 80)
 #' rshifts <- c(0, 4, 8) # this could be c(10, 6, 2) and would produce the same function
 #'
-#' r <- MakeRate(rlist, tmax=10, fshifts=rshifts)
+#' r <- MakeRate(rlist, tMax=10, fShifts=rshifts)
 #'
 #' t<-seq(0, 10, by=.1)
 #' plot(x=t, y=rev(r(t)), main="Simulated preservation", type="l", col="red",
 #' xlab="Mya", ylab="preservation rate", xlim=c(10, sim$TE[1]))
 #'
-#' occs<-Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tmax = 10)
+#' occs<-Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
 #' hist(occs,
 #'      xlim=c(10, sim$TE[1]), #changing axis
 #'      xlab="Mya") #informative labels
 #' abline(v=c(6,2), col="red") # frontiers of each regime
 #'
 #' # we can create a step function in a different way as well
-#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-#' while((sim$TS[1]-sim$TE[1])<10){ # in case first simulation has short-lived lineage
+#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' while((sim$TS[1]-sim$TE[1])<10) { # in case first simulation has short-lived lineage
 #'                                  # which will obscure the pattern
-#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' }
 #'
 #' # preservation function
@@ -91,7 +91,7 @@
 #' plot(x=t, y=rev(r(t)), main="Simulated preservation", type="l", col="red",
 #' xlab="Mya", ylab="preservation rate", xlim=c(10, sim$TE[1]))
 #'
-#' occs<-Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tmax = 10)
+#' occs<-Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
 #' hist(occs,
 #'      xlim=c(10, sim$TE[1]), # changing axis
 #'      xlab="Mya") # informative labels
@@ -104,13 +104,13 @@
 #' @rdname Sample
 #' @export
 
-Sample<-function(S,TE,TS,rr,tmax){
-  TE <- tmax - TE
-  TS <- tmax - TS
+Sample<-function(S,TE,TS,rr,tMax) {
+  TE <- tMax - TE
+  TS <- tMax - TS
 
   # start when the species was born, end when it died
   Now<-ifelse(TS[S]<0,0,TS[S])
-  End<-ifelse(TE[S]>tmax,tmax,TE[S])
+  End<-ifelse(TE[S]>tMax,tMax,TE[S])
 
   # make rr a function if it isn't
   r <- rr
@@ -120,9 +120,9 @@ Sample<-function(S,TE,TS,rr,tmax){
   sampled<-c()
 
   # while we have not reached the time of extinction
-  while (Now<End){
+  while (Now<End) {
     # take th waiting time for sampling, using rexp_var()
-    WaitTimeR<-ifelse(rr(Now)>0,rexp_var(1,rr,Now,tmax), Inf)
+    WaitTimeR<-ifelse(rr(Now)>0,rexp_var(1,rr,Now,tMax), Inf)
 
     # advance in time
     Now<-Now+WaitTimeR
@@ -134,8 +134,8 @@ Sample<-function(S,TE,TS,rr,tmax){
     sampled<-c(sampled,Now)
   }
 
-  # finally, we invert time so that it goes from tmax to 0
-  sampled <- tmax - sampled
+  # finally, we invert time so that it goes from tMax to 0
+  sampled <- tMax - sampled
 
   return(sampled)
 }

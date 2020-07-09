@@ -2,51 +2,56 @@
 % Please edit documentation in R/BDSimGeneral.R
 \name{BDSimGeneral}
 \alias{BDSimGeneral}
-\title{Returns information of a simulated clade for general speciation and
-extinction rates}
+\title{Non-constant rate Birth-Death simulation}
 \usage{
 BDSimGeneral(
-  N0,
+  n0,
   pp,
   qq,
-  tmax,
-  pshape = NULL,
-  qshape = NULL,
+  tMax,
+  pShape = NULL,
+  qShape = NULL,
   fast = TRUE,
   trueExt = FALSE
 )
 }
 \arguments{
-\item{N0}{initial number of species, usually 1. Good param to
-tweak if one is observing a low sample size when testing.}
+\item{n0}{initial number of species, usually 1. Good parameter
+to tweak if one is observing a low sample size when testing.}
 
-\item{pp}{function to hold the speciation rate over time.
-\code{BDSim} supplies this function with a \code{pp} ready to be used, so
-that the only other information \code{BDSimGeneral} needs is a shape in case
-the rate is to be age-dependent.}
+\item{pp}{function to hold the speciation rate over time. It will either be
+interpreted as an exponential rate, or a Weibull scale if 
+\code{pShape != NULL}.}
 
-\item{qq}{similar to above, but for extinction rate.}
+\item{qq}{similar to above, but for the extinction rate.
 
-\item{tmax}{ending time of simulation. Any species still living
-after \code{tmax} is considered extant, and any species that would be
-generated after \code{tmax} is not born.}
+Note: this function is meant to be called by \code{BDSim}, so it neither
+allows for as much flexibility, nor call \code{MakeRate}. If the user wishes
+to use \code{BDSimGeneral} with environmental or step-function rates, they
+can generate the rate with \code{MakeRate} and supply it to the function.}
 
-\item{pshape}{shape param for the Weibull distribution for
-age-dependent speciation. Default is 0, where \code{pp} will be considered a
-time-dependent exponential rate. For \code{pshape != NULL}, \code{pp} will
+\item{tMax}{ending time of simulation. Any species still living
+after \code{tMax} is considered extant, and any species that would be
+generated after \code{tMax} is not born.}
+
+\item{pShape}{shape parameter for the Weibull distribution for age-dependent
+speciation. Default is \code{NULL}, where \code{pp} will be considered a
+time-dependent exponential rate. For \code{pShape != NULL}, \code{pp} will
 be considered a scale, and \code{rexp_var} will draw a Weibull distribution
 instead.}
 
-\item{qshape}{similar as above, but for extinction rate.}
+\item{qShape}{similar as above, but for the extinction rate.}
 
-\item{fast}{when \code{TRUE}, sets \code{rexp_var} to throw away waiting times
-higher than the maximum simulation time. Should be \code{FALSE} for unbiased
-testing of age dependency. User might also se it to \code{FALSE} for more
-accurate waiting times.}
+\item{fast}{used for \code{BDSimGeneral}. When \code{TRUE}, sets 
+\code{rexp_var} to throw away waiting times higher than the maximum 
+simulation time. Should be \code{FALSE} for unbiased testing of age 
+dependency. User might also se it to \code{FALSE} for more accurate waiting
+times.}
 
-\item{trueExt}{when \code{TRUE}, time of extinction of extant species will be
-the true time, otherwise it will be tmax+0.01. Need to be \code{TRUE} when
-testing age-dependent extinction}
+\item{trueExt}{used for \code{BDSimGeneral}. When \code{TRUE}, time of 
+extinction of extant species will be the true time, otherwise it will be 
+tMax+0.01. Need to be \code{TRUE} when testing age-dependent 
+extinction.}
 }
 \value{
 a list of vectors, as follows
@@ -55,280 +60,468 @@ a list of vectors, as follows
 \item{\code{TE}}{list of extinction times, with -0.01 as the time of
 extinction for extant species.}
 
-\item{\code{TS}}{list of speciation times, with tmax+0.01 as the time of
+\item{\code{TS}}{list of speciation times, with tMax+0.01 as the time of
 speciation for species that started the simulation.}
 
 \item{\code{PAR}}{list of parents. Species that started the simulation have
 NA, while species that were generated during the simulation have their
 parent's number. Species are numbered as they are born.}
 
-\item{\code{EXTANT}}{list of booleans representing whether a species is
+\item{\code{EXTANT}}{list of booleans representing whether each species is
 extant.}}
 }
 \description{
 \code{BDSimGeneral} takes an initial number of species, speciation and
-extinction rates (either functions of time or of time and some
+extinction rates (either constants, functions of time, or of time and an
 environmental variable), a maximum simulation time and possibly a shape for
-age-dependent speciation and/or extinction.
+age-dependent speciation and/or extinction. It then generates the speciation 
+and extinction times, parent and status information for the species in the 
+simulation. Time runs from \code{tMax} to 0, to be consistent with the 
+literature, though one can easily invert that by subtracting the results from
+\code{tMax}.
 }
 \examples{
 
 # first we define a function to calculate the mean diversity and var at time t
-SimMean<-function(t, SimList){
-  SimExtantT<-as.numeric(lapply(1:length(SimList),function(y){
-    TS <- tmax - SimList[[y]]$TS
-    TE <- tmax - SimList[[y]]$TE
-    length(which(TS<=t&TE>=t))}))
-  return(list(mean=mean(SimExtantT), var=(var(SimExtantT))))
+sim.mean<-function(t, simList) {
+  # apply to each replicate of the simulation
+  SimExtantT<-as.numeric(lapply(1:length(simList), function(y) {
+    
+    # invert extinction and speciation times, so that we may consider functions
+    # running from past to present
+    TS <- tMax - simList[[y]]$TS
+    TE <- tMax - simList[[y]]$TE
+    
+    # find how many species are alive at time t
+    length(which(TS <= t & TE >= t))}))
+  return(list(mean = mean(SimExtantT), var = (var(SimExtantT))))
 }
-# note the tmax -, rescaling the vectors so we can work only with functions
-# going forward in time
 
-# also, we need functions to calculate the expected var at time t
-Int<-function(t, div) {
+# also, we need functions to calculate the expected varianc at time t
+int<-function(t, div) {
+  # integrate diversity from 0 to time t
   return(integrate(div, 0, t)$value)
 }
-DivVar<-function(t, div, qq){
-  return(N0*exp(Int(t, div))*(exp(Int(t, div)) - 1 + 2*exp(Int(t,div))*
+
+# formula for the variance - see Kendall 1948
+div.var<-function(t, div, qq) {
+  return(n0*exp(int(t, div))*(exp(int(t, div)) - 1 + 2*exp(int(t, div))*
                                 integrate(Vectorize(function(x)
-                                  exp(-Int(x, div))*qq(x)), 0, t)$value))
+                                  exp(-int(x, div))*qq(x)), 0, t)$value))
 }
-# and a time parameter we will need
-tmax <- 40
-Time <- 1:tmax
+
+# and a time parameter we will need for plotting
+tMax <- 40
+time <- 1:tMax
 
 # now we can test a couple scenarios
 # first, even though this is BDSimGeneral, we can try constant rates
-N0 <- 1
-tmax <- 40
+
+# initial number of species
+n0 <- 1
+
+# maximum simulation time
+tMax <- 40
+
+# speciation
 p <- 0.11
+
+# extinction
 q <- 0.08
-SimList <- lapply(1:10000, function(x) BDSimGeneral(N0, p, q, tmax))
+
+\dontrun{
+# run the simulations
+simList <- lapply(1:10000, function(x) BDSimGeneral(n0, p, q, tMax))
 
 # let us make vectors to hold the average diversity and variance
-pp <- Vectorize(function(t) p)
+
+# function for diversity
+div <- Vectorize(function(t) p - q)
+
+# function for extinction - needed for the variance
 qq <- Vectorize(function(t) q)
-div <- Vectorize(function(t) pp(t) - qq(t))
 
-MeanDiv <- unlist(lapply(Time, function(x) SimMean(x, SimList=SimList)$mean))
-ExpectedDiv <- VarRateExp(div, 1, Time)
+# calculate the mean diversity at our time points
+MeanDiv <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$mean))
 
-MeanVar <- unlist(lapply(Time, function(x) SimMean(x, SimList=SimList)$var))
-ExpectedVar <- unlist(lapply(Time, function(x) DivVar(x, div, qq)))
+# calculate the expected diversity for the sime time points
+expectedDiv <- VarRateExp(div, 1, time)
+
+# do the same with variance
+meanVar <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$var))
+expectedVar <- unlist(lapply(time, function(x) div.var(x, div, qq)))
 
 # and now let us check out the plots
-plot(Time, log(MeanDiv), type='l', main="Species Diversity", xlab="Time (My)",
-     ylab="log(Diversity)")
-lines(Time, log(ExpectedDiv), col='RED')
-legend(x=5, y=log(max(MeanDiv)), legend=c("Expected", "Observed"),
-       col=c("RED", "BLACK"), lty=c(1,1))
-plot(Time, log(MeanVar), type='l')
-lines(Time, log(ExpectedVar), type='l', col='RED')
-legend(x=5, y=log(max(MeanVar)), legend=c("Expected", "Observed"),
-       col=c("RED", "BLACK"), lty=c(1,1))
 
-# we can complicate things a bit by making speciation time dependent
-# note we lower the number of simulations, since BDSimGeneral takes
-# longer for non-constant rates. This takes approximately 3 minutes,
-# so if a user has time they can replicate this for more replicates
-# and see it agrees with expectation even better
-N0 <- 1
-tmax <- 40
-p <- function(t) {
-  return(0.05+0.005*t)
+# mean diversity, compared with expected
+plot(time, log(MeanDiv), type = 'l', main = "Species diversity", 
+     xlab = "Time (My)", ylab = "log(Diversity)")
+lines(time, log(expectedDiv), col = 'RED')
+legend(x = 5, y = log(max(MeanDiv)), legend = c("Expected", "Observed"),
+       col = c("RED", "BLACK"), lty = c(1,1))
+
+# same for variance
+plot(time, log(meanVar), type = 'l',  main = "Species diversity variance", 
+     xlab = "Time (My)", ylab = "log(Variance)")
+lines(time, log(expectedVar), type = 'l', col='RED')
+legend(x = 5, y = log(max(meanVar)), legend = c("Expected", "Observed"),
+       col = c("RED", "BLACK"), lty = c(1,1))
 }
+
+# we can complicate things further with a linear function as a rate
+# BDSimGeneral takes longer so we run examples for 1000 replicates instead
+
+# initial number of species
+n0 <- 1
+
+# maximum simulation time
+tMax <- 40
+
+# speciation
+p <- function(t) {
+  return(0.05 + 0.005*t)
+}
+
+# extinction
 q <- 0.05
-SimList <- lapply(1:1000, function(x) BDSimGeneral(N0, p, q, tmax))
+
+\dontrun{
+# run the simulations
+simList <- lapply(1:1000, function(x) BDSimGeneral(n0, p, q, tMax))
 
 # let us make vectors to hold the average diversity and variance
+
+# we won't need these for all simulations but it is good to make it uniform
+# function for speciation
 pp <- Vectorize(function(t) p(t))
+
+# function for extinction
 qq <- Vectorize(function(t) q)
-div <- Vectorize(function(t) pp(t) - qq(t))
 
-MeanDiv <- unlist(lapply(Time, function(x) SimMean(x, SimList=SimList)$mean))
-ExpectedDiv <- VarRateExp(div, 1, Time)
+# function for diversity
+div <- Vectorize(function(t) p(t) - q)
 
-MeanVar <- unlist(lapply(Time, function(x) SimMean(x, SimList=SimList)$var))
-ExpectedVar <- unlist(lapply(Time, function(x) DivVar(x, div, qq)))
+# calculate the mean diversity at our time points
+MeanDiv <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$mean))
+
+# calculate the expected diversity for the sime time points
+expectedDiv <- VarRateExp(div, 1, time)
+
+# do the same with variance
+meanVar <- unlist(lapply(time, function(x) sim.mean(x, SimList = SimList)$var))
+expectedVar <- unlist(lapply(time, function(x) div.var(x, div, qq)))
 
 # and now let us check out the plots
-plot(Time, log(MeanDiv), type='l', main="Species Diversity", xlab="Time (My)",
-     ylab="log(Diversity)")
-lines(Time, log(ExpectedDiv), col='RED')
-legend(x=5, y=log(max(MeanDiv)), legend=c("Expected", "Observed"),
-       col=c("RED", "BLACK"), lty=c(1,1))
-plot(Time, log(MeanVar), type='l')
-lines(Time, log(ExpectedVar), type='l', col='RED')
-legend(x=5, y=log(max(MeanVar)), legend=c("Expected", "Observed"),
-       col=c("RED", "BLACK"), lty=c(1,1))
+
+# mean diversity, compared with expected
+plot(time, log(MeanDiv), type = 'l', main = "Species diversity", 
+     xlab = "Time (My)", ylab = "log(Diversity)")
+lines(time, log(expectedDiv), col = 'RED')
+legend(x = 5, y = log(max(MeanDiv)), legend = c("Expected", "Observed"),
+       col = c("RED", "BLACK"), lty = c(1,1))
+
+# same for variance
+plot(time, log(meanVar), type = 'l',  main = "Species diversity variance", 
+     xlab = "Time (My)", ylab = "log(Variance)")
+lines(time, log(expectedVar), type = 'l', col='RED')
+legend(x = 5, y = log(max(meanVar)), legend = c("Expected", "Observed"),
+       col = c("RED", "BLACK"), lty = c(1,1))
+}
 
 # we can also create a step function. Keep in mind this is a slower way than by
 # creating step functions using ifelse()
-N0 <- 1
-tmax <- 40
+
+# initial number of species
+n0 <- 1
+
+# maximum simulation time
+tMax <- 40
+
+# speciation rate
 p <- function(t) {
-  return(0.05+0.005*t)
+  return(0.05 + 0.005*t)
 }
-qlist <- c(0.04, 0.06, 0.07)
-qshifts <- c(0, 20, 30)
-q <- MakeRate(qlist, tmax, fshifts=qshifts)
-SimList <- lapply(1:1000, function(x) BDSimGeneral(N0, p, q, tmax))
+
+# list of extinction rates
+qList <- c(0.04, 0.06, 0.07)
+
+# list of shift times. Note qShifts could be c(40, 20, 10) for 
+# identical results
+qShifts <- c(0, 20, 30)
+
+# let us take a look at how MakeRate will make it a step function
+q <- MakeRate(qList, fShifts = qShifts)
+
+# and plot it
+plot(seq(0, tMax, 0.1), q(seq(0, tMax, 0.1)), type = 'l',
+     main = "Extintion rate as a step function", xlab = "Time (My)",
+     ylab = "Rate (species/My)")
+# note that this is slower than creating a step function with ifelse(), in this
+# case q <- function(t) ifelse(t < 20, 0.04, ifelse(t < 30, 0.06, 0.07))
+
+# also note that if done with ifelse(), the function must go from 0, instead of
+# from tMax
+
+\dontrun{
+# run the simulations
+SimList <- lapply(1:1000, function(x) BDSimGeneral(n0, p, q, tMax))
 
 # let us make vectors to hold the average diversity and variance
+
+# we won't need these for all simulations but it is good to make it uniform
+# function for speciation
 pp <- Vectorize(function(t) p(t))
+
+# function for extinction
 qq <- Vectorize(function(t) q(t))
-div <- Vectorize(function(t) pp(t) - qq(t))
 
-MeanDiv <- unlist(lapply(Time, function(x) SimMean(x, SimList=SimList)$mean))
-ExpectedDiv <- VarRateExp(div, 1, Time)
+# function for diversity
+div <- Vectorize(function(t) p(t) - q(t))
 
-MeanVar <- unlist(lapply(Time, function(x) SimMean(x, SimList=SimList)$var))
-ExpectedVar <- unlist(lapply(Time, function(x) DivVar(x, div, qq)))
+# calculate the mean diversity at our time points
+MeanDiv <- unlist(lapply(time, function(x) sim.mean(x, SimList = SimList)$mean))
+
+# calculate the expected diversity for the sime time points
+expectedDiv <- VarRateExp(div, 1, time)
+
+# do the same with variance
+meanVar <- unlist(lapply(time, function(x) sim.mean(x, SimList = SimList)$var))
+expectedVar <- unlist(lapply(time, function(x) div.var(x, div, qq)))
 
 # and now let us check out the plots
-plot(Time, log(MeanDiv), type='l', main="Species Diversity", xlab="Time (My)",
-     ylab="log(Diversity)")
-lines(Time, log(ExpectedDiv), col='RED')
-legend(x=5, y=log(max(MeanDiv)), legend=c("Expected", "Observed"),
-       col=c("RED", "BLACK"), lty=c(1,1))
-plot(Time, log(MeanVar), type='l')
-lines(Time, log(ExpectedVar), type='l', col='RED')
-legend(x=5, y=log(max(MeanVar)), legend=c("Expected", "Observed"),
-       col=c("RED", "BLACK"), lty=c(1,1))
 
-# another feature to add is age dependency. Note that since there is no analytical
-# solution to this system, we must test species longevity directly and therefore
-# must pass fast=FALSE to the function
-N0 <- 1
-tmax <- 40
-p <- 0.15
-q <- 10
-qshape <- 1
-SimList <- lapply(1:1000, function(x)
-  BDSimGeneral(N0, p, q, tmax, qshape=qshape, fast=FALSE, trueExt=TRUE))
+# mean diversity, compared with expected
+plot(time, log(MeanDiv), type = 'l', main = "Species diversity", 
+     xlab = "Time (My)", ylab = "log(Diversity)")
+lines(time, log(expectedDiv), col = 'RED')
+legend(x = 5, y = log(max(MeanDiv)), legend = c("Expected", "Observed"),
+       col = c("RED", "BLACK"), lty = c(1,1))
 
-# now we can use fitdistrplus to check that, on average, the longevities simulated
-# follow a Weibull distribution
-shapes <- c()
-scales <- c()
-for (i in 1:length(SimList)) {
-  TE <- tmax - SimList[[i]]$TE
-  TS <- tmax - SimList[[i]]$TS
-  TS <- ifelse(TS<0, 0, TS)
-
-  if (length(TE) < 2) next
-
-  estimate <- fitdistrplus::fitdist(TE-TS,distr="weibull",method="mge",
-                                    lower=c(0,0), start=list(shape=1,scale=10),
-                                    gof='CvM')$estimate
-  shapes <- c(shapes, estimate[1])
-  scales <- c(scales, estimate[2])
+# same for variance
+plot(time, log(meanVar), type = 'l',  main = "Species diversity variance", 
+     xlab = "Time (My)", ylab = "log(Variance)")
+lines(time, log(expectedVar), type = 'l', col='RED')
+legend(x = 5, y = log(max(meanVar)), legend = c("Expected", "Observed"),
+       col = c("RED", "BLACK"), lty = c(1,1))
 }
 
-# make a boxplot
-boxplot(shapes, outline=FALSE, main="Boxplot of shapes")
-abline(h=qshape)
-boxplot(scales, outline=FALSE, main="Boxplot of scales")
-abline(h=q)
+# another feature to add is age dependency. Note that since there is no 
+# analytical solution to this system, we must test species longevity directly 
+# and therefore must pass fast = FALSE to the function
+
+if (requireNamespace("fitdistrplus", quietly = TRUE)) {
+  # initial number of species
+  n0 <- 1
+  
+  # maximum simulation time
+  tMax <- 40
+  
+  # speciation
+  p <- 0.15
+  
+  # extinction - a Weibull scale
+  q <- 10
+  
+  # extinction shape
+  qShape <- 1
+  
+  \dontrun{
+  # run simulations - note fast = FALSE and trueExt = TRUE so we can accurately
+  # fit the results to a Weibull
+  SimList <- lapply(1:1000, function(x)
+    BDSimGeneral(n0, p, q, tMax, qShape = qShape, fast = FALSE, trueExt = TRUE))
+  
+  # now we can use fitdistrplus to check that, on average, the longevities 
+  # simulated follow a Weibull distribution
+  
+  # vectors to hold the shape and scale values
+  shapes <- c()
+  scales <- c()
+  
+  # for each simulation
+  for (i in 1:length(SimList)) {
+    
+    # invert the time so we can perform a fit
+    TE <- tMax - SimList[[i]]$TE
+    TS <- tMax - SimList[[i]]$TS
+    
+    # TS could be -0.01, set it to 0 if so
+    TS <- ifelse(TS < 0, 0, TS)
+    
+    # cannot fit for simulations that had only one species
+    if (length(TE) < 2) next
+    
+    estimate <- fitdistrplus::fitdist(TE - TS, distr = "weibull", method = "mge",
+                                      lower = c(0,0), start = list(shape = 1, scale = 10),
+                                      gof = 'CvM')$estimate
+    shapes <- c(shapes, estimate[1])
+    scales <- c(scales, estimate[2])
+  }
+  
+  # make a boxplot
+  boxplot(shapes, outline = FALSE, main = "Boxplot of shapes")
+  abline(h = qShape)
+  boxplot(scales, outline = FALSE, main = "Boxplot of scales")
+  abline(h = q)
+  }
+}
 
 # we can also have time-varying scale, but the complexity of the system makes
 # the only test possible be a direct calculation of the expected longevity.
 # Since we have done that in the tests for rexp_var(), we will not repeat it
 # here.
 
-# finally, we could have environmental dependency on a rate. For that, we need
-# RPANDA
-if (requireNamespace("RPANDA", quietly=TRUE)) {
-  N0 <- 1
-  tmax <- 40
+\dontrun{
+# finally, we could have environmental dependency on a rate. To test that, we 
+# need RPANDA
+if (requireNamespace("RPANDA", quietly = TRUE)) {
+  # initial number of species
+  n0 <- 1
+  
+  # maximum simulation time
+  tMax <- 40
+  
+  # temperature-dependent speciation
   p_t <- function(t, temp) {
     return(0.04*exp(0.15*temp))
   }
+  
+  # extinction
   q <- 0.01
-
+  
   # using RPANDA to get the temperature data
   data(InfTemp, package="RPANDA")
-
-  p <- MakeRate(p_t, tmax, env_f=InfTemp)
+  
+  # speciation
+  p <- MakeRate(p_t, tMax, envF = InfTemp)
+  
   # since we need many species to be able to test this effectively using
   # RPANDA, and the rates become really noisy with temperature, we set
   # only 100 simulations to finish it in a reasonable time
-  SimList <- lapply(1:100, function(x) BDSimGeneral(N0, p, q, tmax))
-
+  
+  # run simulations
+  SimList <- lapply(1:1000, function(x) BDSimGeneral(n0, p, q, tMax))
+  
   # let us make vectors to hold the average diversity and variance
+  
+  # we won't need these for all simulations but it is good to make it uniform
+  # function for speciation
   pp <- Vectorize(function(t) p(t))
+  
+  # function for extinction
   qq <- Vectorize(function(t) q)
-  div <- Vectorize(function(t) pp(t) - qq(t))
-
-  MeanDiv <- unlist(lapply(Time, function(x) SimMean(x, SimList=SimList)$mean))
-  ExpectedDiv <- VarRateExp(div, 1, Time)
-
-  MeanVar <- unlist(lapply(Time, function(x) SimMean(x, SimList=SimList)$var))
-  ExpectedVar <- unlist(lapply(Time, function(x) DivVar(x, div, qq)))
-
+  
+  # function for diversity
+  div <- Vectorize(function(t) p(t) - q)
+  
+  # calculate the mean diversity at our time points
+  MeanDiv <- unlist(lapply(time, function(x) sim.mean(x, SimList = SimList)$mean))
+  
+  # calculate the expected diversity for the sime time points
+  expectedDiv <- VarRateExp(div, 1, time)
+  
+  # do the same with variance
+  meanVar <- unlist(lapply(time, function(x) sim.mean(x, SimList = SimList)$var))
+  expectedVar <- unlist(lapply(time, function(x) div.var(x, div, qq)))
+  
   # and now let us check out the plots
-  plot(Time, log(MeanDiv), type='l', main="Species Diversity", xlab="Time (My)",
-       ylab="log(Diversity)")
-  lines(Time, log(ExpectedDiv), col='RED')
-  legend(x=5, y=log(max(MeanDiv)), legend=c("Expected", "Observed"),
-         col=c("RED", "BLACK"), lty=c(1,1))
-  plot(Time, log(MeanVar), type='l')
-  lines(Time, log(ExpectedVar), type='l', col='RED')
-  legend(x=5, y=log(max(MeanVar)), legend=c("Expected", "Observed"),
-         col=c("RED", "BLACK"), lty=c(1,1))
-
+  
+  # mean diversity, compared with expected
+  plot(time, log(MeanDiv), type = 'l', main = "Species diversity", 
+       xlab = "Time (My)", ylab = "log(Diversity)")
+  lines(time, log(expectedDiv), col = 'RED')
+  legend(x = 5, y = log(max(MeanDiv)), legend = c("Expected", "Observed"),
+         col = c("RED", "BLACK"), lty = c(1,1))
+  
+  # same for variance
+  plot(Time, log(meanVar), type = 'l',  main = "Species diversity variance", 
+       xlab = "Time (My)", ylab = "log(Variance)")
+  lines(Time, log(expectedVar), type = 'l', col='RED')
+  legend(x = 5, y = log(max(meanVar)), legend = c("Expected", "Observed"),
+         col = c("RED", "BLACK"), lty = c(1,1))
+  
   # the plots look good, but the noise makes it confusing. We can also use the
   # fit_env function from RPANDA to test
+  
+  # create the necessary parameters for fit_env
+  
+  # vectors to hold the parameters estimated by fit_env - the value multiplying
+  # the exponential and the value multiplying temperature
   intercepts <- c()
   mults <- c()
-
-  # create the necessary parameters for fit_env
+  
+  # function fit_env will use to fit speciation
   f.l <- function(t, x, y) {
     y[1] * exp(y[2] * x)
   }
+  
+  # starting values for the fit
   lpar <- c(0.05, 0.2)
-  # we fix mu since fit_env works much better this way. We could also set f.m to y[1]
-  # and set cst.mu=TRUE in fit_env, or not set any other options, but this leads to
-  # a much worse fit on the part of RPANDA
+  
+  # we fix mu since fit_env works much better this way. We could also set f.m 
+  # to y[1] and set cst.mu = TRUE in fit_env, or not set any other options, but 
+  # this leads to a much worse fit on the part of RPANDA
   f.m <- function(t, x, y) {
     0.06
   }
+  
+  # no starting values since there is nothing to estimate
   mpar <- c()
-
-  dof<-smooth.spline(InfTemp[,1], InfTemp[,2])$df
-
+  
+  # degrees of freedom for the data set
+  dof <- smooth.spline(InfTemp[,1], InfTemp[,2])$df
+  
+  # matrix to hold estimated parameters
   par_matrix <- matrix(0, nrow = 0, ncol = 2)
+  
+  # for each replicate
   for (i in 1:length(SimList)) {
+    # get the simulation in question
     sim <- SimList[[i]]
+    
+    # need more than 2 species to use fit_env
     if (length(sim$TE[sim$TE < 0]) < 2) next
-
-    # needs to be a molecular phylogeny
+    
+    # get the phylogeny (needs to be molecular, so we use drop.fossil)
     phy <- ape::drop.fossil(MakePhylo(sim))
-
+    
+    # total time of the phylogeny
+    # note picante is in RPANDA's namespace
     tot_time <- max(picante::node.age(phy)$ages)
-    env_fit <- RPANDA::fit_env(phy,InfTemp,tot_time,f.l,f.m,lpar,
-                               mpar,df=dof,dt=1e-3, fix.mu=TRUE)
-    par_matrix <- rbind(par_matrix, env_fit$lamb_par)
+    
+    # perform the fit
+    envFit <- RPANDA::fit_env(phy, InfTemp, tot_time, f.l, f.m, lpar,
+                              mpar, df = dof, dt = 1e-3, fix.mu = TRUE)
+    
+    # append the estimated parameters to the matrix
+    par_matrix <- rbind(par_matrix, envFit$lamb_par)
   }
-
+  
   # one must remember that functions in RPANDA go from present to past, as
   # opposed to our functions. So we can test by comparing the value of our
   # rates with the estimates at the given time points
-
-  # first get tempearature temp at the time points
+  
+  # first get temperature temp at the time points
   find_t <- function(A, t) {
-   return(min(which(A==A[A-t==min(A[which(A-t>0)]-t)])))
+    # annoying expression but all it does is find the time point closest to t
+    # in a vector A
+    return(min(which(A == A[A - t == min(A[which(A - t > 0)] - t)])))
   }
-  temp_t <- unlist(lapply(Time, function(x) find_t(InfTemp[,1], x)))
+  
+  # find the corresponding Time points in InfTemp
+  temp_t <- unlist(lapply(Time, function(x) find_t(InfTemp[, 1], x)))
+  
+  # get the temperature at those time points
   temp <- InfTemp[temp_t, 2]
-
-  # then get the value of the estimate and observed functions at these points
-  estimate <- rev(mean(par_matrix[,1]) *
-                    exp(mean(par_matrix[,2]) * temp))
+  
+  # get the value of the estimate and observed functions at these points
+  estimate <- rev(mean(par_matrix[, 1]) *
+                    exp(mean(par_matrix[, 2]) * temp))
   actual <- p_t(temp_t, temp)
-
+  
   # total quadratic error should be low
   sum((estimate-actual)^2)
+}
 }
 }
 \author{

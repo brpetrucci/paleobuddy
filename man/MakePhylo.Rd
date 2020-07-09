@@ -21,34 +21,44 @@ lineage.
 }
 \examples{
 
-#Generating a phylogeny using constant rates
-sim<-BDSim(N0 = 1, pp = 0.2, qq = 0.05, tmax = 10)
-while(length(sim$TE) < 2){ #in case first simulation has only one species
-  sim<-BDSim(N0 = 1, pp = 0.2, qq = 0.05, tmax = 10)
+# generating a phylogeny using constant rates
+sim <- BDSim(n0 = 1, pp = 0.2, qq = 0.05, tMax = 10)
+
+# in case first simulation has only one species
+while (length(sim$TE) < 2) {
+  sim <- BDSim(n0 = 1, pp = 0.2, qq = 0.05, tMax = 10)
 }
-phy<-MakePhylo(sim)
+
+phy <- MakePhylo(sim)
 
 # we need ape to plot it
-if (requireNamespace("ape", quietly=TRUE)) {
+if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(phy)
+  
   # we can also plot only the molecular phylogeny
   ape::plot.phylo(ape::drop.fossil(phy))
 }
 
-# this works for sim generated with any of the scenarios in \code{BDSim}, of course
-sim<-BDSim(N0=1, pp=function(t) 0.12+0.01*t,qq=10, tmax=10, qshape=1.3)
-while(length(sim$TE) < 2){ #in case first simulation has only one species
-  sim<-BDSim(N0=1, pp=function(t) 0.12+0.01*t,qq=10, tmax=10, qshape=1.3)
-}
-phy<-MakePhylo(sim)
+# this works for sim generated with any of the scenarios in BDSim, of course
+sim <- BDSim(n0 = 1, pp = function(t) 0.12 + 0.01*t, qq = 10, 
+             tMax = 10, qShape = 1.3)
 
-if (requireNamespace("ape", quietly=TRUE)) {
+# in case first simulation has only one species
+while(length(sim$TE) < 2) { 
+  sim <- BDSim(n0 = 1, pp = function(t) 0.12 + 0.01*t, qq = 10, 
+               tMax = 10, qShape = 1.3)
+}
+phy <- MakePhylo(sim)
+
+if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(phy)
+  ape::plot.phylo(ape::drop.fossil(phy))
 }
-
 }
 \author{
-Function written by Matheus Januario. Reference: Ezard, T. H.,
+Function written by Matheus Januario. 
+
+Reference: Ezard, T. H.,
 Pearson, P. N., Aze, T., & Purvis, A. (2012). The meaning of birth and death
 (in macroevolutionary birth-death models). Biology letters, 8(1), 139-142.
 }

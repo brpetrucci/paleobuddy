@@ -2,7 +2,7 @@
 #'
 #' \code{SampleClade} takes times of speciation and extinction, information to
 #' create a sampling rate with \code{MakeRate}, a vector of geologic time intervals,
-#' and whether one wants the true return times or a range based on \code{IntVec}.
+#' and whether one wants the true return times or a range based on \code{bins}.
 #'
 #' @param S a species number (i.e. its identity) vector to be sampled. Could be
 #' only a subset of the species if the user wishes.
@@ -20,20 +20,20 @@
 #' \code{rshifts} are NULL, it will be treated as an exponential rate.
 #' Must be a constant if \code{dFUN} is not \code{NULL}.
 #'
-#' @param tmax the maximum simulation time, used by \code{rexp_var}.
+#' @param tMax the maximum simulation time, used by \code{rexp_var}.
 #' @param env_rr a matrix containing time points and values of an enviromental
 #' variable, like temperature, for each time point. This will be used to create
 #' a sampling rate, so \code{rr} must be a function of time and said variable
 #' if \code{env_rr} is not NULL.
 #'
 #' @param rshifts vector of rate shifts. First element must be starting time for
-#' simulation (0, or tmax). Vector must have the same length as \code{rr} E.g.
-#' \code{rr = c(0.15, 0.1, 0.2)}, \code{pshifts = c(0, 20, 30)} means r will be
-#' 0.15 from 0 to 20, 0.1 from 20 to 30, and 0.2 from 30 to \code{tmax}.
+#' simulation (0, or tMax). Vector must have the same length as \code{rr} E.g.
+#' \code{rr = c(0.15, 0.1, 0.2)}, \code{pShifts = c(0, 20, 30)} means r will be
+#' 0.15 from 0 to 20, 0.1 from 20 to 30, and 0.2 from 30 to \code{tMax}.
 #'
 #' Note that using this method for step-function rates is currently slower than
-#' using \code{ifelse}. Using \code{c(0, 10, tmax)} is the
-#' same as \code{c(tmax, tmax - 10, 0)}.
+#' using \code{ifelse}. Using \code{c(0, 10, tMax)} is the
+#' same as \code{c(tMax, tMax - 10, 0)}.
 #'
 #' @param returnTrue if set to true, a list of true ocurrence times for each
 #' species will be returned. If set to true, we call \code{binner} to take the
@@ -80,22 +80,22 @@
 #' # \code{Sample}  and \code{SampleADPP} functions
 #'
 #' # first we can try constant sampling
-#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-#' while((sim$TS[1]-sim$TE[1])<10){
-#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' while((sim$TS[1]-sim$TE[1])<10) {
+#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' }
 #'
 #' r <- 100 # high so we can see the pattern
 #' # the resolution of the fossil dataset:
-#' stages=seq(from=10, to = 0, # from simulation's tmax to present
+#' stages=seq(from=10, to = 0, # from simulation's tMax to present
 #'            by = -.1)
 #' # note that we will provide a very high resolution to test the function
 #'
-#' dt<-SampleClade(1:length(sim$TE), sim, r, tmax=10, stages=stages)
+#' dt<-SampleClade(1:length(sim$TE), sim, r, tMax=10, stages=stages)
 #' ids<-unique(dt$Species)
 #' mids<-(dt$MaxT-dt$MinT)+dt$MinT
 #'
-#' for(i in 1:length(ids)){
+#' for (i in 1:length(ids)) {
 #'
 #'   sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 #'   # the histogram should have the curve right over it
@@ -108,9 +108,9 @@
 #' }
 #'
 #' # now let us try a linearly increasing r
-#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-#' while((sim$TS[1]-sim$TE[1])<10){
-#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' while((sim$TS[1]-sim$TE[1])<10) {
+#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' }
 #'
 #' r <- function(t) {
@@ -124,7 +124,7 @@
 #' ids<-unique(dt$Species)
 #' mids<-(dt$MaxT-dt$MinT)+dt$MinT
 #'
-#' for(i in 1:length(ids)){
+#' for (i in 1:length(ids)) {
 #'   sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 #'
 #'   hist(mids[dt$Species==ids[i]], main=paste0("spp = ", sp, "; duration ~ ",
@@ -137,7 +137,7 @@
 #'
 #' # sampling could be any function of time, of course, such as a step function
 #' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-#' while((sim$TS[1]-sim$TE[1])<10){
+#' while((sim$TS[1]-sim$TE[1])<10) {
 #'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
 #' }
 #'
@@ -147,7 +147,7 @@
 #' # step function, but it is an option
 #'
 #' # make it a function so we can plot it
-#' r <- MakeRate(rlist, 10, fshifts=rshifts)
+#' r <- MakeRate(rlist, 10, fShifts=rshifts)
 #'
 #' stages=seq(from=10, to = 0,
 #'            by = -.1)
@@ -157,7 +157,7 @@
 #' ids<-unique(dt$Species)
 #' mids<-(dt$MaxT-dt$MinT)+dt$MinT
 #'
-#' for(i in 1:length(ids)){
+#' for (i in 1:length(ids)) {
 #'   sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 #'
 #'   hist(mids[dt$Species==ids[i]], main=paste0("spp = ", sp, "; duration ~ ",
@@ -169,11 +169,11 @@
 #' }
 #'
 #' # finally, \code{SampleClade} also accepts an environmental variable
-#' if (requireNamespace("RPANDA", quietly=TRUE)) {
+#' if (requireNamespace("RPANDA", quietly = TRUE)) {
 #'   data(InfTemp, package="RPANDA")
 #'
 #'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-#'   while((sim$TS[1]-sim$TE[1])<10){
+#'   while((sim$TS[1]-sim$TE[1])<10) {
 #'     sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
 #'   }
 #'
@@ -195,7 +195,7 @@
 #'   ids<-unique(dt$Species)
 #'   mids<-(dt$MaxT-dt$MinT)+dt$MinT
 #'
-#'   for(i in 1:length(ids)){
+#'   for (i in 1:length(ids)) {
 #'     sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 #'
 #'     hist(mids[dt$Species==ids[i]], main=paste0("spp = ", sp, "; duration ~ ",
@@ -212,16 +212,16 @@
 #'
 #' # let us start with a hat-shaped increase through the duration of a species
 #' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
-#' while((sim$TS[1]-sim$TE[1])<10){
+#' while((sim$TS[1]-sim$TE[1])<10) {
 #'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
 #' }
 #'
 #' # preservation function in respect to age
 #' # here we will use the PERT function. It is described in Silvestro et al 2014
 #'
-#' dPERT<-function(t,s,e,sp,a=3,b=3, log=FALSE){
+#' dPERT<-function(t,s,e,sp,a=3,b=3, log=FALSE) {
 #'
-#'   if(e>=s){
+#'   if (e>=s) {
 #'     message("There is no PERT with e>=s")
 #'     return(rep(NaN, times=length(t)))
 #'   }
@@ -230,21 +230,21 @@
 #'   t<-t[id2]
 #'
 #'   res<-vector()
-#'   if(log){
+#'   if (log) {
 #'     res[id1]<--Inf
-#'   }else{
+#'   } else {
 #'     res[id1]<-0
 #'   }
 #'
-#'   if(log){
+#'   if (log) {
 #'     res[id2]<-log(((s-t)^2)*((-e+t)^2)/((s-e)^5*beta(a,b)))
-#'   } else{
+#'   } else {
 #'     res[id2]<-((s-t)^2)*((-e+t)^2)/((s-e)^5*beta(a,b))
 #'   }
 #'   return(res)
 #' }
 #'
-#' dPERTmax<-function(s,e,sp){
+#' dPERTmax<-function(s,e,sp) {
 #'   return(((s-e)/2)+e)
 #' }
 #'
@@ -256,7 +256,7 @@
 #' ids<-unique(dt$Species)
 #' mids<-(dt$MaxT-dt$MinT)+dt$MinT
 #'
-#' for(i in 1:length(ids)){
+#' for (i in 1:length(ids)) {
 #'
 #'   sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 #'
@@ -273,7 +273,7 @@
 #' # now, a hat-shaped increase through the duration of a species dependent on two parameters
 #'
 #' sim<-BDSim(N0 = 1, pp = 0.1, qq = 0.1, tmax = 10)
-#' while(length(sim$TE)<20){
+#' while(length(sim$TE)<20) {
 #'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
 #' }
 #'
@@ -282,16 +282,16 @@
 #' # function. In this model, preservation responds to the age of a lineage
 #' # (in absolute time) and a "mode" of the triangle. This mode, in this example,
 #' # is the result of the interaction between two parameters: par and par1
-#' dTRImod2<-function(t,s,e,sp){
+#' dTRImod2<-function(t,s,e,sp) {
 #'
-#'   if(e>=s){
+#'   if (e>=s) {
 #'     message("There is no TRI with e>=s")
 #'     return(rep(NaN, times=length(t)))
 #'   }
 #'
 #'   md<-par[sp]+par1[sp]
 #'
-#'   if(md<e | md>s){
+#'   if (md<e | md>s) {
 #'     message("There is no TRI with md outside [s, e] interval")
 #'     return(rep(NaN, times=length(t)))
 #'   }
@@ -312,11 +312,11 @@
 #'               # help page of the SampleADPP() function
 #' }
 #'
-#' dTRImaxmod2<-function(s,e,sp){
+#' dTRImaxmod2<-function(s,e,sp) {
 #'   return(2/(s-e))
 #' }
 #' # a random point inside each lineage's duration
-#' par<-runif(n = length(sim$TE), min = sim$TE, max = sim$TS)
+#' par<-runif (n = length(sim$TE), min = sim$TE, max = sim$TS)
 #'
 #' # a distance between "par" and the lineage's duration middle
 #' par1<-(((sim$TS-sim$TE)/2)+sim$TE)-par
@@ -330,7 +330,7 @@
 #' ids<-unique(dt$Species)
 #' mids<-(dt$MaxT-dt$MinT)+dt$MinT
 #'
-#' for(i in 1:length(ids)){
+#' for (i in 1:length(ids)) {
 #'
 #'   sp<-unique(as.numeric(gsub("spp_", "", ids[i])))
 #'
@@ -348,16 +348,16 @@
 #' @rdname SampleClade
 #' @export
 
-SampleClade<-function(S, sim, rr,tmax,env_rr=NULL,rshifts=NULL,returnTrue=FALSE,stages=NULL, dFUN=NULL, dFUNmax=NULL,...){
+SampleClade<-function(S, sim, rr,tmax,env_rr=NULL,rshifts=NULL,returnTrue=FALSE,stages=NULL, dFUN=NULL, dFUNmax=NULL,...) {
   # get the speciation and extinction times vectors
   TE <- sim$TE[S]
   TS <- sim$TS[S]
 
   # check if it is age-dependent
-  if(is.null(dFUN)){
+  if (is.null(dFUN)) {
     rr <- MakeRate(rr, tmax, env_rr, rshifts)
-  } else{
-    if(!is.numeric(rr) | length(rr)>1){
+  } else {
+    if (!is.numeric(rr) | length(rr)>1) {
       stop("ADPP cannot be used with time-varing preservation rates")
     }
   }
@@ -366,25 +366,25 @@ SampleClade<-function(S, sim, rr,tmax,env_rr=NULL,rshifts=NULL,returnTrue=FALSE,
   stages<-sort(stages, decreasing = TRUE)
 
   # sample using Poisson process:
-  if(is.null(dFUN)){ # independent of age (i.e. occurrences uniformly distributed through the lineage's age)
+  if (is.null(dFUN)) { # independent of age (i.e. occurrences uniformly distributed through the lineage's age)
     point_estimates<-lapply(S,Sample,TE=TE,TS=TS,rr=rr,tmax=tmax)
     zero_occs<-which(lapply(point_estimates, length)==0)
     message(paste0(length(zero_occs), " species left no fossil"))
-  } else{ #dependent of age (i.e. occurrences distributed through the lineage's age accourding to the function provided by the user)
+  } else { #dependent of age (i.e. occurrences distributed through the lineage's age accourding to the function provided by the user)
     point_estimates<-SampleADPP(S, TS=TS, TE=TE, rr=rr, dFUN = dFUN, dFUNmax = dFUNmax, ...)
   }
 
   # wrapping data
 
   # output as fossil occurrence binned within stages/bins
-  if(!returnTrue){
+  if (!returnTrue) {
 
     res<-data.frame(matrix(nrow=0, ncol=4))
     colnames(res)<-c("Species", "Extant", "MaxT", "MinT")
-    for(i in 1:length(point_estimates)){
+    for (i in 1:length(point_estimates)) {
       binned_occs<-binner(point_estimates[[i]], bins=stages)
-      for(k in 1:(length(stages)-1)){
-        if(binned_occs[k]>0){
+      for (k in 1:(length(stages)-1)) {
+        if (binned_occs[k]>0) {
           # make a row of the data frame
           aux<-data.frame(Species=i,Extant=NA,MaxT=rep(stages[k], times=binned_occs[k]),MinT=stages[k+1])
           res<-rbind(res, aux)
@@ -397,7 +397,7 @@ SampleClade<-function(S, sim, rr,tmax,env_rr=NULL,rshifts=NULL,returnTrue=FALSE,
 
     # and the species column
     res$Species<-paste0("spp_", res$Species)
-  } else{
+  } else {
     # output as the "true" times of preservation of each lineage
     # if returnTrue=TRUE, get a a data frame with the real sampling times only
     res<-data.frame(matrix(nrow=length(unlist(point_estimates)), ncol=3))

@@ -3,181 +3,298 @@
 #' \code{BDSim} takes an initial number of species, speciation and extinction
 #' rate functions and a maximum time of simulation, together with multiple
 #' options to alter the rates, and calls \code{BDSimConstant} or
-#' \code{BDSimGeneral} with the rates.
+#' \code{BDSimGeneral} to generate a species diversification process under the
+#' desired scenario.
 #'
-#' @param N0 initial number of species, usually 1. Good param
+#' @param n0 initial number of species, usually 1. Good parameter
 #' to tweak if one is observing a low sample size when testing.
 #'
-#' @param pp function to hold the speciation rate over time. It
-#' could be a function of time (to be an exponential rate or weibull scale), a
-#' function of time and an environmental variable, or a vector of rates to be
+#' @param pp function to hold the speciation rate over time. It could be a
+#' constant or a function of time (to be an exponential rate or weibull scale),
+#' a function of time and an environmental variable, or a vector of rates to be
 #' accompanied by a vector of rate shifts \code{pshifts}.
 #'
-#' @param qq similar as above, but for extinction rate.
+#' @param qq similar as above, but for the extinction rate.
 #'
 #' Note: \code{pp} and \code{qq} must always be greater than 0
 #'
-#' @param tmax ending time of simulation. Any species still living
-#' after tmax is considered extant, and any species that would be generated
-#' after \code{tmax} is not born.
+#' @param tMax ending time of simulation. Any species still living
+#' after tMax is considered extant, and any species that would be generated
+#' after \code{tMax} is not born.
 #'
-#' @param pshape shape param for the Weibull distribution for
-#' age-dependent speciation. Default is 0, where \code{pp} will be considered a
-#' time-dependent exponential rate. For \code{pshape != NULL}, \code{pp} will
+#' @param pShape shape parameter for the Weibull distribution for age-dependent
+#' speciation. Default is \code{NULL}, where \code{pp} will be considered a
+#' time-dependent exponential rate. For \code{pShape != NULL}, \code{pp} will
 #' be considered a scale, and \code{rexp_var} will draw a Weibull distribution
 #' instead.
 #'
-#' @param qshape similar as above, but for extinction rate.
+#' @param qShape similar as above, but for the extinction rate.
 #'
-#' @param env_pp a matrix containing time points and values of an
-#' enviromental variable, like temperature, for each time point. This will be
+#' @param envPP a matrix containing time points and values of an
+#' environmental variable, like temperature, for each time point. This will be
 #' used to create a speciation rate, so \code{pp} must be a function of time
 #' and said variable.
 #'
-#' @param env_qq similar as above, but for extinction rate.
+#' @param envQQ similar as above, but for the extinction rate.
 #'
-#' @param pshifts vector of rate shifts. First element must be
-#' starting time for simulation (0). It must have the same length as \code{pp}.
-#' E.g. \code{pp = c(0.1, 0.2, 0.1)}, \code{pshifts = c(0, 10, 20)} means p
-#' will be 0.1 from 0 to 10, 0.2 from 10 to 20, and 0.1 from 20 to \code{tmax}.
+#' @param pshifts vector of rate shifts. First element must be the sstarting
+#' time for the simulation (0 or tMax). It must have the same length as
+#' \code{pp}. E.g. \code{pp = c(0.1, 0.2, 0.1)}, \code{pshifts = c(0, 10, 20)}
+#' means the speciation rate will be 0.1 from 0 to 10, 0.2 from 10 to 20, and 
+#' 0.1 from 20 to \code{tMax}. It would also be identical, in this case, to use
+#' \code{pshifts = c(tMax, tMax-10, tMax-20)}.
+#' 
 #' Note that using this  method for step-function rates is currently slower than using
 #' \code{ifelse}.
 #'
-#' @param qshifts similar as above, but for extinction rate.
+#' @param qshifts similar as above, but for the extinction rate.
+#' 
+#' @param fast used for \code{BDSimGeneral}. When \code{TRUE}, sets 
+#' \code{rexp_var} to throw away waiting times higher than the maximum 
+#' simulation time. Should be \code{FALSE} for unbiased testing of age 
+#' dependency. User might also se it to \code{FALSE} for more accurate waiting
+#' times.
+#' 
+#' @param trueExt used for \code{BDSimGeneral}. When \code{TRUE}, time of 
+#' extinction of extant species will be the true time, otherwise it will be 
+#' tMax+0.01. Need to be \code{TRUE} when testing age-dependent 
+#' extinction.
 #'
 #' @return the return list of either \code{BDSimConstant} or
 #' \code{BDSimGeneral}, which have the same elements, as follows
 #'
 #' \describe{
-#' \item{\code{TE}}{list of extinction times, with tmax + 0.01 as the time of
+#' \item{\code{TE}}{list of extinction times, with -0.01 as the time of
 #' extinction for extant species.}
 #'
-#' \item{\code{TS}}{list of speciation times, with -0.01 as the time of
+#' \item{\code{TS}}{list of speciation times, with tMax+0.01 as the time of
 #' speciation for species that started the simulation.}
 #'
 #' \item{\code{PAR}}{list of parents. Species that started the simulation have
 #' NA, while species that were generated during the simulation have their
 #' parent's number. Species are numbered as they are born.}
 #'
-#' \item{\code{EXTANT}}{list of booleans representing whether a species is
+#' \item{\code{EXTANT}}{list of booleans representing whether each species is
 #' extant.}}
 #'
 #' @author written by Bruno do Rosario Petrucci.
 #'
 #' @examples
 #'
-#' # since both \code{BDSimConstant} and \code{BDSimGeneral} have been tested in
-#' # their respective man pages, we will spend some time here giving examples of
-#' # possible combinations of diversification scenarios.
-#'
+#' # since both \code{BDSimConstant} and \code{BDSimGeneral} have been tested
+#' # in their respective man pages, we will spend some time here giving examples
+#' # of possible combinations of diversification rates.
+#' 
 #' # consider first the simplest regimen, constant speciation and extinction
-#' N0 <- 1
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 40
+#' 
+#' # speciation
 #' p <- 0.11
+#' 
+#' # extinction
 #' q <- 0.08
-#' tmax <- 40
-#' sim <- BDSim(N0, p, q, tmax) # this must be run until we have more than 1 sp
+#' 
+#' 
+#' # run the simulation
+#' sim <- BDSim(n0, p, q, tMax)
+#' 
+#' # run until we get more than 1 species
+#' while (length(sim$TE) < 2) {
+#'   sim <- BDSim(n0, p, q, tMax)
+#' }
+#' 
 #' # we can plot the phylogeny to take a look
-#' if (requireNamespace("ape", quietly=TRUE)) {
+#' if (requireNamespace("ape", quietly = TRUE)) {
 #'   phy <- MakePhylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
-#'
+#' 
 #' # now let us complicate speciation more, maybe a linear function
-#' N0 <- 1
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 40
+#' 
+#' # speciation rate
 #' p <- function(t) {
-#'   return(0.09+0.005*t)
+#'   return(0.09 + 0.005*t)
 #' }
+#' 
+#' # extinction rate
 #' q <- 0.08
-#' tmax <- 40
-#' sim <- BDSim(N0, p, q, tmax)
-#'
+#' 
+#' \dontrun{
+#' # run the simulation
+#' sim <- BDSim(n0, p, q, tMax)
+#' }
+#' 
 #' # what if we want q to be a step function?
-#' q <- c(0.08, 0.07, 0.08)
-#' qshifts <- c(0, 20, 35)
+#' 
+#' # list of extinction rates
+#' qList <- c(0.08, 0.07, 0.08)
+#' 
+#' # list of shift times. Note qshifts could be c(40, 20, 5) for identical results
+#' qShifts <- c(0, 20, 35)
+#' 
 #' # let us take a look at how MakeRate will make it a step function
-#' qq <- MakeRate(q, fshifts=qshifts)
-#' plot(seq(0, tmax, 0.1), qq(seq(0, tmax, 0.1)), type='l')
-#' # note that this is slower than creating a step function with ifelse()
-#'
+#' q <- MakeRate(qList, fShifts = qShifts)
+#' 
+#' # and plot it
+#' plot(seq(0, tMax, 0.1), q(seq(0, tMax, 0.1)), type = 'l',
+#'      main = "Extintion rate as a step function", xlab = "Time (My)",
+#'      ylab = "Rate (species/My)")
+#' # note that this is slower than creating a step function with ifelse(), in this
+#' # case q <- function(t) ifelse(t < 20, 0.08, ifelse(t < 35, 0.07, 0.08))
+#' 
+#' # also note that if done with ifelse(), the function must go from 0, instead of
+#' # from tMax
+#' 
 #' # looking good, we will keep everything else the same
-#'
+#' 
+#' # maximum simulation time
+#' tMax <- 40
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # speciation
 #' p <- function(t) {
-#'   return(0.09+0.005*t)
+#'   return(0.09 + 0.005*t)
 #' }
-#' q <- c(0.08, 0.07, 0.08)
-#' qshifts <- c(0, 20, 35)
-#'
-#' N0 <- 1
-#' tmax <- 40
-#' sim <- BDSim(N0, p, q, tmax, qshifts=qshifts)
-#'
-#' # we can supply a shape parameter to try age-dependent rates
-#' N0 <- 1
+#' 
+#' \dontrun{
+#'   # run the simulation. We can pass the stepfunction directly, or just give
+#'   # a list of q and a list of shifts
+#'   sim <- BDSim(n0, p, qList, tMax, qshifts = qshifts)
+#' }
+#' 
+#' # we can also supply a shape parameter to try age-dependent rates
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 40
+#' 
+#' # speciation - here note it is a Weibull scale
 #' p <- 10
-#' pshape <- 2
+#' 
+#' # speciation shape
+#' pShape <- 2
+#' 
+#' # extinction
 #' q <- 0.08
-#' tmax <- 40
-#' sim <- BDSim(N0, p, q, tmax, pshape=pshape)
-#'
+#' 
+#' 
+#' # run the simulation
+#' sim <- BDSim(n0, p, q, tMax, pShape = pShape)
+#' 
 #' # finally, we can also have a rate dependent on an environmental variable,
 #' # like temperature data in RPANDA
-#'
-#' if (requireNamespace("RPANDA", quietly=TRUE)) {
-#'   data(InfTemp, package="RPANDA")
-#'   N0 <- 1
+#' 
+#' if (requireNamespace("RPANDA", quietly = TRUE)) {
+#'   
+#'   # get temperature data from RPANDA
+#'   data(InfTemp, package = "RPANDA")
+#'   
+#'   # initial number of species
+#'   n0 <- 1
+#'   
+#'   # maximum simulation time
+#'   tMax <- 40
+#'   
+#'   # speciation - a scale
 #'   p <- function(t) {
 #'     return(1 + 0.25*t)
 #'   }
-#'
+#'   
 #'   # note the scale for the age-dependency can be a time-varying function
-#'
-#'   pshape <- 1.5
+#'   
+#'   # speciation shape
+#'   pShape <- 1.5
+#'   
+#'   # extinction, dependent on temperature exponentially
 #'   q <- function(t, env) {
-#'     return(0.15 * exp(-0.01 * env))
+#'     return(0.15*exp(-0.01*env))
 #'   }
-#'   env_q <- InfTemp
-#'  tmax <- 40
-#'  sim <- BDSim(N0, p, q, tmax, pshape=pshape, env_q=InfTemp)
+#'   
+#'   # need a variable to tell BDSim the extinction is environmentally dependent
+#'   envQQ <- InfTemp
+#'   
+#'   
+#'   \dontrun{
+#'     # run the simulation
+#'     sim <- BDSim(n0, p, q, tMax, pShape = pShape, envQQ = InfTemp)
+#'   }
+#'   
+#'   
+#'   # one can mix and match all of these scenarios as they wish - age-dependency
+#'   # and constant rates, age-dependent and temperature-dependent rates, etc. The
+#'   # only combination that is not allowed is a vector rate and environmental
+#'   # data, but one can get around that as follows
+#'   
+#'   # initial number of species
+#'   n0 <- 1
+#'   
+#'   # speciation - a step function of temperature built using ifelse()
+#'   p <- function(t, env) {
+#'     ifelse(t < 20, env,
+#'            ifelse(t < 30, env/2, 2*env/3))
+#'   }
+#'   
+#'   # speciation shape
+#'   pShape <- 2
+#'   
+#'   # environment variable to use - temperature
+#'   envPP <- InfTemp
+#'   
+#'   # extinction
+#'   q <- 0.08
+#'   
+#'   # maximum simulation time
+#'   tMax <- 40
+#'   
+#'   \dontrun{
+#'     # run the simulation
+#'     sim <- BDSim(n0, p, q, tMax, pShape = pShape, envPP = envPP)
+#'   }
 #' }
-#'
-#' # one can mix and match all of these scenarios as they wish - age-dependency
-#' # and constant rates, age-dependent and temperature-dependent rates, etc. The
-#' # only combination that is not allowed is a vector rate and environmental
-#' # data, but one can get around that as follows,
-#' N0 <- 1
-#' p <- function(t, env) {
-#'   ifelse(t < 20, env,
-#'          ifelse(t < 30, env/2, 2*env/3))
-#' }
-#' pshape <- 2
-#' env_p <- InfTemp
-#' q <- 0.08
-#' tmax <- 40
-#' sim <- BDSim(N0, p, q, tmax, pshape=pshape, env_pp=env_p)
-#'
+#' 
 #' @name BDSim
 #' @rdname BDSim
 #' @export
 
-BDSim<-function(N0,pp,qq,tmax,pshape=NULL,qshape=NULL,env_pp=NULL,env_qq=NULL,
-                pshifts=NULL,qshifts=NULL){
+BDSim <- function(n0, pp, qq, tMax, pShape = NULL, qShape = NULL, envPP = NULL, 
+                envQQ = NULL, pshifts = NULL, qshifts = NULL, fast = TRUE, 
+                trueExt=FALSE) {
+  
   # if we have ONLY numbers for pp and qq, it is constant
-  if ((is.numeric(pp)&length(pp)==1)&
-      (is.numeric(qq)&length(qq)==1)&
-       (is.null(c(pshape,qshape,env_pp,env_qq,pshifts,qshifts)))) {
-    p<-pp
-    q<-qq
+  if ((is.numeric(pp) & length(pp) == 1) &
+      (is.numeric(qq) & length(qq) == 1) &
+       (is.null(c(pShape, qShape, envPP, envQQ, pshifts,qshifts)))) {
+    p <- pp
+    q <- qq
+    
     # call BDSimConstant
-    return(BDSimConstant(N0,p,q,tmax))
+    return(BDSimConstant(n0, p, q, tMax))
   }
 
   # else it is not constant
-  else{
+  # note even if pp or qq is constant this may call BDSimGeneral, since we
+  # might have a shape parameter
+  else {
     # use MakeRate to create the rates we want
-    p<-MakeRate(pp,tmax,env_pp,pshifts)
-    q<-MakeRate(qq,tmax,env_qq,qshifts)
+    p <- MakeRate(pp, tMax, envPP, pshifts)
+    q <- MakeRate(qq, tMax, envQQ, qshifts)
 
     # call BDSimGeneral
-    return(BDSimGeneral(N0,p,q,tmax,pshape,qshape))
+    return(BDSimGeneral(n0, p, q, tMax, pShape, qShape, fast, trueExt))
   }
 }

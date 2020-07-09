@@ -5,7 +5,7 @@
 \title{Calculates the expected number of species for a given time varying rate
 using the exponential distribution for variable rates.}
 \usage{
-VarRateExp(ff, N0 = 1, t, env_f = NULL, fshifts = NULL)
+VarRateExp(ff, N0 = 1, t, env_f = NULL, fShifts = NULL)
 }
 \arguments{
 \item{ff}{a rate for the exponential distribution that can be
@@ -13,7 +13,7 @@ any function of time. One can also supply data for an environmental
 variable (see below for the \code{env_f} param) and get the expected
 number of species for a hybrid function of time and said variable. Finally,
 one can instead supply a vector of rates to \code{ff} and a vector of shifts
-to \code{fshifts} and get a step function. It is more efficient to create a
+to \code{fShifts} and get a step function. It is more efficient to create a
 stepfunction using \code{ifelse} however (see examples below).}
 
 \item{N0}{the initial number of species is by default 1, but one
@@ -32,7 +32,7 @@ column and the desired environmental variable as a second. Note that
 supplying a function with one argument and a non-NULL \code{env_f}, and vice
 versa, will return an error.}
 
-\item{fshifts}{a vector of rate shifts. Then used with the rates
+\item{fShifts}{a vector of rate shifts. Then used with the rates
 vector to create a step function for the rates. If supplied without a rates
 vector, and vice versa, will return an error.}
 }
@@ -44,7 +44,7 @@ in \code{t}, which can then be used to plot vs. \code{t}.
 \code{VarRateExp} takes a function, an initial number of species and a time
 vector and calculates the predicted exponential with that function as rate
 on that interval. This allows for efficient testing of the diversity curves
-produced by \code{PaleoBuddy} simulations.
+produced by \code{paleobuddy} simulations.
 }
 \examples{
 
@@ -130,14 +130,14 @@ plot(T, div, type='l')
 
 # ...which we can do as follows
 ff <- c(0.2, -0.1, 0.1, -0.05)
-fshifts <- c(0, 10, 20, 35)
-r <- MakeRate(ff, fshifts = fshifts)
+fShifts <- c(0, 10, 20, 35)
+r <- MakeRate(ff, fShifts = fShifts)
 plot(T, r(T),type='l')
 
-div <- VarRateExp(ff, t=T, fshifts=fshifts)
+div <- VarRateExp(ff, t=T, fShifts=fShifts)
 plot(T, div, type='l')
 
-# note the delay in running VarRateExp using this method. Integrating a step
+# note the delay in running VarRateExp using this method. integrating a step
 # function created using the methods in MakeRate() is slow, as explained in
 # the above and below notes (reproduced from the MakeRate documentation)
 
@@ -150,7 +150,7 @@ plot(T, div, type='l')
 
 # RPANDA supplies us with some really useful environmental dataframes
 # to use as an example, let us try temperature
-if (requireNamespace("RPANDA", quietly=TRUE)) {
+if (requireNamespace("RPANDA", quietly = TRUE)) {
   data(InfTemp, package="RPANDA")
 
   ff <- function(t, env) {

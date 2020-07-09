@@ -1,6 +1,6 @@
-# PaleoBuddy
+# paleobuddy
 
-`PaleoBuddy` is an R package to simulate species diversification and generate fossil records and phylogenies. While the literature on species birth-death simulators is extensive, including important software like [paleotree](https://github.com/dwbapst/paleotree) and [APE](https://github.com/cran/ape), we concluded there were interesting gaps to be filled regarding possible diversification scenarios. Differently from most simulators in the field, we strived for flexibility over focus, implementing and planning to implement a large array of regimens for users to experiment with and combine. In this way, `PaleoBuddy` can be used in complement to other simulators as a flexible jack of all trades, or, in the case of scenarios implemented only here, can allow for robust and easy simulations for novel situations.
+`paleobuddy` is an R package to simulate species diversification and generate fossil records and phylogenies. While the literature on species birth-death simulators is extensive, including important software like [paleotree](https://github.com/dwbapst/paleotree) and [APE](https://github.com/cran/ape), we concluded there were interesting gaps to be filled regarding possible diversification scenarios. Differently from most simulators in the field, we strived for flexibility over focus, implementing and planning to implement a large array of regimens for users to experiment with and combine. In this way, `paleobuddy` can be used in complement to other simulators as a flexible jack of all trades, or, in the case of scenarios implemented only here, can allow for robust and easy simulations for novel situations.
 
 ## Important functions
 
