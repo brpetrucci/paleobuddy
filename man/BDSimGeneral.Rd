@@ -98,7 +98,6 @@ tmax <- 40
 Time <- 1:tmax
 
 # now we can test a couple scenarios
-\dontrun{
 # first, even though this is BDSimGeneral, we can try constant rates
 N0 <- 1
 tmax <- 40
@@ -236,7 +235,7 @@ abline(h=q)
 # the only test possible be a direct calculation of the expected longevity.
 # Since we have done that in the tests for rexp_var(), we will not repeat it
 # here.
-}
+
 # finally, we could have environmental dependency on a rate. For that, we need
 # RPANDA
 if (requireNamespace("RPANDA", quietly=TRUE)) {

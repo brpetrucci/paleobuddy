@@ -195,3 +195,4 @@ BDSimConstant<-function(N0 = 1, p, q, tmax){
 
   return(list(TE=TE,TS=TS,PAR=Parent,EXTANT=is.extant))
 }
+
