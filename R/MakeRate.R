@@ -129,15 +129,15 @@
 #' @rdname MakeRate
 #' @export
 
-MakeRate<-function(ff,tMax, env_f=NULL,fShifts=NULL) {
+MakeRate<-function(ff,tMax, envF=NULL,fShifts=NULL) {
   # may use this soon
   nargs = ifelse(is.numeric(ff), length(ff), length(formals(ff)))
 
   # let us first check for some errors
   if (is.numeric(ff)) {
-    # if ff is constant, we should not see any env_f or fShifts
+    # if ff is constant, we should not see any envF or fShifts
     if (nargs == 1) {
-      if (!is.null(env_f) || !is.null(fShifts)) {
+      if (!is.null(envF) || !is.null(fShifts)) {
         stop("constant rate with environmental variable or shifts")
       } else {
         return(ff)
@@ -154,8 +154,8 @@ MakeRate<-function(ff,tMax, env_f=NULL,fShifts=NULL) {
       stop("rate vector and shifts vector must have the same length")
     }
 
-    # if we have a rates vector and shifts vector, should not have env_f
-    else if (!is.null(env_f)) {
+    # if we have a rates vector and shifts vector, should not have envF
+    else if (!is.null(envF)) {
       stop("rates and shifts supplied with environmental variable;
            use ifelse()")
     }
@@ -172,15 +172,15 @@ MakeRate<-function(ff,tMax, env_f=NULL,fShifts=NULL) {
       stop("function can only depend on time and environmental var")
     }
 
-    # if it has two, we must also have a non-null env_f
+    # if it has two, we must also have a non-null envF
     else if (nargs == 2) {
-      if (is.null(env_f)) {
+      if (is.null(envF)) {
         stop("environmental function supplied with no environmental variable")
       }
     }
   }
 
-  else if (nargs == 1 && !is.null(env_f)) {
+  else if (nargs == 1 && !is.null(envF)) {
     stop("environmental variable supplied with one argument function")
   }
 
@@ -213,21 +213,21 @@ MakeRate<-function(ff,tMax, env_f=NULL,fShifts=NULL) {
   }
 
   # if we want it to be dependent on environmental variables
-  else if (!is.null(env_f)) {
+  else if (!is.null(envF)) {
     # find degrees of freedom
-    df <- smooth.spline(x=env_f[,1], env_f[,2])$df
+    df <- smooth.spline(x=envF[,1], envF[,2])$df
 
     # now that we have the degrees of freedom, perform the spline
-    spline_result <- smooth.spline(env_f[,1],env_f[,2], df=df)
+    spline_result <- smooth.spline(envF[,1],envF[,2], df=df)
 
     # use predict to find the rate at all times
-    env_func <- function(t) {
+    envFunc <- function(t) {
       predict(spline_result,t)$y
     }
 
     # make it a function of time only
     f<-function(t) {
-      return(ff(t,env_func(t)))
+      return(ff(t,envFunc(t)))
     }
   }
 

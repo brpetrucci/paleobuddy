@@ -8,7 +8,7 @@ SampleClade(
   S,
   sim,
   rr,
-  tmax,
+  tMax,
   env_rr = NULL,
   rshifts = NULL,
   returnTrue = FALSE,
@@ -29,6 +29,8 @@ function, a function dependent on time and environment, or a vector of
 rates corresponding to the times in \code{rshifts}. If \code{env_rr} and
 \code{rshifts} are NULL, it will be treated as an exponential rate.
 Must be a constant if \code{dFUN} is not \code{NULL}.}
+
+\item{tMax}{the maximum simulation time, used by \code{rexp_var}.}
 
 \item{env_rr}{a matrix containing time points and values of an enviromental
 variable, like temperature, for each time point. This will be used to create
@@ -80,8 +82,6 @@ maximum density.
 Note that if it is not provided, 1 will be used instead, leading to longer running times.}
 
 \item{...}{additional parameters related to \code{dFUN} and \code{dFUNmax}.}
-
-\item{tMax}{the maximum simulation time, used by \code{rexp_var}.}
 }
 \value{
 a list of occurrences for that species, expected to be around
@@ -100,9 +100,9 @@ and whether one wants the true return times or a range based on \code{bins}.
 # \code{Sample}  and \code{SampleADPP} functions
 
 # first we can try constant sampling
-sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 while((sim$TS[1]-sim$TE[1])<10) {
-  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+  sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 }
 
 r <- 100 # high so we can see the pattern
@@ -128,19 +128,19 @@ for (i in 1:length(ids)) {
 }
 
 # now let us try a linearly increasing r
-sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 while((sim$TS[1]-sim$TE[1])<10) {
-  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+  sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 }
 
 r <- function(t) {
   return(200-5*t)
 }
 
-stages=seq(from=10, to = 0, # from simulation's tmax to present
+stages=seq(from=10, to = 0, # from simulation's tMax to present
            by = -.1)
 
-dt<-SampleClade(1:length(sim$TE), sim, r, tmax=10, stages=stages)
+dt<-SampleClade(1:length(sim$TE), sim, r, tMax=10, stages=stages)
 ids<-unique(dt$Species)
 mids<-(dt$MaxT-dt$MinT)+dt$MinT
 
@@ -156,9 +156,9 @@ for (i in 1:length(ids)) {
 }
 
 # sampling could be any function of time, of course, such as a step function
-sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 while((sim$TS[1]-sim$TE[1])<10) {
-  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+  sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 }
 
 rlist <- c(100, 50, 120)
@@ -172,7 +172,7 @@ r <- MakeRate(rlist, 10, fShifts=rshifts)
 stages=seq(from=10, to = 0,
            by = -.1)
 
-dt<-SampleClade(1:length(sim$TE), sim, rlist, tmax=10,
+dt<-SampleClade(1:length(sim$TE), sim, rlist, tMax=10,
 rshifts=rshifts, stages=stages)
 ids<-unique(dt$Species)
 mids<-(dt$MaxT-dt$MinT)+dt$MinT
@@ -192,9 +192,9 @@ for (i in 1:length(ids)) {
 if (requireNamespace("RPANDA", quietly = TRUE)) {
   data(InfTemp, package="RPANDA")
 
-  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+  sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
   while((sim$TS[1]-sim$TE[1])<10) {
-    sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+    sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
   }
 
   env_r <- InfTemp
@@ -204,13 +204,13 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   }
 
   # make it a function so we can plot it
-  rr <- MakeRate(r, env_f=env_r)
+  rr <- MakeRate(r, envF=env_r)
   # let us check r is high enough to see a pattern
   plot(1:10, rr(1:10), type='l', main="Sampling rate", xlab="My", ylab="r")
 
   stages=seq(from=10, to = 0, by = -.1)
 
-  dt<-SampleClade(1:length(sim$TE), sim, r, tmax=10, env_rr=env_r,
+  dt<-SampleClade(1:length(sim$TE), sim, r, tMax=10, env_rr=env_r,
   stages=stages)
   ids<-unique(dt$Species)
   mids<-(dt$MaxT-dt$MinT)+dt$MinT
@@ -231,9 +231,9 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
 # check \code{SampleADPP}.
 
 # let us start with a hat-shaped increase through the duration of a species
-sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 while((sim$TS[1]-sim$TE[1])<10) {
-  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+  sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 }
 
 # preservation function in respect to age
@@ -270,7 +270,7 @@ dPERTmax<-function(s,e,sp) {
 
 stages<-seq(from=10, to = 0, by = -.1)
 
-dt<-SampleClade(S = 1:length(sim$TE), sim, rr=10, tmax = 100, stages = stages,
+dt<-SampleClade(S = 1:length(sim$TE), sim, rr=10, tMax = 100, stages = stages,
 dFUN = dPERT, dFUNmax = dPERTmax)
 
 ids<-unique(dt$Species)
@@ -292,9 +292,9 @@ for (i in 1:length(ids)) {
 
 # now, a hat-shaped increase through the duration of a species dependent on two parameters
 
-sim<-BDSim(N0 = 1, pp = 0.1, qq = 0.1, tmax = 10)
+sim<-BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 while(length(sim$TE)<20) {
-  sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tmax = 10)
+  sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 }
 
 # preservation function in respect to age
@@ -344,7 +344,7 @@ par1<-(((sim$TS-sim$TE)/2)+sim$TE)-par
 # the resolution of the fossil dataset:
 stages<-seq(from=10, to = 0, by = -.1)
 
-dt<-SampleClade(S = 1:length(sim$TE), sim, rr=10, tmax = 100, stages = stages,
+dt<-SampleClade(S = 1:length(sim$TE), sim, rr=10, tMax = 100, stages = stages,
 dFUN = dTRImod2, dFUNmax = dTRImaxmod2)
 
 ids<-unique(dt$Species)

@@ -8,26 +8,26 @@
 #'
 #' @param ff a rate for the exponential distribution that can be
 #' any function of time. One can also supply data for an environmental
-#' variable (see below for the \code{env_f} param) and get the expected
+#' variable (see below for the \code{envF} param) and get the expected
 #' number of species for a hybrid function of time and said variable. Finally,
 #' one can instead supply a vector of rates to \code{ff} and a vector of shifts
 #' to \code{fShifts} and get a step function. It is more efficient to create a
 #' stepfunction using \code{ifelse} however (see examples below).
 #'
-#' @param N0 the initial number of species is by default 1, but one
+#' @param n0 the initial number of species is by default 1, but one
 #' can change to any positive number. We allow for negative initial values as
 #' well, but of course that will not help in testing the package.
 #'
 #' NOTE: \code{VarRateExp} will find the expected number of daughters given a
-#' rate \code{ff} and an initial number of parents \code{N0}, so in a
+#' rate \code{ff} and an initial number of parents \code{n0}, so in a
 #' biological context \code{ff} is diversification rate, not speciation (unless
 #' extinction is 0, of course).
 #'
 #' @param t a time vector over which to consider the distribution.
 #'
-#' @param env_f a two dimensional dataframe with time as a first
+#' @param envF a two dimensional dataframe with time as a first
 #' column and the desired environmental variable as a second. Note that
-#' supplying a function with one argument and a non-NULL \code{env_f}, and vice
+#' supplying a function with one argument and a non-NULL \code{envF}, and vice
 #' versa, will return an error.
 #'
 #' @param fShifts a vector of rate shifts. Then used with the rates
@@ -89,7 +89,7 @@
 #' plot(T, r(T), type='l')
 #'
 #' # not a good time for this poor clade
-#' div <- VarRateExp(ff, N0 = 2, T)
+#' div <- VarRateExp(ff, n0 = 2, T)
 #' plot(T, div, type='l')
 #'
 #' # remember: ff can be any time-varying function!
@@ -99,7 +99,7 @@
 #' r <- MakeRate(ff)
 #' plot(T, r(T), type='l')
 #'
-#' div <- VarRateExp(ff, N0=2, T)
+#' div <- VarRateExp(ff, n0=2, T)
 #' plot(T, div, type='l')
 #'
 #' # we can use ifelse() to make a step function like this
@@ -147,20 +147,20 @@
 #'   ff <- function(t, env) {
 #'     return(0.002*env)
 #'   }
-#'   r <- MakeRate(ff, env_f = InfTemp)
+#'   r <- MakeRate(ff, envF = InfTemp)
 #'   plot(T, r(T), type='l')
 #'
-#'   div <- VarRateExp(ff, t=T, env_f=InfTemp)
+#'   div <- VarRateExp(ff, t=T, envF=InfTemp)
 #'   plot(T, div, type='l')
 #'
 #'   # we can also have a function that depends on both time AND temperature
 #'   ff <- function(t, env) {
 #'     return(0.03 * env - 0.01 * t)
 #'   }
-#'   r <- MakeRate(ff, env_f = InfTemp)
+#'   r <- MakeRate(ff, envF = InfTemp)
 #'   plot(T, r(T), type='l')
 #'
-#'   div <- VarRateExp(ff, t=T, env_f=InfTemp)
+#'   div <- VarRateExp(ff, t=T, envF=InfTemp)
 #'   plot(T, div, type='l')
 #'
 #'   # as mentioned above, we could also use ifelse() to construct a step function
@@ -170,10 +170,10 @@
 #'                   ifelse(t < 30, 0.2 - 0.005*env,
 #'                          ifelse(t <= 50, 0.1 + 0.005*env, 0))))
 #'   }
-#'   r <- MakeRate(ff, env_f = InfTemp)
+#'   r <- MakeRate(ff, envF = InfTemp)
 #'   plot(T, r(T), type='l')
 #'
-#'   div <- VarRateExp(ff, t=T, env_f = InfTemp)
+#'   div <- VarRateExp(ff, t=T, envF = InfTemp)
 #'   plot(T, div, type='l')
 #' }
 #'
@@ -181,9 +181,9 @@
 #' @rdname VarRateExp
 #' @export
 
-VarRateExp<-function(ff,N0=1,t,env_f=NULL,fShifts=NULL) {
+VarRateExp<-function(ff,n0=1,t,envF=NULL,fShifts=NULL) {
   # get the corresponding rate
-  f <- MakeRate(ff, env_f = env_f, fShifts = fShifts)
+  f <- MakeRate(ff, envF = envF, fShifts = fShifts)
 
   if (!is.numeric(f)) {
     # integrate the rate for each t
@@ -198,5 +198,5 @@ VarRateExp<-function(ff,N0=1,t,env_f=NULL,fShifts=NULL) {
     integral <- f*t
   }
 
-  return(N0*exp(integral))
+  return(n0*exp(integral))
 }

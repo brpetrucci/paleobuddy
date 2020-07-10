@@ -7,19 +7,19 @@
 rexp_var(n = 1, lambda, now, tMax, shape = NULL, TS = NULL, fast = TRUE)
 }
 \arguments{
-\item{n}{the number of times to return. The default is 1, but
-we allow for a higher \code{n} to be consistent with the \code{rexp}
-function.}
+\item{n}{the number of waiting times to return. The default is 1, but we
+allow for a higher \code{n} to be consistent with the \code{rexp} function.}
 
 \item{lambda}{the rate parameter for the exponential
-distribution. If shape is not \code{NULL}, \code{lambda} is a scale for the
-Weibull. In both cases we allow for any time-varying function. If one wants
-a constant \code{c}, please use \code{lambda <- Vectorize(function(t) c)}.}
+distribution. If shape is not \code{NULL}, \code{lambda} is a scale for a
+Weibull distribution. In both cases we allow for any time-varying function. 
+If one wants a constant \code{c}, please use 
+\code{lambda <- Vectorize(function(t) c)}.}
 
 \item{now}{the current time. Needed so that we consider only the interval
 between the current time and the maximum time for the time-varying rate.
-Notice this does means the waiting time is >= \code{now}, so we also
-subtract \code{now} from the waiting time before returning.}
+Notice this does means the waiting time is \code{>= now}, so we also
+subtract \code{now} from the result before returning.}
 
 \item{tMax}{the simulation ending time. If the waiting time would be too
 high, we return \code{2*tMax} to signify the event never happens, if 
@@ -31,15 +31,16 @@ distribution dis taken to be a weibull. Otherwise, it is considered an
 exponential.
 
 Notes: if \code{shape} is really low it may be impossible
-for \code{uniroot} to find a root. Time-varying shape is implemented, but
+for \code{uniroot} to find a root; Time-varying shape is implemented, but
 not yet thoroughly tested.}
 
-\item{TS}{if shape is given, there must be a TS parameter to
-account for the scaling between simulation and species time. Supplying one
-without the other leads to an error.}
+\item{TS}{if shape is given, there must be a \code{TS} parameter to account
+for the scaling between simulation and species time. Supplying one without
+the other leads to an error.}
 
-\item{fast}{if set to FALSE, waiting times larger than the max
-simulation time will not be thrown away. Needed when testing the function.}
+\item{fast}{if set to \code{FALSE}, waiting times larger than \code{tMax} 
+will not be thrown away. This argument is needed so one can testt he function
+without bias.}
 }
 \value{
 a vector of waiting times for the exponential or weibull
@@ -50,7 +51,7 @@ distribution with the given rates.
 of time and optionally a shape for age dependent rates. It also takes a
 number of waiting times to return, and whether the user wishes to throw away
 waiting times that pass \code{tMax}. It returns a time from an exponential
-distribution, or a weibull distribution, if \code{shape != NULL}.
+distribution, or a weibull distribution if \code{shape != NULL}.
 }
 \examples{
 
@@ -207,7 +208,5 @@ if (requireNamespace("fitdistrplus", quietly = TRUE)) {
 
 }
 \author{
-written by Bruno do Rosario Petrucci; the idea for calculating
-an exponentially distributed variable t using \code{1-p = exp(t)} came from
-\code{baseR}'s own \code{rexp} and \href{https://rdrr.io/cran/ape/f/}{APE}.
+written by Bruno do Rosario Petrucci.
 }

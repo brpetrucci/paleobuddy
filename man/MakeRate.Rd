@@ -5,7 +5,7 @@
 \title{Returns a rate based on a time-varying function, environmental variable
 and/or vectors of rates and shifts}
 \usage{
-MakeRate(ff, tMax, env_f = NULL, fShifts = NULL)
+MakeRate(ff, tMax, envF = NULL, fShifts = NULL)
 }
 \arguments{
 \item{ff}{the baseline function with which to make the rate.
@@ -25,17 +25,17 @@ be accompanied by a corresponding vector of shifts \code{fShifts}}}}
 \item{tMax}{a number corresponding to the maximum simulation time.
 Needed to ensure \code{fShifts} runs the correct way.}
 
+\item{envF}{a dataframe representing an environmental variable
+(time, CO2 etc) with time. The first column must be time, second column the
+values of the variable. See below; one good resource for these dataframes is
+\href{https://cran.r-project.org/web/packages/RPANDA/}{RPANDA}.}
+
 \item{fShifts}{a vector of rate shifts. The first element must
 be the first time point for the simulation. This may be 0 or tMax. Since
 functions in paleobuddy run from 0 to tMax, if \code{fShifts} runs from past
 to present, in other words \code{fShifts[2] < fShifts[1]}, we take
 \code{tMax-fShifts} as the shifts vector. Note that supplying \code{fShifts}
 when \code{ff} is not a rates vector will return an error.}
-
-\item{envF}{a dataframe representing an environmental variable
-(time, CO2 etc) with time. The first column must be time, second column the
-values of the variable. See below; one good resource for these dataframes is
-\href{https://cran.r-project.org/web/packages/RPANDA/}{RPANDA}.}
 }
 \value{
 returns a constant or time-varying function (depending on input)

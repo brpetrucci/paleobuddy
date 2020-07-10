@@ -30,7 +30,7 @@ x <- c(5.2, 4.9, 4.1, 3.2, 1, 0.2)
 bins <- c(6, 5, 4, 3, 2, 1, 0)
 
 # result
-binnedSamp <- binner(x, bins) # should be (1, 2, 1, 0, 1, 1)
+binnedSamp <- binner(x, bins)
 
 # check
 print(sum(binnedSamp == c(1, 2, 1, 0, 1, 1)) == length(binnedSamp))
@@ -41,10 +41,10 @@ print(sum(binnedSamp == c(1, 2, 1, 0, 1, 1)) == length(binnedSamp))
 x <- c(6.7, 5.03, 4.2, 3.4, 1.2, 0.4)
 
 # bins list
-bins <- c(7, bins1)
+bins <- c(7, 6, 5, 4, 3, 2, 1, 0)
 
 # result
-binnedSamp <- binner(x, bins) # should be (1, 1, 1, 1, 0, 1, 1)
+binnedSamp <- binner(x, bins)
 
 # check
 print(sum(binnedSamp == c(1, 1, 1, 1, 0, 1, 1)) == length(binnedSamp))

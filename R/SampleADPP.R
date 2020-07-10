@@ -53,10 +53,10 @@
 #' # will never be this high.
 #'
 #' # we can start with a hat-shaped increase through the duration of a species
-#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' while((sim$TS[1]-sim$TE[1])<10) { # in case first simulation has short-lived
 #'                                  # lineage which will obscure the pattern
-#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#'   sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' }
 #'
 #' # preservation function in respect to age
@@ -100,10 +100,10 @@
 #' # now we can test the simpler scenario of uniform sampling probablity
 #' # through the duration of a species (= homogeneous poisson process)
 #'
-#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' while((sim$TS[1]-sim$TE[1])<10) { # in case first simulation has short-lived
 #'                                  # lineage which will obscure the pattern
-#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#'   sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' }
 #'
 #' # preservation function in respect to age
@@ -129,10 +129,10 @@
 #' # now, a hat-shaped increase through the duration of a species with more
 #' # parameters than TS and TE:
 #'
-#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' while((sim$TS[1]-sim$TE[1])<10) { # in case first simulation has short-lived
 #'                                  # lineage which will obscure the pattern
-#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#'   sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' }
 #'
 #' # preservation function in respect to age
@@ -199,9 +199,9 @@
 #' # with more parameters than TS and TE, but with the parameters relate to
 #' # the relative age of each lineage
 #'
-#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' while((sim$TS[1]-sim$TE[1])<10) {
-#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#'   sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' }
 #'
 #' # preservation function in respect to age, with the "mde" of the triangle
@@ -260,9 +260,9 @@
 #' # This is usefull when the user wants to use variable parameters for each species
 #' # but wants to keep track of those parameters after the sampling is over
 #'
-#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' while(length(sim$TE)<20) {
-#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#'   sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' }
 #'
 #' # preservation function in respect to age, with the "mode" of the triangle

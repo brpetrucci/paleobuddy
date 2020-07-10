@@ -30,7 +30,7 @@
 #' sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' while((sim$TS[1]-sim$TE[1])<10) { # in case first simulation has short-lived
 #'                                  # lineage which will obscure the pattern
-#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#'   sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' }
 #'
 #' # preservation function
@@ -51,10 +51,10 @@
 #'
 #' # now let us try a step function
 #'
-#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' while((sim$TS[1]-sim$TE[1])<10) { # in case first simulation has short-lived
 #'                                  # lineage which will obscure the pattern
-#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#'   sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' }
 #'
 #' # we can create the sampling rate here from a few vectors
@@ -74,10 +74,10 @@
 #' abline(v=c(6,2), col="red") # frontiers of each regime
 #'
 #' # we can create a step function in a different way as well
-#' sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' while((sim$TS[1]-sim$TE[1])<10) { # in case first simulation has short-lived lineage
 #'                                  # which will obscure the pattern
-#'   sim<-BDSim(N0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#'   sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 #' }
 #'
 #' # preservation function
