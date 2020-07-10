@@ -1,10 +1,11 @@
-#' Species age-dependent sampling
+#' Age-dependent rate species sampling
 #'
-#' \code{SampleADPP} takes a species number, a vector of speciation and extinction
-#' times, a sampling rate and an age-dependent model which descirbes how the
-#' Poisson Process relates to the age of each species.
+#' \code{SampleADPP} takes a species number, a vector of speciation and 
+#' extinction times, a sampling rate and an age-dependent model which describes
+#' how the Poisson Process relates to the age of each species, and returns a
+#' vector of occurrence times for the list of species.
 #'
-#' @param S a species number (i.e. its identity) vector to be sampled.
+#' @param S a list species numbers to be sampled.
 #'
 #' @param TE a vector of extinction times, usually an output of \code{BDSim}.
 #'
@@ -13,36 +14,38 @@
 #' @param rr a mean sampling rate (equivalent to the \code{lambda} of a poisson)
 #' in the poisson process.
 #'
-#' @param dFUN A density function representing the age-dependent
+#' @param dFun A density function representing the age-dependent
 #' preservation model. It must be a density function, and consequently
 #'
 #' \describe{
 #'
-#' \item{1}{integrate to 1 (though this condition is not verified by the function,
-#' it is the user responsibility to check this property)}
+#' \item{1.}{integrate to 1 (though this condition is not verified by the 
+#' function, it is the user's responsibility to check this property)}
 #'
-#' \item{2}{describe the density of sampling a lineage in a given point
-#' \code{t} in geological time}
+#' \item{2.}{describe the density of sampling a lineage in a given point \code{t}
+#' in geological time}
 #'
-#' \item{3}{be parameterized in absolute geological time (i.e. should be relative
+#' \item{3.}{be parametrized in absolute geological time (i.e. should be relative
 #' to absolute geological time, in Mya)}
 #'
-#' \item{4}{should be limited between \code{s} (i.e. the lineage's speciation/origination
-#' geological, absolute, time) and \code{e} (i.e. the lineage's extinction geological,
-#' absolute, time), with \code{s} > \code{e}}
+#' \item{4.}{should be limited between \code{s} (i.e. the lineage's 
+#' speciation/origination geological time) and \code{e} (i.e. the lineage's 
+#' extinction geological time), with \code{s} > \code{e}}
 #'
-#' \item{5}{include the arguments \code{t}, \code{s}, \code{e} and \code{sp}}}
+#' \item{5.}{include the arguments \code{t}, \code{s}, \code{e} and \code{sp}}}
 #'
-#' @param dFUNmax a function that calculates the maximum (density) value
-#' of \code{dFUN} using its arguments. It can also be a number representing the
+#' @param dFunMax a function that calculates the maximum (density) value
+#' of \code{dFun} using its arguments. It can also be a number representing the
 #' maximum density.
 #'
-#' Note that if it is not provided, 1 will be used instead, leading to longer running times.
+#' Note that if it is not provided, it will be approximated numerically, leading 
+#' to longer running times.
 #'
-#' @param ... Additional parameters related to \code{dFUN} and \code{dFUNmax}.
+#' @param ... additional parameters related to \code{dFun} and \code{dFunMax}.
 #'
-#' @return a list of occurrences for that species, expected to be around \code{(Ts-TE)*rr}
-#' occurrences, with their distribution in time given by the function provided by the user.
+#' @return a list of occurrences for that species, expected to be around 
+#' \code{(Ts-TE)*rr} occurrences, with their distribution in time given by the
+#' function provided by the user.
 #'
 #' @author written by Matheus Januario.
 #'
@@ -50,364 +53,494 @@
 #'
 #' # Note: all examples use just 1 lineage and very large preservation rates
 #' # (rr = 5000 occs/my) to be clearer to the reader. Most of times preservation
-#' # will never be this high.
-#'
+#' # will not be this high.
+#' 
 #' # we can start with a hat-shaped increase through the duration of a species
-#' sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
-#' while((sim$TS[1]-sim$TE[1])<10) { # in case first simulation has short-lived
-#'                                  # lineage which will obscure the pattern
-#'   sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' 
+#' # simulate a group
+#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' 
+#' # in case first simulation is short-lived
+#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
-#'
-#' # preservation function in respect to age
+#' 
 #' # here we will use the PERT function. It is described in:
 #' # Silvestro et al 2014
-#'
-#' dPERT<-function(t,s,e,sp,a=3,b=3, log=FALSE) {
-#'
-#'   if (e>=s) {
-#'     message("There is no PERT with e>=s")
-#'     return(rep(NaN, times=length(t)))
+#' 
+#' # preservation function
+#' dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) { 
+#'   
+#'   # check if it is a valid PERT
+#'   if (e >= s) { 
+#'     message("There is no PERT with e >= s")
+#'     return(rep(NaN, times = length(t)))
 #'   }
-#'   id1<-which(t<=e | t>=s)
-#'   id2<-which(!(t<=e | t>=s))
-#'   t<-TRUE[id2]
-#'
-#'   res<-vector()
+#'   
+#'   # find the valid and invalid times
+#'   id1 <- which(t <= e | t >= s)
+#'   id2 <- which(!(t <= e | t >= s))
+#'   t <- t[id2]
+#'   
+#'   # initialize result vector
+#'   res <- vector()
+#'   
+#'   # if user wants a log function
 #'   if (log) {
-#'     res[id1]<--Inf
-#'   } else {
-#'     res[id1]<-0
+#'     # invalid times get -Inf
+#'     res[id1] <- -Inf
+#'     
+#'     # valid times calculated with log
+#'     res[id2] <- log(((s - t) ^ 2)*((-e + t) ^ 2)/((s - e) ^ 5*beta(a,b)))
 #'   }
-#'
-#'   if (log) {
-#'     res[id2]<-log(((s-t)^2)*((-e+t)^2)/((s-e)^5*beta(a,b)))
-#'   } else {
-#'     res[id2]<-((s-t)^2)*((-e+t)^2)/((s-e)^5*beta(a,b))
+#'   # otherwise
+#'   else{
+#'     res[id1] <- 0
+#'     
+#'     res[id2] <- ((s - t) ^ 2)*((-e + t) ^ 2)/((s - e) ^ 5*beta(a,b))
 #'   }
+#'   
 #'   return(res)
 #' }
-#'
-#' dPERTmax<-function(s,e,sp) {
-#'   return(((s-e)/2)+e)
+#' 
+#' # function to calculate max of the PERT
+#' dPERTmax <- function(s, e, sp) {
+#'   return(((s - e) / 2) + e)
 #' }
-#'
-#' occs<-SampleADPP(S=1, TE = sim$TE, TS = sim$TS, rr = 5000, dFUN = dPERT,
-#' dFUNmax = dPERTmax)
-#' hist(unlist(occs), breaks=100, probability = TRUE)
-#' curve(dPERT(x, s = sim$TS[1], e=sim$TE[1]),20, 0, add=TRUE, col="red")
-#'
+#' 
+#' \dontrun{
+#' # find occurrences
+#' occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 5000, dFun = dPERT,
+#'                    dFunMax = dPERTmax)
+#' 
+#' # check histogram
+#' hist(unlist(occs), breaks = 100, probability = TRUE)
+#' 
+#' # expected curve
+#' curve(dPERT(x, s = sim$TS[1], e = sim$TE[1]), 20, 0, add = TRUE, col = "red")
+#' }
+#' 
 #' # now we can test the simpler scenario of uniform sampling probablity
 #' # through the duration of a species (= homogeneous poisson process)
-#'
-#' sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
-#' while((sim$TS[1]-sim$TE[1])<10) { # in case first simulation has short-lived
-#'                                  # lineage which will obscure the pattern
-#'   sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' 
+#' # simulate a group
+#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' 
+#' # in case first simulation is short-lived
+#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
-#'
+#' 
 #' # preservation function in respect to age
 #' # occurrences are uniformly distributed
-#' custom.uniform<-function(t,s,e,sp) {
-#'
-#'   if (e>=s) {
-#'     message("There is no PERT with e>=s")
-#'     return(rep(NaN, times=length(t)))
+#' custom.uniform <- function(t, s, e, sp) {
+#'   
+#'   # make sure it is a valid uniform
+#'   if (e >= s) {
+#'     message("There is no uniform function with e >= s")
+#'     return(rep(NaN, times = length(t)))
 #'   }
-#'
-#'   res<-dunif (x = t, min = e, max = s)
-#'
+#'   
+#'   res <- dunif(x = t, min = e, max = s)
+#'   
 #'   return(res)
 #' }
-#'
-#' # we will not give a dFUNmax function this time. SampleADPP() will try to find
+#' 
+#' # we will not give a dFunMax function this time. SampleADPP() will try to find
 #' # the maximum density with a very simple numerical simulation
-#' occs<-SampleADPP(S=1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 5000, dFUN = custom.uniform)
-#' hist(unlist(occs[[1]]), breaks=100, probability = TRUE)
-#' curve(dunif (x, min=sim$TE[1], max=sim$TS[1]),10, 0, add=TRUE, col="red")
-#'
+#' occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 5000, dFun = custom.uniform)
+#' 
+#' # check histogram
+#' hist(unlist(occs[[1]]), breaks = 100, probability = TRUE)
+#' 
+#' # expected curve
+#' curve(dunif (x, min = sim$TE[1], max = sim$TS[1]), 10, 0, 
+#'       add = TRUE, col = "red")
+#' 
 #' # now, a hat-shaped increase through the duration of a species with more
-#' # parameters than TS and TE:
-#'
-#' sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
-#' while((sim$TS[1]-sim$TE[1])<10) { # in case first simulation has short-lived
-#'                                  # lineage which will obscure the pattern
-#'   sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' # parameters than TS and TE
+#' 
+#' # simulate a group
+#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' 
+#' # in case first simulation is short-lived
+#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
-#'
-#' # preservation function in respect to age
+#' 
 #' # here we will use the triangular distribution. We have some empirical evidence
-#' # that taxa occurrences might present triangular shape, see Zliobaite et al 2017
-#'
-#' dTRI<-function(t,s,e,sp,md) {
-#'
+#' # that taxa occurrences might present triangular shape
+#' # see Zliobaite et al 2017
+#' 
+#' # preservation function
+#' dTRI <- function(t, s, e, sp, md) {
+#'   
 #'   # please note ths function is inverted. The correspondence would be:
-#'   # s=b maximum
-#'   # e=a minimum
-#'   # md=c distribution's mode
-#'
-#'   if (e>=s) {
-#'     message("There is no TRI with e>=s") # this is a condition necessary to use
-#'                                          # the sampling functions in this package
-#'     return(rep(NaN, times=length(t)))
+#'   # s = b maximum
+#'   # e = a minimum
+#'   # md = c distribution's mode
+#'   
+#'   # make sure it is a valid TRI
+#'   if (e >= s) {
+#'     message("There is no TRI with e >= s") 
+#'     return(rep(NaN, times = length(t)))
 #'   }
-#'
-#'   if (md<e | md>s) {
-#'   # this is a condition which is specific to the triangular function
+#'   
+#'   # another condition we must check
+#'   if (md < e | md > s) {
 #'     message("There is no TRI with md outside [s, e] interval")
-#'     return(rep(NaN, times=length(t)))
+#'     return(rep(NaN, times = length(t)))
 #'   }
-#'
+#'   
 #'   # needed to vectorize the function:
-#'   id1<-which(t>=e & t<md)
-#'   id2<-which(t==md)
-#'   id3<-which(t>md & t<=s)
-#'   id4<-which( !(1:length(t) %in% c(id1,id2,id3)))
-#'
+#'   id1 <- which(t >= e & t < md)
+#'   id2 <- which(t == md)
+#'   id3 <- which(t > md & t <= s)
+#'   id4 <- which( !(1:length(t) %in% c(id1,id2,id3)))
+#'   
 #'   # actually vetorizing function
-#'   res<-vector()
-#'
-#'   res[id1]<-(2*(t[id1]-e))/((s-e)*(md-e)) #(t=>e & t<md)
-#'   res[id2]<-2/(s-e) #(t==md)
-#'   res[id3]<-(2*(s-t[id3]))/((s-e)*(s-md)) #(md<t & t<=s)
-#'   res[id4]<-0 #outside fucntion's limits
-#'
+#'   res <- vector()
+#'   
+#'   # (t >= e & t < md)
+#'   res[id1] <- (2*(t[id1] - e)) / ((s - e)*(md - e)) 
+#'   
+#'   #(t == md)
+#'   res[id2] <- 2 / (s - e)
+#'   
+#'   #(md < t & t <= s)
+#'   res[id3] <- (2*(s - t[id3])) / ((s - e)*(s - md))
+#'   
+#'   #outside function's limits
+#'   res[id4] <- 0 
+#'   
 #'   return(res)
 #' }
-#'
-#' dTRImax<-function(s,e,sp,md) {
-#' # the "dFUNmax" function must have the same parameters then the dFUN function,
+#' 
+#' # the dFunMax function must have the same parameters then the dFun function,
 #' # even if they do not use them
-#'   return(2/(s-e))
+#' dTRImax <- function(s, e, sp, md) {
+#'   
+#'   return(2 / (s - e))
 #' }
-#'
-#' # now we are providing the mode for the triangular sampling
-#' occs<-SampleADPP(S=1, TE = sim$TE, TS = sim$TS, rr = 5000, dFUN = dTRI,
-#' dFUNmax = dTRImax, md=8)
-#'
+#' 
+#' \dontrun{
+#' # note we are providing the mode for the triangular sampling as an ... argument
+#' occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 5000, dFun = dTRI,
+#'                    dFunMax = dTRImax, md = 8)
+#' 
 #' # please note in the original parametrization, the "md" parameter (mode) is
 #' # in "absolute time", i.e. a specific number in the absolute scale. This is not,
 #' # directly, an "age-dependent" model. We show it here as we will construct
-#' #  models related to age in the following examples (4 and 5). This is also
-#' # the reason we only plot the first lienage in this specific example
+#' # models related to age in the following examples (4 and 5). This is also
+#' # the reason we only plot the first lineage in this specific example
 #' # (many lineages might not be alive in the "md" moment in time).
-#'
-#' hist(unlist(occs[[1]]), breaks=100, probability = TRUE)
-#' curve(dTRI(x, e=sim$TE[1], s=sim$TS[1], md = 8),10, 0, add=TRUE, col="red")
-#'
+#' 
+#' # check histrogram
+#' hist(unlist(occs[[1]]), breaks = 100, probability = TRUE)
+#' 
+#' # expected curve
+#' curve(dTRI(x, e = sim$TE[1], s = sim$TS[1], md = 8), 10, 0, add = TRUE, 
+#'       col = "red")
+#' }
+#' 
 #' # we can also have a hat-shaped increase through the duration of a species
 #' # with more parameters than TS and TE, but with the parameters relate to
 #' # the relative age of each lineage
-#'
-#' sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
-#' while((sim$TS[1]-sim$TE[1])<10) {
-#'   sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' 
+#' # simulate a group
+#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' 
+#' # in case first simulation is short-lived
+#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
-#'
-#' # preservation function in respect to age, with the "mde" of the triangle
-#' # being exaclty at the last quarter of the duration of EACH lineage
-#' dTRImod1<-function(t,s,e,sp) {
-#' # note that now we don't have the "md" parameter here,
-#' # but it is calculated inside the function
-#'
-#'   if (e>=s) {
-#'     message("There is no TRI with e>=s")
-#'     return(rep(NaN, times=length(t)))
+#' 
+#' # preservation function, with the "mde" of the triangle being exactly at the
+#' # last quarter of the duration of EACH lineage
+#' dTRImod1 <- function(t, s, e, sp) {
+#'   # note that now we don't have the "md" parameter here,
+#'   # but it is calculated inside the function
+#'   
+#'   # check if it is a valid TRI
+#'   if (e >= s) {
+#'     message("There is no TRI with e >= s")
+#'     return(rep(NaN, times = length(t)))
 #'   }
-#'
-#'   # here is another difference from the function in example 3
-#'   md<-((s-e)/4)+e # md is at the last quarter of the duration of the lineage
+#'   
+#'   # calculate md
+#'   md <- ((s - e) / 4) + e 
+#'   # md is at the last quarter of the duration of the lineage
+#'   
 #'   # please note that the same logic can be used to sample parameters
 #'   # internally in the function, running for instance:
 #'   # md<-runif (n = 1, min = e, max = s)
-#'
-#'   if (md<e | md>s) {
+#'   
+#'   # check it is a valid md
+#'   if (md < e | md > s) {
 #'     message("There is no TRI with md outside [s, e] interval")
 #'     return(rep(NaN, times=length(t)))
 #'   }
-#'
-#'   id1<-which(t>=e & t<md)
-#'   id2<-which(t==md)
-#'   id3<-which(t>md & t<=s)
-#'   id4<-which( !(1:length(t) %in% c(id1,id2,id3)))
-#'
+#'   
+#'   # needed to vectorize function
+#'   id1 <- which(t >= e & t < md)
+#'   id2 <- which(t == md)
+#'   id3 <- which(t>md & t <= s)
+#'   id4 <- which( !(1:length(t) %in% c(id1,id2,id3)))
+#'   
+#'   # vectorize the function
 #'   res<-vector()
-#'
-#'   res[id1]<-(2*(t[id1]-e))/((s-e)*(md-e))
-#'   res[id2]<-2/(s-e)
-#'   res[id3]<-(2*(s-t[id3]))/((s-e)*(s-md))
-#'   res[id4]<-0
-#'
-#'   return(res) #for more details in this function, see example 3
+#'   
+#'   res[id1] <- (2*(t[id1] - e)) / ((s - e)*(md - e))
+#'   res[id2] <- 2 / (s - e)
+#'   res[id3] <- (2*(s - t[id3])) / ((s - e)*(s - md))
+#'   res[id4] <- 0
+#'   
+#'   return(res)
 #' }
-#'
-#' dTRImaxmod1<-function(s,e,sp) {
-#'   return(2/(s-e))
+#' 
+#' # function to calculate max
+#' dTRImaxmod1<-function(s, e, sp) {
+#'   return(2 / (s - e))
 #' }
-#'
-#' occs<-SampleADPP(S=1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 5000,
-#' dFUN = dTRImod1, dFUNmax = dTRImaxmod1)
-#'
-#' # we do not have the "md" parameter (see example 3) as it corresponds to
-#' # the last quarter of the duration of each lineage
-#'
-#' hist(unlist(occs[[1]]), breaks=100, probability = TRUE)
-#' mid<-((sim$TS[1]-sim$TE[1])/4)+sim$TE[1]
-#' curve(dTRI(x, e=sim$TE[1], s=sim$TS[1], md = mid),10, 0, add=TRUE, col="red")
-#'
+#' 
+#' \dontrun{
+#' # find occurrences
+#' occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 5000,
+#'                    dFun = dTRImod1, dFunMax = dTRImaxmod1)
+#' 
+#' # we do not have the "md" parameter (see example 3) as it corresponds to the
+#' # last quarter of the duration of each lineage
+#' 
+#' # check histogram
+#' hist(unlist(occs[[1]]), breaks = 100, probability = TRUE)
+#' 
+#' # md of dTRI
+#' mid <- ((sim$TS[1] - sim$TE[1]) / 4) + sim$TE[1]
+#' 
+#' # expected curve
+#' curve(dTRI(x, e = sim$TE[1], s = sim$TS[1], md = mid), 10, 0, add = TRUE, col = "red")
+#' }
+#' 
 #' # finally, a hat-shaped increase through the duration of a species with more
 #' # parameters than TS and TE, but the parameters relate to each specific lineage.
-#' # This is usefull when the user wants to use variable parameters for each species
+#' # This is useful when the user wants to use variable parameters for each species
 #' # but wants to keep track of those parameters after the sampling is over
-#'
-#' sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
-#' while(length(sim$TE)<20) {
-#'   sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' 
+#' # simulate a group
+#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' 
+#' # in case first simulation is short-lived
+#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
-#'
+#' 
 #' # preservation function in respect to age, with the "mode" of the triangle
 #' # being exactly at the last quarter of the duration of EACH lineage.
-#' dTRImod2<-function(t,s,e,sp) {
-#'
-#'   if (e>=s) {
-#'     message("There is no TRI with e>=s")
-#'     return(rep(NaN, times=length(t)))
+#' dTRImod2<-function(t, s, e, sp) {
+#'   
+#'   # make sure it is a valid TRI
+#'   if (e >= s) {
+#'     message("There is no TRI with e >= s")
+#'     return(rep(NaN, times = length(t)))
 #'   }
-#'
-#'   # here is another difference from the function in example 3 and 4
-#'   md<-par[sp]+par1[sp]
-#'
-#'   if (md<e | md>s) {
+#'   
+#'   # here is the difference from the function in example 3 and 4
+#'   md <- par[sp] + par1[sp]
+#'   
+#'   # check that md is valid
+#'   if (md < e | md > s) {
 #'     message("There is no TRI with md outside [s, e] interval")
-#'     return(rep(NaN, times=length(t)))
+#'     return(rep(NaN, times = length(t)))
 #'   }
-#'
-#'   id1<-which(t>=e & t<md)
-#'   id2<-which(t==md)
-#'   id3<-which(t>md & t<=s)
-#'   id4<-which( !(1:length(t) %in% c(id1,id2,id3)))
-#'
-#'   res<-vector()
-#'
-#'   res[id1]<-(2*(t[id1]-e))/((s-e)*(md-e))
-#'   res[id2]<-2/(s-e)
-#'   res[id3]<-(2*(s-t[id3]))/((s-e)*(s-md))
-#'   res[id4]<-0
-#'
-#'   return(res) #for more details in this function, see example 3 and 4
+#'   
+#'   id1 <- which(t >= e & t < md)
+#'   id2 <- which(t == md)
+#'   id3 <- which(t > md & t <= s)
+#'   id4 <- which(!(1:length(t) %in% c(id1,id2,id3)))
+#'   
+#'   res <- vector()
+#'   
+#'   res[id1] <- (2*(t[id1] - e)) / ((s - e)*(md - e))
+#'   res[id2] <- 2 / (s - e)
+#'   res[id3] <- (2*(s - t[id3])) / ((s - e)*(s - md))
+#'   res[id4] <- 0
+#'   
+#'   return(res) 
+#'   #for more details in this function, see example 3 and 4
 #' }
-#'
-#' dTRImaxmod2<-function(s,e,sp) {
-#'   return(2/(s-e))
+#' 
+#' # maximum function
+#' dTRImaxmod2 <- function(s, e, sp) {
+#'   return(2 / (s - e))
 #' }
-#' par<-runif (n = length(sim$TE), min = sim$TE, max = sim$TS)
-#' par1<-(((sim$TS-sim$TE)/2)+sim$TE)-par
-#' occs<-SampleADPP(S=1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 5000,
-#' dFUN = dTRImod2, dFUNmax = dTRImaxmod2)
-#'
-#' # we dont have the "md" parameter (see example 3) as it corresponds to
+#' 
+#' # get the par and par1 vectors
+#' par <- runif (n = length(sim$TE), min = sim$TE, max = sim$TS)
+#' par1 <- (((sim$TS - sim$TE)/2) + sim$TE) - par
+#' 
+#' \dontrun{
+#' # find occurrence list
+#' occs <- SampleADPP(S = 1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 5000,
+#'                    dFun = dTRImod2, dFunMax = dTRImaxmod2)
+#' 
+#' # we do not have the "md" parameter (see example 3) as it corresponds to
 #' # the last quarter of the duration of each lineage
-#'
-#' # checking:
+#' 
+#' # checking each species
 #' for (sp in 1:length(sim$TE)) {
-#'   hist(unlist(occs[[sp]]), breaks=100, probability = TRUE,
-#'   main=paste0("spp ", sp, " ; duration ~ ",
-#'   round(sim$TS[sp]-sim$TE[sp], digits = 2)))
-#'   mid=par[sp]+par1[sp]
-#'   curve(dTRI(x, e=sim$TE[sp], s=sim$TS[sp], md = mid),10, 0, add=TRUE,
-#'   col="red", n = 100)
-#'   abline(v=mid, col="red")
+#'   # check histogram
+#'   hist(unlist(occs[[sp]]), breaks = 100, probability = TRUE,
+#'        main = paste0("spp ", sp, " ; duration ~ ",
+#'                      round(sim$TS[sp] - sim$TE[sp], digits = 2)))
+#'   
+#'   # calculate mid
+#'   mid <- par[sp] + par1[sp]
+#'   
+#'   # expected curve
+#'   curve(dTRI(x, e = sim$TE[sp], s = sim$TS[sp], md = mid),10, 0, add = TRUE,
+#'         col = "red", n = 100)
+#'   abline(v = mid, col = "red")
+#' }
+#' 
+#'
 #' }
 #'
 #' @name SampleADPP
 #' @rdname SampleADPP
 #' @export
 
-SampleADPP<-function(S, TS, TE, rr, dFUN, dFUNmax=NULL, ...) {
+SampleADPP <- function(S, TS, TE, rr, dFun, dFunMax = NULL, ...) {
 
   # setting things and checking inputs
-  print.message<-TRUE
-  if (sum(c("t", "s", "e", "sp") %in% names(formals(dFUN)))<3) {
-    stop("dFUN must have \"t\", \"s\", \"e\", and  \"sp\" parameters")
+  printMessage <- TRUE
+  
+  # checking dFun has all arguments it needs
+  if (sum(c("t", "s", "e", "sp") %in% names(formals(dFun))) < 3) {
+    stop("dFun must have \"t\", \"s\", \"e\", and  \"sp\" parameters")
   }
 
-  if (!(is.null(dFUNmax))) { # if dFUNmax is provided by user
-    if (!(is.numeric(dFUNmax))) { #if it is a function
-
-      if (sum(c("t", "s", "e", "sp") %in% names(formals(dFUNmax)))<3) {
-        stop("dFUNmax must have \"t\", \"s\", \"e\", and  \"sp\" parameters")
+  # checking whether dFunMax exists and is a function
+  if (!(is.null(dFunMax))) { 
+    if (!(is.numeric(dFunMax))) {
+      # it must also have those parameters
+      if (sum(c("t", "s", "e", "sp") %in% names(formals(dFunMax))) < 3) {
+        stop("dFunMax must have \"t\", \"s\", \"e\", and  \"sp\" parameters")
       }
 
-      if (sum(names(formals(dFUNmax)) %in% names(formals(dFUN))
-             [-which(names(formals(dFUN))=="t")])
-         <length(names(formals(dFUNmax)))) {
-        stop("dFUN and dFUNmax must have the same arguments
-             (with the exception of \"t\" argument for dFUN\")")
+      # and it must also have the same parameters as dFun
+      if (sum(names(formals(dFunMax)) %in% names(formals(dFun))
+             [-which(names(formals(dFun)) == "t")])
+         < length(names(formals(dFunMax)))) {
+        stop("dFun and dFunMax must have the same arguments
+             (with the exception of \"t\" argument for dFun\")")
       }
 
     }
   }
 
-
-  occs<-list()
-  for (sp in S) { # for each lineage in the dataset
-
-    if (is.null(dFUNmax)) { # if dFUNmax is not provided by the user
-
-      if (print.message) {
-        message("Please wait. The function will use approximate maximum point for the function and that might take a while")
-        print.message<-FALSE
+  # initialize occurrence list
+  occs <- list()
+  
+  # for each lineage in the dataset
+  for (sp in S) { 
+    # if dFunMax is not provided by the user
+    if (is.null(dFunMax)) { 
+      # it is slower
+      if (printMessage) {
+        message("Please wait. The function will use approximate maximum point 
+                for the function and that might take a while")
+        printMessage <- FALSE
       }
 
-      # a simple/lazy but usefull aproximation: lower threshold until it is smaller than the maximum dFUN calculating at each 0.1my, then do one step back.
-      aux<-dFUN(seq(TE[sp], TS[sp], by=.01), e = TE[sp], s = TS[sp], ...)
-      threshold=0.99
-      test<-aux > threshold
-      if (sum(test)>=1) {
-        threshold<-max(aux)
-      } else {
-        while(sum(test)<1) {
-          threshold<-threshold-0.01
-          test<-aux > threshold
+      # a simple/lazy but useful approximation: lower threshold until it is 
+      # smaller than the maximum dFun calculating at each 0.1my, then 
+      # do one step back.
+      
+      # get the value of dFun
+      aux <- dFun(seq(TE[sp], TS[sp], by=.01), e = TE[sp], s = TS[sp], ...)
+      
+      # start a treshold - slightly below 1
+      threshold <- 0.99
+      
+      # whether the value anywhere is higher than threshold
+      test <- aux > threshold
+      
+      # if the value is higher than the threshold somewhere
+      if (sum(test) >= 1) {
+        # get new max
+        threshold <- max(aux)
+      } 
+      else {
+        # if not
+        while (sum(test) < 1) {
+          # get new treshold
+          threshold <- threshold - 0.01
+          
+          # redo test
+          test <- aux > threshold
         }
       }
-      dFUNmax_aprox<-threshold+0.01
+      
+      # max approximation is slightly above treshold so we capture that point
+      dFunMaxApprox <- threshold + 0.01
     }
 
 
     # number of occurrences following a poisson process:
-    noccs<-rpois(1, lambda = rr*(TS[sp]-TE[sp]))
+    nOccs <- rpois(1, lambda = rr*(TS[sp] - TE[sp]))
 
     # time of each occurrence:
-    res<-vector()
+    res <- vector()
 
-    # accept-reject method for Monte Carlo generation of random numbers from a density distribution:
-    while(length(res)<noccs) {
+    # accept-reject method for Monte Carlo generation of random numbers from 
+    # a density distribution
+    
+    # while we still have occurrences to check
+    while (length(res) < nOccs) {
       # sample a number within species duration:
-      t<-runif (n = 1, max = TS[sp], min = TE[sp])
+      t <- runif (n = 1, max = TS[sp], min = TE[sp])
 
-      # calculating the density of t and checking if it is smaller than a random sampled number between 0 and dFUNmax
-      if (is.null(dFUNmax)) { # w/ approx. dFUNmax
-        test<- runif (n=1, min = 0, max = dFUNmax_aprox)<= dFUN(t = t, s = TS[sp], e = TE[sp], sp=sp, ...)
-      } else {
-        if (is.numeric(dFUNmax)) { # w/ numeric dFUNmax
-          message(paste0("dFUNmax = ", dFUNmax, " will be assumed as the maximum value of dFUN"))
-          test<- runif (n=1, min = 0, max = dFUNmax)<= dFUN(t = t, s = TS[sp], e = TE[sp], sp=sp, ...)
-        } else { # w/ algebrical dFUNmax
-          test<- runif (n=1, min = 0, max = dFUNmax(s = TS[sp], e = TE[sp], sp=sp, ...))<= dFUN(t = t, s = TS[sp], e = TE[sp], sp=sp, ...)
+      # calculate the density of t and check if it is smaller than a random 
+      # sampled number between 0 and dFunMax
+      
+      # if we need to use dFunMaxApprox
+      if (is.null(dFunMax)) {
+        # check whether uniform variable is smaller
+        test <- runif (n = 1, min = 0, max = dFunMaxApprox) <= 
+          dFun(t = t, s = TS[sp], e = TE[sp], sp=sp, ...)
+      } 
+      
+      # if we have exact max
+      else {
+        # if it is a number
+        if (is.numeric(dFunMax)) { 
+          message(paste0("dFunMax = ", dFunMax, 
+                         " will be assumed as the maximum value of dFun"))
+          # check whether uniform variable is smaller
+          test <- runif (n = 1, min = 0, max = dFunMax) <= 
+            dFun(t = t, s = TS[sp], e = TE[sp], sp = sp, ...)
+        } 
+        # if it is a function
+        else {
+          test <- runif(n = 1, min = 0, 
+                        max = dFunMax(s = TS[sp], e = TE[sp], sp = sp, ...)) <= 
+            dFun(t = t, s = TS[sp], e = TE[sp], sp = sp, ...)
         }
       }
-      if (test) { # if the sampled number is smaller or equal to the density o t, appends t to the result:
-        res<-c(res, t)
+      # if the sampled number is smaller or equal to the density of t, 
+      # append t to the result:
+      if (test) { 
+        res <- c(res, t)
       }
     }
-    occs[[sp]]<-res # appends in the whole dataset
+    # append in the occurence vector
+    occs[[sp]] <- res 
 
   }
 
   # warning about non-sampled species:
-  zero_occs<-which(lapply(occs, length)==0)
-  message(paste0(length(zero_occs), " species left no fossil"))
+  zeroOccs <- which(lapply(occs, length) == 0)
+  message(paste0(length(zeroOccs), " species left no fossil"))
 
   return(occs)
 }

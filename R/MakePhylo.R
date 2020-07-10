@@ -41,7 +41,7 @@
 #'              tMax = 10, qShape = 1.3)
 #' 
 #' # in case first simulation has only one species
-#' while(length(sim$TE) < 2) { 
+#' while (length(sim$TE) < 2) { 
 #'   sim <- BDSim(n0 = 1, pp = function(t) 0.12 + 0.01*t, qq = 10, 
 #'                tMax = 10, qShape = 1.3)
 #' }

@@ -208,7 +208,7 @@ MeanDiv <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$mean))
 expectedDiv <- VarRateExp(div, 1, time)
 
 # do the same with variance
-meanVar <- unlist(lapply(time, function(x) sim.mean(x, SimList = SimList)$var))
+meanVar <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$var))
 expectedVar <- unlist(lapply(time, function(x) div.var(x, div, qq)))
 
 # and now let us check out the plots
@@ -264,7 +264,7 @@ plot(seq(0, tMax, 0.1), q(seq(0, tMax, 0.1)), type = 'l',
 
 \dontrun{
 # run the simulations
-SimList <- lapply(1:1000, function(x) BDSimGeneral(n0, p, q, tMax))
+simList <- lapply(1:1000, function(x) BDSimGeneral(n0, p, q, tMax))
 
 # let us make vectors to hold the average diversity and variance
 
@@ -279,13 +279,13 @@ qq <- Vectorize(function(t) q(t))
 div <- Vectorize(function(t) p(t) - q(t))
 
 # calculate the mean diversity at our time points
-MeanDiv <- unlist(lapply(time, function(x) sim.mean(x, SimList = SimList)$mean))
+MeanDiv <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$mean))
 
 # calculate the expected diversity for the sime time points
 expectedDiv <- VarRateExp(div, 1, time)
 
 # do the same with variance
-meanVar <- unlist(lapply(time, function(x) sim.mean(x, SimList = SimList)$var))
+meanVar <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$var))
 expectedVar <- unlist(lapply(time, function(x) div.var(x, div, qq)))
 
 # and now let us check out the plots
@@ -328,7 +328,7 @@ if (requireNamespace("fitdistrplus", quietly = TRUE)) {
   \dontrun{
   # run simulations - note fast = FALSE and trueExt = TRUE so we can accurately
   # fit the results to a Weibull
-  SimList <- lapply(1:1000, function(x)
+  simList <- lapply(1:1000, function(x)
     BDSimGeneral(n0, p, q, tMax, qShape = qShape, fast = FALSE, trueExt = TRUE))
   
   # now we can use fitdistrplus to check that, on average, the longevities 
@@ -339,11 +339,11 @@ if (requireNamespace("fitdistrplus", quietly = TRUE)) {
   scales <- c()
   
   # for each simulation
-  for (i in 1:length(SimList)) {
+  for (i in 1:length(simList)) {
     
     # invert the time so we can perform a fit
-    TE <- tMax - SimList[[i]]$TE
-    TS <- tMax - SimList[[i]]$TS
+    TE <- tMax - simList[[i]]$TE
+    TS <- tMax - simList[[i]]$TS
     
     # TS could be -0.01, set it to 0 if so
     TS <- ifelse(TS < 0, 0, TS)
@@ -400,7 +400,7 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   # only 100 simulations to finish it in a reasonable time
   
   # run simulations
-  SimList <- lapply(1:1000, function(x) BDSimGeneral(n0, p, q, tMax))
+  simList <- lapply(1:1000, function(x) BDSimGeneral(n0, p, q, tMax))
   
   # let us make vectors to hold the average diversity and variance
   
@@ -415,13 +415,13 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   div <- Vectorize(function(t) p(t) - q)
   
   # calculate the mean diversity at our time points
-  MeanDiv <- unlist(lapply(time, function(x) sim.mean(x, SimList = SimList)$mean))
+  MeanDiv <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$mean))
   
   # calculate the expected diversity for the sime time points
   expectedDiv <- VarRateExp(div, 1, time)
   
   # do the same with variance
-  meanVar <- unlist(lapply(time, function(x) sim.mean(x, SimList = SimList)$var))
+  meanVar <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$var))
   expectedVar <- unlist(lapply(time, function(x) div.var(x, div, qq)))
   
   # and now let us check out the plots
@@ -475,9 +475,9 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   par_matrix <- matrix(0, nrow = 0, ncol = 2)
   
   # for each replicate
-  for (i in 1:length(SimList)) {
+  for (i in 1:length(simList)) {
     # get the simulation in question
-    sim <- SimList[[i]]
+    sim <- simList[[i]]
     
     # need more than 2 species to use fit_env
     if (length(sim$TE[sim$TE < 0]) < 2) next

@@ -36,7 +36,7 @@ member species.
 sim<-BDSim(n0 = 3, pp = .1, qq = 0.1, tMax = 10)
 
 # in case first simulation has a small number of lineages
-while(length(sim$TE)<20) {
+while (length(sim$TE)<20) {
   sim<-BDSim(n0 = 3, pp = .1, qq = 0.1, tMax = 10)
 }
 
@@ -80,7 +80,7 @@ for (i in 1:length(test)) {
 sim<-BDSim(n0 = 5, pp = .1, qq = 0.1, tMax = 10)
 
 # in case first simulation has a small number of lineages
-while(length(sim$TE)<20) {
+while (length(sim$TE)<20) {
   sim<-BDSim(n0 = 5, pp = .1, qq = 0.1, tMax = 10)
 }
 
@@ -122,7 +122,7 @@ for (i in 1:length(test)) {
 
 # including one clade, of course
 sim<-BDSim(n0 = 1, pp = .2, qq = 0.1, tMax = 10)
-while(length(sim$TE)<10) {
+while (length(sim$TE)<10) {
   sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
 }
 

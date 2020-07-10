@@ -12,7 +12,7 @@
 #' @param pp function to hold the speciation rate over time. It could be a
 #' constant or a function of time (to be an exponential rate or weibull scale),
 #' a function of time and an environmental variable, or a vector of rates to be
-#' accompanied by a vector of rate shifts \code{pshifts}.
+#' accompanied by a vector of rate shifts \code{pShifts}.
 #'
 #' @param qq similar as above, but for the extinction rate.
 #'
@@ -37,17 +37,17 @@
 #'
 #' @param envQQ similar as above, but for the extinction rate.
 #'
-#' @param pshifts vector of rate shifts. First element must be the sstarting
+#' @param pShifts vector of rate shifts. First element must be the sstarting
 #' time for the simulation (0 or tMax). It must have the same length as
-#' \code{pp}. E.g. \code{pp = c(0.1, 0.2, 0.1)}, \code{pshifts = c(0, 10, 20)}
+#' \code{pp}. E.g. \code{pp = c(0.1, 0.2, 0.1)}, \code{pShifts = c(0, 10, 20)}
 #' means the speciation rate will be 0.1 from 0 to 10, 0.2 from 10 to 20, and 
 #' 0.1 from 20 to \code{tMax}. It would also be identical, in this case, to use
-#' \code{pshifts = c(tMax, tMax-10, tMax-20)}.
+#' \code{pShifts = c(tMax, tMax-10, tMax-20)}.
 #' 
 #' Note that using this  method for step-function rates is currently slower than using
 #' \code{ifelse}.
 #'
-#' @param qshifts similar as above, but for the extinction rate.
+#' @param qShifts similar as above, but for the extinction rate.
 #' 
 #' @param fast used for \code{BDSimGeneral}. When \code{TRUE}, sets 
 #' \code{rexp_var} to throw away waiting times higher than the maximum 
@@ -140,7 +140,7 @@
 #' # list of extinction rates
 #' qList <- c(0.08, 0.07, 0.08)
 #' 
-#' # list of shift times. Note qshifts could be c(40, 20, 5) for identical results
+#' # list of shift times. Note qShifts could be c(40, 20, 5) for identical results
 #' qShifts <- c(0, 20, 35)
 #' 
 #' # let us take a look at how MakeRate will make it a step function
@@ -172,7 +172,7 @@
 #' \dontrun{
 #'   # run the simulation. We can pass the stepfunction directly, or just give
 #'   # a list of q and a list of shifts
-#'   sim <- BDSim(n0, p, qList, tMax, qshifts = qshifts)
+#'   sim <- BDSim(n0, p, qList, tMax, qShifts = qShifts)
 #' }
 #' 
 #' # we can also supply a shape parameter to try age-dependent rates
@@ -272,13 +272,13 @@
 #' @export
 
 BDSim <- function(n0, pp, qq, tMax, pShape = NULL, qShape = NULL, envPP = NULL, 
-                envQQ = NULL, pshifts = NULL, qshifts = NULL, fast = TRUE, 
+                envQQ = NULL, pShifts = NULL, qShifts = NULL, fast = TRUE, 
                 trueExt=FALSE) {
   
   # if we have ONLY numbers for pp and qq, it is constant
   if ((is.numeric(pp) & length(pp) == 1) &
       (is.numeric(qq) & length(qq) == 1) &
-       (is.null(c(pShape, qShape, envPP, envQQ, pshifts,qshifts)))) {
+       (is.null(c(pShape, qShape, envPP, envQQ, pShifts,qShifts)))) {
     p <- pp
     q <- qq
     
@@ -291,8 +291,8 @@ BDSim <- function(n0, pp, qq, tMax, pShape = NULL, qShape = NULL, envPP = NULL,
   # might have a shape parameter
   else {
     # use MakeRate to create the rates we want
-    p <- MakeRate(pp, tMax, envPP, pshifts)
-    q <- MakeRate(qq, tMax, envQQ, qshifts)
+    p <- MakeRate(pp, tMax, envPP, pShifts)
+    q <- MakeRate(qq, tMax, envQQ, qShifts)
 
     # call BDSimGeneral
     return(BDSimGeneral(n0, p, q, tMax, pShape, qShape, fast, trueExt))
