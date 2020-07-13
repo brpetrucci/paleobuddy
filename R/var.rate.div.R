@@ -1,7 +1,7 @@
 #' Calculates the expected number of species for a given time varying rate
 #' using the exponential distribution for variable rates.
 #'
-#' \code{VarRateExp} takes a function, an initial number of species and a time
+#' \code{var.rate.div} takes a function, an initial number of species and a time
 #' vector and calculates the predicted exponential with that function as rate
 #' on that interval. This allows for efficient testing of the diversity curves
 #' produced by \code{paleobuddy} simulations.
@@ -18,7 +18,7 @@
 #' can change to any positive number. We allow for negative initial values as
 #' well, but of course that will not help in testing the package.
 #'
-#' NOTE: \code{VarRateExp} will find the expected number of daughters given a
+#' NOTE: \code{var.rate.div} will find the expected number of daughters given a
 #' rate \code{ff} and an initial number of parents \code{n0}, so in a
 #' biological context \code{ff} is diversification rate, not speciation (unless
 #' extinction is 0, of course).
@@ -50,11 +50,11 @@
 #' par(mfrow = c(1,2))
 #' 
 #' # see how the rate looks
-#' r <- MakeRate(0.5)
+#' r <- make.rate(0.5)
 #' plot(t, rep(r, length(t)), type = 'l')
 #' 
 #' # get the diversity and plot it
-#' div <- VarRateExp(ff, t = t)
+#' div <- var.rate.div(ff, t = t)
 #' plot(t, div, type = 'l')
 #' 
 #' ###
@@ -64,11 +64,11 @@
 #' }
 #' 
 #' # visualize the rate
-#' r <- MakeRate(ff)
+#' r <- make.rate(ff)
 #' plot(t, r(t), type = 'l')
 #' 
 #' # get the diversity and plot it
-#' div <- VarRateExp(ff, t = t)
+#' div <- var.rate.div(ff, t = t)
 #' plot(t, div, type = 'l')
 #' 
 #' ###
@@ -90,11 +90,11 @@
 #' }
 #' 
 #' # visualize the rate
-#' r <- MakeRate(ff)
+#' r <- make.rate(ff)
 #' plot(t, r(t), type = 'l')
 #' 
 #' # get diversity and plot it
-#' div <- VarRateExp(ff, n0 = 2, t)
+#' div <- var.rate.div(ff, n0 = 2, t)
 #' plot(t, div, type = 'l')
 #' 
 #' ###
@@ -106,11 +106,11 @@
 #' }
 #' 
 #' # visualize the rate
-#' r <- MakeRate(ff)
+#' r <- make.rate(ff)
 #' plot(t, r(t), type = 'l')
 #' 
 #' # we can have any number of starting species
-#' div <- VarRateExp(ff, n0 = 2, t)
+#' div <- var.rate.div(ff, n0 = 2, t)
 #' plot(t, div, type = 'l')
 #' 
 #' ###
@@ -125,11 +125,11 @@
 #' t <- seq(0, 10, 0.1)
 #' 
 #' # visualize the rate
-#' r <- MakeRate(ff)
+#' r <- make.rate(ff)
 #' plot(t, r(t), type = 'l')
 #' 
 #' # get the diversity and plot it
-#' div <- VarRateExp(ff, t = t)
+#' div <- var.rate.div(ff, t = t)
 #' plot(t, div, type = 'l')
 #' 
 #' # important note: this method of creating a step function might be annoying,
@@ -147,16 +147,16 @@
 #' fShifts <- c(0, 2, 3, 5)
 #' 
 #' # visualize the rate
-#' r <- MakeRate(ff, fShifts = fShifts)
+#' r <- make.rate(ff, fShifts = fShifts)
 #' plot(t, r(t),type = 'l')
 #' 
 #' # get the diversity and plot it
-#' div <- VarRateExp(ff, t = t, fShifts = fShifts)
+#' div <- var.rate.div(ff, t = t, fShifts = fShifts)
 #' plot(t, div, type = 'l')
 #' 
-#' # note the delay in running VarRateExp using this method. integrating a step
-#' # function created using the methods in MakeRate() is slow, as explained in
-#' # the MakeRate documentation)
+#' # note the delay in running var.rate.div using this method. integrating a step
+#' # function created using the methods in make.rate() is slow, as explained in
+#' # the make.rate documentation)
 #' 
 #' # it is also impractical to supply a rate and a shifts vector and
 #' # have an environmental dependency, so in cases where one looks to run
@@ -177,11 +177,11 @@
 #'   }
 #'   
 #'   # visualize the rate
-#'   r <- MakeRate(ff, envF = InfTemp)
+#'   r <- make.rate(ff, envF = InfTemp)
 #'   plot(t, r(t), type = 'l')
 #'   
 #'   # get diversity and plot it
-#'   div <- VarRateExp(ff, t = t, envF = InfTemp)
+#'   div <- var.rate.div(ff, t = t, envF = InfTemp)
 #'   plot(t, div, type = 'l')
 #'   
 #'   ###
@@ -193,11 +193,11 @@
 #'   }
 #'   
 #'   # visualize the rate
-#'   r <- MakeRate(ff, envF = InfTemp)
+#'   r <- make.rate(ff, envF = InfTemp)
 #'   plot(t, r(t), type = 'l')
 #'   
 #'   # get diversity and plot it
-#'   div <- VarRateExp(ff, t = t, envF = InfTemp)
+#'   div <- var.rate.div(ff, t = t, envF = InfTemp)
 #'   plot(t, div, type = 'l')
 #'   
 #'   ###
@@ -212,20 +212,20 @@
 #'   }
 #'   
 #'   # visualize the rate
-#'   r <- MakeRate(ff, envF = InfTemp)
+#'   r <- make.rate(ff, envF = InfTemp)
 #'   plot(t, r(t), type = 'l')
 #'   
-#'   div <- VarRateExp(ff, t = t, envF = InfTemp)
+#'   div <- var.rate.div(ff, t = t, envF = InfTemp)
 #'   plot(t, div, type = 'l')
 #' }
 #' 
-#' @name VarRateExp
-#' @rdname VarRateExp
+#' @name var.rate.div
+#' @rdname var.rate.div
 #' @export
 
-VarRateExp <- function(ff, n0 = 1, t, envF = NULL, fShifts = NULL) {
+var.rate.div <- function(ff, n0 = 1, t, envF = NULL, fShifts = NULL) {
   # get the corresponding rate
-  f <- MakeRate(ff, envF = envF, fShifts = fShifts)
+  f <- make.rate(ff, envF = envF, fShifts = fShifts)
 
   if (!is.numeric(f)) {
     # integrate the rate for each t

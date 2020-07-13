@@ -1,12 +1,12 @@
 #' Converts a paleobuddy simulation into a phylogeny
 #'
-#' \code{MakePhylo} generates a \code{phylo} object using a simulation from the
-#' \code{BDSim} function. The phylogeny follows a "Hennigian" (sensu Ezard et
+#' \code{make.phylo} generates a \code{phylo} object using a simulation from the
+#' \code{bd.sim} function. The phylogeny follows a "Hennigian" (sensu Ezard et
 #' al 2011) format. If the simulation has only one lineage, the function
 #' returns \code{NA} as there is no phylogeny for a simulation with only one
 #' lineage.
 #'
-#' @param sim a simulation from the \code{BDSim} function.
+#' @param sim a simulation from the \code{bd.sim} function.
 #'
 #' @author Function written by Matheus Januario. 
 #' 
@@ -19,11 +19,11 @@
 #' @examples
 #'
 #' # generating a phylogeny using constant rates
-#' sim <- BDSim(n0 = 1, pp = 0.2, qq = 0.05, tMax = 10, 
+#' sim <- bd.sim(n0 = 1, pp = 0.2, qq = 0.05, tMax = 10, 
 #'              nFinal = c(2, Inf), extOnly = TRUE)
 #' 
 #' # make the phylogeny
-#' phy <- MakePhylo(sim)
+#' phy <- make.phylo(sim)
 #' 
 #' par(mfrow = c(1, 2))
 #' # plot it
@@ -34,13 +34,13 @@
 #'   ape::plot.phylo(ape::drop.fossil(phy))
 #' }
 #' 
-#' # this works for sim generated with any of the scenarios in BDSim, of course
-#' sim <- BDSim(n0 = 1, pp = function(t) 0.05 + 0.01*t, 
+#' # this works for sim generated with any of the scenarios in bd.sim, of course
+#' sim <- bd.sim(n0 = 1, pp = function(t) 0.05 + 0.01*t, 
 #'              qq = function(t) 0.03 + 0.015*t, tMax = 10, 
 #'              nFinal = c(2, Inf), extOnly = TRUE)
 #' 
 #' # make the phylogeny
-#' phy <- MakePhylo(sim)
+#' phy <- make.phylo(sim)
 #' 
 #' par(mfrow = c(1, 2))
 #' # plot it
@@ -51,11 +51,11 @@
 #'   ape::plot.phylo(ape::drop.fossil(phy))
 #' }
 #' 
-#' @name MakePhylo
-#' @rdname MakePhylo
+#' @name make.phylo
+#' @rdname make.phylo
 #' @export
 
-MakePhylo <- function(sim) {
+make.phylo <- function(sim) {
 
   # simulations with just one species do not have a phylogeny
   if (length(sim$TE) < 2) {

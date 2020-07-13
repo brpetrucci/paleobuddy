@@ -1,6 +1,6 @@
 #' Non-constant rate Birth-Death simulation
 #'
-#' \code{BDSimGeneral} takes an initial number of species, speciation and
+#' \code{bd.sim.general} takes an initial number of species, speciation and
 #' extinction rates (either constants, functions of time, or of time and an
 #' environmental variable), a maximum simulation time and possibly a shape for
 #' age-dependent speciation and/or extinction. It then generates the speciation 
@@ -18,10 +18,10 @@
 #'
 #' @param qq similar to above, but for the extinction rate.
 #' 
-#' Note: this function is meant to be called by \code{BDSim}, so it neither
-#' allows for as much flexibility, nor call \code{MakeRate}. If the user wishes
-#' to use \code{BDSimGeneral} with environmental or step-function rates, they
-#' can generate the rate with \code{MakeRate} and supply it to the function.
+#' Note: this function is meant to be called by \code{bd.sim}, so it neither
+#' allows for as much flexibility, nor call \code{make.rate}. If the user wishes
+#' to use \code{bd.sim.general} with environmental or step-function rates, they
+#' can generate the rate with \code{make.rate} and supply it to the function.
 #'
 #' @param tMax ending time of simulation. Any species still living
 #' after \code{tMax} is considered extant, and any species that would be
@@ -30,30 +30,30 @@
 #' @param pShape shape parameter for the Weibull distribution for age-dependent
 #' speciation. Default is \code{NULL}, where \code{pp} will be considered a
 #' time-dependent exponential rate. For \code{pShape != NULL}, \code{pp} will
-#' be considered a scale, and \code{rexp_var} will draw a Weibull distribution
+#' be considered a scale, and \code{rexp.var} will draw a Weibull distribution
 #' instead.
 #'
 #' @param qShape similar as above, but for the extinction rate.
 #' 
 #' @param nFinal an interval of acceptable number of species at the end of the
 #' simulation. If not supplied, default is \code{c(0, Inf)}, so that any number
-#' of species is accepted. If supplied, \code{BDSimGeneral} will run until the
+#' of species is accepted. If supplied, \code{bd.sim.general} will run until the
 #' number of total species generated, or, if \code{extOnly = TRUE}, the number of
 #' extant species at the end of the simulation, lies within the interval.
 #' 
 #' @param extOnly a boolean indicating whether \code{nFinal} should be taken as
 #' the number of total or extant species during the simulation. If \code{TRUE},
-#' \code{BDSimGeneral} will run until the number of extant species lies within
+#' \code{bd.sim.general} will run until the number of extant species lies within
 #' the \code{nFinal} interval. If \code{FALSE}, as default, it will run until the
 #' total number of species generated lies within that interval.
 #' 
-#' @param fast used for \code{BDSimGeneral}. When \code{TRUE}, sets 
-#' \code{rexp_var} to throw away waiting times higher than the maximum 
+#' @param fast used for \code{bd.sim.general}. When \code{TRUE}, sets 
+#' \code{rexp.var} to throw away waiting times higher than the maximum 
 #' simulation time. Should be \code{FALSE} for unbiased testing of age 
 #' dependency. User might also se it to \code{FALSE} for more accurate waiting
 #' times.
 #' 
-#' @param trueExt used for \code{BDSimGeneral}. When \code{TRUE}, time of 
+#' @param trueExt used for \code{bd.sim.general}. When \code{TRUE}, time of 
 #' extinction of extant species will be the true time, otherwise it will be 
 #' tMax+0.01. Need to be \code{TRUE} when testing age-dependent 
 #' extinction.
@@ -81,7 +81,7 @@
 #' # we can test a couple scenarios
 #' 
 #' ###
-#' # first, even though this is BDSimGeneral, we can try constant rates
+#' # first, even though this is bd.sim.general, we can try constant rates
 #' 
 #' # initial number of species
 #' n0 <- 1
@@ -96,17 +96,17 @@
 #' q <- 0.08
 #' 
 #' # run the simulation
-#' sim <- BDSimGeneral(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   phy <- MakePhylo(sim)
+#'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
 #' 
 #' ###
 #' # we can complicate things further with a linear function as a rate
-#' # BDSimGeneral takes longer so we run examples for 1000 replicates instead
+#' # bd.sim.general takes longer so we run examples for 1000 replicates instead
 #' 
 #' # initial number of species
 #' n0 <- 1
@@ -123,11 +123,11 @@
 #' q <- 0.05
 #' 
 #' # run the simulation
-#' sim <- BDSimGeneral(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   phy <- MakePhylo(sim)
+#'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
 #' 
@@ -153,8 +153,8 @@
 #' # identical results
 #' qShifts <- c(0, 15, 25)
 #' 
-#' # let us take a look at how MakeRate will make it a step function
-#' q <- MakeRate(qList, fShifts = qShifts)
+#' # let us take a look at how make.rate will make it a step function
+#' q <- make.rate(qList, fShifts = qShifts)
 #' 
 #' # and plot it
 #' plot(seq(0, tMax, 0.1), q(seq(0, tMax, 0.1)), type = 'l',
@@ -168,14 +168,14 @@
 #' }
 #' 
 #' # run the simulation
-#' sim <- BDSimGeneral(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
 #' # equivalent:
-#' # sim <- BDSimGeneral(n0, p, qList, tMax, qShifts = qShifts)
+#' # sim <- bd.sim.general(n0, p, qList, tMax, qShifts = qShifts)
 #' # this is, however, much slower
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   phy <- MakePhylo(sim)
+#'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
 #' 
@@ -196,11 +196,11 @@
 #' qShape <- 1
 #' 
 #' # run simulations
-#' sim <- BDSimGeneral(n0, p, q, tMax, qShape = qShape, nFinal = c(2, Inf))
+#' sim <- bd.sim.general(n0, p, q, tMax, qShape = qShape, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   phy <- MakePhylo(sim)
+#'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
 #' 
@@ -223,11 +223,11 @@
 #' qShape <- 1
 #' 
 #' # run simulations
-#' sim <- BDSimGeneral(n0, p, q, tMax, qShape = qShape, nFinal = c(2, Inf))
+#' sim <- bd.sim.general(n0, p, q, tMax, qShape = qShape, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   phy <- MakePhylo(sim)
+#'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
 #' 
@@ -252,28 +252,28 @@
 #'   data(InfTemp, package="RPANDA")
 #'   
 #'   # speciation
-#'   p <- MakeRate(p_t, tMax, envF = InfTemp)
+#'   p <- make.rate(p_t, tMax, envF = InfTemp)
 #'   
 #'   # since we need many species to be able to test this effectively using
 #'   # RPANDA, and the rates become really noisy with temperature, we set
 #'   # only 100 simulations to finish it in a reasonable time
 #'   
 #'   # run simulations
-#'   sim <- BDSimGeneral(n0, p, q, tMax, nFinal = c(2, Inf))
+#'   sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
 #'   
 #'   # we can plot the phylogeny to take a look
 #'   if (requireNamespace("ape", quietly = TRUE)) {
-#'     phy <- MakePhylo(sim)
+#'     phy <- make.phylo(sim)
 #'     ape::plot.phylo(phy)
 #'   }
 #' }
 #'
-#' @name BDSimGeneral
-#' @rdname BDSimGeneral
+#' @name bd.sim.general
+#' @rdname bd.sim.general
 #' @export
 #' 
 
-BDSimGeneral <- function(n0, pp, qq, tMax, 
+bd.sim.general <- function(n0, pp, qq, tMax, 
                          pShape = NULL, qShape = NULL,
                          nFinal = c(0, Inf), extOnly = FALSE,
                          fast = TRUE, trueExt = FALSE) {
@@ -311,19 +311,19 @@ BDSimGeneral <- function(n0, pp, qq, tMax,
       # was there at the beginning
       tNow <- ifelse(TS[sCount] < 0, 0, TS[sCount])
 
-      # find the waiting time using rexp_var - note that in rexp_var we only
+      # find the waiting time using rexp.var - note that in rexp.var we only
       # count t from tNow (to consider the rates as functions), so that
       # now we need to subtract tNow
       waitTimeS <- ifelse(
         is.numeric(pp), rexp(1, pp), 
         ifelse(pp(tNow) > 0, 
-               rexp_var(1, pp, tNow, tMax, pShape, 
+               rexp.var(1, pp, tNow, tMax, pShape, 
                         ifelse(TS[sCount] < 0, 0, TS[sCount]), fast), Inf))
       
       waitTimeE <- ifelse(
         is.numeric(qq), rexp(1, qq), 
         ifelse(qq(tNow) > 0,
-               rexp_var(1, qq, tNow, tMax, qShape,
+               rexp.var(1, qq, tNow, tMax, qShape,
                         ifelse(TS[sCount] < 0, 0, TS[sCount]), fast), Inf))
   
       tExp <- tNow + waitTimeE
@@ -344,7 +344,7 @@ BDSimGeneral <- function(n0, pp, qq, tMax,
         waitTimeS <- ifelse(
           is.numeric(pp), rexp(1, pp), 
           ifelse(pp(tNow) > 0, 
-                 rexp_var(1, pp, tNow, tMax, pShape, 
+                 rexp.var(1, pp, tNow, tMax, pShape, 
                           ifelse(TS[sCount] < 0, 0, TS[sCount]), fast), Inf))
       }
   

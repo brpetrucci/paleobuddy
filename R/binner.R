@@ -43,35 +43,35 @@
 #' # let us try with a real simulated species fossil record
 #' 
 #' # run the simulation
-#' sim <- BDSim(1, pp = 0.1, qq = 0.05, tMax = 15)
+#' sim <- bd.sim(1, pp = 0.1, qq = 0.05, tMax = 15)
 #' 
 #' # sample it
-#' sampled <- Sample(S = 1, TE = sim$TE, TS = sim$TS, rr = 1, tMax = 15)
+#' sampled <- sample(S = 1, TE = sim$TE, TS = sim$TS, rr = 1, tMax = 15)
 #' 
 #' # bins list
 #' bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
 #' 
 #' # result
-#' binnedSample <- binner(sampled, bins)
-#' binnedSample
+#' binnedsample <- binner(sampled, bins)
+#' binnedsample
 #' 
 #' ### 
 #' # just one more
 #' 
 #' # run the simulation
-#' sim <- BDSim(1, pp = function(t) {
+#' sim <- bd.sim(1, pp = function(t) {
 #'   return(0.05 + 0.005*t)
 #' }, qq = 0.05, tMax = 20)
 #' 
 #' # sample it
-#' sampled <- Sample(S = 1, TE = sim$TE, TS = sim$TS, rr = 1, tMax = 15)
+#' sampled <- sample(S = 1, TE = sim$TE, TS = sim$TS, rr = 1, tMax = 15)
 #' 
 #' # bins list
 #' bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
 #' 
 #' # result
-#' binnedSample <- binner(sampled, bins)
-#' binnedSample
+#' binnedsample <- binner(sampled, bins)
+#' binnedsample
 #'
 #' @name binner
 #' @rdname binner

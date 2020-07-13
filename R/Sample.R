@@ -1,21 +1,21 @@
 #' Constant and non-constant rate species sampling
 #'
-#' \code{Sample} takes a species number, a vector of speciation and extinction 
+#' \code{sample} takes a species number, a vector of speciation and extinction 
 #' times, a sampling rate and a maximum time for simulation and returns a list
 #' of occurrence times for each species.
 #'
-#' @param S the species number to be sampled. Since \code{Sample} will be called
+#' @param S the species number to be sampled. Since \code{sample} will be called
 #' by a wrapper using \code{lapply}, it is through \code{S} that we apply this
 #' function.
 #'
-#' @param TE a vector of extinction times, usually an output of \code{BDSim}.
+#' @param TE a vector of extinction times, usually an output of \code{bd.sim}.
 #'
-#' @param TS a vector of speciation times, usually an output of \code{BDSim}.
+#' @param TS a vector of speciation times, usually an output of \code{bd.sim}.
 #'
-#' @param rr a sampling rate function. Can be created by \code{MakeRate} for
+#' @param rr a sampling rate function. Can be created by \code{make.rate} for
 #' simplicity, but can be any time-varying function.
 #'
-#' @param tMax the maximum simulation time, used by \code{rexp_var}.
+#' @param tMax the maximum simulation time, used by \code{rexp.var}.
 #'
 #' @return a list of occurrences for that species.
 #'
@@ -27,11 +27,11 @@
 #' # let us start with a linear increase in preservation rate
 #' 
 #' # simulate a group
-#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation was short-lived
 #' while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # preservation function
@@ -48,7 +48,7 @@
 #'      xlim = c(10, sim$TE[1]))
 #' 
 #' # sample
-#' occs <- Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
+#' occs <- sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
 #' 
 #' # check histogram
 #' hist(occs,
@@ -60,11 +60,11 @@
 #' # now let us try a step function
 #' 
 #' # simulate a group
-#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation was short lived
 #' while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # we can create the sampling rate here from a few vectors
@@ -77,7 +77,7 @@
 #' rShifts <- c(0, 4, 8)
 #' 
 #' # create the rate to visualize it
-#' r <- MakeRate(rlist, tMax = 10, fShifts = rShifts)
+#' r <- make.rate(rlist, tMax = 10, fShifts = rShifts)
 #' 
 #' # time
 #' t <- seq(0, 10, by = 0.1)
@@ -88,7 +88,7 @@
 #'      xlim = c(10, sim$TE[1]))
 #' 
 #' # sample
-#' occs <- Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
+#' occs <- sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
 #' 
 #' # check histogram
 #' hist(occs,
@@ -102,11 +102,11 @@
 #' # we can create a step function in a different way as well
 #' 
 #' # simulate a group
-#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation was short-lived
 #' while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # preservation function
@@ -125,7 +125,7 @@
 #'      xlim = c(10, sim$TE[1]))
 #' 
 #' # sample
-#' occs <- Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
+#' occs <- sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
 #' 
 #' # check histogram
 #' hist(occs,
@@ -138,11 +138,11 @@
 #' 
 #' if (requireNamespace("RPANDA", quietly = TRUE)) {
 #'   # simulate a group
-#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #'   
 #'   # in case first simulation was short-lived
 #'   while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'     sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'     sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #'   }
 #'   
 #'   # preservation function dependent on temperature
@@ -154,7 +154,7 @@
 #'   data(InfTemp, package = "RPANDA")
 #'   
 #'   # final preservation
-#'   r <- MakeRate(r_t, envF = InfTemp)
+#'   r <- make.rate(r_t, envF = InfTemp)
 #'   
 #'   # visualizing the plot from past to present
 #'   plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
@@ -162,7 +162,7 @@
 #'        xlim = c(10, sim$TE[1]))
 #'   
 #'   # sample
-#'   occs <- Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
+#'   occs <- sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
 #'   
 #'   # check histogram
 #'   hist(occs,
@@ -170,11 +170,11 @@
 #'        xlab = "Mya")
 #' }
 #' 
-#' @name Sample
-#' @rdname Sample
+#' @name sample
+#' @rdname sample
 #' @export
 
-Sample<-function(S, TE, TS, rr, tMax) {
+sample<-function(S, TE, TS, rr, tMax) {
   # invert times since simulation goes from 0 to tMax
   TE <- tMax - TE
   TS <- tMax - TS
@@ -196,8 +196,8 @@ Sample<-function(S, TE, TS, rr, tMax) {
 
   # while we have not reached the time of extinction
   while (Now < End) {
-    # take the waiting time for sampling, using rexp_var()
-    WaitTimeR <- ifelse(rr(Now) > 0, rexp_var(1, rr, Now, tMax), Inf)
+    # take the waiting time for sampling, using rexp.var()
+    WaitTimeR <- ifelse(rr(Now) > 0, rexp.var(1, rr, Now, tMax), Inf)
 
     # advance in time
     Now <- Now + WaitTimeR

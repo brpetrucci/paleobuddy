@@ -1,7 +1,7 @@
 #' Returns a rate based on a time-varying function, environmental variable
 #' and/or vectors of rates and shifts
 #'
-#' \code{MakeRate} takes a function \code{ff}, which could be a constant, a
+#' \code{make.rate} takes a function \code{ff}, which could be a constant, a
 #' function of time or a vector of rates. If it is a constant or a time-varying
 #' function, nothing else need be supplied. Otherwise, if \code{ff} is a vector
 #' of rates, the user must supply the accompanying vector of rate shifts
@@ -53,11 +53,11 @@
 #' # first we need a time vector to use on plots
 #' t <- seq(0, 50, 0.1)
 #' 
-#' # MakeRate will leave some types of functions unaltered, like the following
+#' # make.rate will leave some types of functions unaltered, like the following
 #' 
 #' ###
 #' # let us start simple: create a constant rate
-#' r <- MakeRate(0.5)
+#' r <- make.rate(0.5)
 #' 
 #' # plot it
 #' plot(t, rep(r, length(t)), type = 'l')
@@ -71,7 +71,7 @@
 #' }
 #' 
 #' # create rate
-#' r <- MakeRate(ff)
+#' r <- make.rate(ff)
 #' 
 #' # plot it
 #' plot(t, r(t), type = 'l')
@@ -85,7 +85,7 @@
 #' }
 #' 
 #' # create rate
-#' r <- MakeRate(ff)
+#' r <- make.rate(ff)
 #' 
 #' # plot it
 #' plot(t, r(t), type = 'l')
@@ -101,7 +101,7 @@
 #' 
 #' # and make it into a rate - in this case, as the previous, it does not alter
 #' # ff. We put it here as a contrast to the other way to make a step function
-#' r <- MakeRate(ff)
+#' r <- make.rate(ff)
 #' 
 #' # plot it
 #' plot(t, r(t), type = 'l')
@@ -111,7 +111,7 @@
 #' # integration than when using our method of transforming a rates and shifts
 #' # vector into a function of time
 #' 
-#' # this is a good segway into the cases where MakeRate actually makes a rate!
+#' # this is a good segway into the cases where make.rate actually makes a rate!
 #' # note that while the previous ones seemed useless, we need that implementation
 #' # so that the birth-death functions work
 #' 
@@ -125,7 +125,7 @@
 #' fShifts <- c(0, 10, 20, 35)
 #' 
 #' # make the rate
-#' r <- MakeRate(ff, fShifts = fShifts)
+#' r <- make.rate(ff, fShifts = fShifts)
 #' 
 #' # plot it
 #' plot(t, r(t),type = 'l')
@@ -151,7 +151,7 @@
 #'   }
 #'   
 #'   # make the rate
-#'   r <- MakeRate(ff, envF = InfTemp)
+#'   r <- make.rate(ff, envF = InfTemp)
 #'   
 #'   # plot it
 #'   plot(t, r(t), type = 'l')
@@ -165,7 +165,7 @@
 #'   }
 #'   
 #'   # make a rate
-#'   r <- MakeRate(ff, envF = InfTemp)
+#'   r <- make.rate(ff, envF = InfTemp)
 #'   
 #'   # plot it
 #'   plot(t, r(t), type = 'l')
@@ -182,17 +182,17 @@
 #'   }
 #'   
 #'   # rate
-#'   r <- MakeRate(ff, envF = InfTemp)
+#'   r <- make.rate(ff, envF = InfTemp)
 #'   
 #'   # plot it
 #'   plot(t, r(t), type = 'l')
 #' }
 #'
-#' @name MakeRate
-#' @rdname MakeRate
+#' @name make.rate
+#' @rdname make.rate
 #' @export
 
-MakeRate <- function(ff, tMax, envF = NULL, fShifts = NULL) {
+make.rate <- function(ff, tMax, envF = NULL, fShifts = NULL) {
   # use this to check for length and how many arguments
   nargs = ifelse(is.numeric(ff), length(ff), length(formals(ff)))
 

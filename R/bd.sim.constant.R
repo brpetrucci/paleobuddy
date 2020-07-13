@@ -1,6 +1,6 @@
 #' Constant rate Birth-Death simulation
 #'
-#' \code{BDSimConstant} takes a rate, a maximum simulation time and an initial
+#' \code{bd.sim.constant} takes a rate, a maximum simulation time and an initial
 #' number of species and returns the history of the clade originated from those
 #' species using a birth-death process with constant rates equal to the given 
 #' rates. It then generates the speciation and extinction times, parent and 
@@ -23,13 +23,13 @@
 #' 
 #' @param nFinal an interval of acceptable number of species at the end of the
 #' simulation. If not supplied, default is \code{c(0, Inf)}, so that any number
-#' of species is accepted. If supplied, \code{BDSimConstant} will run until the
+#' of species is accepted. If supplied, \code{bd.sim.constant} will run until the
 #' number of total species generated, or, if \code{extOnly = TRUE}, the number of
 #' extant species at the end of the simulation, lies within the interval.
 #' 
 #' @param extOnly a boolean indicating whether \code{nFinal} should be taken as
 #' the number of total or extant species during the simulation. If \code{TRUE},
-#' \code{BDSimConstant} will run until the number of extant species lies within
+#' \code{bd.sim.constant} will run until the number of extant species lies within
 #' the \code{nFinal} interval. If \code{FALSE}, as default, it will run until the
 #' total number of species generated lies within that interval.
 #'
@@ -71,11 +71,11 @@
 #' q <- 0
 #' 
 #' # run the simulation
-#' sim <- BDSimConstant(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim.constant(n0, p, q, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   phy <- MakePhylo(sim)
+#'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
 #' 
@@ -95,11 +95,11 @@
 #' q <- 0.04
 #' 
 #' # run the simulation
-#' sim <- BDSimConstant(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim.constant(n0, p, q, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   phy <- MakePhylo(sim)
+#'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
 #' 
@@ -120,16 +120,16 @@
 #' q <- 0.02
 #' 
 #' # run the simulation
-#' sim <- BDSimConstant(n0, p, q, tMax)
+#' sim <- bd.sim.constant(n0, p, q, tMax)
 #' 
 #' # of course in this case there are no phylogenies to plot
 #'
-#' @name BDSimConstant
-#' @rdname BDSimConstant
+#' @name bd.sim.constant
+#' @rdname bd.sim.constant
 #' @export
 
 
-BDSimConstant <- function(n0 = 1, pp, qq, tMax, 
+bd.sim.constant <- function(n0 = 1, pp, qq, tMax, 
                           nFinal = c(0, Inf), extOnly = FALSE) {
   # initialize species count with a value that makes sure the while loop runs
   len <- -1
@@ -141,7 +141,7 @@ BDSimConstant <- function(n0 = 1, pp, qq, tMax,
     # check that the rates are constant
     if (!(is.numeric(pp) & length(pp) == 1 &
         is.numeric(qq) * length(qq) == 1)) {
-      stop("BDSimConstant requires constant rates")
+      stop("bd.sim.constant requires constant rates")
     }
     
     # initialize the vectors to hold times of speciation and extinction, parents

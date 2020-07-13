@@ -1,19 +1,19 @@
 #' General rate species sampling
 #'
-#' \code{SampleClade} takes times of speciation and extinction, information to
-#' create a sampling rate with \code{MakeRate}, a vector of geologic time 
+#' \code{sample.clade} takes times of speciation and extinction, information to
+#' create a sampling rate with \code{make.rate}, a vector of geologic time 
 #' intervals, and whether one wants the true return times or a range based on 
 #' \code{bins}, and returns a data frame with minimum and maximum times for
 #' occurrences (\code{returnTrue == FALSE}) or exact occurrence times 
 #' (\code{returnTrue == TRUE}) for each species.
 #'
 #' @param S a list species numbers to be sampled. Could be only a subset of the
-#' species if the user wishes.
+#' species if the user wishes. The default is all species in \code{sim}.
 #'
-#' @param sim a simulation, usually the output of \code{BDSim}.
+#' @param sim a simulation, usually the output of \code{bd.sim}.
 #'
 #' @param bins a vector of time intervals corresponding to geological time
-#' ranges. If \code{returnTrue} is false, \code{SampleClade} returns the
+#' ranges. If \code{returnTrue} is false, \code{sample.clade} returns the
 #' occurrence times as ranges. In this way, we simulate the granularity in
 #' real world fossil records. If \code{returnTrue} is true, this is ignored.
 #'
@@ -23,7 +23,7 @@
 #' 
 #' Note: must be a constant if \code{dFun} is not \code{NULL}.
 #'
-#' @param tMax the maximum simulation time, used by \code{rexp_var}.
+#' @param tMax the maximum simulation time, used by \code{rexp.var}.
 #' @param envRR a matrix containing time points and values of an enviromental
 #' variable, like temperature, for each time point. This will be used to create
 #' a sampling rate, so \code{rr} must be a function of time and said variable
@@ -89,11 +89,11 @@
 #' # we can start with a constant case
 #' 
 #' # simulate a group
-#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
 #' while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # sampling rate
@@ -105,7 +105,7 @@
 #' # note that we will provide a very high resolution to test the function
 #' 
 #' # find the occurrence data frame
-#' dt <- SampleClade(1:length(sim$TE), sim, r, tMax = 10, bins = bins)
+#' dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, bins = bins)
 #' 
 #' # extract species identity
 #' ids <- unique(dt$Species)
@@ -130,11 +130,11 @@
 #' # sampling can be any function of time in the non-age dependent case, of course
 #' 
 #' # simulate a group
-#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
 #' while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # sampling rate
@@ -148,7 +148,7 @@
 #' # note that we will provide a very high resolution to test the function
 #' 
 #' # find the occurrence data frame
-#' dt <- SampleClade(1:length(sim$TE), sim, r, tMax = 10, bins = bins)
+#' dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, bins = bins)
 #' 
 #' # extract species identity
 #' ids <- unique(dt$Species)
@@ -173,11 +173,11 @@
 #' # now we can try a step function rate
 #' 
 #' # simulate a group
-#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
 #' while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # we will use the less efficient method of creating a step function
@@ -190,7 +190,7 @@
 #' rShifts <- c(0, 4, 8)
 #' 
 #' # make it a function so we can plot it
-#' r <- MakeRate(rlist, 10, fShifts=rShifts)
+#' r <- make.rate(rlist, 10, fShifts=rShifts)
 #' 
 #' # the resolution of the fossil dataset:
 #' bins <- seq(from = 10, to = 0,
@@ -198,7 +198,7 @@
 #' # note that we will provide a very high resolution to test the function
 #' 
 #' # find the occurrence data frame
-#' dt <- SampleClade(1:length(sim$TE), sim, r, tMax = 10, bins = bins)
+#' dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, bins = bins)
 #' 
 #' # extract species identity
 #' ids <- unique(dt$Species)
@@ -220,17 +220,17 @@
 #' }
 #' 
 #' ###
-#' # finally, \code{SampleClade} also accepts an environmental variable
+#' # finally, \code{sample.clade} also accepts an environmental variable
 #' if (requireNamespace("RPANDA", quietly = TRUE)) {
 #'   # get temperature data
 #'   data(InfTemp, package = "RPANDA")
 #'   
 #'   # simulate a group
-#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #'   
 #'   # in case first simulation is short-lived
 #'   while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'     sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'     sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #'   }
 #'   
 #'   # make temperature the environmental dependency of r
@@ -242,7 +242,7 @@
 #'   }
 #'   
 #'   # make it a function so we can plot it
-#'   rr <- MakeRate(r, envF = envR)
+#'   rr <- make.rate(r, envF = envR)
 #'   
 #'   # let us check that r is high enough to see a pattern
 #'   plot(1:10, rr(1:10), type = 'l', main = "Sampling rate",
@@ -254,7 +254,7 @@
 #'   # note that we will provide a very high resolution to test the function
 #'   
 #'   # find the occurrence data frame
-#'   dt <- SampleClade(1:length(sim$TE), sim, r, tMax = 10, envRR = envR,
+#'   dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, envRR = envR,
 #'                     bins = bins)
 #'   
 #'   # extract species identity
@@ -278,15 +278,15 @@
 #' }
 #' 
 #' # we will now do some tests with age-dependent rates. For more details,
-#' # check SampleADPP.
+#' # check sample.adpp.
 #' 
 #' ###
 #' # simulate a group
-#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
 #' while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # here we will use the PERT function. It is described in:
@@ -337,7 +337,7 @@
 #'             by = -0.1)
 #' # note that we will provide a very high resolution to test the function
 #' 
-#' dt <- SampleClade(1:length(sim$TE), sim, rr = 3, tMax = 10, bins = bins,
+#' dt <- sample.clade(1:length(sim$TE), sim, rr = 3, tMax = 10, bins = bins,
 #'                   dFun = dPERT, dFunMax = dPERTmax)
 #' 
 #' # extract species identity
@@ -370,11 +370,11 @@
 #' # parameters
 #' 
 #' # simulate a group
-#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
 #' while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # preservation function in respect to age, with the "mode" of the triangle
@@ -428,7 +428,7 @@
 #'             by = -0.1)
 #' # note that we will provide a very high resolution to test the function
 #' 
-#' dt <- SampleClade(1:length(sim$TE), sim, rr = 4, tMax = 10, bins = bins,
+#' dt <- sample.clade(1:length(sim$TE), sim, rr = 4, tMax = 10, bins = bins,
 #'                   dFun = dTRImod2, dFunMax = dTRImaxmod2)
 #' 
 #' # extract species identity
@@ -456,20 +456,25 @@
 #' # (and bins) may affect the quality of the fit. See vignettes for more 
 #' # thorough testing
 #' 
-#' @name SampleClade
-#' @rdname SampleClade
+#' @name sample.clade
+#' @rdname sample.clade
 #' @export
 
-SampleClade <- function(S, sim, rr, tMax, envRR = NULL, rShifts = NULL, 
-                        returnTrue = FALSE, bins = NULL, 
-                        dFun = NULL, dFunMax = NULL,...) {
+sample.clade <- function(S = NULL, sim, rr, tMax, envRR = NULL, rShifts = NULL,
+                         returnTrue = FALSE, bins = NULL, 
+                         dFun = NULL, dFunMax = NULL,...) {
+  # make S all species if it is NULL
+  if (is.null(S)) {
+    S = 1:length(sim$TE)
+  }
+  
   # get the speciation and extinction times vectors
   TE <- sim$TE[S]
   TS <- sim$TS[S]
 
   # check if it is age-dependent
   if (is.null(dFun)) {
-    rr <- MakeRate(rr, tMax, envRR, rShifts)
+    rr <- make.rate(rr, tMax, envRR, rShifts)
   } else {
     if (!is.numeric(rr) | length(rr)>1) {
       stop("ADPP cannot be used with time-varing preservation rates")
@@ -478,7 +483,7 @@ SampleClade <- function(S, sim, rr, tMax, envRR = NULL, rShifts = NULL,
   
   # check if we have bins if we need them
   if (!returnTrue & is.null(bins)) {
-    stop("SampleClade needs a bins vector to returned binned samples")
+    stop("sample.clade needs a bins vector to returned binned samples")
   }
 
   # adjusting bins
@@ -490,7 +495,7 @@ SampleClade <- function(S, sim, rr, tMax, envRR = NULL, rShifts = NULL,
   # lineage's age)
   if (is.null(dFun)) { 
     # find occurrences times
-    pointEstimates <- lapply(S, Sample, TE = TE, TS = TS, rr = rr, tMax = tMax)
+    pointEstimates <- lapply(S, sample, TE = TE, TS = TS, rr = rr, tMax = tMax)
     
     # which species left no occurrences
     zeroOccs <- which(lapply(pointEstimates, length) == 0)
@@ -503,7 +508,7 @@ SampleClade <- function(S, sim, rr, tMax, envRR = NULL, rShifts = NULL,
   # according to dFun)
   else { 
     # find occurrence times
-    pointEstimates <- SampleADPP(S, TS = TS, TE = TE, rr = rr, 
+    pointEstimates <- sample.adpp(S, TS = TS, TE = TE, rr = rr, 
                                  dFun = dFun, dFunMax = dFunMax, ...)
   }
 

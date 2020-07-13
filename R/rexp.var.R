@@ -1,6 +1,6 @@
 #' General rate exponential and Weibull waiting times
 #'
-#' \code{rexp_var} uses a rate (that could be constant or time-varying), a range
+#' \code{rexp.var} uses a rate (that could be constant or time-varying), a range
 #' of time and optionally a shape for age dependent rates. It also takes a
 #' number of waiting times to return, and whether the user wishes to throw away
 #' waiting times that pass \code{tMax}. It returns a time from an exponential
@@ -63,7 +63,7 @@
 #' tMax <- 40
 #' 
 #' # get waiting time
-#' t <- rexp_var(n = 1, lambda, now, tMax)
+#' t <- rexp.var(n = 1, lambda, now, tMax)
 #' t
 #' 
 #' ###
@@ -79,7 +79,7 @@
 #' tMax <- 40
 #' 
 #' # find the waiting time
-#' t <- rexp_var(n = 1, lambda, now, tMax)
+#' t <- rexp.var(n = 1, lambda, now, tMax)
 #' t
 #' 
 #' ###
@@ -97,7 +97,7 @@
 #' tMax <- 40
 #' 
 #' # find the waiting time
-#' t <- rexp_var(n = 1, lambda, now, tMax)
+#' t <- rexp.var(n = 1, lambda, now, tMax)
 #' t
 #' 
 #' ###
@@ -115,11 +115,11 @@
 #' tMax <- 40
 #' 
 #' # find the waiting time
-#' t <- rexp_var(n = 1, lambda, now, tMax)
+#' t <- rexp.var(n = 1, lambda, now, tMax)
 #' t
 #' 
 #' ###
-#' # rexp_var also works for a weibull
+#' # rexp.var also works for a weibull
 #' 
 #' # scale
 #' lambda <- 2
@@ -137,7 +137,7 @@
 #' TS <- 0
 #' 
 #' # find the list of waiting time
-#' t <- rexp_var(n = 1, lambda, now, tMax,
+#' t <- rexp.var(n = 1, lambda, now, tMax,
 #'               shape = shape, TS = TS)
 #' t
 #' 
@@ -160,7 +160,7 @@
 #' TS <- 0
 #' 
 #' # find the list of waiting times - it doesn't need to be just one
-#' t <- rexp_var(n = 5, lambda, now, tMax,
+#' t <- rexp.var(n = 5, lambda, now, tMax,
 #'               shape = shape, TS = TS)
 #' t
 #' 
@@ -185,7 +185,7 @@
 #' TS <- 3.5
 #' 
 #' # find the list of waiting times
-#' t <- rexp_var(n = 3, lambda, now, tMax,
+#' t <- rexp.var(n = 3, lambda, now, tMax,
 #'               shape = shape, TS = TS)
 #' t
 #' 
@@ -212,7 +212,7 @@
 #' TS <- 0
 #' 
 #' # find the list of waiting times - it doesn't need to be just one
-#' t <- rexp_var(n = 5, lambda, now, tMax,
+#' t <- rexp.var(n = 5, lambda, now, tMax,
 #'               shape = shape, TS = TS)
 #' t
 #' 
@@ -237,15 +237,15 @@
 #' TS <- 0
 #' 
 #' # find the list of waiting times - it doesn't need to be just one
-#' t <- rexp_var(n = 2, lambda, now, tMax,
+#' t <- rexp.var(n = 2, lambda, now, tMax,
 #'               shape = shape, TS = TS)
 #' t
 #'
-#' @name rexp_var
-#' @rdname rexp_var
+#' @name rexp.var
+#' @rdname rexp.var
 #' @export
 
-rexp_var<-function(n = 1, lambda, now, tMax, shape = NULL, TS = NULL, fast = TRUE) {
+rexp.var<-function(n = 1, lambda, now, tMax, shape = NULL, TS = NULL, fast = TRUE) {
   # make a vector to hold the results
   vars <- rep(0, n)
 

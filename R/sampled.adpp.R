@@ -1,15 +1,15 @@
 #' Age-dependent rate species sampling
 #'
-#' \code{SampleADPP} takes a species number, a vector of speciation and 
+#' \code{sample.adpp} takes a species number, a vector of speciation and 
 #' extinction times, a sampling rate and an age-dependent model which describes
 #' how the Poisson Process relates to the age of each species, and returns a
 #' vector of occurrence times for the list of species.
 #'
 #' @param S a list species numbers to be sampled.
 #'
-#' @param TE a vector of extinction times, usually an output of \code{BDSim}.
+#' @param TE a vector of extinction times, usually an output of \code{bd.sim}.
 #'
-#' @param TS a vector of speciation times, usually an output of \code{BDSim}.
+#' @param TS a vector of speciation times, usually an output of \code{bd.sim}.
 #'
 #' @param rr a mean sampling rate (equivalent to the \code{lambda} of a poisson)
 #' in the poisson process.
@@ -55,11 +55,11 @@
 #' # we can start with a hat-shaped increase through the duration of a species
 #' 
 #' # simulate a group
-#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
 #' while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # here we will use the PERT function. It is described in:
@@ -106,7 +106,7 @@
 #' }
 #' 
 #' # find occurrences
-#' occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 1, dFun = dPERT,
+#' occs <- sample.adpp(S = 1, TE = sim$TE, TS = sim$TS, rr = 1, dFun = dPERT,
 #'                    dFunMax = dPERTmax)
 #' 
 #' # check histogram
@@ -121,11 +121,11 @@
 #' # through the duration of a species (= homogeneous poisson process)
 #' 
 #' # simulate a group
-#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
 #' while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # preservation function in respect to age
@@ -143,9 +143,9 @@
 #'   return(res)
 #' }
 #' 
-#' # we will not give a dFunMax function this time. SampleADPP() will try to find
+#' # we will not give a dFunMax function this time. sample.adpp() will try to find
 #' # the maximum density with a very simple numerical simulation
-#' occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 2, dFun = custom.uniform)
+#' occs <- sample.adpp(S = 1, TE = sim$TE, TS = sim$TS, rr = 2, dFun = custom.uniform)
 #' 
 #' # check histogram
 #' hist(unlist(occs[[1]]), probability = TRUE)
@@ -159,11 +159,11 @@
 #' # parameters than TS and TE
 #' 
 #' # simulate a group
-#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
 #' while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # here we will use the triangular distribution. We have some empirical evidence
@@ -222,7 +222,7 @@
 #' }
 #' 
 #' # note we are providing the mode for the triangular sampling as an ... argument
-#' occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 2.5, dFun = dTRI,
+#' occs <- sample.adpp(S = 1, TE = sim$TE, TS = sim$TS, rr = 2.5, dFun = dTRI,
 #'                    dFunMax = dTRImax, md = 8)
 #' 
 #' # please note in the original parametrization, the "md" parameter (mode) is
@@ -245,11 +245,11 @@
 #' # the relative age of each lineage
 #' 
 #' # simulate a group
-#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
 #' while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # preservation function, with the "mde" of the triangle being exactly at the
@@ -301,7 +301,7 @@
 #' }
 #' 
 #' # find occurrences
-#' occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 5,
+#' occs <- sample.adpp(S = 1, TE = sim$TE, TS = sim$TS, rr = 5,
 #'                    dFun = dTRImod1, dFunMax = dTRImaxmod1)
 #' 
 #' # we do not have the "md" parameter (see example 3) as it corresponds to the
@@ -323,11 +323,11 @@
 #' # but wants to keep track of those parameters after the sampling is over
 #' 
 #' # simulate a group
-#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
 #' while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # preservation function in respect to age, with the "mode" of the triangle
@@ -375,7 +375,7 @@
 #' par1 <- (((sim$TS - sim$TE)/2) + sim$TE) - par
 #' 
 #' # find occurrence list
-#' occs <- SampleADPP(S = 1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 10,
+#' occs <- sample.adpp(S = 1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 10,
 #'                    dFun = dTRImod2, dFunMax = dTRImaxmod2)
 #' 
 #' # we do not have the "md" parameter (see example 3) as it corresponds to
@@ -397,11 +397,11 @@
 #'   abline(v = mid, col = "red")
 #' }
 #'
-#' @name SampleADPP
-#' @rdname SampleADPP
+#' @name sample.adpp
+#' @rdname sample.adpp
 #' @export
 
-SampleADPP <- function(S, TS, TE, rr, dFun, dFunMax = NULL, ...) {
+sample.adpp <- function(S, TS, TE, rr, dFun, dFunMax = NULL, ...) {
 
   # setting things and checking inputs
   printMessage <- TRUE

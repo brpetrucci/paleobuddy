@@ -1,9 +1,9 @@
 #' General rate Birth-Death simulation
 #'
-#' \code{BDSim} takes an initial number of species, speciation and extinction
+#' \code{bd.sim} takes an initial number of species, speciation and extinction
 #' rate functions and a maximum time of simulation, together with multiple
-#' options to alter the rates, and calls \code{BDSimConstant} or
-#' \code{BDSimGeneral} to generate a species diversification process under the
+#' options to alter the rates, and calls \code{bd.sim.constant} or
+#' \code{bd.sim.general} to generate a species diversification process under the
 #' desired scenario.
 #'
 #' @param n0 initial number of species, usually 1. Good parameter
@@ -25,7 +25,7 @@
 #' @param pShape shape parameter for the Weibull distribution for age-dependent
 #' speciation. Default is \code{NULL}, where \code{pp} will be considered a
 #' time-dependent exponential rate. For \code{pShape != NULL}, \code{pp} will
-#' be considered a scale, and \code{rexp_var} will draw a Weibull distribution
+#' be considered a scale, and \code{rexp.var} will draw a Weibull distribution
 #' instead.
 #'
 #' @param qShape similar as above, but for the extinction rate.
@@ -51,30 +51,30 @@
 #' 
 #' @param nFinal an interval of acceptable number of species at the end of the
 #' simulation. If not supplied, default is \code{c(0, Inf)}, so that any number
-#' of species is accepted. If supplied, \code{BDSimConstant} or 
-#' \code{BDSimGeneral} will run until the number of total species generated, or, 
+#' of species is accepted. If supplied, \code{bd.sim.constant} or 
+#' \code{bd.sim.general} will run until the number of total species generated, or, 
 #' if \code{extOnly = TRUE}, the number of extant species at the end of the 
 #' simulation, lies within the interval.
 #' 
 #' @param extOnly a boolean indicating whether \code{nFinal} should be taken as
 #' the number of total or extant species during the simulation. If \code{TRUE},
-#' \code{BDSimConstant} or \code{BDSimGeneral} will run until the number of extant
+#' \code{bd.sim.constant} or \code{bd.sim.general} will run until the number of extant
 #' species lies within the \code{nFinal} interval. If \code{FALSE}, as default, it 
 #' will run until the total number of species generated lies within that interval.
 #' 
-#' @param fast used for \code{BDSimGeneral}. When \code{TRUE}, sets 
-#' \code{rexp_var} to throw away waiting times higher than the maximum 
+#' @param fast used for \code{bd.sim.general}. When \code{TRUE}, sets 
+#' \code{rexp.var} to throw away waiting times higher than the maximum 
 #' simulation time. Should be \code{FALSE} for unbiased testing of age 
 #' dependency. User might also se it to \code{FALSE} for more accurate waiting
 #' times.
 #' 
-#' @param trueExt used for \code{BDSimGeneral}. When \code{TRUE}, time of 
+#' @param trueExt used for \code{bd.sim.general}. When \code{TRUE}, time of 
 #' extinction of extant species will be the true time, otherwise it will be 
 #' tMax+0.01. Need to be \code{TRUE} when testing age-dependent 
 #' extinction.
 #'
-#' @return the return list of either \code{BDSimConstant} or
-#' \code{BDSimGeneral}, which have the same elements, as follows
+#' @return the return list of either \code{bd.sim.constant} or
+#' \code{bd.sim.general}, which have the same elements, as follows
 #'
 #' \describe{
 #' \item{\code{TE}}{list of extinction times, with -0.01 as the time of
@@ -113,12 +113,12 @@
 #' q <- 0.08
 #' 
 #' # run the simulation, making sure we have more than 1 species in the end
-#' sim <- BDSim(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim(n0, p, q, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
 #'   # full phylogeny
-#'   phy <- MakePhylo(sim)
+#'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
 #' 
@@ -140,12 +140,12 @@
 #' q <- 0.08
 #' 
 #' # run the simulation, making sure we have more than 1 species in the end
-#' sim <- BDSim(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim(n0, p, q, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
 #'   # full phylogeny
-#'   phy <- MakePhylo(sim)
+#'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
 #' 
@@ -157,8 +157,8 @@
 #' # list of shift times. Note qShifts could be c(40, 20, 5) for identical results
 #' qShifts <- c(0, 20, 35)
 #' 
-#' # let us take a look at how MakeRate will make it a step function
-#' q <- MakeRate(qList, fShifts = qShifts)
+#' # let us take a look at how make.rate will make it a step function
+#' q <- make.rate(qList, fShifts = qShifts)
 #' 
 #' # and plot it
 #' plot(seq(0, tMax, 0.1), q(seq(0, tMax, 0.1)), type = 'l',
@@ -185,14 +185,14 @@
 #' }
 #' 
 #' # run the simulation
-#' sim <- BDSim(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim(n0, p, q, tMax, nFinal = c(2, Inf))
 #' # equivalent:
-#' # sim <- BDSimGeneral(n0, p, qList, tMax, qShifts = qShifts)
+#' # sim <- bd.sim.general(n0, p, qList, tMax, qShifts = qShifts)
 #' # this is, however, much slower
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   phy <- MakePhylo(sim)
+#'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
 #' 
@@ -215,11 +215,11 @@
 #' q <- 0.08
 #' 
 #' # run the simulation
-#' sim <- BDSim(n0, p, q, tMax, pShape = pShape, nFinal = c(2, Inf))
+#' sim <- bd.sim(n0, p, q, tMax, pShape = pShape, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   phy <- MakePhylo(sim)
+#'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
 #' 
@@ -244,11 +244,11 @@
 #' q <- 0.2
 #' 
 #' # run the simulation
-#' sim <- BDSim(n0, p, q, tMax, pShape = pShape, nFinal = c(2, Inf))
+#' sim <- bd.sim(n0, p, q, tMax, pShape = pShape, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   phy <- MakePhylo(sim)
+#'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
 #' 
@@ -280,16 +280,16 @@
 #'     return(0.2*exp(0.01*env))
 #'   }
 #'   
-#'   # need a variable to tell BDSim the extinction is environmentally dependent
+#'   # need a variable to tell bd.sim the extinction is environmentally dependent
 #'   envQQ <- InfTemp
 #'   
 #'   # run the simulation
-#'   sim <- BDSim(n0, p, q, tMax, pShape = pShape, envQQ = InfTemp,
+#'   sim <- bd.sim(n0, p, q, tMax, pShape = pShape, envQQ = InfTemp,
 #'                nFinal = c(2, Inf))
 #'   
 #'   # we can plot the phylogeny to take a look
 #'   if (requireNamespace("ape", quietly = TRUE)) {
-#'     phy <- MakePhylo(sim)
+#'     phy <- make.phylo(sim)
 #'     ape::plot.phylo(phy)
 #'   }
 #'   
@@ -321,21 +321,21 @@
 #'   tMax <- 40
 #'   
 #'   # run the simulation
-#'   sim <- BDSim(n0, p, q, tMax, pShape = pShape, envPP = envPP,
+#'   sim <- bd.sim(n0, p, q, tMax, pShape = pShape, envPP = envPP,
 #'                nFinal = c(2, Inf))
 #'   
 #'   # we can plot the phylogeny to take a look
 #'   if (requireNamespace("ape", quietly = TRUE)) {
-#'     phy <- MakePhylo(sim)
+#'     phy <- make.phylo(sim)
 #'     ape::plot.phylo(phy)
 #'   }
 #' }
 #' 
-#' @name BDSim
-#' @rdname BDSim
+#' @name bd.sim
+#' @rdname bd.sim
 #' @export
 
-BDSim <- function(n0, pp, qq, tMax, 
+bd.sim <- function(n0, pp, qq, tMax, 
                   pShape = NULL, qShape = NULL, 
                   envPP = NULL, envQQ = NULL, 
                   pShifts = NULL, qShifts = NULL, 
@@ -349,20 +349,20 @@ BDSim <- function(n0, pp, qq, tMax,
     p <- pp
     q <- qq
     
-    # call BDSimConstant
-    return(BDSimConstant(n0, p, q, tMax, nFinal, extOnly))
+    # call bd.sim.constant
+    return(bd.sim.constant(n0, p, q, tMax, nFinal, extOnly))
   }
 
   # else it is not constant
-  # note even if pp or qq is constant this may call BDSimGeneral, since we
+  # note even if pp or qq is constant this may call bd.sim.general, since we
   # might have a shape parameter
   else {
-    # use MakeRate to create the rates we want
-    p <- MakeRate(pp, tMax, envPP, pShifts)
-    q <- MakeRate(qq, tMax, envQQ, qShifts)
+    # use make.rate to create the rates we want
+    p <- make.rate(pp, tMax, envPP, pShifts)
+    q <- make.rate(qq, tMax, envQQ, qShifts)
 
-    # call BDSimGeneral
-    return(BDSimGeneral(n0, p, q, tMax, pShape, qShape, 
+    # call bd.sim.general
+    return(bd.sim.general(n0, p, q, tMax, pShape, qShape, 
                         nFinal, extOnly, fast, trueExt))
   }
 }
