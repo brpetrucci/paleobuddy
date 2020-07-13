@@ -1,16 +1,5 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
-language: r
-install:
-- R -e "0" --args --bootstrap-packrat
-- R -e "packrat::restore(restart = FALSE)"
-r:
-- release
-- devel
+language: R
 warnings_are_errors: true
 sudo: required
-cache:
-  directories:
-    - $TRAVIS_BUILD_DIR/packrat/src
-    - $TRAVIS_BUILD_DIR/packrat/lib
-  packages: true
