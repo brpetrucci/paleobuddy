@@ -125,11 +125,13 @@ plot(t, div, type = 'l')
 ###
 # we can use ifelse() to make a step function like this
 ff <- function(t) {
-  return(ifelse(t < 10, 0.1,
-                ifelse(t < 20, 0.3,
-                       ifelse(t < 30, -0.2,
-                              ifelse(t < 40, 0.05, 0)))))
+  return(ifelse(t < 2, 0.1,
+                ifelse(t < 3, 0.3,
+                       ifelse(t < 5, -0.2, 0.05))))
 }
+
+# change t so things are faster
+t <- seq(0, 10, 0.1)
 
 # visualize the rate
 r <- MakeRate(ff)
@@ -148,13 +150,10 @@ plot(t, div, type = 'l')
 # ...which we can do as follows
 
 # rates vector
-ff <- c(0.2, 0.1, 0.15, 0.05)
-
-# change t so the integral is faster
-t <- seq(0, 20, 0.1)
+ff <- c(0.1, 0.3, -0.2, 0.05)
 
 # rate shifts vector
-fShifts <- c(0, 5, 10, 15)
+fShifts <- c(0, 2, 3, 5)
 
 # visualize the rate
 r <- MakeRate(ff, fShifts = fShifts)
@@ -216,9 +215,9 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   
   # diversification
   ff <- function(t, env) {
-    return(ifelse(t < 10, 0.1 + 0.01*env,
-                  ifelse(t < 30, 0.2 - 0.005*env,
-                         ifelse(t <= 50, 0.1 + 0.005*env, 0))))
+    return(ifelse(t < 2, 0.1 + 0.01*env,
+                  ifelse(t < 5, 0.2 - 0.005*env,
+                         ifelse(t < 8, 0.1 + 0.005*env, 0))))
   }
   
   # visualize the rate

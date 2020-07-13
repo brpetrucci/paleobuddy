@@ -1,5 +1,5 @@
 Package: paleobuddy
-Title: Simulating diversification dynamics
+Title: Simulating Diversification Dynamics
 Version: 0.0.0.900
 Authors@R: c(
     person(given = "Bruno",
@@ -14,7 +14,7 @@ Authors@R: c(
 	   family = "Quental",
 	   role = "aut",
 	   email = "tbquental@usp.br"))
-Description: paleobuddy is an R package to simulate species diversification and generate fossil records and phylogenies. While the literature on species birth-death simulators is extensive, including important software like paleotree and APE, we concluded there were interesting gaps to be filled regarding possible diversification scenarios. Here we strived for flexibility over focus, implementing a large array of regimens for users to experiment with and combine. In this way, paleobuddy can be used in complement to other simulators as a flexible jack of all trades, or, in the case of scenarios implemented only here, can allow for robust and easy simulations for novel situations.
+Description: this is an R package to simulate species diversification and generate fossil records and phylogenies. While the literature on species birth-death simulators is extensive, including important software like paleotree and APE, we concluded there were interesting gaps to be filled regarding possible diversification scenarios. Here we strove for flexibility over focus, implementing a large array of regimens for users to experiment with and combine. In this way, paleobuddy can be used in complement to other simulators as a flexible jack of all trades, or, in the case of scenarios implemented only here, can allow for robust and easy simulations for novel situations.
 Imports:
 	stats,
 	utils

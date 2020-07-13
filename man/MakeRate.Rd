@@ -28,7 +28,7 @@ Needed to ensure \code{fShifts} runs the correct way.}
 \item{envF}{a dataframe representing an environmental variable
 (time, CO2 etc) with time. The first column must be time, second column the
 values of the variable. See below; one good resource for these dataframes is
-\href{https://cran.r-project.org/web/packages/RPANDA/}{RPANDA}.}
+\href{https://CRAN.R-project.org/package=RPANDA}{RPANDA}.}
 
 \item{fShifts}{a vector of rate shifts. The first element must
 be the first time point for the simulation. This may be 0 or tMax. Since

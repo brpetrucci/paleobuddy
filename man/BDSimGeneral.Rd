@@ -96,11 +96,7 @@ literature, though one can easily invert that by subtracting the results from
 }
 \examples{
 
-# first we define a time vector for plotting
-tMax <- 40
-time <- 1:tMax
-
-# now we can test a couple scenarios
+# we can test a couple scenarios
 
 ###
 # first, even though this is BDSimGeneral, we can try constant rates
@@ -182,14 +178,18 @@ q <- MakeRate(qList, fShifts = qShifts)
 plot(seq(0, tMax, 0.1), q(seq(0, tMax, 0.1)), type = 'l',
      main = "Extintion rate as a step function", xlab = "Time (My)",
      ylab = "Rate (species/My)")
-# note that this is slower than creating a step function with ifelse(), in this
-# case q <- function(t) ifelse(t < 20, 0.04, ifelse(t < 30, 0.06, 0.07))
 
-# also note that if done with ifelse(), the function must go from 0, instead of
-# from tMax
+# a different way to define the same extinction function
+q <- function(t) {
+  ifelse(t < 15, 0.05,
+         ifelse(t < 25, 0.08, 0.11))
+}
 
 # run the simulation
 sim <- BDSimGeneral(n0, p, q, tMax, nFinal = c(2, Inf))
+# equivalent:
+# sim <- BDSimGeneral(n0, p, qList, tMax, qShifts = qShifts)
+# this is, however, much slower
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {

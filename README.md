@@ -8,10 +8,10 @@
 
 `SampleClade` is a fossil record-generating function, returning an organized data frame with occurrence times - or occurrence time ranges, provided the user supplies the respective interval vector. It allows for a sampling rate `rr` that can be similarly flexible to `pp` and `qq` above, with the exception of a `shape` parameter, since we ommitted that option given the absence of the use of Weibull distributions to model age-dependent sampling in the literature. Instead, we allow for the user to supply a function they wish to use as age-dependent sampling, `pFUN`, such as the PERT distribution used in [PyRate](https://github.com/dsilvestro/PyRate). If possible, the user can supply a maximizer for that function, `pFUNMax`, which would lead to faster computation. In the case of sampling, age-dependency and time-varying sampling rates are incompatible, at least as of the initial publication of the package. Still, `SampleClade` allows for unprecedented flexibility in sampling, letting the user combine as they wish time-varying, and environmentally-dependent functions, and any maximizable age-dependent function as a sampling rate.
 
-`PB2phylo` closes the trio of most important functions of the package, taking a PB simulation and returning a `phylo` object from the APE package (see above).
+`MakePhylo` closes the trio of most important functions of the package, taking a PB simulation and returning a `phylo` object from the APE package (see above).
 
 Besides its main species diversification-simulating functions, `PaleoBuddy` also supplies the user with a few interesting statistical tools, such as `rexp_var`, a generalization of the `rexp` function in BaseR that allows for time-varying exponential rates and a `shape` parameter, in which case it generalizes the `rweibull` function.
 
 ## Authors
 
-`PaleoBuddy` was idealized by Bruno do Rosario Petrucci and Tiago Bosisio Quental. The birth-death, statistical and part of the sampling functions were written by Bruno. Most of the sampling functions were written by Matheus Januário Sousa. 
+`paleobuddy` was idealized by Bruno do Rosario Petrucci and Tiago Bosisio Quental. The birth-death, statistical and part of the sampling functions were written by Bruno. Most of the sampling functions were written by Matheus Januário.

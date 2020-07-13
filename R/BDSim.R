@@ -152,7 +152,7 @@
 #' # what if we want q to be a step function?
 #' 
 #' # list of extinction rates
-#' qList <- c(0.08, 0.06, 0.07)
+#' qList <- c(0.09, 0.08, 0.1)
 #' 
 #' # list of shift times. Note qShifts could be c(40, 20, 5) for identical results
 #' qShifts <- c(0, 20, 35)
@@ -164,11 +164,6 @@
 #' plot(seq(0, tMax, 0.1), q(seq(0, tMax, 0.1)), type = 'l',
 #'      main = "Extintion rate as a step function", xlab = "Time (My)",
 #'      ylab = "Rate (species/My)")
-#' # note that this is slower than creating a step function with ifelse(), in this
-#' # case q <- function(t) ifelse(t < 20, 0.08, ifelse(t < 35, 0.07, 0.08))
-#' 
-#' # also note that if done with ifelse(), the function must go from 0, instead of
-#' # from tMax
 #' 
 #' # looking good, we will keep everything else the same
 #' 
@@ -183,9 +178,17 @@
 #'   return(0.02 + 0.005*t)
 #' }
 #' 
-#' # run the simulation. We can pass the step function directly, or just give
-#' # a list of q and a list of shifts
-#' sim <- BDSim(n0, p, qList, tMax, qShifts = qShifts, nFinal = c(2, Inf))
+#' # a different way to define the same extinction function
+#' q <- function(t) {
+#'   ifelse(t < 20, 0.09, 
+#'          ifelse(t < 35, 0.08, 0.1))
+#' }
+#' 
+#' # run the simulation
+#' sim <- BDSim(n0, p, q, tMax, nFinal = c(2, Inf))
+#' # equivalent:
+#' # sim <- BDSimGeneral(n0, p, qList, tMax, qShifts = qShifts)
+#' # this is, however, much slower
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -220,6 +223,35 @@
 #'   ape::plot.phylo(phy)
 #' }
 #' 
+#' ### 
+#' # scale can be a time-varying function as well
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 40
+#' 
+#' # speciation - here note it is a Weibull scale
+#' p <- function(t) {
+#'   return(2 + 0.25*t)
+#' }
+#' 
+#' # speciation shape
+#' pShape <- 2
+#' 
+#' # extinction
+#' q <- 0.2
+#' 
+#' # run the simulation
+#' sim <- BDSim(n0, p, q, tMax, pShape = pShape, nFinal = c(2, Inf))
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- MakePhylo(sim)
+#'   ape::plot.phylo(phy)
+#' }
+#' 
 #' ###
 #' # finally, we can also have a rate dependent on an environmental variable,
 #' # like temperature data in RPANDA
@@ -236,14 +268,12 @@
 #'   tMax <- 40
 #'   
 #'   # speciation - a scale
-#'   p <- function(t) {
-#'     return(0.5 + 0.25*t)
-#'   }
+#'   p <- 10
 #'   
 #'   # note the scale for the age-dependency can be a time-varying function
 #'   
 #'   # speciation shape
-#'   pShape <- 1.5
+#'   pShape <- 2
 #'   
 #'   # extinction, dependent on temperature exponentially
 #'   q <- function(t, env) {
@@ -254,7 +284,7 @@
 #'   envQQ <- InfTemp
 #'   
 #'   # run the simulation
-#'   sim <- BDSim(n0, p, q, tMax, pShape = pShape, envQQ = InfTemp, 
+#'   sim <- BDSim(n0, p, q, tMax, pShape = pShape, envQQ = InfTemp,
 #'                nFinal = c(2, Inf))
 #'   
 #'   # we can plot the phylogeny to take a look
@@ -274,7 +304,7 @@
 #'   
 #'   # speciation - a step function of temperature built using ifelse()
 #'   p <- function(t, env) {
-#'     ifelse(t < 20, env,
+#'     ifelse(t < 20, 2*env,
 #'            ifelse(t < 30, env/2, 2*env/3))
 #'   }
 #'   
@@ -284,14 +314,14 @@
 #'   # environment variable to use - temperature
 #'   envPP <- InfTemp
 #'   
-#'   # extinction
-#'   q <- 0.15
+#'   # extinction - high so this does not take too long to run
+#'   q <- 0.3
 #'   
 #'   # maximum simulation time
 #'   tMax <- 40
 #'   
 #'   # run the simulation
-#'   sim <- BDSim(n0, p, q, tMax, pShape = pShape, envPP = envPP, 
+#'   sim <- BDSim(n0, p, q, tMax, pShape = pShape, envPP = envPP,
 #'                nFinal = c(2, Inf))
 #'   
 #'   # we can plot the phylogeny to take a look
