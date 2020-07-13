@@ -49,6 +49,19 @@
 #'
 #' @param qShifts similar as above, but for the extinction rate.
 #' 
+#' @param nFinal an interval of acceptable number of species at the end of the
+#' simulation. If not supplied, default is \code{c(0, Inf)}, so that any number
+#' of species is accepted. If supplied, \code{BDSimConstant} or 
+#' \code{BDSimGeneral} will run until the number of total species generated, or, 
+#' if \code{extOnly = TRUE}, the number of extant species at the end of the 
+#' simulation, lies within the interval.
+#' 
+#' @param extOnly a boolean indicating whether \code{nFinal} should be taken as
+#' the number of total or extant species during the simulation. If \code{TRUE},
+#' \code{BDSimConstant} or \code{BDSimGeneral} will run until the number of extant
+#' species lies within the \code{nFinal} interval. If \code{FALSE}, as default, it 
+#' will run until the total number of species generated lies within that interval.
+#' 
 #' @param fast used for \code{BDSimGeneral}. When \code{TRUE}, sets 
 #' \code{rexp_var} to throw away waiting times higher than the maximum 
 #' simulation time. Should be \code{FALSE} for unbiased testing of age 
@@ -318,9 +331,12 @@
 #' @rdname BDSim
 #' @export
 
-BDSim <- function(n0, pp, qq, tMax, pShape = NULL, qShape = NULL, envPP = NULL, 
-                envQQ = NULL, pShifts = NULL, qShifts = NULL, fast = TRUE, 
-                trueExt=FALSE) {
+BDSim <- function(n0, pp, qq, tMax, 
+                  pShape = NULL, qShape = NULL, 
+                  envPP = NULL, envQQ = NULL, 
+                  pShifts = NULL, qShifts = NULL, 
+                  nFinal = c(0, Inf), extOnly = FALSE,
+                  fast = TRUE, trueExt=FALSE) {
   
   # if we have ONLY numbers for pp and qq, it is constant
   if ((is.numeric(pp) & length(pp) == 1) &
