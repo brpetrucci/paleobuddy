@@ -9,3 +9,8 @@ r:
 - devel
 warnings_are_errors: true
 sudo: required
+cache:
+  directories:
+    - $TRAVIS_BUILD_DIR/packrat/src
+    - $TRAVIS_BUILD_DIR/packrat/lib
+  packages: true
