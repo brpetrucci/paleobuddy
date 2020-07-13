@@ -1,7 +1,7 @@
 ## Test environments
 * local Windows 10.0.19041, R 3.5.3
 * check_win (devel and release)
-* local Ubuntu bionic 18.04, R 3.6
+* ubuntu xenian 18.04 (on travis-ci)
 
 ## R CMD check results
 There were no ERRORs, or WARNINGs.
