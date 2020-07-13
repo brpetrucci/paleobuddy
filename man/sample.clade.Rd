@@ -57,26 +57,6 @@ ranges. If \code{returnTrue} is false, \code{sample.clade} returns the
 occurrence times as ranges. In this way, we simulate the granularity in
 real world fossil records. If \code{returnTrue} is true, this is ignored.}
 
-\item{dFun}{A density function representing the age-dependent
-preservation model. It must be a density function, and consequently
-
-\describe{
-
-\item{1.}{integrate to 1 (though this condition is not verified by the 
-function, it is the user's responsibility to check this property)}
-
-\item{2.}{describe the density of sampling a lineage in a given point \code{t}
-in geological time}
-
-\item{3.}{be parametrized in absolute geological time (i.e. should be relative
-to absolute geological time, in Mya)}
-
-\item{4.}{should be limited between \code{s} (i.e. the lineage's 
-speciation/origination geological time) and \code{e} (i.e. the lineage's 
-extinction geological time), with \code{s} > \code{e}}
-
-\item{5.}{include the arguments \code{t}, \code{s}, \code{e} and \code{sp}}}}
-
 \item{dFunMax}{a function that calculates the maximum (density) value
 of \code{dFun} using its arguments. It can also be a number representing the
 maximum density.
