@@ -22,16 +22,13 @@ lineage.
 \examples{
 
 # generating a phylogeny using constant rates
-sim <- BDSim(n0 = 1, pp = 0.2, qq = 0.05, tMax = 10)
-
-# in case first simulation has only one species
-while (sum(sim$TE < 0) < 2) {
-  sim <- BDSim(n0 = 1, pp = 0.2, qq = 0.05, tMax = 10)
-}
+sim <- BDSim(n0 = 1, pp = 0.2, qq = 0.05, tMax = 10, 
+             nFinal = c(2, Inf), extOnly = TRUE)
 
 # make the phylogeny
 phy <- MakePhylo(sim)
 
+par(mfrow = c(1, 2))
 # plot it
 if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(phy)
@@ -41,18 +38,14 @@ if (requireNamespace("ape", quietly = TRUE)) {
 }
 
 # this works for sim generated with any of the scenarios in BDSim, of course
-sim <- BDSim(n0 = 1, pp = function(t) 0.12 + 0.01*t, qq = 10,
-             tMax = 10, qShape = 1.3)
-
-# in case first simulation has only one species
-while (sum(sim$TE < 0) < 2) {
-  sim <- BDSim(n0 = 1, pp = function(t) 0.12 + 0.01*t, qq = 10,
-               tMax = 10, qShape = 1.3)
-}
+sim <- BDSim(n0 = 1, pp = function(t) 0.05 + 0.01*t, 
+             qq = function(t) 0.03 + 0.015*t, tMax = 10, 
+             nFinal = c(2, Inf), extOnly = TRUE)
 
 # make the phylogeny
 phy <- MakePhylo(sim)
 
+par(mfrow = c(1, 2))
 # plot it
 if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(phy)

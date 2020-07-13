@@ -4,7 +4,7 @@
 \alias{BDSimConstant}
 \title{Constant rate Birth-Death simulation}
 \usage{
-BDSimConstant(n0 = 1, pp, qq, tMax)
+BDSimConstant(n0 = 1, pp, qq, tMax, nFinal = c(0, Inf), extOnly = FALSE)
 }
 \arguments{
 \item{n0}{initial number of species, usually 1. Good parameter
@@ -19,6 +19,18 @@ Note: \code{pp} and \code{qq} must always be greater than 0}
 \item{tMax}{ending time of simulation. Any species still living
 after tMax is considered extant, and any species that would be generated
 after \code{tMax} is not born.}
+
+\item{nFinal}{an interval of acceptable number of species at the end of the
+simulation. If not supplied, default is \code{c(0, Inf)}, so that any number
+of species is accepted. If supplied, \code{BDSimConstant} will run until the
+number of total species generated, or, if \code{extOnly = TRUE}, the number of
+extant species at the end of the simulation, lies within the interval.}
+
+\item{extOnly}{a boolean indicating whether \code{nFinal} should be taken as
+the number of total or extant species during the simulation. If \code{TRUE},
+\code{BDSimConstant} will run until the number of extant species lies within
+the \code{nFinal} interval. If \code{FALSE}, as default, it will run until the
+total number of species generated lies within that interval.}
 }
 \value{
 a list of vectors, as follows
@@ -48,11 +60,7 @@ invert that by subtracting the results from \code{tMax}.
 }
 \examples{
 
-# first we define a time vector for plotting
-tMax <- 40
-time <- 1:tMax
-
-# now we can show a couple scenarios
+# we can show a couple scenarios
 
 ###
 # first, extinction 0
@@ -70,7 +78,7 @@ p <- 0.1
 q <- 0
 
 # run the simulation
-sim <- BDSim(n0, p, q, tMax)
+sim <- BDSimConstant(n0, p, q, tMax, nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -94,7 +102,7 @@ p <- 0.1
 q <- 0.04
 
 # run the simulation
-sim <- BDSimConstant(n0, p, q, tMax)
+sim <- BDSimConstant(n0, p, q, tMax, nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -119,10 +127,9 @@ p <- 0
 q <- 0.02
 
 # run the simulation
-sim <- BDSim(n0, p, q, tMax)
+sim <- BDSimConstant(n0, p, q, tMax)
 
 # of course in this case there are no phylogenies to plot
-
 
 }
 \author{

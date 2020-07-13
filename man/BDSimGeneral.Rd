@@ -11,6 +11,8 @@ BDSimGeneral(
   tMax,
   pShape = NULL,
   qShape = NULL,
+  nFinal = c(0, Inf),
+  extOnly = FALSE,
   fast = TRUE,
   trueExt = FALSE
 )
@@ -41,6 +43,18 @@ be considered a scale, and \code{rexp_var} will draw a Weibull distribution
 instead.}
 
 \item{qShape}{similar as above, but for the extinction rate.}
+
+\item{nFinal}{an interval of acceptable number of species at the end of the
+simulation. If not supplied, default is \code{c(0, Inf)}, so that any number
+of species is accepted. If supplied, \code{BDSimGeneral} will run until the
+number of total species generated, or, if \code{extOnly = TRUE}, the number of
+extant species at the end of the simulation, lies within the interval.}
+
+\item{extOnly}{a boolean indicating whether \code{nFinal} should be taken as
+the number of total or extant species during the simulation. If \code{TRUE},
+\code{BDSimGeneral} will run until the number of extant species lies within
+the \code{nFinal} interval. If \code{FALSE}, as default, it will run until the
+total number of species generated lies within that interval.}
 
 \item{fast}{used for \code{BDSimGeneral}. When \code{TRUE}, sets 
 \code{rexp_var} to throw away waiting times higher than the maximum 
@@ -104,12 +118,7 @@ p <- 0.11
 q <- 0.08
 
 # run the simulation
-sim <- BDSimGeneral(n0, p, q, tMax)
-
-# run until we get more than 1 species
-while (length(sim$TE) < 2) {
-  sim <- BDSim(n0, p, q, tMax)
-}
+sim <- BDSimGeneral(n0, p, q, tMax, nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -136,12 +145,7 @@ p <- function(t) {
 q <- 0.05
 
 # run the simulation
-sim <- BDSimGeneral(n0, p, q, tMax)
-
-# run until we get more than 1 species
-while (length(sim$TE) < 2) {
-  sim <- BDSim(n0, p, q, tMax)
-}
+sim <- BDSimGeneral(n0, p, q, tMax, nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -161,15 +165,15 @@ tMax <- 40
 
 # speciation rate
 p <- function(t) {
-  return(0.05 + 0.005*t)
+  return(0.03 + 0.005*t)
 }
 
 # list of extinction rates
-qList <- c(0.05, 0.06, 0.07)
+qList <- c(0.05, 0.08, 0.11)
 
 # list of shift times. Note qShifts could be c(40, 20, 10) for
 # identical results
-qShifts <- c(0, 20, 30)
+qShifts <- c(0, 15, 25)
 
 # let us take a look at how MakeRate will make it a step function
 q <- MakeRate(qList, fShifts = qShifts)
@@ -185,12 +189,7 @@ plot(seq(0, tMax, 0.1), q(seq(0, tMax, 0.1)), type = 'l',
 # from tMax
 
 # run the simulation
-sim <- BDSimGeneral(n0, p, q, tMax)
-
-# run until we get more than 1 species
-while (length(sim$TE) < 2) {
-  sim <- BDSim(n0, p, q, tMax)
-}
+sim <- BDSimGeneral(n0, p, q, tMax, nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -206,7 +205,7 @@ n0 <- 1
 tMax <- 40
 
 # speciation
-p <- 0.15
+p <- 0.1
 
 # extinction - a Weibull scale
 q <- 10
@@ -214,14 +213,8 @@ q <- 10
 # extinction shape
 qShape <- 1
 
-# run simulations - note fast = FALSE and trueExt = TRUE so we can accurately
-# fit the results to a Weibull
-sim <- BDSimGeneral(n0, p, q, tMax, qShape = qShape)
-
-# run until we get more than 1 species
-while (length(sim$TE) < 2) {
-  sim <- BDSimGeneral(n0, p, q, tMax, qShape = qShape)
-}
+# run simulations
+sim <- BDSimGeneral(n0, p, q, tMax, qShape = qShape, nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -247,13 +240,8 @@ q <- function(t) {
 # extinction shape
 qShape <- 1
 
-# run simulations 
-sim <- BDSimGeneral(n0, p, q, tMax, qShape = qShape)
-
-# run until we get more than 1 species
-while (length(sim$TE) < 2) {
-  sim <- BDSimGeneral(n0, p, q, tMax, qShape = qShape)
-}
+# run simulations
+sim <- BDSimGeneral(n0, p, q, tMax, qShape = qShape, nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -276,7 +264,7 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   }
   
   # extinction
-  q <- 0.05
+  q <- 0.075
   
   # using RPANDA to get the temperature data
   data(InfTemp, package="RPANDA")
@@ -289,12 +277,7 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   # only 100 simulations to finish it in a reasonable time
   
   # run simulations
-  sim <- BDSim(n0, p, q, tMax)
-  
-  # run until we get more than 1 species
-  while (length(sim$TE) < 2) {
-    sim <- BDSimGeneral(n0, p, q, tMax)
-  }
+  sim <- BDSimGeneral(n0, p, q, tMax, nFinal = c(2, Inf))
   
   # we can plot the phylogeny to take a look
   if (requireNamespace("ape", quietly = TRUE)) {

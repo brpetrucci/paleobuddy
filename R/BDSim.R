@@ -112,16 +112,12 @@
 #' # extinction
 #' q <- 0.08
 #' 
-#' # run the simulation
-#' sim <- BDSim(n0, p, q, tMax)
-#' 
-#' # run until we get more than 1 species
-#' while (length(sim$TE) < 2) {
-#'   sim <- BDSim(n0, p, q, tMax)
-#' }
+#' # run the simulation, making sure we have more than 1 species in the end
+#' sim <- BDSim(n0, p, q, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
+#'   # full phylogeny
 #'   phy <- MakePhylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
@@ -137,22 +133,18 @@
 #' 
 #' # speciation rate
 #' p <- function(t) {
-#'   return(0.09 + 0.005*t)
+#'   return(0.05 + 0.005*t)
 #' }
 #' 
 #' # extinction rate
 #' q <- 0.08
 #' 
-#' # run the simulation
-#' sim <- BDSim(n0, p, q, tMax)
-#' 
-#' # run until we get more than 1 species
-#' while (length(sim$TE) < 2) {
-#'   sim <- BDSim(n0, p, q, tMax)
-#' }
+#' # run the simulation, making sure we have more than 1 species in the end
+#' sim <- BDSim(n0, p, q, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
+#'   # full phylogeny
 #'   phy <- MakePhylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
@@ -160,7 +152,7 @@
 #' # what if we want q to be a step function?
 #' 
 #' # list of extinction rates
-#' qList <- c(0.08, 0.07, 0.08)
+#' qList <- c(0.08, 0.06, 0.07)
 #' 
 #' # list of shift times. Note qShifts could be c(40, 20, 5) for identical results
 #' qShifts <- c(0, 20, 35)
@@ -188,17 +180,12 @@
 #' 
 #' # speciation
 #' p <- function(t) {
-#'   return(0.09 + 0.005*t)
+#'   return(0.02 + 0.005*t)
 #' }
 #' 
 #' # run the simulation. We can pass the step function directly, or just give
 #' # a list of q and a list of shifts
-#' sim <- BDSim(n0, p, qList, tMax, qShifts = qShifts)
-#' 
-#' # run until we get more than 1 species
-#' while (length(sim$TE) < 2) {
-#'   sim <- BDSim(n0, p, qList, tMax, qShifts = qShifts)
-#' }
+#' sim <- BDSim(n0, p, qList, tMax, qShifts = qShifts, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -225,12 +212,7 @@
 #' q <- 0.08
 #' 
 #' # run the simulation
-#' sim <- BDSim(n0, p, q, tMax, pShape = pShape)
-#' 
-#' # run until we get more than 1 species
-#' while (length(sim$TE) < 2) {
-#'   sim <- BDSim(n0, p, q, tMax, pShape = pShape)
-#' }
+#' sim <- BDSim(n0, p, q, tMax, pShape = pShape, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -255,7 +237,7 @@
 #'   
 #'   # speciation - a scale
 #'   p <- function(t) {
-#'     return(1 + 0.25*t)
+#'     return(0.5 + 0.25*t)
 #'   }
 #'   
 #'   # note the scale for the age-dependency can be a time-varying function
@@ -265,19 +247,15 @@
 #'   
 #'   # extinction, dependent on temperature exponentially
 #'   q <- function(t, env) {
-#'     return(0.15*exp(0.01*env))
+#'     return(0.2*exp(0.01*env))
 #'   }
 #'   
 #'   # need a variable to tell BDSim the extinction is environmentally dependent
 #'   envQQ <- InfTemp
 #'   
 #'   # run the simulation
-#'   sim <- BDSim(n0, p, q, tMax, pShape = pShape, envQQ = InfTemp)
-#'   
-#'   # run until we get more than 1 species
-#'   while (length(sim$TE) < 2) {
-#'     sim <- BDSim(n0, p, q, tMax, pShape = pShape, envQQ = InfTemp)
-#'   }
+#'   sim <- BDSim(n0, p, q, tMax, pShape = pShape, envQQ = InfTemp, 
+#'                nFinal = c(2, Inf))
 #'   
 #'   # we can plot the phylogeny to take a look
 #'   if (requireNamespace("ape", quietly = TRUE)) {
@@ -313,12 +291,8 @@
 #'   tMax <- 40
 #'   
 #'   # run the simulation
-#'   sim <- BDSim(n0, p, q, tMax, pShape = pShape, envPP = envPP)
-#'   
-#'   # run until we get more than 1 species
-#'   while (length(sim$TE) < 2) {
-#'     sim <- BDSim(n0, p, q, tMax, pShape = pShape, envPP = InfTemp)
-#'   }
+#'   sim <- BDSim(n0, p, q, tMax, pShape = pShape, envPP = envPP, 
+#'                nFinal = c(2, Inf))
 #'   
 #'   # we can plot the phylogeny to take a look
 #'   if (requireNamespace("ape", quietly = TRUE)) {
@@ -341,7 +315,7 @@ BDSim <- function(n0, pp, qq, tMax,
   # if we have ONLY numbers for pp and qq, it is constant
   if ((is.numeric(pp) & length(pp) == 1) &
       (is.numeric(qq) & length(qq) == 1) &
-       (is.null(c(pShape, qShape, envPP, envQQ, pShifts,qShifts)))) {
+       (is.null(c(pShape, qShape, envPP, envQQ, pShifts, qShifts)))) {
     p <- pp
     q <- qq
     

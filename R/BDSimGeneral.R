@@ -100,12 +100,7 @@
 #' q <- 0.08
 #' 
 #' # run the simulation
-#' sim <- BDSimGeneral(n0, p, q, tMax)
-#' 
-#' # run until we get more than 1 species
-#' while (length(sim$TE) < 2) {
-#'   sim <- BDSim(n0, p, q, tMax)
-#' }
+#' sim <- BDSimGeneral(n0, p, q, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -132,12 +127,7 @@
 #' q <- 0.05
 #' 
 #' # run the simulation
-#' sim <- BDSimGeneral(n0, p, q, tMax)
-#' 
-#' # run until we get more than 1 species
-#' while (length(sim$TE) < 2) {
-#'   sim <- BDSim(n0, p, q, tMax)
-#' }
+#' sim <- BDSimGeneral(n0, p, q, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -157,15 +147,15 @@
 #' 
 #' # speciation rate
 #' p <- function(t) {
-#'   return(0.05 + 0.005*t)
+#'   return(0.03 + 0.005*t)
 #' }
 #' 
 #' # list of extinction rates
-#' qList <- c(0.05, 0.06, 0.07)
+#' qList <- c(0.05, 0.08, 0.11)
 #' 
 #' # list of shift times. Note qShifts could be c(40, 20, 10) for
 #' # identical results
-#' qShifts <- c(0, 20, 30)
+#' qShifts <- c(0, 15, 25)
 #' 
 #' # let us take a look at how MakeRate will make it a step function
 #' q <- MakeRate(qList, fShifts = qShifts)
@@ -181,12 +171,7 @@
 #' # from tMax
 #' 
 #' # run the simulation
-#' sim <- BDSimGeneral(n0, p, q, tMax)
-#' 
-#' # run until we get more than 1 species
-#' while (length(sim$TE) < 2) {
-#'   sim <- BDSim(n0, p, q, tMax)
-#' }
+#' sim <- BDSimGeneral(n0, p, q, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -202,7 +187,7 @@
 #' tMax <- 40
 #' 
 #' # speciation
-#' p <- 0.15
+#' p <- 0.1
 #' 
 #' # extinction - a Weibull scale
 #' q <- 10
@@ -210,14 +195,8 @@
 #' # extinction shape
 #' qShape <- 1
 #' 
-#' # run simulations - note fast = FALSE and trueExt = TRUE so we can accurately
-#' # fit the results to a Weibull
-#' sim <- BDSimGeneral(n0, p, q, tMax, qShape = qShape)
-#' 
-#' # run until we get more than 1 species
-#' while (length(sim$TE) < 2) {
-#'   sim <- BDSimGeneral(n0, p, q, tMax, qShape = qShape)
-#' }
+#' # run simulations
+#' sim <- BDSimGeneral(n0, p, q, tMax, qShape = qShape, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -243,13 +222,8 @@
 #' # extinction shape
 #' qShape <- 1
 #' 
-#' # run simulations 
-#' sim <- BDSimGeneral(n0, p, q, tMax, qShape = qShape)
-#' 
-#' # run until we get more than 1 species
-#' while (length(sim$TE) < 2) {
-#'   sim <- BDSimGeneral(n0, p, q, tMax, qShape = qShape)
-#' }
+#' # run simulations
+#' sim <- BDSimGeneral(n0, p, q, tMax, qShape = qShape, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -272,7 +246,7 @@
 #'   }
 #'   
 #'   # extinction
-#'   q <- 0.05
+#'   q <- 0.075
 #'   
 #'   # using RPANDA to get the temperature data
 #'   data(InfTemp, package="RPANDA")
@@ -285,12 +259,7 @@
 #'   # only 100 simulations to finish it in a reasonable time
 #'   
 #'   # run simulations
-#'   sim <- BDSim(n0, p, q, tMax)
-#'   
-#'   # run until we get more than 1 species
-#'   while (length(sim$TE) < 2) {
-#'     sim <- BDSimGeneral(n0, p, q, tMax)
-#'   }
+#'   sim <- BDSimGeneral(n0, p, q, tMax, nFinal = c(2, Inf))
 #'   
 #'   # we can plot the phylogeny to take a look
 #'   if (requireNamespace("ape", quietly = TRUE)) {
@@ -308,96 +277,104 @@ BDSimGeneral <- function(n0, pp, qq, tMax,
                          pShape = NULL, qShape = NULL,
                          nFinal = c(0, Inf), extOnly = FALSE,
                          fast = TRUE, trueExt = FALSE) {
-  # create vectors to hold times of speciation, extinction, parents and status
-  TS <- rep(-0.01, n0)
-  TE <- rep(NA, n0)
-  parent <- rep(NA, n0)
-  isExtant <- rep(TRUE, n0)
-
-  # initialize species count
-  sCount <- 1
-
-  # if shape is not null, make scale a function if it is not
+  # initialize species count with a value that makes sure the while loop runs
+  len <- -1
+  
+  # counter to make sure the nFinal is achievable
+  counter <- 1
+  
+  # if shape is not null, make scale a function to facilitate checking
   if (!is.null(pShape)) {
     p <- pp
-    pp <- ifelse(is.numeric(p), Vectorize(function(t) p),
-                 p)
+    pp <- ifelse(is.numeric(p), Vectorize(function(t) p), p)
   }
+  
   if (!is.null(qShape)) {
     q <- qq
-    qq <- ifelse(is.numeric(q), Vectorize(function(t) q),
-                 q)
+    qq <- ifelse(is.numeric(q), Vectorize(function(t) q), q)
   }
+  
+  while (len < nFinal[1] | len > nFinal[2]) {
+    # create vectors to hold times of speciation, extinction, parents and status
+    TS <- rep(-0.01, n0)
+    TE <- rep(NA, n0)
+    parent <- rep(NA, n0)
+    isExtant <- rep(TRUE, n0)
+  
+    # initialize species count
+    sCount <- 1
+  
+    # while we have species to be analyzed still
+    while (length(TE) >= sCount) {
+  
+      # get the time of speciation, or 0 if the species
+      # was there at the beginning
+      tNow <- ifelse(TS[sCount] < 0, 0, TS[sCount])
 
-  # while we have species to be analyzed still
-  while (length(TE) >= sCount) {
-
-    # get the time of speciation, or 0 if the species
-    # was there at the beginning
-    tNow <- ifelse(TS[sCount] < 0, 0, TS[sCount])
-
-    # find the waiting time using rexp_var - note that in rexp_var we only
-    # count t from tNow (to consider the rates as functions), so that
-    # now we need to subtract tNow
-    waitTimeS <- ifelse(
-      is.numeric(pp), rexp(1, pp), 
-      ifelse(pp(tNow) > 0, 
-             rexp_var(1, pp, tNow, tMax, pShape, 
-                      ifelse(TS[sCount] < 0, 0, TS[sCount]), fast), Inf))
-    waitTimeE <- ifelse(
-      is.numeric(qq), rexp(1, qq), 
-      ifelse(qq(tNow) > 0,
-             rexp_var(1, qq, tNow, tMax, qShape,
-                      ifelse(TS[sCount] < 0, 0, TS[sCount]), fast), Inf))
-
-    tExp <- tNow + waitTimeE
-
-    # while there are fast enough speciations before the species goes extinct,
-    while ((tNow + waitTimeS) <= min(tExp, tMax)) {
-
-      # advance to the time of speciation
-      tNow <- tNow + waitTimeS
-
-      # add new times to the vectors
-      TS <- c(TS, tNow)
-      TE <- c(TE, NA)
-      parent <- c(parent, sCount)
-      isExtant <- c(isExtant, TRUE)
-
-      # get a new speciation waiting time, and include it in the vector
+      # find the waiting time using rexp_var - note that in rexp_var we only
+      # count t from tNow (to consider the rates as functions), so that
+      # now we need to subtract tNow
       waitTimeS <- ifelse(
         is.numeric(pp), rexp(1, pp), 
         ifelse(pp(tNow) > 0, 
                rexp_var(1, pp, tNow, tMax, pShape, 
                         ifelse(TS[sCount] < 0, 0, TS[sCount]), fast), Inf))
+      
+      waitTimeE <- ifelse(
+        is.numeric(qq), rexp(1, qq), 
+        ifelse(qq(tNow) > 0,
+               rexp_var(1, qq, tNow, tMax, qShape,
+                        ifelse(TS[sCount] < 0, 0, TS[sCount]), fast), Inf))
+  
+      tExp <- tNow + waitTimeE
+  
+      # while there are fast enough speciations before the species goes extinct,
+      while ((tNow + waitTimeS) <= min(tExp, tMax)) {
+  
+        # advance to the time of speciation
+        tNow <- tNow + waitTimeS
+  
+        # add new times to the vectors
+        TS <- c(TS, tNow)
+        TE <- c(TE, NA)
+        parent <- c(parent, sCount)
+        isExtant <- c(isExtant, TRUE)
+  
+        # get a new speciation waiting time, and include it in the vector
+        waitTimeS <- ifelse(
+          is.numeric(pp), rexp(1, pp), 
+          ifelse(pp(tNow) > 0, 
+                 rexp_var(1, pp, tNow, tMax, pShape, 
+                          ifelse(TS[sCount] < 0, 0, TS[sCount]), fast), Inf))
+      }
+  
+      # reached the time of extinction
+      tNow <- tExp
+  
+      # record extinction, and if species is extant make it more than tMax
+      TE[sCount] <- ifelse(tNow < tMax | trueExt, tNow, tMax + 0.01)
+      isExtant[sCount] <- ifelse(TE[sCount] > tMax, TRUE, FALSE)
+  
+      # next species
+      sCount <- sCount + 1
     }
-
-    # reached the time of extinction
-    tNow <- tExp
-
-    # record extinction, and if species is extant make it more than tMax
-    TE[sCount] <- ifelse(tNow < tMax | trueExt, tNow, tMax + 0.01)
-    isExtant[sCount] <- ifelse(TE[sCount] > tMax, TRUE, FALSE)
-
-    # next species
-    sCount <- sCount + 1
-  }
-
-  # now we invert TE and TS so time goes from tMax to 0
-  TE <- tMax - TE
-  TS <- tMax - TS
-
-  # check if we do not have an acceptable number of species
-  test <- (extOnly & (sum(isExtant) < nFinal[1] | sum(isExtant) > nFinal[2])) |
-    (length(TE) < nFinal[1] | length(TE) > nFinal[2])
   
-  # if we do not, find a new result
-  if (test) {
-      return(BDSimConstant(n0, pp, qq, tMax, nFinal, extOnly))
+    # now we invert TE and TS so time goes from tMax to 0
+    TE <- tMax - TE
+    TS <- tMax - TS
+
+    # check the size of the simulation
+    len <- ifelse(extOnly, sum(isExtant), length(isExtant))
+    # if this is in nFinal, the while loop stops
+    
+    # if we have ran for too long, stop
+    counter <- counter + 1
+    if (counter > 100000) {
+      message("This value of nFinal took more than 100000 simulations 
+              to achieve")
+      return(NA)
+    }
   }
   
-  # if we do, return this one
-  else {
-    return(list(TE = TE, TS = TS, PAR = parent, EXTANT = isExtant))
-  }
+  return(list(TE = TE, TS = TS, PAR = parent, EXTANT = isExtant))
 }

@@ -34,12 +34,7 @@ member species.
 
 ###
 # first, let us try a simulation with 3 clades,
-sim <- BDSim(n0 = 3, pp = 0.1, qq = 0.1, tMax = 10)
-
-# in case first simulation has a small number of lineages
-while (length(sim$TE) < 20) {
-  sim <- BDSim(n0 = 3, pp = 0.1, qq = 0.1, tMax = 10)
-}
+sim <- BDSim(n0 = 3, pp = 0.1, qq = 0.1, tMax = 10, nFinal = c(20, Inf))
 
 # using the functions
 clades <- findLineages(sim)
@@ -55,7 +50,7 @@ for (i in 1:length(clades)) {
     # placeholder plot
     plot(NA, xlim = c(-1, 1), ylim = c(-1, 1))
     text("simulation with \n just one lineage", x = 0, y = 0.5, cex = 2)
-  } 
+  }
   # if it is a proper phylogeny
   else {
     if (requireNamespace("ape", quietly = TRUE)) {
@@ -87,13 +82,7 @@ for (i in 1:length(clades)) {
 
 ###
 # it works with any number of clades, of course
-sim <- BDSim(n0 = 5, pp = 0.1, qq = 0.08, tMax = 10)
-
-# in case first simulation has a small number of lineages
-while (length(sim$TE) < 20) {
-  sim <- BDSim(n0 = 5, pp = 0.1, qq = 0.1, tMax = 10)
-}
-
+sim <- BDSim(n0 = 5, pp = 0.1, qq = 0.08, tMax = 10, nFinal = c(20, Inf))
 
 # using the functions
 clades <- findLineages(sim)
@@ -109,7 +98,7 @@ for (i in 1:length(clades)) {
     # placeholder plot
     plot(NA, xlim = c(-1, 1), ylim = c(-1, 1))
     text("simulation with \n just one lineage", x = 0, y = 0.5, cex = 2)
-  } 
+  }
   # if it is a proper phylogeny
   else {
     if (requireNamespace("ape", quietly = TRUE)) {
@@ -141,12 +130,7 @@ for (i in 1:length(clades)) {
 
 ###
 # including one clade
-sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.08, tMax = 10)
-
-# in case first simulation has a small number of lineages
-while (length(sim$TE) < 20) {
-  sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
-}
+sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.08, tMax = 10, nFinal = c(5, Inf))
 
 par(mfrow = c(1,2))
 
@@ -161,7 +145,8 @@ if (requireNamespace("ape", quietly = TRUE)) {
 ###
 # now let us check that when S does not contain a starting species, we still
 # get correct subsets of the simulation
-sim <- BDSim(1, 0.1, 0.05, 40)
+sim <- BDSim(1, 0.1, 0.05, 40, nFinal = c(5, Inf))
+
 # making sure we have a couple of clades to explore
 while ((length(which(sim$PAR == 1)) < 3) | (length(which(sim$PAR == 2)) < 3) |
        (length(which(sim$PAR == 3)) < 3)) {

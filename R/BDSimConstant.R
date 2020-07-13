@@ -53,11 +53,7 @@
 #'
 #' @examples
 #' 
-#' # first we define a time vector for plotting
-#' tMax <- 40
-#' time <- 1:tMax
-#' 
-#' # now we can show a couple scenarios
+#' # we can show a couple scenarios
 #' 
 #' ###
 #' # first, extinction 0
@@ -75,7 +71,7 @@
 #' q <- 0
 #' 
 #' # run the simulation
-#' sim <- BDSim(n0, p, q, tMax)
+#' sim <- BDSimConstant(n0, p, q, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -99,7 +95,7 @@
 #' q <- 0.04
 #' 
 #' # run the simulation
-#' sim <- BDSimConstant(n0, p, q, tMax)
+#' sim <- BDSimConstant(n0, p, q, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -124,11 +120,9 @@
 #' q <- 0.02
 #' 
 #' # run the simulation
-#' sim <- BDSim(n0, p, q, tMax)
+#' sim <- BDSimConstant(n0, p, q, tMax)
 #' 
 #' # of course in this case there are no phylogenies to plot
-#' 
-
 #'
 #' @name BDSimConstant
 #' @rdname BDSimConstant
@@ -137,78 +131,86 @@
 
 BDSimConstant <- function(n0 = 1, pp, qq, tMax, 
                           nFinal = c(0, Inf), extOnly = FALSE) {
-  # check that the rates are constant
-  if (!(is.numeric(pp) & length(pp) == 1 &
-      is.numeric(qq) * length(qq) == 1)) {
-    stop("BDSimConstant requires constant rates")
-  }
+  # initialize species count with a value that makes sure the while loop runs
+  len <- -1
   
-  # initialize the vectors to hold times of speciation and extinction, parents
-  # and status (extant or not)
-  TS <- rep(-0.01, n0)
-  TE <- rep(NA, n0)
-  parent <- rep(NA, n0)
-  isExtant <- rep(TRUE, n0)
-
-  # initialize the counting variable
-  sCount <- 1
-
-  # while we have more species in a vector than we have analyzed,
-  while (length(TE) >= sCount) {
-    # TS starts at -0.01 to show it was alive at the beginning, but to count
-    # time we need to start at 0
-    tNow <- ifelse(TS[sCount] < 0, 0, TS[sCount])
-
-    # draw waiting times with rexp()
-    waittimeS <- ifelse(pp > 0, rexp(1, pp), Inf)
-    waittimeE <- ifelse(qq > 0, rexp(1, qq), Inf)
-
-    # if the time of extinction is after the end of the simulation, make it tMax
-    tExp <- min(tNow + waittimeE, tMax)
-
-    # while there are fast enough speciations before the species goes extinct,
-    while ((tNow + waittimeS) <= tExp) {
-      # update time
-      tNow<-tNow + waittimeS
-
-      # create a new species with corresponding TE, TS and parent
-      TS <- c(TS, tNow)
-      TE <- c(TE, NA)
-      parent <- c(parent, sCount)
-      isExtant <- c(isExtant, TRUE) # it is alive
-
-      # take a new waiting time - if now + waittimeS is still less than when
-      # the species goes extinct, repeat
-      waittimeS <- ifelse(pp > 0, rexp(1, pp), Inf)
+  # counter to make sure the nFinal is achievable
+  counter <- 1
+  
+  while (len < nFinal[1] | len > nFinal[2]) {
+    # check that the rates are constant
+    if (!(is.numeric(pp) & length(pp) == 1 &
+        is.numeric(qq) * length(qq) == 1)) {
+      stop("BDSimConstant requires constant rates")
     }
-
-    # reached the time of the species extinction
-    tNow <- tExp
-
-    # record the extinction - if tExp >= tMax, it didn't go extinct
-    TE[sCount] <- ifelse(tNow < tMax, tNow, tMax + 0.01)
-    isExtant[sCount] <- ifelse(TE[sCount] > tMax, TRUE, FALSE)
-
-    # next species
-    sCount <- sCount + 1
-  }
-
-  # finally, we invert both TE and TS to attain to the convention that time
-  # runs from 0 to tMax
-  TE <- tMax - TE
-  TS <- tMax - TS
+    
+    # initialize the vectors to hold times of speciation and extinction, parents
+    # and status (extant or not)
+    TS <- rep(-0.01, n0)
+    TE <- rep(NA, n0)
+    parent <- rep(NA, n0)
+    isExtant <- rep(TRUE, n0)
   
-  # check if we do not have an acceptable number of species
-  test <- (extOnly & (sum(isExtant) < nFinal[1] | sum(isExtant) > nFinal[2])) |
-    (length(TE) < nFinal[1] | length(TE) > nFinal[2])
+    # initialize the counting variable
+    sCount <- 1
   
-  # if we do not, find a new result
-  if (test) {
-    return(BDSimConstant(n0, pp, qq, tMax, nFinal, extOnly))
+    # while we have more species in a vector than we have analyzed,
+    while (length(TE) >= sCount) {
+      # TS starts at -0.01 to show it was alive at the beginning, but to count
+      # time we need to start at 0
+      tNow <- ifelse(TS[sCount] < 0, 0, TS[sCount])
+  
+      # draw waiting times with rexp()
+      waittimeS <- ifelse(pp > 0, rexp(1, pp), Inf)
+      waittimeE <- ifelse(qq > 0, rexp(1, qq), Inf)
+  
+      # if the time of extinction is after the end of the simulation, make it tMax
+      tExp <- min(tNow + waittimeE, tMax)
+  
+      # while there are fast enough speciations before the species goes extinct,
+      while ((tNow + waittimeS) <= tExp) {
+        # update time
+        tNow<-tNow + waittimeS
+  
+        # create a new species with corresponding TE, TS and parent
+        TS <- c(TS, tNow)
+        TE <- c(TE, NA)
+        parent <- c(parent, sCount)
+        isExtant <- c(isExtant, TRUE) # it is alive
+  
+        # take a new waiting time - if now + waittimeS is still less than when
+        # the species goes extinct, repeat
+        waittimeS <- ifelse(pp > 0, rexp(1, pp), Inf)
+      }
+  
+      # reached the time of the species extinction
+      tNow <- tExp
+  
+      # record the extinction - if tExp >= tMax, it didn't go extinct
+      TE[sCount] <- ifelse(tNow < tMax, tNow, tMax + 0.01)
+      isExtant[sCount] <- ifelse(TE[sCount] > tMax, TRUE, FALSE)
+  
+      # next species
+      sCount <- sCount + 1
+    }
+  
+    # finally, we invert both TE and TS to attain to the convention that time
+    # runs from 0 to tMax
+    TE <- tMax - TE
+    TS <- tMax - TS
+  
+    # check the size of the simulation
+    len <- ifelse(extOnly, sum(isExtant), length(isExtant))
+    # if this is in nFinal, the while loop stops
+    
+    # if we have ran for too long, stop
+    counter <- counter + 1
+    if (counter > 100000) {
+      message("This value of nFinal took more than 100000 simulations 
+              to achieve")
+      return(NA)
+    }
   }
 
-  # if we do, return this one
-  else {
-    return(list(TE = TE, TS = TS, PAR = parent, EXTANT = isExtant))
-  }
+  return(list(TE = TE, TS = TS, PAR = parent, EXTANT = isExtant))
 }

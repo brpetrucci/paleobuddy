@@ -248,7 +248,7 @@ MakeRate <- function(ff, tMax, envF = NULL, fShifts = NULL) {
       }
       
       # and envF needs to have two columns
-      if (nrow(envF) != 2) {
+      if (ncol(envF) != 2) {
         stop("environmental variable must be a dataframe with two columns")
       }
     }
