@@ -58,10 +58,7 @@ vector of occurrence times for the list of species.
 }
 \examples{
 
-# Note: all examples use just 1 lineage and very large preservation rates
-# (rr = 5000 occs/my) to be clearer to the reader. Most of times preservation
-# will not be this high.
-
+###
 # we can start with a hat-shaped increase through the duration of a species
 
 # simulate a group
@@ -76,10 +73,10 @@ while ((sim$TS[1] - sim$TE[1]) < 10) {
 # Silvestro et al 2014
 
 # preservation function
-dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) { 
+dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
   
   # check if it is a valid PERT
-  if (e >= s) { 
+  if (e >= s) {
     message("There is no PERT with e >= s")
     return(rep(NaN, times = length(t)))
   }
@@ -115,18 +112,18 @@ dPERTmax <- function(s, e, sp) {
   return(((s - e) / 2) + e)
 }
 
-\dontrun{
 # find occurrences
-occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 5000, dFun = dPERT,
+occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 1, dFun = dPERT,
                    dFunMax = dPERTmax)
 
 # check histogram
-hist(unlist(occs), breaks = 100, probability = TRUE)
+hist(unlist(occs), probability = TRUE)
 
-# expected curve
+# expected curve - probably will not fit great because of low sample size, see
+# vignettes for more rigorous tests
 curve(dPERT(x, s = sim$TS[1], e = sim$TE[1]), 20, 0, add = TRUE, col = "red")
-}
 
+###
 # now we can test the simpler scenario of uniform sampling probablity
 # through the duration of a species (= homogeneous poisson process)
 
@@ -155,15 +152,16 @@ custom.uniform <- function(t, s, e, sp) {
 
 # we will not give a dFunMax function this time. SampleADPP() will try to find
 # the maximum density with a very simple numerical simulation
-occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 5000, dFun = custom.uniform)
+occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 2, dFun = custom.uniform)
 
 # check histogram
-hist(unlist(occs[[1]]), breaks = 100, probability = TRUE)
+hist(unlist(occs[[1]]), probability = TRUE)
 
 # expected curve
-curve(dunif (x, min = sim$TE[1], max = sim$TS[1]), 10, 0, 
+curve(dunif (x, min = sim$TE[1], max = sim$TS[1]), 10, 0,
       add = TRUE, col = "red")
 
+###
 # now, a hat-shaped increase through the duration of a species with more
 # parameters than TS and TE
 
@@ -189,7 +187,7 @@ dTRI <- function(t, s, e, sp, md) {
   
   # make sure it is a valid TRI
   if (e >= s) {
-    message("There is no TRI with e >= s") 
+    message("There is no TRI with e >= s")
     return(rep(NaN, times = length(t)))
   }
   
@@ -209,7 +207,7 @@ dTRI <- function(t, s, e, sp, md) {
   res <- vector()
   
   # (t >= e & t < md)
-  res[id1] <- (2*(t[id1] - e)) / ((s - e)*(md - e)) 
+  res[id1] <- (2*(t[id1] - e)) / ((s - e)*(md - e))
   
   #(t == md)
   res[id2] <- 2 / (s - e)
@@ -218,7 +216,7 @@ dTRI <- function(t, s, e, sp, md) {
   res[id3] <- (2*(s - t[id3])) / ((s - e)*(s - md))
   
   #outside function's limits
-  res[id4] <- 0 
+  res[id4] <- 0
   
   return(res)
 }
@@ -230,9 +228,8 @@ dTRImax <- function(s, e, sp, md) {
   return(2 / (s - e))
 }
 
-\dontrun{
 # note we are providing the mode for the triangular sampling as an ... argument
-occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 5000, dFun = dTRI,
+occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 2.5, dFun = dTRI,
                    dFunMax = dTRImax, md = 8)
 
 # please note in the original parametrization, the "md" parameter (mode) is
@@ -243,13 +240,13 @@ occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 5000, dFun = dTRI,
 # (many lineages might not be alive in the "md" moment in time).
 
 # check histrogram
-hist(unlist(occs[[1]]), breaks = 100, probability = TRUE)
+hist(unlist(occs[[1]]), probability = TRUE)
 
 # expected curve
-curve(dTRI(x, e = sim$TE[1], s = sim$TS[1], md = 8), 10, 0, add = TRUE, 
+curve(dTRI(x, e = sim$TE[1], s = sim$TS[1], md = 8), 10, 0, add = TRUE,
       col = "red")
-}
 
+###
 # we can also have a hat-shaped increase through the duration of a species
 # with more parameters than TS and TE, but with the parameters relate to
 # the relative age of each lineage
@@ -275,7 +272,7 @@ dTRImod1 <- function(t, s, e, sp) {
   }
   
   # calculate md
-  md <- ((s - e) / 4) + e 
+  md <- ((s - e) / 4) + e
   # md is at the last quarter of the duration of the lineage
   
   # please note that the same logic can be used to sample parameters
@@ -310,24 +307,23 @@ dTRImaxmod1<-function(s, e, sp) {
   return(2 / (s - e))
 }
 
-\dontrun{
 # find occurrences
-occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 5000,
+occs <- SampleADPP(S = 1, TE = sim$TE, TS = sim$TS, rr = 5,
                    dFun = dTRImod1, dFunMax = dTRImaxmod1)
 
 # we do not have the "md" parameter (see example 3) as it corresponds to the
 # last quarter of the duration of each lineage
 
 # check histogram
-hist(unlist(occs[[1]]), breaks = 100, probability = TRUE)
+hist(unlist(occs[[1]]), probability = TRUE)
 
 # md of dTRI
 mid <- ((sim$TS[1] - sim$TE[1]) / 4) + sim$TE[1]
 
 # expected curve
 curve(dTRI(x, e = sim$TE[1], s = sim$TS[1], md = mid), 10, 0, add = TRUE, col = "red")
-}
 
+###
 # finally, a hat-shaped increase through the duration of a species with more
 # parameters than TS and TE, but the parameters relate to each specific lineage.
 # This is useful when the user wants to use variable parameters for each species
@@ -372,7 +368,7 @@ dTRImod2<-function(t, s, e, sp) {
   res[id3] <- (2*(s - t[id3])) / ((s - e)*(s - md))
   res[id4] <- 0
   
-  return(res) 
+  return(res)
   #for more details in this function, see example 3 and 4
 }
 
@@ -385,9 +381,8 @@ dTRImaxmod2 <- function(s, e, sp) {
 par <- runif (n = length(sim$TE), min = sim$TE, max = sim$TS)
 par1 <- (((sim$TS - sim$TE)/2) + sim$TE) - par
 
-\dontrun{
 # find occurrence list
-occs <- SampleADPP(S = 1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 5000,
+occs <- SampleADPP(S = 1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 10,
                    dFun = dTRImod2, dFunMax = dTRImaxmod2)
 
 # we do not have the "md" parameter (see example 3) as it corresponds to
@@ -396,7 +391,7 @@ occs <- SampleADPP(S = 1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 5000,
 # checking each species
 for (sp in 1:length(sim$TE)) {
   # check histogram
-  hist(unlist(occs[[sp]]), breaks = 100, probability = TRUE,
+  hist(unlist(occs[[sp]]), probability = TRUE,
        main = paste0("spp ", sp, " ; duration ~ ",
                      round(sim$TS[sp] - sim$TE[sp], digits = 2)))
   
@@ -407,9 +402,6 @@ for (sp in 1:length(sim$TE)) {
   curve(dTRI(x, e = sim$TE[sp], s = sim$TS[sp], md = mid),10, 0, add = TRUE,
         col = "red", n = 100)
   abline(v = mid, col = "red")
-}
-
-
 }
 
 }

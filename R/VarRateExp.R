@@ -39,10 +39,11 @@
 #'
 #' @examples
 #'
-#' # let us create a vector of times to use in these examples.
+#' # let us first create a vector of times to use in these examples.
 #' t <- seq(0, 50, 0.1)
 #' 
-#' # let us start simple: create a constant rate
+#' ###
+#' # we can start simple: create a constant rate
 #' ff <- 0.1
 #' 
 #' # set this up so we see rates next to diversity
@@ -56,6 +57,7 @@
 #' div <- VarRateExp(ff, t = t)
 #' plot(t, div, type = 'l')
 #' 
+#' ###
 #' # something a bit more complex: a linear rate
 #' ff <- function(t) {
 #'   return(0.01*t)
@@ -69,7 +71,9 @@
 #' div <- VarRateExp(ff, t = t)
 #' plot(t, div, type = 'l')
 #' 
+#' ###
 #' # remember: ff is diversity!
+#' 
 #' # we can create speciation...
 #' pp <- function(t) {
 #'   return(-0.01*t + 0.2)
@@ -89,11 +93,14 @@
 #' r <- MakeRate(ff)
 #' plot(t, r(t), type = 'l')
 #' 
-#' # not a good time for this poor clade
+#' # get diversity and plot it
 #' div <- VarRateExp(ff, n0 = 2, t)
 #' plot(t, div, type = 'l')
 #' 
+#' ###
 #' # remember: ff can be any time-varying function!
+#' 
+#' # such as a sine
 #' ff <- function(t) {
 #'   return(sin(t)*0.5)
 #' }
@@ -106,6 +113,7 @@
 #' div <- VarRateExp(ff, n0 = 2, t)
 #' plot(t, div, type = 'l')
 #' 
+#' ###
 #' # we can use ifelse() to make a step function like this
 #' ff <- function(t) {
 #'   return(ifelse(t < 10, 0.1,
@@ -118,33 +126,34 @@
 #' r <- MakeRate(ff)
 #' plot(t, r(t), type = 'l')
 #' 
-#' \dontrun{
 #' # get the diversity and plot it
 #' div <- VarRateExp(ff, t = t)
 #' plot(t, div, type = 'l')
-#' }
+#' 
 #' # important note: this method of creating a step function might be annoying,
 #' # but when running thousands of simulations it will provide a much faster
 #' # integration than when using our method of transforming a rates and shifts
-#' # vector into a function of time...
+#' # vector into a function of time
 #' 
+#' ###
 #' # ...which we can do as follows
 #' 
 #' # rates vector
 #' ff <- c(0.2, 0.1, 0.15, 0.05)
 #' 
+#' # change t so the integral is faster
+#' t <- seq(0, 20, 0.1)
+#' 
 #' # rate shifts vector
-#' fShifts <- c(0, 10, 20, 35)
+#' fShifts <- c(0, 5, 10, 15)
 #' 
 #' # visualize the rate
 #' r <- MakeRate(ff, fShifts = fShifts)
 #' plot(t, r(t),type = 'l')
 #' 
-#' \dontrun{
 #' # get the diversity and plot it
 #' div <- VarRateExp(ff, t = t, fShifts = fShifts)
 #' plot(t, div, type = 'l')
-#' }
 #' 
 #' # note the delay in running VarRateExp using this method. integrating a step
 #' # function created using the methods in MakeRate() is slow, as explained in
@@ -172,12 +181,11 @@
 #'   r <- MakeRate(ff, envF = InfTemp)
 #'   plot(t, r(t), type = 'l')
 #'   
-#' \dontrun{
 #'   # get diversity and plot it
 #'   div <- VarRateExp(ff, t = t, envF = InfTemp)
 #'   plot(t, div, type = 'l')
-#' }
 #'   
+#'   ###
 #'   # we can also have a function that depends on both time AND temperature
 #'   
 #'   # diversification
@@ -189,12 +197,11 @@
 #'   r <- MakeRate(ff, envF = InfTemp)
 #'   plot(t, r(t), type = 'l')
 #'   
-#' \dontrun{
 #'   # get diversity and plot it
 #'   div <- VarRateExp(ff, t = t, envF = InfTemp)
 #'   plot(t, div, type = 'l')
-#' }
 #'   
+#'   ###
 #'   # as mentioned above, we could also use ifelse() to construct a step function
 #'   # that is modulated by temperature
 #'   
@@ -209,10 +216,8 @@
 #'   r <- MakeRate(ff, envF = InfTemp)
 #'   plot(t, r(t), type = 'l')
 #'   
-#' \dontrun{
 #'   div <- VarRateExp(ff, t = t, envF = InfTemp)
 #'   plot(t, div, type = 'l')
-#' }
 #' }
 #' 
 #' @name VarRateExp
@@ -226,14 +231,14 @@ VarRateExp <- function(ff, n0 = 1, t, envF = NULL, fShifts = NULL) {
   if (!is.numeric(f)) {
     # integrate the rate for each t
     integral <- lapply(t, function(x) {
-      integrate(Vectorize(f), 0, x, subdivisions = 2000)[1]
+      integrate(Vectorize(f), 0, x, subdivisions = 2000)$value
       })
 
     # make the integral numerical so we can plot
     for (i in 1:length(integral)) {
       integral[i] <- as.numeric(integral[[i]])
       }
-    integral<-as.numeric(integral)
+    integral <- as.numeric(integral)
   }
 
   else {

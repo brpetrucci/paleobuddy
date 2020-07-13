@@ -101,9 +101,11 @@ occurrences (\code{returnTrue == FALSE}) or exact occurrence times
 }
 \examples{
 
-# preservation model, see the examples in the help page of the SampleADPP
-# function
+# in all the coming examples we show histograms for visualization, but note
+# they might not look exactly as intended given the low sample size. See
+# vignettes for more thorough testing
 
+###
 # we can start with a constant case
 
 # simulate a group
@@ -115,15 +117,13 @@ while ((sim$TS[1] - sim$TE[1]) < 10) {
 }
 
 # sampling rate
-# high so we can see the pattern
-r <- 100 
+r <- 2
 
 # the resolution of the fossil dataset:
-bins <- seq(from = 10, to = 0, 
+bins <- seq(from = 10, to = 0,
             by = -0.1)
 # note that we will provide a very high resolution to test the function
 
-\dontrun{
 # find the occurrence data frame
 dt <- SampleClade(1:length(sim$TE), sim, r, tMax = 10, bins = bins)
 
@@ -139,17 +139,15 @@ for (i in 1:length(ids)) {
   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
   
   # check the histogram
-  hist(mids[dt$Species == ids[i]], 
+  hist(mids[dt$Species == ids[i]],
        main = paste0("spp = ", sp, "; duration ~ ",
                      round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
-       xlab = "Time (My)", 
-       breaks = seq(ceiling(sim$TS[i]), floor(sim$TE[i]), -1),
+       xlab = "Time (My)",
        xlim = c(sim$TS[i], sim$TE[i]))
-  
-  # curve where the histogram should be
-  abline(h=r)
 }
-}
+
+###
+# sampling can be any function of time in the non-age dependent case, of course
 
 # simulate a group
 sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
@@ -161,15 +159,14 @@ while ((sim$TS[1] - sim$TE[1]) < 10) {
 
 # sampling rate
 r <- function(t) {
-  return(200 - 5*t)
+  return(3 - 0.25*t)
 }
 
 # the resolution of the fossil dataset:
-bins <- seq(from = 10, to = 0, 
+bins <- seq(from = 10, to = 0,
             by = -0.1)
 # note that we will provide a very high resolution to test the function
 
-\dontrun{
 # find the occurrence data frame
 dt <- SampleClade(1:length(sim$TE), sim, r, tMax = 10, bins = bins)
 
@@ -185,21 +182,14 @@ for (i in 1:length(ids)) {
   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
   
   # check the histogram
-  hist(mids[dt$Species == ids[i]], 
+  hist(mids[dt$Species == ids[i]],
        main = paste0("spp = ", sp, "; duration ~ ",
                      round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
-       xlab = "Time (My)", 
-       breaks = seq(ceiling(sim$TS[i]), floor(sim$TE[i]), -1),
+       xlab = "Time (My)",
        xlim = c(sim$TS[i], sim$TE[i]))
-  
-  # time
-  t <- seq(sim$TE[i], sim$TS[i], 0.1)
-  
-  # plot expected curve from past to present
-  lines(t, rev(r(t)))
-}
 }
 
+###
 # now we can try a step function rate
 
 # simulate a group
@@ -214,7 +204,7 @@ while ((sim$TS[1] - sim$TE[1]) < 10) {
 # one could instead use ifelse()
 
 # rates vector
-rlist <- c(100, 50, 120)
+rlist <- c(1, 2, 0.5)
 
 # rate shifts vector
 rShifts <- c(0, 4, 8)
@@ -223,11 +213,10 @@ rShifts <- c(0, 4, 8)
 r <- MakeRate(rlist, 10, fShifts=rShifts)
 
 # the resolution of the fossil dataset:
-bins <- seq(from = 10, to = 0, 
+bins <- seq(from = 10, to = 0,
             by = -0.1)
 # note that we will provide a very high resolution to test the function
 
-\dontrun{
 # find the occurrence data frame
 dt <- SampleClade(1:length(sim$TE), sim, r, tMax = 10, bins = bins)
 
@@ -243,21 +232,14 @@ for (i in 1:length(ids)) {
   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
   
   # check the histogram
-  hist(mids[dt$Species == ids[i]], 
+  hist(mids[dt$Species == ids[i]],
        main = paste0("spp = ", sp, "; duration ~ ",
                      round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
-       xlab = "Time (My)", 
-       breaks = seq(ceiling(sim$TS[i]), floor(sim$TE[i]), -1),
+       xlab = "Time (My)",
        xlim = c(sim$TS[i], sim$TE[i]))
-  
-  # time
-  t <- seq(sim$TE[i], sim$TS[i], 0.1)
-  
-  # plot expected curve from past to present
-  lines(t, rev(r(t)))
-}
 }
 
+###
 # finally, \code{SampleClade} also accepts an environmental variable
 if (requireNamespace("RPANDA", quietly = TRUE)) {
   # get temperature data
@@ -276,24 +258,23 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   
   # we can then make sampling dependent on the temperature
   r <- function(t, env) {
-    return(25*env)
+    return(0.5*env)
   }
   
   # make it a function so we can plot it
   rr <- MakeRate(r, envF = envR)
   
   # let us check that r is high enough to see a pattern
-  plot(1:10, rr(1:10), type = 'l', main = "Sampling rate", 
+  plot(1:10, rr(1:10), type = 'l', main = "Sampling rate",
        xlab = "My", ylab = "r")
   
   # the resolution of the fossil dataset:
-  bins <- seq(from = 10, to = 0, 
+  bins <- seq(from = 10, to = 0,
               by = -0.1)
   # note that we will provide a very high resolution to test the function
   
-\dontrun{
   # find the occurrence data frame
-  dt <- SampleClade(1:length(sim$TE), sim, r, tMax = 10, envRR = envR, 
+  dt <- SampleClade(1:length(sim$TE), sim, r, tMax = 10, envRR = envR,
                     bins = bins)
   
   # extract species identity
@@ -308,25 +289,18 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
     sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
     
     # check the histogram
-    hist(mids[dt$Species == ids[i]], 
+    hist(mids[dt$Species == ids[i]],
          main = paste0("spp = ", sp, "; duration ~ ",
                        round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
-         xlab = "Time (My)", 
-         breaks = seq(ceiling(sim$TS[i]), floor(sim$TE[i]), -1),
+         xlab = "Time (My)",
          xlim = c(sim$TS[i], sim$TE[i]))
-    
-    # time
-    t <- seq(sim$TE[i], sim$TS[i], 0.1)
-    
-    # plot expected curve from past to present
-    lines(t, rev(rr(t)))
   }
-}
 }
 
 # we will now do some tests with age-dependent rates. For more details,
 # check SampleADPP.
 
+###
 # simulate a group
 sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 
@@ -340,36 +314,36 @@ while ((sim$TS[1] - sim$TE[1]) < 10) {
 
 # preservation function
 dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
-
+  
   # check if it is a valid PERT
   if (e >= s) {
     message("There is no PERT with e >= s")
     return(rep(NaN, times = length(t)))
   }
-
+  
   # find the valid and invalid times
   id1 <- which(t <= e | t >= s)
   id2 <- which(!(t <= e | t >= s))
   t <- t[id2]
-
+  
   # initialize result vector
   res <- vector()
-
+  
   # if user wants a log function
   if (log) {
     # invalid times get -Inf
     res[id1] <- -Inf
-
+    
     # valid times calculated with log
     res[id2] <- log(((s - t) ^ 2)*((-e + t) ^ 2)/((s - e) ^ 5*beta(a,b)))
   }
   # otherwise
   else{
     res[id1] <- 0
-
+    
     res[id2] <- ((s - t) ^ 2)*((-e + t) ^ 2)/((s - e) ^ 5*beta(a,b))
   }
-
+  
   return(res)
 }
 
@@ -383,8 +357,7 @@ bins <- seq(from = 10, to = 0,
             by = -0.1)
 # note that we will provide a very high resolution to test the function
 
-\dontrun{
-dt <- SampleClade(1:length(sim$TE), sim, rr = 5000, tMax = 10, bins = bins,
+dt <- SampleClade(1:length(sim$TE), sim, rr = 3, tMax = 10, bins = bins,
                   dFun = dPERT, dFunMax = dPERTmax)
 
 # extract species identity
@@ -397,23 +370,24 @@ mids <- (dt$MaxT - dt$MinT) + dt$MinT
 for (i in 1:length(ids)) {
   # get the species number
   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
-
+  
   # check the histogram
   hist(mids[dt$Species == ids[[i]]],
        main = paste0("spp = ", sp, "; duration ~ ",
                      round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
        xlab = "Time (My)", probability = TRUE)
-
+  
   # expected curve
   curve(dPERT(x, s = sim$TS[sp], e = sim$TE[sp], sp = sp), from = sim$TE[sp],
         to = sim$TS[sp], add = TRUE, col = "red", n = 100)
 }
-# note that the sampling at fossil bins distorts the quantiles of the
-# distribution, even with the high preservation rate and the high resolution
-# of fossil bins. Also note it might break down for very low durations
-}
+# we provide curves for comparison here, but remember the low sample sizes 
+# (and bins) may affect the quality of the fit. See vignettes for more 
+# thorough testing
 
-# now, a hat-shaped increase through the duration of a species dependent on two parameters
+###
+# now, a hat-shaped increase through the duration of a species dependent on two
+# parameters
 
 # simulate a group
 sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
@@ -426,34 +400,34 @@ while ((sim$TS[1] - sim$TE[1]) < 10) {
 # preservation function in respect to age, with the "mode" of the triangle
 # being exactly at the last quarter of the duration of EACH lineage.
 dTRImod2<-function(t, s, e, sp) {
-
+  
   # make sure it is a valid TRI
   if (e >= s) {
     message("There is no TRI with e >= s")
     return(rep(NaN, times = length(t)))
   }
-
+  
   # here is the difference from the function in example 3 and 4
   md <- par[sp] + par1[sp]
-
+  
   # check that md is valid
   if (md < e | md > s) {
     message("There is no TRI with md outside [s, e] interval")
     return(rep(NaN, times = length(t)))
   }
-
+  
   id1 <- which(t >= e & t < md)
   id2 <- which(t == md)
   id3 <- which(t > md & t <= s)
   id4 <- which(!(1:length(t) \%in\% c(id1,id2,id3)))
-
+  
   res <- vector()
-
+  
   res[id1] <- (2*(t[id1] - e)) / ((s - e)*(md - e))
   res[id2] <- 2 / (s - e)
   res[id3] <- (2*(s - t[id3])) / ((s - e)*(s - md))
   res[id4] <- 0
-
+  
   return(res)
   #for more details in this function, see example 3 and 4
 }
@@ -474,8 +448,7 @@ bins <- seq(from = 10, to = 0,
             by = -0.1)
 # note that we will provide a very high resolution to test the function
 
-\dontrun{
-dt <- SampleClade(1:length(sim$TE), sim, rr = 5000, tMax = 10, bins = bins,
+dt <- SampleClade(1:length(sim$TE), sim, rr = 4, tMax = 10, bins = bins,
                   dFun = dTRImod2, dFunMax = dTRImaxmod2)
 
 # extract species identity
@@ -487,22 +460,21 @@ mids <- (dt$MaxT - dt$MinT) + dt$MinT
 # for each species
 for (i in 1:length(ids)) {
   # get the species number
- sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
-
+  sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+  
   # check the histogram
   hist(mids[dt$Species == ids[[i]]],
        main = paste0("spp = ", sp, "; duration ~ ",
                      round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
        xlab = "Time (My)", probability = TRUE)
-
+  
   # expected curve
   curve(dTRImod2(x, e=sim$TE[sp], s=sim$TS[sp], sp=sp),from = sim$TE[sp],
         to = sim$TS[sp], add=TRUE, col="red", n = 100)
 }
-# note that the sampling at fossil bins distorts the quantiles of the
-# distribution, even with the high preservation rate and the high
-# resolution of fossil bins.
-}
+# we provide curves for comparison here, but remember the low sample sizes 
+# (and bins) may affect the quality of the fit. See vignettes for more 
+# thorough testing
 
 }
 \author{

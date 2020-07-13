@@ -23,60 +23,56 @@
 #'
 #' @examples
 #'
-#' # Note: all examples use just 1 lineage and very large preservation rates just
-#' # to be clearer to the reader. Most of the time preservation will never be 
-#' # this high
-#' 
+#' ###
 #' # let us start with a linear increase in preservation rate
 #' 
 #' # simulate a group
 #' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation was short-lived
-#' while ((sim$TS[1] - sim$TE[1]) < 10) { 
-#'   sim <- BDSim(n0 = 1, pp = -.1, qq = 0.1, tMax = 10)
+#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # preservation function
-#' r<-function(t) {
-#'   return(50 + t*30)
+#' r <- function(t) {
+#'   return(1 + 0.25*t)
 #' }
 #' 
 #' # time
 #' t<-seq(0, 10, by = 0.1)
 #' 
 #' # visualizing from the past to the present
-#' plot(x = t, y = rev(r(t)), main="Simulated preservation", type = "l", 
-#'      col = "red", xlab = "Mya", ylab = "preservation rate", 
+#' plot(x = t, y = rev(r(t)), main="Simulated preservation", type = "l",
+#'      xlab = "Mya", ylab = "preservation rate",
 #'      xlim = c(10, sim$TE[1]))
 #' 
-#' \dontrun{
 #' # sample
 #' occs <- Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
 #' 
 #' # check histogram
 #' hist(occs,
-#'      xlim = c(10, sim$TE[1]), 
+#'      xlim = c(10, sim$TE[1]),
 #'      xlab = "Mya")
 #' lines(t, rev(r(t)))
-#' }
 #' 
+#' ###
 #' # now let us try a step function
 #' 
 #' # simulate a group
 #' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation was short lived
-#' while ((sim$TS[1] - sim$TE[1]) < 10) { 
+#' while ((sim$TS[1] - sim$TE[1]) < 10) {
 #'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # we can create the sampling rate here from a few vectors
 #' 
 #' # rates
-#' rlist <- c(50, 20, 80)
+#' rlist <- c(1, 3, 0.5)
 #' 
-#' # rate shift times -  this could be c(10, 6, 2) 
+#' # rate shift times -  this could be c(10, 6, 2)
 #' # and would produce the same function
 #' rShifts <- c(0, 4, 8)
 #' 
@@ -87,23 +83,22 @@
 #' t <- seq(0, 10, by = 0.1)
 #' 
 #' # visualizing the plot from past to present
-#' plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l", 
-#'      col = "red", xlab = "Mya", ylab = "preservation rate", 
+#' plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
+#'      xlab = "Mya", ylab = "preservation rate",
 #'      xlim = c(10, sim$TE[1]))
 #' 
-#' \dontrun{
 #' # sample
 #' occs <- Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
 #' 
 #' # check histogram
 #' hist(occs,
-#'      xlim = c(10, sim$TE[1]), 
+#'      xlim = c(10, sim$TE[1]),
 #'      xlab = "Mya")
 #' 
 #' # frontiers of each regime
-#' abline(v = 10 - rShifts, col = "red") 
-#' }
+#' abline(v = 10 - rShifts, col = "red")
 #' 
+#' ###
 #' # we can create a step function in a different way as well
 #' 
 #' # simulate a group
@@ -115,10 +110,9 @@
 #' }
 #' 
 #' # preservation function
-#' r<-function(t) {
-#'   ifelse(t < 4, 50,
-#'          ifelse(t < 8, 20,
-#'                 80)) 
+#' r <- function(t) {
+#'   ifelse(t < 4, 1,
+#'          ifelse(t < 8, 3, 0.5))
 #' }
 #' # note how this function should be exactly the same as the previous one
 #' 
@@ -126,23 +120,55 @@
 #' t <- seq(0, 10, by = 0.1)
 #' 
 #' # visualizing the plot from past to present
-#' plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l", 
-#'      col = "red", xlab = "Mya", ylab = "preservation rate", 
+#' plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
+#'      xlab = "Mya", ylab = "preservation rate",
 #'      xlim = c(10, sim$TE[1]))
 #' 
-#' \dontrun{
-#' # sample 
+#' # sample
 #' occs <- Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
 #' 
 #' # check histogram
 #' hist(occs,
-#'      xlim = c(10, sim$TE[1]), 
+#'      xlim = c(10, sim$TE[1]),
 #'      xlab = "Mya")
 #' abline(v = 10 - rShifts, col = "red")
-#' }
 #' 
-#' # one could also use an environmental function to generate a sampling rate,
-#' # see MakeRate()
+#' ###
+#' # finally we could generate sampling dependent on temperature
+#' 
+#' if (requireNamespace("RPANDA", quietly = TRUE)) {
+#'   # simulate a group
+#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   
+#'   # in case first simulation was short-lived
+#'   while ((sim$TS[1] - sim$TE[1]) < 10) {
+#'     sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   }
+#'   
+#'   # preservation function dependent on temperature
+#'   r_t <- function(t, env) {
+#'     return(0.25*env)
+#'   }
+#'   
+#'   # get the temperature data
+#'   data(InfTemp, package = "RPANDA")
+#'   
+#'   # final preservation
+#'   r <- MakeRate(r_t, envF = InfTemp)
+#'   
+#'   # visualizing the plot from past to present
+#'   plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
+#'        xlab = "Mya", ylab = "preservation rate",
+#'        xlim = c(10, sim$TE[1]))
+#'   
+#'   # sample
+#'   occs <- Sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
+#'   
+#'   # check histogram
+#'   hist(occs,
+#'        xlim = c(10, sim$TE[1]),
+#'        xlab = "Mya")
+#' }
 #' 
 #' @name Sample
 #' @rdname Sample

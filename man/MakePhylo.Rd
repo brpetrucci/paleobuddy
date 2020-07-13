@@ -25,13 +25,14 @@ lineage.
 sim <- BDSim(n0 = 1, pp = 0.2, qq = 0.05, tMax = 10)
 
 # in case first simulation has only one species
-while (length(sim$TE) < 2) {
+while (sum(sim$TE < 0) < 2) {
   sim <- BDSim(n0 = 1, pp = 0.2, qq = 0.05, tMax = 10)
 }
 
+# make the phylogeny
 phy <- MakePhylo(sim)
 
-# we need ape to plot it
+# plot it
 if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(phy)
   
@@ -40,20 +41,26 @@ if (requireNamespace("ape", quietly = TRUE)) {
 }
 
 # this works for sim generated with any of the scenarios in BDSim, of course
-sim <- BDSim(n0 = 1, pp = function(t) 0.12 + 0.01*t, qq = 10, 
+sim <- BDSim(n0 = 1, pp = function(t) 0.12 + 0.01*t, qq = 10,
              tMax = 10, qShape = 1.3)
 
 # in case first simulation has only one species
-while (length(sim$TE) < 2) { 
-  sim <- BDSim(n0 = 1, pp = function(t) 0.12 + 0.01*t, qq = 10, 
+while (sum(sim$TE < 0) < 2) {
+  sim <- BDSim(n0 = 1, pp = function(t) 0.12 + 0.01*t, qq = 10,
                tMax = 10, qShape = 1.3)
 }
+
+# make the phylogeny
 phy <- MakePhylo(sim)
 
+# plot it
 if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(phy)
+  
+  # we can also plot only the molecular phylogeny
   ape::plot.phylo(ape::drop.fossil(phy))
 }
+
 }
 \author{
 Function written by Matheus Januario. 

@@ -20,8 +20,8 @@ occurrences for a species.
 }
 \examples{
 
-# this function is simple to test: let us just create an artificial bin and
-# occurrence lists and then check it bounds them correctly
+###
+# first let us create some artificial occurrence data and check
 
 # occurrence list
 x <- c(5.2, 4.9, 4.1, 3.2, 1, 0.2)
@@ -31,28 +31,26 @@ bins <- c(6, 5, 4, 3, 2, 1, 0)
 
 # result
 binnedSamp <- binner(x, bins)
+binnedSamp
 
-# check
-print(sum(binnedSamp == c(1, 2, 1, 0, 1, 1)) == length(binnedSamp))
-
+###
 # it should work with any type of number in bins
 
 # occurrence list
 x <- c(6.7, 5.03, 4.2, 3.4, 1.2, 0.4)
 
 # bins list
-bins <- c(7, 6, 5, 4, 3, 2, 1, 0)
+bins <- c(7.2, 6.1, 5.6, 4.3, 3.2, sqrt(2), 1, 0)
 
 # result
 binnedSamp <- binner(x, bins)
+binnedSamp
 
-# check
-print(sum(binnedSamp == c(1, 1, 1, 1, 0, 1, 1)) == length(binnedSamp))
-
+###
 # let us try with a real simulated species fossil record
 
 # run the simulation
-sim <- BDSim(1, pp = 0.1, qq = 0.09, tMax = 15)
+sim <- BDSim(1, pp = 0.1, qq = 0.05, tMax = 15)
 
 # sample it
 sampled <- Sample(S = 1, TE = sim$TE, TS = sim$TS, rr = 1, tMax = 15)
@@ -62,7 +60,25 @@ bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
 
 # result
 binnedSample <- binner(sampled, bins)
-# one can then check by inspection that the binner is indeed counting correctly
+binnedSample
+
+### 
+# just one more
+
+# run the simulation
+sim <- BDSim(1, pp = function(t) {
+  return(0.05 + 0.005*t)
+}, qq = 0.05, tMax = 20)
+
+# sample it
+sampled <- Sample(S = 1, TE = sim$TE, TS = sim$TS, rr = 1, tMax = 15)
+
+# bins list
+bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
+
+# result
+binnedSample <- binner(sampled, bins)
+binnedSample
 
 }
 \author{

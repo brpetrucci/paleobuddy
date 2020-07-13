@@ -101,10 +101,10 @@ desired scenario.
 }
 \examples{
 
-# since both \code{BDSimConstant} and \code{BDSimGeneral} have been tested
-# in their respective man pages, we will spend some time here giving examples
-# of possible combinations of diversification rates.
+# we will showcase here some of the possible scenarios for diversification,
+# touching on all the kinds of rates
 
+###
 # consider first the simplest regimen, constant speciation and extinction
 
 # initial number of species
@@ -118,7 +118,6 @@ p <- 0.11
 
 # extinction
 q <- 0.08
-
 
 # run the simulation
 sim <- BDSim(n0, p, q, tMax)
@@ -134,6 +133,7 @@ if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(phy)
 }
 
+###
 # now let us complicate speciation more, maybe a linear function
 
 # initial number of species
@@ -150,9 +150,18 @@ p <- function(t) {
 # extinction rate
 q <- 0.08
 
-\dontrun{
 # run the simulation
 sim <- BDSim(n0, p, q, tMax)
+
+# run until we get more than 1 species
+while (length(sim$TE) < 2) {
+  sim <- BDSim(n0, p, q, tMax)
+}
+
+# we can plot the phylogeny to take a look
+if (requireNamespace("ape", quietly = TRUE)) {
+  phy <- MakePhylo(sim)
+  ape::plot.phylo(phy)
 }
 
 # what if we want q to be a step function?
@@ -189,12 +198,22 @@ p <- function(t) {
   return(0.09 + 0.005*t)
 }
 
-\dontrun{
-  # run the simulation. We can pass the stepfunction directly, or just give
-  # a list of q and a list of shifts
+# run the simulation. We can pass the step function directly, or just give
+# a list of q and a list of shifts
+sim <- BDSim(n0, p, qList, tMax, qShifts = qShifts)
+
+# run until we get more than 1 species
+while (length(sim$TE) < 2) {
   sim <- BDSim(n0, p, qList, tMax, qShifts = qShifts)
 }
 
+# we can plot the phylogeny to take a look
+if (requireNamespace("ape", quietly = TRUE)) {
+  phy <- MakePhylo(sim)
+  ape::plot.phylo(phy)
+}
+
+###
 # we can also supply a shape parameter to try age-dependent rates
 
 # initial number of species
@@ -212,10 +231,21 @@ pShape <- 2
 # extinction
 q <- 0.08
 
-
 # run the simulation
 sim <- BDSim(n0, p, q, tMax, pShape = pShape)
 
+# run until we get more than 1 species
+while (length(sim$TE) < 2) {
+  sim <- BDSim(n0, p, q, tMax, pShape = pShape)
+}
+
+# we can plot the phylogeny to take a look
+if (requireNamespace("ape", quietly = TRUE)) {
+  phy <- MakePhylo(sim)
+  ape::plot.phylo(phy)
+}
+
+###
 # finally, we can also have a rate dependent on an environmental variable,
 # like temperature data in RPANDA
 
@@ -242,19 +272,27 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   
   # extinction, dependent on temperature exponentially
   q <- function(t, env) {
-    return(0.15*exp(-0.01*env))
+    return(0.15*exp(0.01*env))
   }
   
   # need a variable to tell BDSim the extinction is environmentally dependent
   envQQ <- InfTemp
   
+  # run the simulation
+  sim <- BDSim(n0, p, q, tMax, pShape = pShape, envQQ = InfTemp)
   
-  \dontrun{
-    # run the simulation
+  # run until we get more than 1 species
+  while (length(sim$TE) < 2) {
     sim <- BDSim(n0, p, q, tMax, pShape = pShape, envQQ = InfTemp)
   }
   
+  # we can plot the phylogeny to take a look
+  if (requireNamespace("ape", quietly = TRUE)) {
+    phy <- MakePhylo(sim)
+    ape::plot.phylo(phy)
+  }
   
+  ###
   # one can mix and match all of these scenarios as they wish - age-dependency
   # and constant rates, age-dependent and temperature-dependent rates, etc. The
   # only combination that is not allowed is a vector rate and environmental
@@ -276,14 +314,23 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   envPP <- InfTemp
   
   # extinction
-  q <- 0.08
+  q <- 0.15
   
   # maximum simulation time
   tMax <- 40
   
-  \dontrun{
-    # run the simulation
-    sim <- BDSim(n0, p, q, tMax, pShape = pShape, envPP = envPP)
+  # run the simulation
+  sim <- BDSim(n0, p, q, tMax, pShape = pShape, envPP = envPP)
+  
+  # run until we get more than 1 species
+  while (length(sim$TE) < 2) {
+    sim <- BDSim(n0, p, q, tMax, pShape = pShape, envPP = InfTemp)
+  }
+  
+  # we can plot the phylogeny to take a look
+  if (requireNamespace("ape", quietly = TRUE)) {
+    phy <- MakePhylo(sim)
+    ape::plot.phylo(phy)
   }
 }
 

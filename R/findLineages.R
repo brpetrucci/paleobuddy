@@ -25,116 +25,139 @@
 #'
 #' # we will start with examples where S are the starting species
 #' 
+#' ###
 #' # first, let us try a simulation with 3 clades,
-#' sim<-BDSim(n0 = 3, pp = .1, qq = 0.1, tMax = 10)
+#' sim <- BDSim(n0 = 3, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation has a small number of lineages
-#' while (length(sim$TE)<20) {
-#'   sim<-BDSim(n0 = 3, pp = .1, qq = 0.1, tMax = 10)
+#' while (length(sim$TE) < 20) {
+#'   sim <- BDSim(n0 = 3, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
 #' # using the functions
-#' test <- findLineages(sim)
+#' clades <- findLineages(sim)
 #' 
-#' # testing if it works:
-#' par(mfrow=c(1,length(test)))
-#' for (i in 1:length(test)) {
-#'   if (sum(test[[i]]$PAR %in% i)<1) {
-#'     plot(NA, xlim = c(-1,1), ylim=c(-1,1))
-#'     text("simulation with \n just one lineage", x = 0, y=.5, cex=2)
-#'   } else {
+#' # set up for plotting side by syde
+#' par(mfrow = c(1,length(clades)))
+#' 
+#' # for each clade
+#' for (i in 1:length(clades)) {
+#'   
+#'   # if there is only one lineage in the clade
+#'   if (length(clades[[i]]$TE) < 2) {
+#'     # placeholder plot
+#'     plot(NA, xlim = c(-1, 1), ylim = c(-1, 1))
+#'     text("simulation with \n just one lineage", x = 0, y = 0.5, cex = 2)
+#'   } 
+#'   # if it is a proper phylogeny
+#'   else {
 #'     if (requireNamespace("ape", quietly = TRUE)) {
-#'       p=ape::plot.phylo(MakePhylo(test[[i]]),
-#'                         main="red = extinction events \n blue = speciation events");
+#'       p <- ape::plot.phylo(
+#'         MakePhylo(clades[[i]]),
+#'         main = "red: extinction events \n blue: speciation events");
 #'       ape::axisPhylo()
 #'     }
 #'     
 #'     # checking speciation times:
-#'     for (j in 2:length(test[[i]]$TS)) {
+#'     for (j in 2:length(clades[[i]]$TS)) {
 #'       # the subtraction is just to adjust the wt with the plot scale
-#'       lines(x=c(
-#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TS[j],
-#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TS[j]),
-#'         y=c(p$y.lim[1],p$y.lim[2]),lwd=2, col="blue")
+#'       lines(x = c(
+#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j],
+#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j]),
+#'         y = c(p$y.lim[1], p$y.lim[2]), lwd = 2, col = "blue")
 #'     }
 #'     
 #'     # checking extinction times:
 #'     for (j in 1:length(sim$TE)) {
 #'       # the subtraction is just to adjust the wt with the plot scale
-#'       lines(x=c(
-#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TE[j],
-#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TE[j]),
-#'         y=c(p$y.lim[1],p$y.lim[2]),lwd=2, col="red")
+#'       lines(x = c(
+#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j],
+#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j]),
+#'         y = c(p$y.lim[1], p$y.lim[2]), lwd = 2, col = "red")
 #'     }
 #'   }
 #' }
 #' 
+#' ###
 #' # it works with any number of clades, of course
-#' sim<-BDSim(n0 = 5, pp = .1, qq = 0.1, tMax = 10)
+#' sim <- BDSim(n0 = 5, pp = 0.1, qq = 0.08, tMax = 10)
 #' 
 #' # in case first simulation has a small number of lineages
-#' while (length(sim$TE)<20) {
-#'   sim<-BDSim(n0 = 5, pp = .1, qq = 0.1, tMax = 10)
+#' while (length(sim$TE) < 20) {
+#'   sim <- BDSim(n0 = 5, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
-#' # using the functions
-#' test <- findLineages(sim)
 #' 
-#' # testing if it works:
-#' par(mfrow=c(1,length(test)))
-#' for (i in 1:length(test)) {
-#'   if (sum(test[[i]]$PAR %in% i)<1) {
-#'     plot(NA, xlim = c(-1,1), ylim=c(-1,1))
-#'     text("simulation with \n just one lineage", x = 0, y=.5, cex=2)
-#'   } else {
+#' # using the functions
+#' clades <- findLineages(sim)
+#' 
+#' # set up for plotting side by syde
+#' par(mfrow = c(1,length(clades)))
+#' 
+#' # for each clade
+#' for (i in 1:length(clades)) {
+#'   
+#'   # if there is only one lineage in the clade
+#'   if (length(clades[[i]]$TE) < 2) {
+#'     # placeholder plot
+#'     plot(NA, xlim = c(-1, 1), ylim = c(-1, 1))
+#'     text("simulation with \n just one lineage", x = 0, y = 0.5, cex = 2)
+#'   } 
+#'   # if it is a proper phylogeny
+#'   else {
 #'     if (requireNamespace("ape", quietly = TRUE)) {
-#'       p=ape::plot.phylo(MakePhylo(test[[i]]),
-#'                         main="red = extinction events \n blue = speciation events");
+#'       p <- ape::plot.phylo(
+#'         MakePhylo(clades[[i]]),
+#'         main = "red: extinction events \n blue: speciation events");
 #'       ape::axisPhylo()
 #'     }
 #'     
 #'     # checking speciation times:
-#'     for (j in 2:length(test[[i]]$TS)) {
+#'     for (j in 2:length(clades[[i]]$TS)) {
 #'       # the subtraction is just to adjust the wt with the plot scale
-#'       lines(x=c(
-#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TS[j],
-#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TS[j]),
-#'         y=c(p$y.lim[1],p$y.lim[2]),lwd=2, col="blue")
+#'       lines(x = c(
+#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j],
+#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j]),
+#'         y = c(p$y.lim[1], p$y.lim[2]), lwd = 2, col = "blue")
 #'     }
 #'     
 #'     # checking extinction times:
 #'     for (j in 1:length(sim$TE)) {
 #'       # the subtraction is just to adjust the wt with the plot scale
-#'       lines(x=c(
-#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TE[j],
-#'         sort(test[[i]]$TS, decreasing = TRUE)[2]-test[[i]]$TE[j]),
-#'         y=c(p$y.lim[1],p$y.lim[2]),lwd=2, col="red")
+#'       lines(x = c(
+#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j],
+#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j]),
+#'         y = c(p$y.lim[1], p$y.lim[2]), lwd = 2, col = "red")
 #'     }
 #'   }
 #' }
 #' 
-#' # including one clade, of course
-#' sim<-BDSim(n0 = 1, pp = .2, qq = 0.1, tMax = 10)
-#' while (length(sim$TE)<10) {
-#'   sim<-BDSim(n0 = 1, pp = .1, qq = 0.1, tMax = 10)
+#' ###
+#' # including one clade
+#' sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.08, tMax = 10)
+#' 
+#' # in case first simulation has a small number of lineages
+#' while (length(sim$TE) < 20) {
+#'   sim <- BDSim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
 #' 
+#' par(mfrow = c(1,2))
 #' 
-#' par(mfrow=c(1,2))
+#' # plotting sim and findLineages(sim) - should be equal
 #' if (requireNamespace("ape", quietly = TRUE)) {
 #'   ape::plot.phylo(MakePhylo(sim), main="original")
 #'   ape::axisPhylo()
 #'   ape::plot.phylo(MakePhylo(findLineages(sim)[[1]]), main="after findLineages()")
 #'   ape::axisPhylo()
-#'   #those should be equal
 #' }
 #' 
+#' ###
 #' # now let us check that when S does not contain a starting species, we still
 #' # get correct subsets of the simulation
 #' sim <- BDSim(1, 0.1, 0.05, 40)
 #' # making sure we have a couple of clades to explore
-#' while ((length(which(sim$PAR==1)) < 3) | (length(which(sim$PAR==2)) < 3) |
-#'        (length(which(sim$PAR==3)) < 3)) {
+#' while ((length(which(sim$PAR == 1)) < 3) | (length(which(sim$PAR == 2)) < 3) |
+#'        (length(which(sim$PAR == 3)) < 3)) {
 #'   sim <- BDSim(1, 0.2, 0.1, 10)
 #' }
 #' 
@@ -146,7 +169,7 @@
 #'   ape::plot.phylo(MakePhylo(findLineages(sim)[[1]]), main="after findLineages()")
 #'   
 #'   # and these should be part of the previous phylogenies
-#'   ape::plot.phylo(MakePhylo(findLineages(sim, c(2, 3))$clade_2), 
+#'   ape::plot.phylo(MakePhylo(findLineages(sim, c(2, 3))$clade_2),
 #'                   main = "Clade_2")
 #'   ape::plot.phylo(MakePhylo(findLineages(sim, c(2, 3))$clade_3),
 #'                   main = "Clade_3")

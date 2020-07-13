@@ -48,38 +48,13 @@ invert that by subtracting the results from \code{tMax}.
 }
 \examples{
 
-# first we define a function to calculate the mean diversity and var at time t
-sim.mean<-function(t, simList) {
-  # apply to each replicate of the simulation
-  simExtantT<-as.numeric(lapply(1:length(simList), function(y) {
-    
-    # invert extinction and speciation times, so that we may consider functions
-    # running from past to present
-    TS <- tMax - simList[[y]]$TS
-    TE <- tMax - simList[[y]]$TE
-    
-    # find how many species are alive at time t
-    length(which(TS <= t & TE >= t))}))
-  return(list(mean = mean(simExtantT), var = (var(simExtantT))))
-}
-
-# also, we need functions to calculate the expected variance at time t
-int<-function(t, div) {
-  # integrate diversity from 0 to time t
-  return(integrate(div, 0, t)$value)
-}
-# formula for the variance - see Kendall 1948
-div.var<-function(t, div, qq) {
-  return(n0*exp(int(t, div))*(exp(int(t, div)) - 1 + 2*exp(int(t, div))*
-                                integrate(Vectorize(function(x)
-                                  exp(-int(x, div))*qq(x)), 0, t)$value))
-}
-
-# and a time parameter we will need for plotting
+# first we define a time vector for plotting
 tMax <- 40
 time <- 1:tMax
 
-# now we can test a couple scenarios
+# now we can show a couple scenarios
+
+###
 # first, extinction 0
 
 # initial number of species
@@ -94,46 +69,16 @@ p <- 0.1
 # extinction
 q <- 0
 
-\dontrun{ 
-# run the simulations
-simList <- lapply(1:10000, function(x) BDSimConstant(n0, p, q, tMax))
+# run the simulation
+sim <- BDSim(n0, p, q, tMax)
 
-
-# let us make vectors to hold the average diversity and variance
-
-# function for diversity
-div <- Vectorize(function(t) p - q)
-
-# function for extinction - needed for the variance
-qq <- Vectorize(function(t) q)
-
-# calculate the mean diversity at our time points
-meanDiv <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$mean))
-
-# calculate the expected diversity for the sime time points
-expectedDiv <- VarRateExp(div, 1, time)
-
-# do the same with variance
-meanVar <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$var))
-expectedVar <- unlist(lapply(time, function(x) div.var(x, div, qq)))
-
-# and now let us check out the plots
-
-# mean diversity, compared with expected
-plot(time, log(meanDiv), type = 'l', main = "Species diversity", 
-     xlab = "Time (My)", ylab = "log(Diversity)")
-lines(time, log(expectedDiv), col = 'RED')
-legend(x = 5, y = log(max(meanDiv)), legend = c("Expected", "Observed"),
-       col = c("RED", "BLACK"), lty = c(1,1))
-
-# same for variance
-plot(time, log(meanVar), type = 'l',  main = "Species diversity variance", 
-     xlab = "Time (My)", ylab = "log(Variance)")
-lines(time, log(expectedVar), type = 'l', col='RED')
-legend(x = 5, y = log(max(meanVar)), legend = c("Expected", "Observed"),
-       col = c("RED", "BLACK"), lty = c(1,1))
+# we can plot the phylogeny to take a look
+if (requireNamespace("ape", quietly = TRUE)) {
+  phy <- MakePhylo(sim)
+  ape::plot.phylo(phy)
 }
 
+###
 # now let us try to turn extinction up a bit
 
 # initial number of species
@@ -148,37 +93,16 @@ p <- 0.1
 # extinction
 q <- 0.04
 
-\dontrun{
-# run the simulations
-simList <- lapply(1:10000, function(x) BDSimConstant(n0, p, q, tMax))
+# run the simulation
+sim <- BDSimConstant(n0, p, q, tMax)
 
-# calculate the mean diversity at our time points
-meanDiv <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$mean))
-
-# calculate the expected diversity for the sime time points
-expectedDiv <- VarRateExp(div, 1, time)
-
-# do the same with variance
-meanVar <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$var))
-expectedVar <- unlist(lapply(time, function(x) div.var(x, div, qq)))
-
-# and now let us check out the plots
-
-# mean diversity, compared with expected
-plot(time, log(meanDiv), type = 'l', main = "Species diversity", 
-     xlab = "Time (My)", ylab = "log(Diversity)")
-lines(time, log(expectedDiv), col = 'RED')
-legend(x = 5, y = log(max(meanDiv)), legend = c("Expected", "Observed"),
-       col = c("RED", "BLACK"), lty = c(1,1))
-
-# same for variance
-plot(time, log(meanVar), type = 'l',  main = "Species diversity variance", 
-     xlab = "Time (My)", ylab = "log(Variance)")
-lines(time, log(expectedVar), type = 'l', col='RED')
-legend(x = 5, y = log(max(meanVar)), legend = c("Expected", "Observed"),
-       col = c("RED", "BLACK"), lty = c(1,1))
+# we can plot the phylogeny to take a look
+if (requireNamespace("ape", quietly = TRUE)) {
+  phy <- MakePhylo(sim)
+  ape::plot.phylo(phy)
 }
 
+###
 # we can also try a pure-death process
 
 # initial number of species - note the high number, so we get an appreciable
@@ -194,37 +118,11 @@ p <- 0
 # extinction
 q <- 0.02
 
-\dontrun{
-# run the simulations
-simList <- lapply(1:10000, function(x) BDSimConstant(n0, p, q, tMax))
+# run the simulation
+sim <- BDSim(n0, p, q, tMax)
 
-# calculate the mean diversity at our time points
-meanDiv <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$mean))
+# of course in this case there are no phylogenies to plot
 
-# calculate the expected diversity for the sime time points
-expectedDiv <- VarRateExp(div, 1, time)
-
-# do the same with variance
-meanVar <- unlist(lapply(time, function(x) sim.mean(x, simList = simList)$var))
-expectedVar <- unlist(lapply(time, function(x) div.var(x, div, qq)))
-
-# and now let us check out the plots
-
-# mean diversity, compared with expected
-plot(time, log(meanDiv), type = 'l', main = "Species diversity", 
-     xlab = "Time (My)", ylab = "log(Diversity)")
-lines(time, log(expectedDiv), col = 'RED')
-legend(x = 30, y = log(max(meanDiv)), legend = c("Expected", "Observed"),
-       col = c("RED", "BLACK"), lty = c(1,1))
-
-# same for variance
-plot(time, log(meanVar), type = 'l',  main = "Species diversity variance", 
-     xlab = "Time (My)", ylab = "log(Variance)")
-lines(time, log(expectedVar), type = 'l', col='RED')
-legend(x = 30, y = log(max(meanVar)) - 2, legend = c("Expected", "Observed"),
-       col = c("RED", "BLACK"), lty = c(1,1))
-}
-# all the cases seem to agree pretty well with expectations
 
 }
 \author{

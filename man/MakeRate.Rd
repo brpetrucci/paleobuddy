@@ -57,24 +57,47 @@ give \code{ff(t, env)} (see examples below).
 }
 \examples{
 
+# first we need a time vector to use on plots
+t <- seq(0, 50, 0.1)
+
+# MakeRate will leave some types of functions unaltered, like the following
+
+###
 # let us start simple: create a constant rate
 r <- MakeRate(0.5)
-plot(1:50, rep(r, 50), type='l')
 
+# plot it
+plot(t, rep(r, length(t)), type = 'l')
+
+###
 # something a bit more complex: a linear rate
+
+# function
 ff <- function(t) {
   return(0.01*t)
 }
-r <- MakeRate(ff)
-plot(1:50, r(1:50), type='l')
 
+# create rate
+r <- MakeRate(ff)
+
+# plot it
+plot(t, r(t), type = 'l')
+
+###
 # remember: this can be any time-varying function!
+
+# function
 ff <- function(t) {
   return(sin(t)*0.01)
 }
-r <- MakeRate(ff)
-plot(1:50, r(1:50), type='l')
 
+# create rate
+r <- MakeRate(ff)
+
+# plot it
+plot(t, r(t), type = 'l')
+
+###
 # we can use ifelse() to make a step function like this
 ff <- function(t) {
   return(ifelse(t < 10, 0.1,
@@ -82,55 +105,95 @@ ff <- function(t) {
                        ifelse(t < 30, 0.2,
                               ifelse(t < 40, 0.05, 0)))))
 }
+
+# and make it into a rate - in this case, as the previous, it does not alter
+# ff. We put it here as a contrast to the other way to make a step function
 r <- MakeRate(ff)
-plot(1:50, r(1:50), type='l')
+
+# plot it
+plot(t, r(t), type = 'l')
 
 # important note: this method of creating a step function might be annoying,
 # but when running thousands of simulations it will provide a much faster
 # integration than when using our method of transforming a rates and shifts
-# vector into a function of time...
+# vector into a function of time
 
-# ...which we can do as follows
+# this is a good segway into the cases where MakeRate actually makes a rate!
+# note that while the previous ones seemed useless, we need that implementation
+# so that the birth-death functions work
+
+###
+# now we can demonstrate the other way of making a step function
+
+# vector of rates
 ff <- c(0.1, 0.2, 0.3, 0.2)
+
+# vector of rate shifts
 fShifts <- c(0, 10, 20, 35)
+
+# make the rate
 r <- MakeRate(ff, fShifts = fShifts)
-plot(1:50, r(1:50),type='l')
+
+# plot it
+plot(t, r(t),type = 'l')
 
 # as mentioned above, while this works well it will be a pain to integrate.
 # Furthermore, it is impractical to supply a rate and a shifts vector and
 # have an environmental dependency, so in cases where one looks to run
-# more than a couple dozen simulations, and when one is looking to have a
+# more than a couple dozen simulations, or when one is looking to have a
 # step function modified by an environmental variable, consider using ifelse()
 
+###
 # finally let us see what we can do with environmental variables
 
 # RPANDA supplies us with some really useful environmental dataframes
 # to use as an example, let us try temperature
 if (requireNamespace("RPANDA", quietly = TRUE)) {
-  data(InfTemp, package="RPANDA")
-
+  # temperature data
+  data(InfTemp, package = "RPANDA")
+  
+  # function
   ff <- function(t, env) {
     return(0.05*env)
   }
+  
+  # make the rate
   r <- MakeRate(ff, envF = InfTemp)
-  plot(1:50, r(1:50), type='l')
+  
+  # plot it
+  plot(t, r(t), type = 'l')
+  
+  ###
+  # we can also have a function that depends on both time AND temperature
+  
+  # function
+  ff <- function(t, env) {
+    return(0.001*exp(0.1*t) + 0.05*env)
+  }
+  
+  # make a rate
+  r <- MakeRate(ff, envF = InfTemp)
+  
+  # plot it
+  plot(t, r(t), type = 'l')
+  
+  ###
+  # as mentioned above, we could also use ifelse() to construct a step function
+  # that is modulated by temperature
+  
+  # function
+  ff <- function(t, env) {
+    return(ifelse(t < 10, 0.1 + 0.01*env,
+                  ifelse(t < 30, 0.2 - 0.005*env,
+                         ifelse(t <= 50, 0.1 + 0.005*env, 0))))
+  }
+  
+  # rate
+  r <- MakeRate(ff, envF = InfTemp)
+  
+  # plot it
+  plot(t, r(t), type = 'l')
 }
-# we can also have a function that depends on both time AND temperature
-ff <- function(t, env) {
-  return(0.001*exp(0.1*t) + 0.05*env)
-}
-r <- MakeRate(ff, envF = InfTemp)
-plot(1:50, r(1:50), type='l')
-
-# as mentioned above, we could also use ifelse() to construct a step function
-# that is modulated by temperature
-ff <- function(t, env) {
-  return(ifelse(t < 10, 0.1 + 0.01*env,
-                ifelse(t < 30, 0.2 - 0.005*env,
-                       ifelse(t <= 50, 0.1 + 0.005*env, 0))))
-}
-r <- MakeRate(ff, envF = InfTemp)
-plot(1:50, r(1:50), type='l')
 
 }
 \author{

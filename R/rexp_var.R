@@ -50,341 +50,196 @@
 #'
 #' @examples
 #'
-#' # Note: to effectively test, you must pass \code{fast=FALSE} to the function.
+###
+#' # let us start by checking a simple exponential variable
 #' 
-#' # use the \code{fitdistrplus} package to see if our distributions fit what
-#' # we expect
-#' if (requireNamespace("fitdistrplus", quietly = TRUE)) {
-#'   # let us start by checking a simple exponential variable
-#'   
-#'   # rate
-#'   lambda <- 0.1
-#'   
-#'   # current time
-#'   now <- 0
-#'   
-#'   # maximum time to check 
-#'   tMax <- 40
-#'   
-#' \dontrun{
-#'   # find the list of waiting times
-#'   dis <- rexp_var(n = 10000, lambda, now, tMax, fast = FALSE)
-#'   
-#'   # find rate
-#'   rate <- unname(fitdistrplus::fitdist(dis, distr = "exp")$estimate)
-#'   
-#'   # check
-#'   print(paste("rate: ", paste(rate, paste(", expected: ", lambda))))
+#' # rate
+#' lambda <- 0.1
+#' 
+#' # current time
+#' now <- 0
+#' 
+#' # maximum time to check
+#' tMax <- 40
+#' 
+#' # get waiting time
+#' t <- rexp_var(n = 1, lambda, now, tMax)
+#' t
+#' 
+#' ###
+#' # another simple exponential
+#' 
+#' # rate
+#' lambda <- 0.5
+#' 
+#' # current time
+#' now <- 0
+#' 
+#' # maximum time to check
+#' tMax <- 40
+#' 
+#' # find the waiting time
+#' t <- rexp_var(n = 1, lambda, now, tMax)
+#' t
+#' 
+#' ###
+#' # now let us try a linear function for the rate
+#' 
+#' # rate
+#' lambda <- function(t) {
+#'   return(0.01*t + 0.1)
 #' }
-#'   
-#'   # another simple exponential
-#'   
-#'   # rate
-#'   lambda <- 0.5
-#'   
-#'   # current time
-#'   now <- 0
-#'   
-#'   # maximum time to check 
-#'   tMax <- 40
-#' \dontrun{
-#'   # find the list of waiting times
-#'   dis <- rexp_var(n = 10000, lambda, now, tMax, fast = FALSE)
-#'   
-#'   # find rate
-#'   rate <- unname(fitdistrplus::fitdist(dis, distr = "exp")$estimate)
-#'   
-#'   # check
-#'   print(paste("rate: ", paste(rate, paste(", expected: ", lambda))))
+#' 
+#' # current time
+#' now <- 0
+#' 
+#' # maximum time to check
+#' tMax <- 40
+#' 
+#' # find the waiting time
+#' t <- rexp_var(n = 1, lambda, now, tMax)
+#' t
+#' 
+#' ###
+#' # what if lambda is exponential?
+#' 
+#' # rate
+#' lambda <- function(t) {
+#'   return(0.01 * exp(0.1*t) + 0.02)
 #' }
-#'   
-#'   # now let us try a linear function
-#'   
-#'   # rate
-#'   lambda <- function(t) {
-#'     return(0.01*t + 0.1)
-#'   }
-#'   
-#'   # current time
-#'   now <- 0
-#'   
-#'   # maximum time to check 
-#'   tMax <- 40
-#'   
-#' \dontrun{
-#'   # find the list of waiting times
-#'   dis <- rexp_var(n = 10000, lambda, now, tMax, fast = FALSE)
-#'   
-#'   # find the rate
-#'   rate <- unname(fitdistrplus::fitdist(dis, distr = "exp")$estimate)
-#'   
-#'   # we can integrate to find the mean rate
-#'   
-#'   # the integrate of 1/this is the mean rate
-#'   f <- Vectorize(function(t) {
-#'     ifelse(lambda(t) == Inf, 0,
-#'            exp(-integrate(function(x) lambda(x),
-#'                           lower = 0, upper = t, subdivisions = 2000)$value))})
-#'   
-#'   # calculate the mean
-#'   mean <- 1/integrate(f, 0, Inf)$value
-#'   
-#'   # check
-#'   print(paste("rate: ", paste(rate, paste(", expected: ", mean))))
-#'   
-#'   # and we can also integrate to find the mean directly
-#'   
-#'   # get distribution function
-#'   p <- Vectorize(function(t) {
-#'     return(
-#'       ifelse(lambda(t) == Inf, 0,
-#'              lambda(t)*exp(-integrate(Vectorize(
-#'                function(x) lambda(x)), lower = 0, upper = t)$value))
-#'     )
-#'   })
-#'   
-#'   # integrate it on the whole space
-#'   mean<-integrate(function(t) t*p(t), 0, Inf)$value
-#'   
-#'   # check
-#'   print(paste("mean: ", paste(mean(dis), paste(", expected: ", mean))))
+#' 
+#' # current time
+#' now <- 0
+#' 
+#' # maximum time to check
+#' tMax <- 40
+#' 
+#' # find the waiting time
+#' t <- rexp_var(n = 1, lambda, now, tMax)
+#' t
+#' 
+#' ###
+#' # rexp_var also works for a weibull
+#' 
+#' # scale
+#' lambda <- 2
+#' 
+#' # shape
+#' shape <- 1
+#' 
+#' # current time
+#' now <- 0
+#' 
+#' # maximum time to check
+#' tMax <- 40
+#' 
+#' # speciation time
+#' TS <- 0
+#' 
+#' # find the list of waiting time
+#' t <- rexp_var(n = 1, lambda, now, tMax,
+#'               shape = shape, TS = TS)
+#' t
+#' 
+#' ###
+#' # shape = 1, the Weibull is an exponential, we could do better
+#' 
+#' # scale
+#' lambda <- 10
+#' 
+#' # shape
+#' shape <- 2
+#' 
+#' # current time
+#' now <- 0
+#' 
+#' # maximum time to check
+#' tMax <- 40
+#' 
+#' # speciation time
+#' TS <- 0
+#' 
+#' # find the list of waiting times - it doesn't need to be just one
+#' t <- rexp_var(n = 5, lambda, now, tMax,
+#'               shape = shape, TS = TS)
+#' t
+#' 
+#' ###
+#' # shape can be less than one, of course
+#' 
+#' # scale
+#' lambda <- 10
+#' 
+#' # shape
+#' shape <- 0.5
+#' 
+#' # current time
+#' now <- 0
+#' 
+#' # maximum time to check
+#' tMax <- 40
+#' 
+#' # speciation time - it will be greater than 0 frequently during a simulation,
+#' # as it is used to represent where in the species life we currently are and
+#' # rescale accordingly
+#' TS <- 3.5
+#' 
+#' # find the list of waiting times
+#' t <- rexp_var(n = 3, lambda, now, tMax,
+#'               shape = shape, TS = TS)
+#' t
+#' 
+#' ###
+#' # both lambda and shape can be time varying for a Weibull, but since we have
+#' # only been able to test time-varying lambda effectively, we do not recommend
+#' # using shape as a function
+#' 
+#' # scale
+#' lambda <- function(t) {
+#'   return(0.25*t + 5)
 #' }
-#'   
-#'   # what if lambda is exponential?
-#'   
-#'   # rate
-#'   lambda <- function(t) {
-#'     return(0.01 * exp(0.1*t) + 0.02)
-#'   }
-#'   
-#'   # current time
-#'   now <- 0
-#'   
-#'   # maximum time to check 
-#'   tMax <- 40
-#'   
-#' \dontrun{
-#'   # find the list of waiting times
-#'   dis <- rexp_var(n = 10000, lambda, now, tMax, fast = FALSE)
-#'   
-#'   # we can integrate to find the mean rate
-#'   
-#'   # the integrate of 1/this is the mean rate
-#'   f <- Vectorize(function(t) {
-#'     ifelse(lambda(t) == Inf, 0,
-#'            exp(-integrate(function(x) lambda(x),
-#'                           lower = 0, upper = t, subdivisions = 2000)$value))})
-#'   
-#'   # calculate the mean
-#'   mean <- 1/integrate(f, 0, Inf)$value
-#'   
-#'   # check
-#'   print(paste("rate: ", paste(rate, paste(", expected: ", mean))))
-#'   
-#'   # and we can also integrate to find the mean directly
-#'   
-#'   # get distribution function
-#'   p <- Vectorize(function(t) {
-#'     return(
-#'       ifelse(lambda(t) == Inf, 0,
-#'              lambda(t)*exp(-integrate(Vectorize(
-#'                function(x) lambda(x)), lower = 0, upper = t)$value))
-#'     )
-#'   })
-#'   
-#'   # integrate it on the whole space
-#'   mean<-integrate(function(t) t*p(t), 0, Inf)$value
-#'   
-#'   # check
-#'   print(paste("mean: ", paste(mean(dis), paste(", expected: ", mean))))
+#' 
+#' # shape
+#' shape <- 3
+#' 
+#' # current time
+#' now <- 0
+#' 
+#' # maximum time to check
+#' tMax <- 40
+#' 
+#' # speciation time
+#' TS <- 0
+#' 
+#' # find the list of waiting times - it doesn't need to be just one
+#' t <- rexp_var(n = 5, lambda, now, tMax,
+#'               shape = shape, TS = TS)
+#' t
+#' 
+#' ###
+#' # lambda can be any function of time, remember
+#' 
+#' # scale
+#' lambda <- function(t) {
+#'   return(0.2*exp(0.1*t) + 5)
 #' }
-#'   
-#'   # now we can also test the age dependency
-#'   
-#'   # scale
-#'   lambda <- 2
-#'   
-#'   # shape
-#'   shape <- 1
-#'   
-#'   # current time
-#'   now <- 0
-#'   
-#'   # maximum time to check 
-#'   tMax <- 40
-#'   
-#' \dontrun{
-#'   # find the list of waiting times
-#'   dis <- rexp_var(n = 5000, lambda, now, tMax, 
-#'                   shape = shape, TS = 0, fast = FALSE)
-#'   
-#'   # find the estimates
-#'   
-#'   # shape
-#'   eShape <- unname(fitdistrplus::fitdist(dis, distr = "weibull")$estimate)[1]
-#'   
-#'   # scale
-#'   eScale <- unname(fitdistrplus::fitdist(dis, distr = "weibull")$estimate)[2]
-#'   
-#'   # check
-#'   print(paste("shape: ", paste(eShape, paste(", expected: ", shape))))
-#'   print(paste("scale: ", paste(eScale, paste(", expected: ", lambda))))
-#'   
-#' }
-#'   
-#'   # shape = 1 is an exponential, we could do better
-#'   
-#'   # scale
-#'   lambda <- 10
-#'   
-#'   # shape
-#'   shape <- 2
-#'   
-#'   # current time
-#'   now <- 0
-#'   
-#'   # maximum time to check 
-#'   tMax <- 40
-#'   
-#' \dontrun{   
-#'   # find the list of waiting times
-#'   dis <- rexp_var(n = 5000, lambda, now, tMax, 
-#'                   shape = shape, TS = 0, fast = FALSE)
-#'   
-#'   # find the estimates
-#'   
-#'   # shape
-#'   eShape <- unname(fitdistrplus::fitdist(dis, distr = "weibull")$estimate)[1]
-#'   
-#'   # scale
-#'   eScale <- unname(fitdistrplus::fitdist(dis, distr = "weibull")$estimate)[2]
-#'   
-#'   # check
-#'   print(paste("shape: ", paste(eShape, paste(", expected: ", shape))))
-#'   print(paste("scale: ", paste(eScale, paste(", expected: ", lambda))))
-#' }
-#'   
-#'   # fitdist gets a bit weird with shape less than 1,
-#'   # so we need some extra arguments to get a fit
-#'   
-#'   # scale
-#'   lambda <- 10
-#'   
-#'   # shape
-#'   shape <- 0.5
-#'   
-#'   # current time
-#'   now <- 0
-#'   
-#'   # maximum time to check 
-#'   tMax <- 40
-#'   
-#' \dontrun{
-#'   # find the list of waiting times
-#'   dis <- rexp_var(n=10000, lambda, now, tMax, 
-#'                   shape = shape, TS = 0, fast = FALSE)
-#'   
-#'   # find the estimates
-#'   
-#'   # shape
-#'   eShape <- unname(fitdistrplus::fitdist(dis, distr = "weibull",
-#'                                          start = list(shape = 1, scale = 1),
-#'                                          method = "mge", gof = "CvM")$estimate)[1]
-#'   
-#'   # scale
-#'   eScale <- unname(fitdistrplus::fitdist(dis, distr = "weibull",
-#'                                          start = list(shape = 1, scale = 1),
-#'                                          method = "mge", gof = "CvM")$estimate)[2]
-#'   
-#'   # check
-#'   print(paste("shape: ", paste(eShape, paste(", expected: ", shape))))
-#'   print(paste("scale: ", paste(eScale, paste(", expected: ", lambda))))
-#' }
-#'   
-#'   # when lambda varies, we might need to do some more to test
-#'   
-#'   # scale
-#'   lambda <- function(t) {
-#'     return(0.25*t + 5)
-#'   }
-#'   
-#'   # shape
-#'   shape <- 3
-#'   
-#'   # current time
-#'   now <- 0
-#'   
-#'   # maximum time to check 
-#'   tMax <- 40
-#'   
-#' \dontrun{
-#'   # find the list of waiting times
-#'   dis <- rexp_var(n = 5000, lambda, now, tMax, 
-#'                   shape = shape, TS = 0, fast = FALSE)
-#'   
-#'   # we will integrate the distribution to find the mean directly
-#'   
-#'   # distribution function
-#'   p <- Vectorize(function(t) {
-#'     res<-shape/lambda(t)*(integrate(
-#'       Vectorize(function(x) 1/lambda(x)), lower = 0, upper = t,
-#'       subdivisions = 2000)$value) ^ (shape - 1)*
-#'       exp(-(integrate(Vectorize(function(x) 1/lambda(x)), 0, t,
-#'                       subdivisions = 2000)$value)^shape)
-#'     # na simply means R doesn't know how to multiply 0 by infinity, but we just
-#'     # need to make it 0 since t*exp(-t) goes to 0 when t goes to infinity
-#'     return(res)
-#'   })
-#'   
-#'   # find the mean
-#'   mean <- integrate(function(t) t*p(t), 0, Inf)$value
-#'   
-#'   # check
-#'   print(paste("rate: ", paste(mean(dis), paste(", expected: ", mean))))
-#' }
-#'   
-#'   # lambda can be any function of time, remember
-#'   
-#'   # scale
-#'   lambda <- function(t) {
-#'     return(0.2*exp(0.1*t) + 5)
-#'   }
-#'   
-#'   # shape
-#'   shape <- 3
-#'   
-#'   # current time
-#'   now <- 0
-#'   
-#'   # maximum time to check 
-#'   tMax <- 40
-#'   
-#' \dontrun{
-#'   # find the list of waiting times
-#'   dis <- rexp_var(n = 5000, lambda, now, tMax, 
-#'                   shape = shape, TS = 0, fast = FALSE)
-#'   
-#'   # we will integrate the distribution to find the mean directly
-#'   
-#'   # distribution function
-#'   p <- Vectorize(function(t) {
-#'     res<-shape/lambda(t)*(integrate(
-#'       Vectorize(function(x) 1/lambda(x)), lower = 0, upper = t,
-#'       subdivisions = 2000)$value) ^ (shape-1)*
-#'       exp(-(integrate(Vectorize(function(x) 1/lambda(x)), 0, t,
-#'                       subdivisions = 2000)$value) ^ shape)
-#'     # na simply means R doesn't know how to multiply 0 by infinity, but we just
-#'     # need to make it 0 since t*exp(-t) goes to 0 when t goes to infinity
-#'     return(ifelse(is.na(res), 0, res))
-#'   })
-#'   
-#'   # find the mean
-#'   mean <- integrate(function(t) t*p(t), 0, Inf)$value
-#'   
-#'   # check
-#'   print(paste("rate: ", paste(mean(dis), paste(", expected: ", mean))))
-#' }
-#' }
+#' 
+#' # shape
+#' shape <- 3
+#' 
+#' # current time
+#' now <- 0
+#' 
+#' # maximum time to check
+#' tMax <- 40
+#' 
+#' # speciation time
+#' TS <- 0
+#' 
+#' # find the list of waiting times - it doesn't need to be just one
+#' t <- rexp_var(n = 2, lambda, now, tMax,
+#'               shape = shape, TS = TS)
+#' t
 #'
 #' @name rexp_var
 #' @rdname rexp_var
