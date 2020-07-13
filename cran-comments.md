@@ -4,9 +4,9 @@
 * ubuntu xenial 16.04 (on travis-ci) (devel and release)
 
 ## R CMD check results
-There were no ERRORs, or WARNINGs or NOTEs.
+There were no ERRORs, or WARNINGs.
 
-This is the first submission, so there may be a first submission note.
+This is the first submission of this package, so there may be a first submission NOTE. There were no other NOTEs.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package
