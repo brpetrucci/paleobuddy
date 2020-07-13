@@ -1,12 +1,12 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: r
-before_install: 
-- sudo add-apt-repository -y ppa:cran/imagemagick
-- sudo apt-get update
-- sudo apt-get install -y libmagick++-dev
+install:
+- R -e "0" --args --bootstrap-packrat
+- R -e "packrat::restore(restart = FALSE)"
 r:
 - release
 - devel
 warnings_are_errors: true
+sudo: required
 cache: packages

@@ -3,3 +3,4 @@
 paleobuddy.Rproj
 .RData
 .Rbuildignore
+packrat/lib*/
