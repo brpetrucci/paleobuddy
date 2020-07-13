@@ -346,7 +346,7 @@ BDSim <- function(n0, pp, qq, tMax,
     q <- qq
     
     # call BDSimConstant
-    return(BDSimConstant(n0, p, q, tMax))
+    return(BDSimConstant(n0, p, q, tMax, nFinal, extOnly))
   }
 
   # else it is not constant
@@ -358,6 +358,7 @@ BDSim <- function(n0, pp, qq, tMax,
     q <- MakeRate(qq, tMax, envQQ, qShifts)
 
     # call BDSimGeneral
-    return(BDSimGeneral(n0, p, q, tMax, pShape, qShape, fast, trueExt))
+    return(BDSimGeneral(n0, p, q, tMax, pShape, qShape, 
+                        nFinal, extOnly, fast, trueExt))
   }
 }
