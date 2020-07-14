@@ -1,80 +1,81 @@
 #' Non-constant rate Birth-Death simulation
 #'
-#' \code{bd.sim.general} takes an initial number of species, speciation and
-#' extinction rates (either constants, functions of time, or of time and an
-#' environmental variable), a maximum simulation time and possibly a shape for
-#' age-dependent speciation and/or extinction. It then generates the speciation 
-#' and extinction times, parent and status information for the species in the 
-#' simulation. Time runs from \code{tMax} to 0, to be consistent with the 
-#' literature, though one can easily invert that by subtracting the results from
-#' \code{tMax}.
+#' Simulates a species birth-death process with general rates for any number of
+#' starting species. Allows for speciation and extinction rates to be either 
+#' constants or functions of time, and optionally takes a shape parameter in case
+#' speciation and/or extinction is to be age-dependent. Returns an object 
+#' containing lists of speciation times, extinction times, parents and status 
+#' (extant or not). Can return true extinction times or simply information on 
+#' whether species lived after maximum simulation time. Allows for constraining on 
+#' the number of species at the end of the simulation, either total or extant.
+#' Note that while time runs from \code{0} to \code{tmax} on the function itself,
+#' it runs from \code{tmax} to \code{0} on the lists returned to conform with the
+#' literature.
 #'
-#' @param n0 initial number of species, usually 1. Good parameter
+#' @param n0 Initial number of species, usually 1. Good parameter
 #' to tweak if one is observing a low sample size when testing.
 #'
-#' @param pp function to hold the speciation rate over time. It will either be
+#' @param pp Function to hold the speciation rate over time. It will either be
 #' interpreted as an exponential rate, or a Weibull scale if 
 #' \code{pShape != NULL}.
 #'
-#' @param qq similar to above, but for the extinction rate.
+#' @param qq Similar to above, but for the extinction rate.
 #' 
 #' Note: this function is meant to be called by \code{bd.sim}, so it neither
 #' allows for as much flexibility, nor call \code{make.rate}. If the user wishes
 #' to use \code{bd.sim.general} with environmental or step-function rates, they
 #' can generate the rate with \code{make.rate} and supply it to the function.
 #'
-#' @param tMax ending time of simulation. Any species still living
+#' @param tMax Ending time of simulation. Any species still living
 #' after \code{tMax} is considered extant, and any species that would be
 #' generated after \code{tMax} is not born.
 #'
-#' @param pShape shape parameter for the Weibull distribution for age-dependent
+#' @param pShape Shape parameter for the Weibull distribution for age-dependent
 #' speciation. Default is \code{NULL}, where \code{pp} will be considered a
 #' time-dependent exponential rate. For \code{pShape != NULL}, \code{pp} will
 #' be considered a scale, and \code{rexp.var} will draw a Weibull distribution
 #' instead.
 #'
-#' @param qShape similar as above, but for the extinction rate.
+#' @param qShape Similar as above, but for the extinction rate.
 #' 
-#' @param nFinal an interval of acceptable number of species at the end of the
+#' @param nFinal An interval of acceptable number of species at the end of the
 #' simulation. If not supplied, default is \code{c(0, Inf)}, so that any number
 #' of species is accepted. If supplied, \code{bd.sim.general} will run until the
 #' number of total species generated, or, if \code{extOnly = TRUE}, the number of
 #' extant species at the end of the simulation, lies within the interval.
 #' 
-#' @param extOnly a boolean indicating whether \code{nFinal} should be taken as
+#' @param extOnly A boolean indicating whether \code{nFinal} should be taken as
 #' the number of total or extant species during the simulation. If \code{TRUE},
 #' \code{bd.sim.general} will run until the number of extant species lies within
 #' the \code{nFinal} interval. If \code{FALSE}, as default, it will run until the
 #' total number of species generated lies within that interval.
 #' 
-#' @param fast used for \code{bd.sim.general}. When \code{TRUE}, sets 
-#' \code{rexp.var} to throw away waiting times higher than the maximum 
-#' simulation time. Should be \code{FALSE} for unbiased testing of age 
-#' dependency. User might also se it to \code{FALSE} for more accurate waiting
-#' times.
+#' @param fast When \code{TRUE}, sets \code{rexp.var} to throw away waiting times 
+#' higher than the maximum simulation time. Should be \code{FALSE} for unbiased 
+#' testing of age dependency. User might also se it to \code{FALSE} for more 
+#' accurate waiting times.
 #' 
-#' @param trueExt used for \code{bd.sim.general}. When \code{TRUE}, time of 
-#' extinction of extant species will be the true time, otherwise it will be 
-#' tMax+0.01. Need to be \code{TRUE} when testing age-dependent 
-#' extinction.
+#' @param trueExt When \code{TRUE}, time of extinction of extant species will be 
+#' the true time, otherwise it will be \code{tMax+0.01}. Need to be \code{TRUE} 
+#' when testing age-dependent extinction.
 #'
-#' @return a list of vectors, as follows
+#' @return A list of vectors, as follows
 #'
 #' \describe{
-#' \item{\code{TE}}{list of extinction times, with -0.01 as the time of
+#' \item{\code{TE}}{List of extinction times, with \code{-0.01} as the time of
 #' extinction for extant species.}
 #'
-#' \item{\code{TS}}{list of speciation times, with tMax+0.01 as the time of
-#' speciation for species that started the simulation.}
+#' \item{\code{TS}}{List of speciation times, with \code{tMax + 0.01} as the time 
+#' of speciation for species that started the simulation.}
 #'
-#' \item{\code{PAR}}{list of parents. Species that started the simulation have
+#' \item{\code{PAR}}{List of parents. Species that started the simulation have
 #' NA, while species that were generated during the simulation have their
 #' parent's number. Species are numbered as they are born.}
 #'
-#' \item{\code{EXTANT}}{list of booleans representing whether each species is
+#' \item{\code{EXTANT}}{List of booleans representing whether each species is
 #' extant.}}
 #'
-#' @author written by Bruno do Rosario Petrucci.
+#' @author Bruno do Rosario Petrucci.
 #'
 #' @examples
 #'

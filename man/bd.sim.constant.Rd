@@ -7,56 +7,56 @@
 bd.sim.constant(n0 = 1, pp, qq, tMax, nFinal = c(0, Inf), extOnly = FALSE)
 }
 \arguments{
-\item{n0}{initial number of species, usually 1. Good parameter
+\item{n0}{Initial number of species, usually 1. Good parameter
 to tweak if one is observing a low sample size when testing.}
 
-\item{pp}{speciation rate. Must be constant.}
+\item{pp}{Speciation rate. Must be constant.}
 
-\item{qq}{extinction rate, similar to above.
+\item{qq}{Extinction rate, similar to above.
 
 Note: \code{pp} and \code{qq} must always be greater than 0}
 
-\item{tMax}{ending time of simulation. Any species still living
+\item{tMax}{Ending time of simulation. Any species still living
 after tMax is considered extant, and any species that would be generated
 after \code{tMax} is not born.}
 
-\item{nFinal}{an interval of acceptable number of species at the end of the
+\item{nFinal}{An interval of acceptable number of species at the end of the
 simulation. If not supplied, default is \code{c(0, Inf)}, so that any number
 of species is accepted. If supplied, \code{bd.sim.constant} will run until the
 number of total species generated, or, if \code{extOnly = TRUE}, the number of
 extant species at the end of the simulation, lies within the interval.}
 
-\item{extOnly}{a boolean indicating whether \code{nFinal} should be taken as
+\item{extOnly}{A boolean indicating whether \code{nFinal} should be taken as
 the number of total or extant species during the simulation. If \code{TRUE},
 \code{bd.sim.constant} will run until the number of extant species lies within
 the \code{nFinal} interval. If \code{FALSE}, as default, it will run until the
 total number of species generated lies within that interval.}
 }
 \value{
-a list of vectors, as follows
+A list of vectors, as follows
 
 \describe{
-\item{\code{TE}}{list of extinction times, with -0.01 as the time of
+\item{\code{TE}}{List of extinction times, with -0.01 as the time of
 extinction for extant species.}
 
-\item{\code{TS}}{list of speciation times, with tMax+0.01 as the time of
+\item{\code{TS}}{List of speciation times, with tMax+0.01 as the time of
 speciation for species that started the simulation.}
 
-\item{\code{PAR}}{list of parents. Species that started the simulation have
+\item{\code{PAR}}{List of parents. Species that started the simulation have
 NA, while species that were generated during the simulation have their
 parent's number. Species are numbered as they are born.}
 
-\item{\code{EXTANT}}{list of booleans representing whether each species is
+\item{\code{EXTANT}}{List of booleans representing whether each species is
 extant.}}
 }
 \description{
-\code{bd.sim.constant} takes a rate, a maximum simulation time and an initial
-number of species and returns the history of the clade originated from those
-species using a birth-death process with constant rates equal to the given 
-rates. It then generates the speciation and extinction times, parent and 
-status information for the species in the simulation. Time runs from 
-\code{tMax} to 0, to be consistent with the literature, though one can easily 
-invert that by subtracting the results from \code{tMax}.
+Simulates a species birth-death process with constant rates for any number
+of starting species. Returns an object containing lists of speciation times,
+extinction times, parents and status (extant or not). Allows for constraining
+on the number of species at the end of the simulation, either total or extant.
+Note that while time runs from \code{0} to \code{tmax} on the function itself,
+it runs from \code{tmax} to \code{0} on the lists returned to conform with the
+literature.
 }
 \examples{
 
@@ -133,5 +133,5 @@ sim <- bd.sim.constant(n0, p, q, tMax)
 
 }
 \author{
-written by Bruno do Rosario Petrucci.
+Bruno do Rosario Petrucci.
 }

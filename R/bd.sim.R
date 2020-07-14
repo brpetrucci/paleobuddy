@@ -1,5 +1,9 @@
 #' General rate Birth-Death simulation
 #'
+#' , functions of time and an environmental variable, or a list
+#' of constants. The choice of type of rate for speciation does not affect
+#' extintion, and vice-versa
+#'
 #' \code{bd.sim} takes an initial number of species, speciation and extinction
 #' rate functions and a maximum time of simulation, together with multiple
 #' options to alter the rates, and calls \code{bd.sim.constant} or

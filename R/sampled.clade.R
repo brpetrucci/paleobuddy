@@ -62,7 +62,8 @@
 #' speciation/origination geological time) and \code{e} (i.e. the lineage's 
 #' extinction geological time), with \code{s} > \code{e}.
 #'
-#' \item include the arguments \code{t}, \code{s}, \code{e} and \code{sp}}}.
+#' \item include the arguments \code{t}, \code{s}, \code{e} and \code{sp}.
+#' }
 #'
 #' @param dFunMax a function that calculates the maximum (density) value
 #' of \code{dFun} using its arguments. It can also be a number representing the
