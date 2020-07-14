@@ -1,25 +1,31 @@
 #' Constant and non-constant rate species sampling
+#' 
+#' Generates a list of occurrence times for a species in a simulation using a
+#' constant or function of absolute time as a rate for a Poisson process. For
+#' sampling of more than one species and/or taking into account species age
+#' instead of absolute time, see \code{sample.clade} and \code{sample.adpp}.
+#' Note that while the Poisson process occurs in forward time, we return (both in
+#' birth-death functions and here) results in backwards time, so that time is
+#' inverted using \code{tMax} both at the beginning and end of \code{sample}.
 #'
-#' \code{sample} takes a species number, a vector of speciation and extinction 
-#' times, a sampling rate and a maximum time for simulation and returns a list
-#' of occurrence times for each species.
-#'
-#' @param S the species number to be sampled. Since \code{sample} will be called
+#' @param S The species number to be sampled. Since \code{sample} will be called
 #' by a wrapper using \code{lapply}, it is through \code{S} that we apply this
 #' function.
 #'
-#' @param TE a vector of extinction times, usually an output of \code{bd.sim}.
+#' @param sim A \code{sim} object, usually an output of \code{bd.sim}.
 #'
-#' @param TS a vector of speciation times, usually an output of \code{bd.sim}.
+#' @param rr A sampling rate function. Can be created by \code{make.rate} for
+#' simplicity, but can be any time-varying function, or a constant.
 #'
-#' @param rr a sampling rate function. Can be created by \code{make.rate} for
-#' simplicity, but can be any time-varying function.
+#' @param tMax The maximum simulation time, used by \code{rexp.var}. A sampling
+#' time greater than \code{tMax} would mean the occurrence is sampled after the
+#' present, so for consistency we require this argument. This is also required
+#' to ensure time follows the correct direction both in the Poisson process and
+#' in the return.
 #'
-#' @param tMax the maximum simulation time, used by \code{rexp.var}.
+#' @return A list of occurrences for that species.
 #'
-#' @return a list of occurrences for that species.
-#'
-#' @author written by Bruno do Rosario Petrucci and Matheus Januario.
+#' @author Bruno do Rosario Petrucci and Matheus Januario.
 #'
 #' @examples
 #'
@@ -48,7 +54,7 @@
 #'      xlim = c(10, sim$TE[1]))
 #' 
 #' # sample
-#' occs <- sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
+#' occs <- sample(S = 1, sim = sim, rr = r, tMax = 10)
 #' 
 #' # check histogram
 #' hist(occs,
@@ -88,7 +94,7 @@
 #'      xlim = c(10, sim$TE[1]))
 #' 
 #' # sample
-#' occs <- sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
+#' occs <- sample(S = 1, sim = sim, rr = r, tMax = 10)
 #' 
 #' # check histogram
 #' hist(occs,
@@ -125,7 +131,7 @@
 #'      xlim = c(10, sim$TE[1]))
 #' 
 #' # sample
-#' occs <- sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
+#' occs <- sample(S = 1, sim = sim, rr = r, tMax = 10)
 #' 
 #' # check histogram
 #' hist(occs,
@@ -162,7 +168,7 @@
 #'        xlim = c(10, sim$TE[1]))
 #'   
 #'   # sample
-#'   occs <- sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
+#'   occs <- sample(S = 1, sim = sim, rr = r, tMax = 10)
 #'   
 #'   # check histogram
 #'   hist(occs,
@@ -174,10 +180,10 @@
 #' @rdname sample
 #' @export
 
-sample<-function(S, TE, TS, rr, tMax) {
+sample<-function(S, sim, rr, tMax) {
   # invert times since simulation goes from 0 to tMax
-  TE <- tMax - TE
-  TS <- tMax - TS
+  TE <- tMax - sim$TE
+  TS <- tMax - sim$TS
 
   # start when the species was born, end when it died
   

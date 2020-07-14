@@ -1,18 +1,13 @@
-#' Returns a rate based on a time-varying function, environmental variable
-#' and/or vectors of rates and shifts
+#' Create a flexible rate for birth-death or sampling simulations
+#' 
+#' Generates a rate to be used on birth-death or sampling functions. Takes as the
+#' base rate a constant, function of time, function of time and an environmental
+#' variable or a list of numbers. Allows for modifying using a list of rate 
+#' shift times or a matrix containing time and environmental data. Also requires
+#' \code{tMax}, the maximum simulation time, so it can recognize both forward and
+#' backward time vector rates.
 #'
-#' \code{make.rate} takes a function \code{ff}, which could be a constant, a
-#' function of time or a vector of rates. If it is a constant or a time-varying
-#' function, nothing else need be supplied. Otherwise, if \code{ff} is a vector
-#' of rates, the user must supply the accompanying vector of rate shifts
-#' \code{fShifts} to create a step function rate. Finally, if \code{ff} takes
-#' an environmental variable as well, the user must supply a dataframe of time
-#' vs. the environmental param, \code{envF}. Note that an error is
-#' returned if the user suplies \code{fShifts} AND \code{envF}. If one wants a
-#' step function modified by an environmental variable, use \code{ifelse} to
-#' give \code{ff(t, env)} (see examples below).
-#'
-#' @param ff the baseline function with which to make the rate.
+#' @param ff The baseline function with which to make the rate.
 #' It can be a
 #'
 #' \describe{
@@ -26,27 +21,27 @@
 #' \item{\code{Vector of rates}}{To create step function rates. Note this must
 #' be accompanied by a corresponding vector of shifts \code{fShifts}}}
 #'
-#' @param tMax a number corresponding to the maximum simulation time.
+#' @param tMax A number corresponding to the maximum simulation time.
 #' Needed to ensure \code{fShifts} runs the correct way.
 #'
-#' @param envF a dataframe representing an environmental variable
-#' (time, CO2 etc) with time. The first column must be time, second column the
-#' values of the variable. See below; one good resource for these dataframes is
-#' \href{https://CRAN.R-project.org/package=RPANDA}{RPANDA}.
+#' @param envF A matrix representing an environmental variable (time, CO2, etc)
+#' with time. The first column must be time, second column the values of the 
+#' variable. Note that supplying \code{envF} with \code{ff} being a function of
+#' only one variable or a constant results in an error.
 #'
-#' @param fShifts a vector of rate shifts. The first element must
-#' be the first time point for the simulation. This may be 0 or tMax. Since
-#' functions in paleobuddy run from 0 to tMax, if \code{fShifts} runs from past
-#' to present, in other words \code{fShifts[2] < fShifts[1]}, we take
-#' \code{tMax-fShifts} as the shifts vector. Note that supplying \code{fShifts}
-#' when \code{ff} is not a rates vector will return an error.
+#' @param fShifts A vector of rate shifts. The first element must
+#' be the first time point for the simulation. This may be \code{0} or 
+#' \code{tMax}. Since functions in paleobuddy run from \code{0} to \code{tMax}, if
+#' \code{fShifts} runs from past to present (\code{fShifts[2] < fShifts[1]}), we 
+#' take \code{tMax - fShifts} as the shifts vector. Note that supplying 
+#' \code{fShifts} when \code{ff} is not a rates vector will result in an error.
 #'
-#' @return returns a constant or time-varying function (depending on input)
-#' that can then be used as a rate in the other \code{paleobuddy} functions.
-#' The returned function will invariably be either a number or a function of
-#' one variable only, usually set as time.
+#' @return A constant or time-varying function (depending on input) that can
+#' then be used as a rate in the other \code{paleobuddy} functions. The returned
+#' function will invariably be either a number or a function of one variable only, 
+#' usually set as time.
 #'
-#' @author written by Bruno do Rosario Petrucci
+#' @author Bruno do Rosario Petrucci
 #'
 #' @examples
 #' 

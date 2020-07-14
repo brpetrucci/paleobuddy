@@ -1,54 +1,54 @@
 #' Age-dependent rate species sampling
 #'
-#' \code{sample.adpp} takes a species number, a vector of speciation and 
-#' extinction times, a sampling rate and an age-dependent model which describes
-#' how the Poisson Process relates to the age of each species, and returns a
-#' vector of occurrence times for the list of species.
+#' Generates a list of occurrence times for each of the species specified using a
+#' Poisson process with constant average rate and occurrences distributed based on
+#' a model of species age. Allows for any distribution as the model of occurrences
+#' during a species life, given certain requirements (see below). Allows for an
+#' optional argument - the maximum of the distribution - that can make the
+#' simulation faster.
 #'
-#' @param S a list species numbers to be sampled.
+#' @param S A list species numbers to be sampled.
 #'
-#' @param TE a vector of extinction times, usually an output of \code{bd.sim}.
+#' @param sim A \code{sim} object, usually an output of \code{bd.sim}.
 #'
-#' @param TS a vector of speciation times, usually an output of \code{bd.sim}.
-#'
-#' @param rr a mean sampling rate (equivalent to the \code{lambda} of a poisson)
-#' in the poisson process.
+#' @param rr A mean sampling rate (equivalent to the \code{lambda} of a Poisson)
+#' in the Poisson process.
 #'
 #' @param dFun A density function representing the age-dependent
 #' preservation model. It must be a density function, and consequently
 #'
 #' \itemize{
 #'
-#' \item integrate to 1 (though this condition is not verified by the 
-#' function, it is the user's responsibility to check this property).
+#' \item integrate to 1 (though this condition is not verified by the function,
+#' it is the user's responsibility to check this property).
 #'
-#' \item describe the density of sampling a lineage in a given point \code{t}
-#' in geological time.
+#' \item describe the density of sampling a lineage in a given point \code{t} in
+#' geological time.
 #'
-#' \item be parametrized in absolute geological time (i.e. should be relative
-#' to absolute geological time, in Mya).
+#' \item be parametrized in absolute geological time (i.e. should be relative to
+#' absolute geological time, in Mya).
 #'
-#' \item should be limited between \code{s} (i.e. the lineage's 
+#' \item should be limited between \code{s} (i.e. the lineage's
 #' speciation/origination geological time) and \code{e} (i.e. the lineage's 
 #' extinction geological time), with \code{s} > \code{e}.
 #'
 #' \item include the arguments \code{t}, \code{s}, \code{e} and \code{sp}.
 #' }
 #'
-#' @param dFunMax a function that calculates the maximum (density) value
-#' of \code{dFun} using its arguments. It can also be a number representing the
+#' @param dFunMax A function that calculates the maximum (density) value of
+#' \code{dFun} using its arguments. It can also be a number representing the
 #' maximum density.
 #'
-#' Note that if it is not provided, it will be approximated numerically, leading 
-#' to longer running times.
+#' Note: if it not provided, it will be approximated numerically, leading to
+#' longer running times.
 #'
-#' @param ... additional parameters related to \code{dFun} and \code{dFunMax}.
+#' @param ... Additional parameters related to \code{dFun} and \code{dFunMax}.
 #'
-#' @return a list of occurrences for that species, expected to be around 
-#' \code{(Ts-TE)*rr} occurrences, with their distribution in time given by the
-#' function provided by the user.
+#' @return A list of occurrences for that species, expected to be around 
+#' \code{(TS - TE)*rr} occurrences, with their distribution in species relative 
+#' time given by the function provided by the user.
 #'
-#' @author written by Matheus Januario.
+#' @author Matheus Januario.
 #'
 #' @examples
 #'
@@ -107,8 +107,7 @@
 #' }
 #' 
 #' # find occurrences
-#' occs <- sample.adpp(S = 1, TE = sim$TE, TS = sim$TS, rr = 1, dFun = dPERT,
-#'                    dFunMax = dPERTmax)
+#' occs <- sample.adpp(S = 1, sim = sim, rr = 1, dFun = dPERT, dFunMax = dPERTmax)
 #' 
 #' # check histogram
 #' hist(unlist(occs), probability = TRUE)
@@ -146,7 +145,7 @@
 #' 
 #' # we will not give a dFunMax function this time. sample.adpp() will try to find
 #' # the maximum density with a very simple numerical simulation
-#' occs <- sample.adpp(S = 1, TE = sim$TE, TS = sim$TS, rr = 2, dFun = custom.uniform)
+#' occs <- sample.adpp(S = 1, sim = sim, rr = 2, dFun = custom.uniform)
 #' 
 #' # check histogram
 #' hist(unlist(occs[[1]]), probability = TRUE)
@@ -223,7 +222,7 @@
 #' }
 #' 
 #' # note we are providing the mode for the triangular sampling as an ... argument
-#' occs <- sample.adpp(S = 1, TE = sim$TE, TS = sim$TS, rr = 2.5, dFun = dTRI,
+#' occs <- sample.adpp(S = 1, sim = sim, rr = 2.5, dFun = dTRI,
 #'                    dFunMax = dTRImax, md = 8)
 #' 
 #' # please note in the original parametrization, the "md" parameter (mode) is
@@ -302,8 +301,8 @@
 #' }
 #' 
 #' # find occurrences
-#' occs <- sample.adpp(S = 1, TE = sim$TE, TS = sim$TS, rr = 5,
-#'                    dFun = dTRImod1, dFunMax = dTRImaxmod1)
+#' occs <- sample.adpp(S = 1, sim = sim, rr = 5,
+#'                     dFun = dTRImod1, dFunMax = dTRImaxmod1)
 #' 
 #' # we do not have the "md" parameter (see example 3) as it corresponds to the
 #' # last quarter of the duration of each lineage
@@ -315,7 +314,8 @@
 #' mid <- ((sim$TS[1] - sim$TE[1]) / 4) + sim$TE[1]
 #' 
 #' # expected curve
-#' curve(dTRI(x, e = sim$TE[1], s = sim$TS[1], md = mid), 10, 0, add = TRUE, col = "red")
+#' curve(dTRImod1(x, e = sim$TE[1], s = sim$TS[1]), 10, 0, add = TRUE, 
+#'       col = "red")
 #' 
 #' ###
 #' # finally, a hat-shaped increase through the duration of a species with more
@@ -333,7 +333,7 @@
 #' 
 #' # preservation function in respect to age, with the "mode" of the triangle
 #' # being exactly at the last quarter of the duration of EACH lineage.
-#' dTRImod2<-function(t, s, e, sp) {
+#' dTRImod2 <- function(t, s, e, sp) {
 #'   
 #'   # make sure it is a valid TRI
 #'   if (e >= s) {
@@ -376,8 +376,8 @@
 #' par1 <- (((sim$TS - sim$TE)/2) + sim$TE) - par
 #' 
 #' # find occurrence list
-#' occs <- sample.adpp(S = 1:length(sim$TE), TE = sim$TE, TS = sim$TS, rr = 10,
-#'                    dFun = dTRImod2, dFunMax = dTRImaxmod2)
+#' occs <- sample.adpp(S = 1:length(sim$TE), sim = sim, rr = 10,
+#'                     dFun = dTRImod2, dFunMax = dTRImaxmod2)
 #' 
 #' # we do not have the "md" parameter (see example 3) as it corresponds to
 #' # the last quarter of the duration of each lineage
@@ -393,7 +393,7 @@
 #'   mid <- par[sp] + par1[sp]
 #'   
 #'   # expected curve
-#'   curve(dTRI(x, e = sim$TE[sp], s = sim$TS[sp], md = mid),10, 0, add = TRUE,
+#'   curve(dTRImod2(x, e = sim$TE[sp], s = sim$TS[sp]), 10, 0, add = TRUE,
 #'         col = "red", n = 100)
 #'   abline(v = mid, col = "red")
 #' }
@@ -402,7 +402,20 @@
 #' @rdname sample.adpp
 #' @export
 
-sample.adpp <- function(S, TS, TE, rr, dFun, dFunMax = NULL, ...) {
+sample.adpp <- function(S = NULL, sim, rr, dFun, dFunMax = NULL, ...) {
+  # some error checking
+  if (sum(S %in% 1:length(sim$TS)) != length(S)) {
+    stop("One or more species numbers provided not in simulation")
+  }
+  
+  # make S all species if it is NULL
+  if (is.null(S)) {
+    S = 1:length(sim$TE)
+  }
+  
+  # get the speciation and extinction times vectors
+  TE <- sim$TE
+  TS <- sim$TS
 
   # setting things and checking inputs
   printMessage <- TRUE
@@ -477,7 +490,6 @@ sample.adpp <- function(S, TS, TE, rr, dFun, dFunMax = NULL, ...) {
       # max approximation is slightly above treshold so we capture that point
       dFunMaxApprox <- threshold + 0.01
     }
-
 
     # number of occurrences following a poisson process:
     nOccs <- rpois(1, lambda = rr*(TS[sp] - TE[sp]))

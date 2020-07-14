@@ -19,86 +19,89 @@ sample.clade(
 )
 }
 \arguments{
-\item{S}{a list species numbers to be sampled. Could be only a subset of the
+\item{S}{A list species numbers to be sampled. Could be only a subset of the
 species if the user wishes. The default is all species in \code{sim}.}
 
-\item{sim}{a simulation, usually the output of \code{bd.sim}.}
+\item{sim}{A simulation, usually the output of \code{bd.sim}.}
 
-\item{rr}{a sampling rate function. May be a constant, a time-dependent
+\item{rr}{A sampling rate function. May be a constant, a time-dependent
 function, a function dependent on time and environment, or a vector of
 rates corresponding to the times in \code{rShifts}.
 
 Note: must be a constant if \code{dFun} is not \code{NULL}.}
 
-\item{tMax}{the maximum simulation time, used by \code{rexp.var}.}
+\item{tMax}{The maximum simulation time, used by \code{rexp.var}.}
 
-\item{envRR}{a matrix containing time points and values of an enviromental
+\item{envRR}{A matrix containing time points and values of an environmental
 variable, like temperature, for each time point. This will be used to create
 a sampling rate, so \code{rr} must be a function of time and said variable
 if \code{envRR} is not NULL.}
 
-\item{rShifts}{vector of rate shifts. First element must be the sstarting
-time for the simulation (0 or tMax). It must have the same length as
-\code{rr}. E.g. \code{rr = c(0.1, 0.2, 0.1)}, \code{rShifts = c(0, 10, 20)}
-means the sampling rate will be 0.1 from 0 to 10, 0.2 from 10 to 20, and 0.1
-from 20 to \code{tMax}. It would also be identical, in this case, to use
-\code{pshifts = c(tMax, tMax - 10, tMax - 20)}.
+\item{rShifts}{Vector of rate shifts. First element must be the starting
+time for the simulation (\code{0} or \code{tMax}). It must have the same length 
+as \code{pp}. Note that \code{c(0, x, tMax)} is equivalent to
+\code{c(tMax, tMax - x, 0)} for the purpose of \code{make.rate}.
 
-Note that using this method for step-function rates is currently slower than
-using \code{ifelse}.}
+Note: using this method for step-function rates is currently slower than using
+\code{ifelse}.}
 
-\item{returnTrue}{if set to \code{TRUE}, the returned data frame will
-contain true times of sampling. If set to \code{FALSE}, we call 
-\code{binner} and the returned data frame will contain ranges of sampling
-times based on \code{bins}.}
+\item{returnTrue}{If set to \code{TRUE}, the returned data frame will contain
+true times of sampling. If set to \code{FALSE}, we call \code{binner} and the
+the returned data frame will contain ranges of sampling times based on 
+\code{bins}.}
 
-\item{bins}{a vector of time intervals corresponding to geological time
-ranges. If \code{returnTrue} is false, \code{sample.clade} returns the
-occurrence times as ranges. In this way, we simulate the granularity in
-real world fossil records. If \code{returnTrue} is true, this is ignored.}
+\item{bins}{A vector of time intervals corresponding to geological time ranges.
+If \code{returnTrue} is false, \code{sample.clade} returns the occurrence
+times as ranges. In this way, we simulate the granularity in real world fossil
+records. If \code{returnTrue} is true, this is ignored. Note that failing to
+supply a \code{bins} vector when \code{returnTRUE == FALSE} will result in an
+error.}
 
 \item{dFun}{A density function representing the age-dependent
 preservation model. It must be a density function, and consequently
 
 \itemize{
 
-\item integrate to 1 (though this condition is not verified by the 
-function, it is the user's responsibility to check this property).
+\item integrate to 1 (though this condition is not verified by the function,
+it is the user's responsibility to check this property).
 
-\item describe the density of sampling a lineage in a given point \code{t}
-in geological time.
+\item describe the density of sampling a lineage in a given point \code{t} in
+geological time.
 
-\item be parametrized in absolute geological time (i.e. should be relative
-to absolute geological time, in Mya).
+\item be parametrized in absolute geological time (i.e. should be relative to
+absolute geological time, in Mya).
 
-\item should be limited between \code{s} (i.e. the lineage's 
+\item should be limited between \code{s} (i.e. the lineage's
 speciation/origination geological time) and \code{e} (i.e. the lineage's 
 extinction geological time), with \code{s} > \code{e}.
 
 \item include the arguments \code{t}, \code{s}, \code{e} and \code{sp}.
 }}
 
-\item{dFunMax}{a function that calculates the maximum (density) value
-of \code{dFun} using its arguments. It can also be a number representing the
+\item{dFunMax}{A function that calculates the maximum (density) value of
+\code{dFun} using its arguments. It can also be a number representing the
 maximum density.
 
-Note that if it is not provided, it will be approximated numerically, leading 
-to longer running times.}
+Note: if it not provided, it will be approximated numerically, leading to
+longer running times.}
 
-\item{...}{additional parameters related to \code{dFun} and \code{dFunMax}.}
+\item{...}{Additional parameters related to \code{dFun} and \code{dFunMax}.}
 }
 \value{
-a data frames containing species names/numbers, whether each species
+A data frame containing species names/numbers, whether each species
 is extant, and either the true occurrence times of species or a range of
 occurrence times based on \code{bins}.
 }
 \description{
-\code{sample.clade} takes times of speciation and extinction, information to
-create a sampling rate with \code{make.rate}, a vector of geologic time 
-intervals, and whether one wants the true return times or a range based on 
-\code{bins}, and returns a data frame with minimum and maximum times for
-occurrences (\code{returnTrue == FALSE}) or exact occurrence times 
-(\code{returnTrue == TRUE}) for each species.
+Generates a data frame containing either true occurrence times or time ranges
+for each of the species specified using a Poisson process. Allows the Poisson
+rate to be a constant, a vector of numbers or a function of time, and allows 
+as an optional parameter a distribution representing the expected occurrence 
+number over a species duration (in which case average rate must be constant). 
+Allows for further flexibility in (non-age dependent) rates by a shift times
+vector and environmental matrix parameters. Optionally takes a list of time
+bins representing geologic periods, so that if the user wishes occurrence 
+times can be presented as a range instead of true points.
 }
 \examples{
 
@@ -219,7 +222,8 @@ bins <- seq(from = 10, to = 0,
 # note that we will provide a very high resolution to test the function
 
 # find the occurrence data frame
-dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, bins = bins)
+dt <- sample.clade(1:length(sim$TE), sim, rlist, rShifts = rShifts, 
+                   tMax = 10, bins = bins)
 
 # extract species identity
 ids <- unique(dt$Species)
@@ -479,5 +483,5 @@ for (i in 1:length(ids)) {
 
 }
 \author{
-written by Matheus Januario and Bruno do Rosario Petrucci.
+Matheus Januario and Bruno do Rosario Petrucci.
 }

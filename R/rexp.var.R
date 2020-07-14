@@ -1,50 +1,53 @@
 #' General rate exponential and Weibull waiting times
+#' 
+#' Generates a waiting time following an exponential or Weibull distribution with
+#' constant or varying rates. Allows for an optional shape parameter, in which 
+#' case \code{lambda} will be taken as a scale. Requires information on the
+#' current time, to consider only rates starting from then, and the speciation
+#' time, optionally, in case shape is provided and the process is age-dependent.
+#' Allows for customization on the possibility of throwing away a waiting time
+#' higher than \code{tMax}, and therefore takes that time as a parameter.
 #'
-#' \code{rexp.var} uses a rate (that could be constant or time-varying), a range
-#' of time and optionally a shape for age dependent rates. It also takes a
-#' number of waiting times to return, and whether the user wishes to throw away
-#' waiting times that pass \code{tMax}. It returns a time from an exponential
-#' distribution, or a weibull distribution if \code{shape != NULL}. 
-#'
-#' @param n the number of waiting times to return. The default is 1, but we
+#' @param n The number of waiting times to return. The default is 1, but we
 #'  allow for a higher \code{n} to be consistent with the \code{rexp} function.
 #' 
-#' @param lambda the rate parameter for the exponential
-#' distribution. If shape is not \code{NULL}, \code{lambda} is a scale for a
-#' Weibull distribution. In both cases we allow for any time-varying function. 
-#' If one wants a constant \code{c}, please use 
-#' \code{lambda <- Vectorize(function(t) c)}.
+#' @param lambda The rate parameter for the exponential distribution. If
+#' \code{shape} is not \code{NULL}, \code{lambda} is a scale for a Weibull
+#' distribution. In both cases we allow for any time-varying function. If one
+#' wants to use a constant rate, please use 
+#' \code{lambda <- Vectorize(function(t) c)}, or \code{rexp}.
 #'
-#' @param now the current time. Needed so that we consider only the interval
+#' @param now The current time. Needed so that we consider only the interval
 #' between the current time and the maximum time for the time-varying rate.
 #' Notice this does means the waiting time is \code{>= now}, so we also
-#' subtract \code{now} from the result before returning.
+#' subtract \code{now} from the result before returning. The default is \code{0}.
 #'
-#' @param tMax the simulation ending time. If the waiting time would be too
-#' high, we return \code{2*tMax} to signify the event never happens, if 
-#' \code{FAST == TRUE}. The function only considers the rate between \code{now}
-#' and \code{tMax}.
+#' @param tMax The simulation ending time. If the waiting time would be too
+#' high, we return \code{tMax + 0.01} to signify the event never happens, if
+#' \code{FAST == TRUE}. Otherwise we return the true waiting time. By default,
+#' \code{tMax} will be \code{Inf}, but if \code{FAST == TRUE} one must supply
+#' a finite value.
 #'
-#' @param shape the shape of a weibull distribution. If not \code{NULL}, the 
-#' distribution dis taken to be a weibull. Otherwise, it is considered an
+#' @param shape The shape of a weibull distribution. If not \code{NULL}, the 
+#' distribution is taken to be a weibull. Otherwise, it is considered an
 #' exponential.
 #'
-#' Notes: if \code{shape} is really low it may be impossible
-#' for \code{uniroot} to find a root; Time-varying shape is implemented, but
-#' not yet thoroughly tested.
+#' Notes: Time-varying shape is implemented, so one could have \code{shape} be a
+#' function of time. It is not thoroughly tested, however, so it may be prudent to
+#' wait for a future release where this feature is well established.
 #'
-#' @param TS if shape is given, there must be a \code{TS} parameter to account
-#' for the scaling between simulation and species time. Supplying one without
-#' the other leads to an error.
+#' @param TS If shape is given, there must be a \code{TS} parameter to account
+#' for the scaling between simulation and species time. Supplying one without the
+#' other leads to an error. The default is \code{0}.
 #'
-#' @param fast if set to \code{FALSE}, waiting times larger than \code{tMax} 
-#' will not be thrown away. This argument is needed so one can testt he function
+#' @param fast If set to \code{FALSE}, waiting times larger than \code{tMax} will
+#' not be thrown away. This argument is needed so one can test the function
 #' without bias.
 #'
-#' @return a vector of waiting times for the exponential or weibull
-#' distribution with the given rates.
+#' @return A vector of waiting times for the exponential or weibull distribution
+#' with the given parameters.
 #'
-#' @author written by Bruno do Rosario Petrucci.
+#' @author Bruno do Rosario Petrucci.
 #'
 #' @import stats
 #'
@@ -174,7 +177,7 @@
 #' shape <- 0.5
 #' 
 #' # current time
-#' now <- 0
+#' now <- 3
 #' 
 #' # maximum time to check
 #' tMax <- 40
@@ -182,7 +185,7 @@
 #' # speciation time - it will be greater than 0 frequently during a simulation,
 #' # as it is used to represent where in the species life we currently are and
 #' # rescale accordingly
-#' TS <- 3.5
+#' TS <- 2.5
 #' 
 #' # find the list of waiting times
 #' t <- rexp.var(n = 3, lambda, now, tMax,
@@ -245,7 +248,22 @@
 #' @rdname rexp.var
 #' @export
 
-rexp.var<-function(n = 1, lambda, now, tMax, shape = NULL, TS = NULL, fast = TRUE) {
+rexp.var<-function(n = 1, lambda, now = 0, tMax = Inf, shape = NULL, TS = NULL, fast = TRUE) {
+  # some error checking
+  if ((is.null(TS) & !is.null(shape)) | (!is.null(TS) & is.null(shape))) {
+    stop("TS and shape must be supplied together")
+  }
+  
+  if (tMax == Inf & fast) {
+    stop("Need a valid tMax for fast computation")
+  }
+  
+  if (!is.null(TS)) {
+    if (now < TS) {
+      stop("TS must be greater than the current time")
+    }
+  }
+  
   # make a vector to hold the results
   vars <- rep(0, n)
 
@@ -263,6 +281,9 @@ rexp.var<-function(n = 1, lambda, now, tMax, shape = NULL, TS = NULL, fast = TRU
     shape <- ifelse(is.numeric(s), Vectorize(function(t) s), s)
   }
 
+  # if tMax is Inf, need another upper for uniroot
+  upper <- ifelse(tMax == Inf, 10 * now + 10, tMax)
+  
   for (i in 1:n) {
     # draw an uniform random variable from 0 to 1
     p <- runif (1)
@@ -274,11 +295,11 @@ rexp.var<-function(n = 1, lambda, now, tMax, shape = NULL, TS = NULL, fast = TRU
       # calculate the probability that the event will happen at all
       total <- 1 - exp(-(integrate(
         Vectorize(function(x) 1/lambda(x + TS)), lower = spnow, 
-        upper = tMax - TS, subdivisions = 2000)$value) ^ shape(tMax))
+        upper = upper - TS, subdivisions = 2000)$value) ^ shape(tMax))
 
       # if the probability is lower than p, the event will not happen
       if (total < p & fast) {
-        vars[i] <- 2*tMax + 0.01
+        vars[i] <- tMax + 0.01
       }
 
       else {
@@ -293,7 +314,7 @@ rexp.var<-function(n = 1, lambda, now, tMax, shape = NULL, TS = NULL, fast = TRU
                                   subdivisions = 2000)$value) ^ shape(t))})
 
         # if f(t) = 0, t is distributed as a Weibull
-        vars[i] <- suppressWarnings(uniroot(f, c(spnow, tMax), 
+        vars[i] <- suppressWarnings(uniroot(f, c(spnow, upper), 
                                             extendInt="yes"))$root - spnow
         
         # if lambda is really high and the integral goes to +-infinity (computationally
@@ -304,12 +325,12 @@ rexp.var<-function(n = 1, lambda, now, tMax, shape = NULL, TS = NULL, fast = TRU
     else {
       # calculate the probability that the event will happen at all
       total <- 1 - exp(-integrate(Vectorize(function(x) lambda(x)), 
-                                  lower = now, upper = tMax, 
+                                  lower = now, upper = upper, 
                                   subdivisions = 2000)$value)
       
       # if the probability is lower than p, the event will not happen
       if (total < p & fast) {
-        vars[i] <- 2*tMax + 0.01
+        vars[i] <- tMax + 0.01
       }
       
       else {
@@ -321,7 +342,7 @@ rexp.var<-function(n = 1, lambda, now, tMax, shape = NULL, TS = NULL, fast = TRU
         # if lambda is really high and the integral goes to +-infinity (computationally
         # speaking), uniroot substitutes it for a really high/low value instead. Since
         # this does not change our results, we accept it and simply suppress the warning
-        vars[i] <- suppressWarnings(uniroot(f, c(0, tMax), 
+        vars[i] <- suppressWarnings(uniroot(f, c(0, upper), 
                                             extendInt="yes"))$root - now
       }
     }

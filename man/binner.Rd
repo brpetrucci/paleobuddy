@@ -7,16 +7,16 @@
 binner(x, bins)
 }
 \arguments{
-\item{x}{the list containing occurrence times for a given species.}
+\item{x}{The list containing occurrence times for a given species.}
 
-\item{bins}{a vector of time intervals corresponding to geological time ranges.}
+\item{bins}{A vector of time intervals corresponding to geological time ranges.}
 }
 \value{
-a list of occurrence counts for each interval.
+A list of occurrence counts for each interval.
 }
 \description{
-\code{binner} takes the time interval vector in question and the list of
-occurrences for a species.
+Given a list of fossil occurrences and time bins to represent geological
+ranges, returns the occurrence counts in each bin.
 }
 \examples{
 
@@ -53,7 +53,7 @@ binnedSamp
 sim <- bd.sim(1, pp = 0.1, qq = 0.05, tMax = 15)
 
 # sample it
-sampled <- sample(S = 1, TE = sim$TE, TS = sim$TS, rr = 1, tMax = 15)
+sampled <- sample(S = 1, sim = sim, rr = 1, tMax = 15)
 
 # bins list
 bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
@@ -71,7 +71,7 @@ sim <- bd.sim(1, pp = function(t) {
 }, qq = 0.05, tMax = 20)
 
 # sample it
-sampled <- sample(S = 1, TE = sim$TE, TS = sim$TS, rr = 1, tMax = 15)
+sampled <- sample(S = 1, sim = sim, rr = 1, tMax = 15)
 
 # bins list
 bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
@@ -82,5 +82,5 @@ binnedsample
 
 }
 \author{
-written by Matheus Januario and Bruno do Rosario Petrucci
+Matheus Januario and Bruno do Rosario Petrucci
 }

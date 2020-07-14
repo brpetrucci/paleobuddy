@@ -1,16 +1,19 @@
 #' Non-constant rate Birth-Death simulation
 #'
 #' Simulates a species birth-death process with general rates for any number of
-#' starting species. Allows for speciation and extinction rates to be either 
-#' constants or functions of time, and optionally takes a shape parameter in case
-#' speciation and/or extinction is to be age-dependent. Returns an object 
-#' containing lists of speciation times, extinction times, parents and status 
-#' (extant or not). Can return true extinction times or simply information on 
-#' whether species lived after maximum simulation time. Allows for constraining on 
-#' the number of species at the end of the simulation, either total or extant.
+#' starting species. Allows for the speciation/extinction rate to be constant or
+#' a function of time. Takes an optional shape argument for speciation and/or 
+#' extinction, under which the corresponding rate will be taken to be a Weibull 
+#' scale for age-dependent dynamics. Returns an object containing lists of 
+#' speciation times, extinction times, parents and status (extant or not). Can 
+#' return true extinction times or simply information on whether species lived
+#' after maximum simulation time. Allows for constraining on the number of species
+#' at the end of the simulation, either total or extant. Returns \code{NA} and 
+#' sends a warning if it cannot find a simulation with the desired number of 
+#' species after \code{100000} tries.
 #' Note that while time runs from \code{0} to \code{tmax} on the function itself,
 #' it runs from \code{tmax} to \code{0} on the lists returned to conform with the
-#' literature.
+#' literature. 
 #'
 #' @param n0 Initial number of species, usually 1. Good parameter
 #' to tweak if one is observing a low sample size when testing.
@@ -26,9 +29,9 @@
 #' to use \code{bd.sim.general} with environmental or step-function rates, they
 #' can generate the rate with \code{make.rate} and supply it to the function.
 #'
-#' @param tMax Ending time of simulation. Any species still living
-#' after \code{tMax} is considered extant, and any species that would be
-#' generated after \code{tMax} is not born.
+#' @param tMax Ending time of simulation. Any species still living after
+#' \code{tMax} is considered extant, and any species that would be generated
+#' after \code{tMax} is not born.
 #'
 #' @param pShape Shape parameter for the Weibull distribution for age-dependent
 #' speciation. Default is \code{NULL}, where \code{pp} will be considered a
@@ -236,37 +239,39 @@
 #' # finally, we could have environmental dependency on a rate
 #' if (requireNamespace("RPANDA", quietly = TRUE)) {
 #'   # initial number of species
-#'   n0 <- 1
-#'   
-#'   # maximum simulation time
-#'   tMax <- 40
-#'   
-#'   # temperature-dependent speciation
-#'   p_t <- function(t, temp) {
-#'     return(0.04*exp(0.15*temp))
-#'   }
-#'   
-#'   # extinction
-#'   q <- 0.075
-#'   
-#'   # using RPANDA to get the temperature data
-#'   data(InfTemp, package="RPANDA")
-#'   
-#'   # speciation
-#'   p <- make.rate(p_t, tMax, envF = InfTemp)
-#'   
-#'   # since we need many species to be able to test this effectively using
-#'   # RPANDA, and the rates become really noisy with temperature, we set
-#'   # only 100 simulations to finish it in a reasonable time
-#'   
-#'   # run simulations
-#'   sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
+#'  n0 <- 1
+#'
+#'  # maximum simulation time
+#'  tMax <- 40
+#'  
+#'  # temperature-dependent speciation
+#'  p_t <- function(t, temp) {
+#'    return(0.04*exp(0.15*temp))
+#'  }
+#'
+#'  # extinction
+#'  q <- 0.075
+#'
+#'  # using RPANDA to get the temperature data
+#'  data(InfTemp, package="RPANDA")
+#'
+#'  # speciation
+#'  p <- make.rate(p_t, tMax, envF = InfTemp)
+#'
+#'  # run simulations
+#'  sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
 #'   
 #'   # we can plot the phylogeny to take a look
 #'   if (requireNamespace("ape", quietly = TRUE)) {
 #'     phy <- make.phylo(sim)
 #'     ape::plot.phylo(phy)
 #'   }
+#' }
+#' 
+#' # note nFinal has to be sensible
+#' \dontrun{
+#' # this would return an error
+#' sim <- bd.sim.general(1, pp = 0.01, qq = 1, tMax = 100, nFinal = c(100, Inf))
 #' }
 #'
 #' @name bd.sim.general
@@ -307,25 +312,30 @@ bd.sim.general <- function(n0, pp, qq, tMax,
   
     # while we have species to be analyzed still
     while (length(TE) >= sCount) {
+      # actual speciation time
+      specT <- ifelse(TS[sCount] < 0, 0, TS[sCount])
+      
+      # need this to pass speciation time to rexp.var only when shape is there
+      pSpecT <- NULL
+      if (!is.null(pShape)) pSpecT <- specT
+      
+      qSpecT <- NULL
+      if (!is.null(qShape)) qSpecT <- specT
   
       # get the time of speciation, or 0 if the species
       # was there at the beginning
-      tNow <- ifelse(TS[sCount] < 0, 0, TS[sCount])
+      tNow <- specT
 
-      # find the waiting time using rexp.var - note that in rexp.var we only
-      # count t from tNow (to consider the rates as functions), so that
-      # now we need to subtract tNow
+      # find the waiting time using rexp.var if pp is not constant
+      # note we need to pass NULL for TS if the corresponding shape is NULL
       waitTimeS <- ifelse(
         is.numeric(pp), rexp(1, pp), 
         ifelse(pp(tNow) > 0, 
-               rexp.var(1, pp, tNow, tMax, pShape, 
-                        ifelse(TS[sCount] < 0, 0, TS[sCount]), fast), Inf))
-      
+               rexp.var(1, pp, tNow, tMax, pShape, pSpecT, fast), Inf))
       waitTimeE <- ifelse(
         is.numeric(qq), rexp(1, qq), 
         ifelse(qq(tNow) > 0,
-               rexp.var(1, qq, tNow, tMax, qShape,
-                        ifelse(TS[sCount] < 0, 0, TS[sCount]), fast), Inf))
+               rexp.var(1, qq, tNow, tMax, qShape, qSpecT, fast), Inf))
   
       tExp <- tNow + waitTimeE
   
@@ -345,8 +355,7 @@ bd.sim.general <- function(n0, pp, qq, tMax,
         waitTimeS <- ifelse(
           is.numeric(pp), rexp(1, pp), 
           ifelse(pp(tNow) > 0, 
-                 rexp.var(1, pp, tNow, tMax, pShape, 
-                          ifelse(TS[sCount] < 0, 0, TS[sCount]), fast), Inf))
+                 rexp.var(1, pp, tNow, tMax, pShape, pSpecT, fast), Inf))
       }
   
       # reached the time of extinction
@@ -371,7 +380,7 @@ bd.sim.general <- function(n0, pp, qq, tMax,
     # if we have ran for too long, stop
     counter <- counter + 1
     if (counter > 100000) {
-      message("This value of nFinal took more than 100000 simulations 
+      warning("This value of nFinal took more than 100000 simulations 
               to achieve")
       return(NA)
     }

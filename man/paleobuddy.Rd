@@ -3,13 +3,11 @@
 \docType{package}
 \name{paleobuddy}
 \alias{paleobuddy}
-\title{paleobuddy}
+\title{paleobuddy: Simulating diversification dynamics with flexible scenarios}
 \description{
-The foo package provides three categories of important functions:
-foo, bar and baz.
+Here is where I will write the help section for the package
 }
-\section{Foo functions}{
-
-The foo functions ...
+\section{Help needed}{
+NA
 }
 

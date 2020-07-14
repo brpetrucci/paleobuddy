@@ -1,20 +1,25 @@
-#' Converts a paleobuddy simulation into a phylogeny
+#' Phylogeny generating
 #'
-#' \code{make.phylo} generates a \code{phylo} object using a simulation from the
-#' \code{bd.sim} function. The phylogeny follows a "Hennigian" (sensu Ezard et
-#' al 2011) format. If the simulation has only one lineage, the function
-#' returns \code{NA} as there is no phylogeny for a simulation with only one
-#' lineage.
+#' Generates a phylogeny from a \code{sim} object containing speciation and
+#' extinction times, parent and status information, usually returned by
+#' \code{bd.sim} or similar. Returns a \code{phylo} object containing information
+#' on the phylogeny, following a "Hennigian" (Ezard et al 2011) format. Returns
+#' \code{NA} and sends a warning if the simulation has only one lineage, or if 
+#' more than one species has no parent (i.e. there is no one common ancestor). In
+#' this case, use \code{find.lineages} first.
 #'
-#' @param sim a simulation from the \code{bd.sim} function.
-#'
-#' @author Function written by Matheus Januario. 
-#' 
-#' Reference: Ezard, T. H.,
-#' Pearson, P. N., Aze, T., & Purvis, A. (2012). The meaning of birth and death
-#' (in macroevolutionary birth-death models). Biology letters, 8(1), 139-142.
+#' @param sim a simulation containing lists for the speciation times, extinction
+#' times, parent identities and status (extant or extinct).
 #'
 #' @return A \code{phylo} object.
+#' 
+#' @author Matheus Januario. 
+#' 
+#' @references
+#' 
+#' Ezard, T. H., Pearson, P. N., Aze, T., & Purvis, A. (2012). The meaning of 
+#' birth and death (in macroevolutionary birth-death models). Biology letters, 
+#' 8(1), 139-142.
 #'
 #' @examples
 #'
@@ -64,7 +69,8 @@ make.phylo <- function(sim) {
   }
 
   if (sum(is.na(sim$PAR)) > 1) {
-    stop("Multiple starting species. Use function findClades()")
+    message("Multiple starting species. Use function findClades()")
+    return(NA)
   }
 
   all.dir.daughter <- function(lin, x) {

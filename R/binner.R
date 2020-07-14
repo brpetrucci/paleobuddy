@@ -1,15 +1,15 @@
 #' Bin occurrences in geologic intervals
 #'
-#' \code{binner} takes the time interval vector in question and the list of
-#' occurrences for a species.
+#' Given a list of fossil occurrences and time bins to represent geological
+#' ranges, returns the occurrence counts in each bin.
 #'
-#' @param x the list containing occurrence times for a given species.
+#' @param x The list containing occurrence times for a given species.
 #'
-#' @param bins a vector of time intervals corresponding to geological time ranges.
+#' @param bins A vector of time intervals corresponding to geological time ranges.
 #'
-#' @return a list of occurrence counts for each interval.
+#' @return A list of occurrence counts for each interval.
 #'
-#' @author written by Matheus Januario and Bruno do Rosario Petrucci
+#' @author Matheus Januario and Bruno do Rosario Petrucci
 #'
 #' @examples
 #'
@@ -46,7 +46,7 @@
 #' sim <- bd.sim(1, pp = 0.1, qq = 0.05, tMax = 15)
 #' 
 #' # sample it
-#' sampled <- sample(S = 1, TE = sim$TE, TS = sim$TS, rr = 1, tMax = 15)
+#' sampled <- sample(S = 1, sim = sim, rr = 1, tMax = 15)
 #' 
 #' # bins list
 #' bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
@@ -64,7 +64,7 @@
 #' }, qq = 0.05, tMax = 20)
 #' 
 #' # sample it
-#' sampled <- sample(S = 1, TE = sim$TE, TS = sim$TS, rr = 1, tMax = 15)
+#' sampled <- sample(S = 1, sim = sim, rr = 1, tMax = 15)
 #' 
 #' # bins list
 #' bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)

@@ -1,100 +1,104 @@
 #' General rate Birth-Death simulation
+#' 
+#' Simulates a species birth-death process with general rates for any number of
+#' starting species. Allows for the speciation/extinction rate to be constant,
+#' a function of time, a function of time and an environmental variable, or a list
+#' of numbers. Takes an optional shape argument for speciation and/or extinction,
+#' under which the corresponding rate will be taken to be a Weibull scale for 
+#' age-dependent dynamics. Also may take a list of rate shifts, if the
+#' corresponding rate is a list of numbers, or a dataframe with environmental 
+#' data. Returns an object containing lists of speciation times, extinction times, 
+#' parents and status (extant or not). Can return true extinction times or simply 
+#' information on whether species lived after maximum simulation time. Allows for
+#' constraining on the number of species at the end of the simulation, either 
+#' total or extant.
+#' Note that while time runs from \code{0} to \code{tmax} on the function itself,
+#' it runs from \code{tmax} to \code{0} on the lists returned to conform with the
+#' literature.
 #'
-#' , functions of time and an environmental variable, or a list
-#' of constants. The choice of type of rate for speciation does not affect
-#' extintion, and vice-versa
-#'
-#' \code{bd.sim} takes an initial number of species, speciation and extinction
-#' rate functions and a maximum time of simulation, together with multiple
-#' options to alter the rates, and calls \code{bd.sim.constant} or
-#' \code{bd.sim.general} to generate a species diversification process under the
-#' desired scenario.
-#'
-#' @param n0 initial number of species, usually 1. Good parameter
+#' @param n0 Initial number of species, usually 1. Good parameter
 #' to tweak if one is observing a low sample size when testing.
 #'
-#' @param pp function to hold the speciation rate over time. It could be a
+#' @param pp Function to hold the speciation rate over time. It could be a
 #' constant or a function of time (to be an exponential rate or weibull scale),
 #' a function of time and an environmental variable, or a vector of rates to be
 #' accompanied by a vector of rate shifts \code{pShifts}.
 #'
-#' @param qq similar as above, but for the extinction rate.
+#' @param qq Similar as above, but for the extinction rate.
 #'
 #' Note: \code{pp} and \code{qq} must always be greater than 0
 #'
-#' @param tMax ending time of simulation. Any species still living
-#' after tMax is considered extant, and any species that would be generated
+#' @param tMax Ending time of simulation. Any species still living after
+#' \code{tMax} is considered extant, and any species that would be generated
 #' after \code{tMax} is not born.
 #'
-#' @param pShape shape parameter for the Weibull distribution for age-dependent
+#' @param pShape Shape parameter for the Weibull distribution for age-dependent
 #' speciation. Default is \code{NULL}, where \code{pp} will be considered a
 #' time-dependent exponential rate. For \code{pShape != NULL}, \code{pp} will
 #' be considered a scale, and \code{rexp.var} will draw a Weibull distribution
 #' instead.
 #'
-#' @param qShape similar as above, but for the extinction rate.
+#' @param qShape Similar as above, but for the extinction rate.
 #'
-#' @param envPP a matrix containing time points and values of an
-#' environmental variable, like temperature, for each time point. This will be
-#' used to create a speciation rate, so \code{pp} must be a function of time
-#' and said variable.
+#' @param envPP A matrix representing an environmental variable (time, CO2, etc)
+#' with time. The first column must be time, second column the values of the 
+#' variable. This will be used to create a speciation rate using \code{make.rate},
+#' so \code{pp} must be a function of time and another variable.
 #'
-#' @param envQQ similar as above, but for the extinction rate.
+#' @param envQQ Similar as above, but for the extinction rate.
 #'
-#' @param pShifts vector of rate shifts. First element must be the sstarting
-#' time for the simulation (0 or tMax). It must have the same length as
-#' \code{pp}. E.g. \code{pp = c(0.1, 0.2, 0.1)}, \code{pShifts = c(0, 10, 20)}
-#' means the speciation rate will be 0.1 from 0 to 10, 0.2 from 10 to 20, and 
-#' 0.1 from 20 to \code{tMax}. It would also be identical, in this case, to use
-#' \code{pShifts = c(tMax, tMax-10, tMax-20)}.
+#' @param pShifts Vector of rate shifts. First element must be the sstarting
+#' time for the simulation (\code{0} or \code{tMax}). It must have the same length 
+#' as \code{pp}. Note that \code{c(0, x, tMax)} is equivalent to
+#' \code{c(tMax, tMax - x, 0)} for the purpose of \code{make.rate}.
 #' 
 #' Note that using this  method for step-function rates is currently slower than using
 #' \code{ifelse}.
 #'
-#' @param qShifts similar as above, but for the extinction rate.
+#' @param qShifts Similar as above, but for the extinction rate.
 #' 
-#' @param nFinal an interval of acceptable number of species at the end of the
+#' @param nFinal An interval of acceptable number of species at the end of the
 #' simulation. If not supplied, default is \code{c(0, Inf)}, so that any number
 #' of species is accepted. If supplied, \code{bd.sim.constant} or 
 #' \code{bd.sim.general} will run until the number of total species generated, or, 
 #' if \code{extOnly = TRUE}, the number of extant species at the end of the 
 #' simulation, lies within the interval.
 #' 
-#' @param extOnly a boolean indicating whether \code{nFinal} should be taken as
+#' @param extOnly A boolean indicating whether \code{nFinal} should be taken as
 #' the number of total or extant species during the simulation. If \code{TRUE},
 #' \code{bd.sim.constant} or \code{bd.sim.general} will run until the number of extant
 #' species lies within the \code{nFinal} interval. If \code{FALSE}, as default, it 
 #' will run until the total number of species generated lies within that interval.
 #' 
-#' @param fast used for \code{bd.sim.general}. When \code{TRUE}, sets 
+#' @param fast Used for \code{bd.sim.general}. When \code{TRUE}, sets 
 #' \code{rexp.var} to throw away waiting times higher than the maximum 
 #' simulation time. Should be \code{FALSE} for unbiased testing of age 
 #' dependency. User might also se it to \code{FALSE} for more accurate waiting
 #' times.
 #' 
-#' @param trueExt used for \code{bd.sim.general}. When \code{TRUE}, time of 
+#' @param trueExt Used for \code{bd.sim.general}. When \code{TRUE}, time of 
 #' extinction of extant species will be the true time, otherwise it will be 
 #' tMax+0.01. Need to be \code{TRUE} when testing age-dependent 
 #' extinction.
 #'
-#' @return the return list of either \code{bd.sim.constant} or
+#' @return The return list of either \code{bd.sim.constant} or
 #' \code{bd.sim.general}, which have the same elements, as follows
 #'
 #' \describe{
-#' \item{\code{TE}}{list of extinction times, with -0.01 as the time of
+#' \item{\code{TE}}{List of extinction times, with -0.01 as the time of
 #' extinction for extant species.}
 #'
-#' \item{\code{TS}}{list of speciation times, with tMax+0.01 as the time of
+#' \item{\code{TS}}{List of speciation times, with tMax+0.01 as the time of
 #' speciation for species that started the simulation.}
 #'
-#' \item{\code{PAR}}{list of parents. Species that started the simulation have
+#' \item{\code{PAR}}{List of parents. Species that started the simulation have
 #' NA, while species that were generated during the simulation have their
 #' parent's number. Species are numbered as they are born.}
 #'
-#' \item{\code{EXTANT}}{list of booleans representing whether each species is
+#' \item{\code{EXTANT}}{List of booleans representing whether each species is
 #' extant.}}
 #'
-#' @author written by Bruno do Rosario Petrucci.
+#' @author Bruno do Rosario Petrucci.
 #'
 #' @examples
 #' 
@@ -335,6 +339,12 @@
 #'   }
 #' }
 #' 
+#' # note nFinal has to be sensible
+#' \dontrun{
+#' # this would return an error
+#' sim <- bd.sim(1, pp = 0.01, qq = 1, tMax = 100, nFinal = c(100, Inf))
+#' }
+#' 
 #' @name bd.sim
 #' @rdname bd.sim
 #' @export
@@ -344,7 +354,7 @@ bd.sim <- function(n0, pp, qq, tMax,
                   envPP = NULL, envQQ = NULL, 
                   pShifts = NULL, qShifts = NULL, 
                   nFinal = c(0, Inf), extOnly = FALSE,
-                  fast = TRUE, trueExt=FALSE) {
+                  fast = TRUE, trueExt = FALSE) {
   
   # if we have ONLY numbers for pp and qq, it is constant
   if ((is.numeric(pp) & length(pp) == 1) &
@@ -367,6 +377,6 @@ bd.sim <- function(n0, pp, qq, tMax,
 
     # call bd.sim.general
     return(bd.sim.general(n0, p, q, tMax, pShape, qShape, 
-                        nFinal, extOnly, fast, trueExt))
+                          nFinal, extOnly, fast, trueExt))
   }
 }

@@ -2,49 +2,51 @@
 % Please edit documentation in R/var.rate.div.R
 \name{var.rate.div}
 \alias{var.rate.div}
-\title{Calculates the expected number of species for a given time varying rate
-using the exponential distribution for variable rates.}
+\title{Expected diversity for general exponential rates}
 \usage{
 var.rate.div(ff, n0 = 1, t, envF = NULL, fShifts = NULL)
 }
 \arguments{
-\item{ff}{a rate for the exponential distribution that can be
-any function of time. One can also supply data for an environmental
-variable (see below for the \code{envF} param) and get the expected
-number of species for a hybrid function of time and said variable. Finally,
-one can instead supply a vector of rates to \code{ff} and a vector of shifts
-to \code{fShifts} and get a step function. It is more efficient to create a
-stepfunction using \code{ifelse} however (see examples below).}
+\item{ff}{A rate for the exponential distribution that can be any function of
+time. One can also supply data for an environmental variable (see below for the
+\code{envF} param) and get the expected number of species for a hybrid function 
+of time and said variable. Finally, one can instead supply a vector of rates to 
+\code{ff} and a vector of shifts to \code{fShifts} and get a step function. It 
+is more efficient to create a step function using \code{ifelse} however (see 
+examples below).}
 
-\item{n0}{the initial number of species is by default 1, but one
-can change to any positive number. We allow for negative initial values as
-well, but of course that will not help in testing the package.
+\item{n0}{The initial number of species is by default 1, but one can change to
+any positive number. We allow for negative initial values as well, but of 
+course that is not biologically sound.
 
-NOTE: \code{var.rate.div} will find the expected number of daughters given a
+Note: \code{var.rate.div} will find the expected number of daughters given a
 rate \code{ff} and an initial number of parents \code{n0}, so in a
 biological context \code{ff} is diversification rate, not speciation (unless
-extinction is 0, of course).}
+extinction is \code{0}).}
 
-\item{t}{a time vector over which to consider the distribution.}
+\item{t}{A time vector over which to consider the distribution.}
 
-\item{envF}{a two dimensional dataframe with time as a first
-column and the desired environmental variable as a second. Note that
-supplying a function with one argument and a non-NULL \code{envF}, and vice
-versa, will return an error.}
+\item{envF}{A two dimensional matrix with time as the first column and the
+desired environmental variable as the second. Note that supplying a function 
+with one argument and a non-NULL \code{envF}, and vice versa, will return an 
+error.}
 
-\item{fShifts}{a vector of rate shifts. Then used with the rates
-vector to create a step function for the rates. If supplied without a rates
-vector, and vice versa, will return an error.}
+\item{fShifts}{Vector of rate shifts. First element must be the starting
+time for the simulation (\code{0} or \code{tMax}). It must have the same length 
+as \code{pp}. Note that \code{c(0, x, tMax)} is equivalent to
+\code{c(tMax, tMax - x, 0)} for the purpose of \code{make.rate}.}
 }
 \value{
-a vector of the expected number of species per time point supplied
+A vector of the expected number of species per time point supplied
 in \code{t}, which can then be used to plot vs. \code{t}.
 }
 \description{
-\code{var.rate.div} takes a function, an initial number of species and a time
-vector and calculates the predicted exponential with that function as rate
-on that interval. This allows for efficient testing of the diversity curves
-produced by \code{paleobuddy} simulations.
+Calculates the expected species diversity on an interval given a (possibly time
+dependent) exponential rate. Takes any number, list of numbers, function of 
+time or function of time and an environmental variable as a rate. Allows for 
+flexibility by optionally taking a number of initial species, environmental 
+data and vector of rate shift times. Calculates the diversity for any vector
+of time.
 }
 \examples{
 

@@ -6,7 +6,8 @@
 #' on the number of species at the end of the simulation, either total or extant.
 #' Note that while time runs from \code{0} to \code{tmax} on the function itself,
 #' it runs from \code{tmax} to \code{0} on the lists returned to conform with the
-#' literature.
+#' literature. Returns \code{NA} and sends a warning if it cannot find a
+#' simulation with the desired number of species after \code{100000} tries.
 #'
 #' @param n0 Initial number of species, usually 1. Good parameter
 #' to tweak if one is observing a low sample size when testing.
@@ -17,8 +18,8 @@
 #' 
 #' Note: \code{pp} and \code{qq} must always be greater than 0
 #'
-#' @param tMax Ending time of simulation. Any species still living
-#' after tMax is considered extant, and any species that would be generated
+#' @param tMax Ending time of simulation. Any species still living after
+#' \code{tMax} is considered extant, and any species that would be generated
 #' after \code{tMax} is not born.
 #' 
 #' @param nFinal An interval of acceptable number of species at the end of the
@@ -123,7 +124,13 @@
 #' sim <- bd.sim.constant(n0, p, q, tMax)
 #' 
 #' # of course in this case there are no phylogenies to plot
-#'
+#' 
+#' # note nFinal has to be sensible
+#' \dontrun{
+#' # this would return an error
+#' sim <- bd.sim.constant(1, pp = 0.01, qq = 1, tMax = 100, nFinal = c(100, Inf))
+#' }
+#' 
 #' @name bd.sim.constant
 #' @rdname bd.sim.constant
 #' @export
@@ -206,7 +213,7 @@ bd.sim.constant <- function(n0 = 1, pp, qq, tMax,
     # if we have ran for too long, stop
     counter <- counter + 1
     if (counter > 100000) {
-      message("This value of nFinal took more than 100000 simulations 
+      warning("This value of nFinal took more than 100000 simulations 
               to achieve")
       return(NA)
     }

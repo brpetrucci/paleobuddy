@@ -4,29 +4,35 @@
 \alias{sample}
 \title{Constant and non-constant rate species sampling}
 \usage{
-sample(S, TE, TS, rr, tMax)
+sample(S, sim, rr, tMax)
 }
 \arguments{
-\item{S}{the species number to be sampled. Since \code{sample} will be called
+\item{S}{The species number to be sampled. Since \code{sample} will be called
 by a wrapper using \code{lapply}, it is through \code{S} that we apply this
 function.}
 
-\item{TE}{a vector of extinction times, usually an output of \code{bd.sim}.}
+\item{sim}{A \code{sim} object, usually an output of \code{bd.sim}.}
 
-\item{TS}{a vector of speciation times, usually an output of \code{bd.sim}.}
+\item{rr}{A sampling rate function. Can be created by \code{make.rate} for
+simplicity, but can be any time-varying function, or a constant.}
 
-\item{rr}{a sampling rate function. Can be created by \code{make.rate} for
-simplicity, but can be any time-varying function.}
-
-\item{tMax}{the maximum simulation time, used by \code{rexp.var}.}
+\item{tMax}{The maximum simulation time, used by \code{rexp.var}. A sampling
+time greater than \code{tMax} would mean the occurrence is sampled after the
+present, so for consistency we require this argument. This is also required
+to ensure time follows the correct direction both in the Poisson process and
+in the return.}
 }
 \value{
-a list of occurrences for that species.
+A list of occurrences for that species.
 }
 \description{
-\code{sample} takes a species number, a vector of speciation and extinction 
-times, a sampling rate and a maximum time for simulation and returns a list
-of occurrence times for each species.
+Generates a list of occurrence times for a species in a simulation using a
+constant or function of absolute time as a rate for a Poisson process. For
+sampling of more than one species and/or taking into account species age
+instead of absolute time, see \code{sample.clade} and \code{sample.adpp}.
+Note that while the Poisson process occurs in forward time, we return (both in
+birth-death functions and here) results in backwards time, so that time is
+inverted using \code{tMax} both at the beginning and end of \code{sample}.
 }
 \examples{
 
@@ -55,7 +61,7 @@ plot(x = t, y = rev(r(t)), main="Simulated preservation", type = "l",
      xlim = c(10, sim$TE[1]))
 
 # sample
-occs <- sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
+occs <- sample(S = 1, sim = sim, rr = r, tMax = 10)
 
 # check histogram
 hist(occs,
@@ -95,7 +101,7 @@ plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
      xlim = c(10, sim$TE[1]))
 
 # sample
-occs <- sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
+occs <- sample(S = 1, sim = sim, rr = r, tMax = 10)
 
 # check histogram
 hist(occs,
@@ -132,7 +138,7 @@ plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
      xlim = c(10, sim$TE[1]))
 
 # sample
-occs <- sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
+occs <- sample(S = 1, sim = sim, rr = r, tMax = 10)
 
 # check histogram
 hist(occs,
@@ -169,7 +175,7 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
        xlim = c(10, sim$TE[1]))
   
   # sample
-  occs <- sample(S = 1, TS = sim$TS[1], TE = sim$TE[1], rr = r, tMax = 10)
+  occs <- sample(S = 1, sim = sim, rr = r, tMax = 10)
   
   # check histogram
   hist(occs,
@@ -179,5 +185,5 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
 
 }
 \author{
-written by Bruno do Rosario Petrucci and Matheus Januario.
+Bruno do Rosario Petrucci and Matheus Januario.
 }
