@@ -4,7 +4,7 @@
 \alias{var.rate.div}
 \title{Expected diversity for general exponential rates}
 \usage{
-var.rate.div(ff, n0 = 1, t, envF = NULL, fShifts = NULL)
+var.rate.div(ff, n0 = 1, t, tMax = NULL, envF = NULL, fShifts = NULL)
 }
 \arguments{
 \item{ff}{A rate for the exponential distribution that can be any function of
@@ -26,15 +26,18 @@ extinction is \code{0}).}
 
 \item{t}{A time vector over which to consider the distribution.}
 
+\item{tMax}{A number corresponding to the maximum simulation time.
+Needed to ensure \code{fShifts} runs the correct way.}
+
 \item{envF}{A two dimensional matrix with time as the first column and the
 desired environmental variable as the second. Note that supplying a function 
-with one argument and a non-NULL \code{envF}, and vice versa, will return an 
-error.}
+with one argument and a non-\code{NULL} \code{envF}, and vice versa, will 
+return an error.}
 
 \item{fShifts}{Vector of rate shifts. First element must be the starting
 time for the simulation (\code{0} or \code{tMax}). It must have the same length 
-as \code{pp}. Note that \code{c(0, x, tMax)} is equivalent to
-\code{c(tMax, tMax - x, 0)} for the purpose of \code{make.rate}.}
+as \code{pp}. \code{c(0, x, tMax)} is equivalent to \code{c(tMax, tMax - x, 0)}
+for the purposes of \code{make.rate}.}
 }
 \value{
 A vector of the expected number of species per time point supplied
@@ -71,7 +74,7 @@ plot(t, div, type = 'l')
 ###
 # something a bit more complex: a linear rate
 ff <- function(t) {
-  return(0.01*t)
+ return(0.01*t)
 }
 
 # visualize the rate
@@ -87,17 +90,17 @@ plot(t, div, type = 'l')
 
 # we can create speciation...
 pp <- function(t) {
-  return(-0.01*t + 0.2)
+ return(-0.01*t + 0.2)
 }
 
 # ...and extinction...
 qq <- function(t) {
-  return(0.01*t)
+ return(0.01*t)
 }
 
 # ...and code ff as diversification
 ff <- function(t) {
-  return(pp(t) - qq(t))
+ return(pp(t) - qq(t))
 }
 
 # visualize the rate
@@ -113,7 +116,7 @@ plot(t, div, type = 'l')
 
 # such as a sine
 ff <- function(t) {
-  return(sin(t)*0.5)
+ return(sin(t)*0.5)
 }
 
 # visualize the rate
@@ -127,9 +130,9 @@ plot(t, div, type = 'l')
 ###
 # we can use ifelse() to make a step function like this
 ff <- function(t) {
-  return(ifelse(t < 2, 0.1,
-                ifelse(t < 3, 0.3,
-                       ifelse(t < 5, -0.2, 0.05))))
+ return(ifelse(t < 2, 0.1,
+               ifelse(t < 3, 0.3,
+                      ifelse(t < 5, -0.2, 0.05))))
 }
 
 # change t so things are faster
@@ -158,11 +161,11 @@ ff <- c(0.1, 0.3, -0.2, 0.05)
 fShifts <- c(0, 2, 3, 5)
 
 # visualize the rate
-r <- make.rate(ff, fShifts = fShifts)
+r <- make.rate(ff, tMax = 10, fShifts = fShifts)
 plot(t, r(t),type = 'l')
 
 # get the diversity and plot it
-div <- var.rate.div(ff, t = t, fShifts = fShifts)
+div <- var.rate.div(ff, t = t, tMax = 10, fShifts = fShifts)
 plot(t, div, type = 'l')
 
 # note the delay in running var.rate.div using this method. integrating a step
@@ -179,55 +182,55 @@ plot(t, div, type = 'l')
 # RPANDA supplies us with some really useful environmental dataframes
 # to use as an example, let us try temperature
 if (requireNamespace("RPANDA", quietly = TRUE)) {
-  # get the temperature data
-  data(InfTemp, package = "RPANDA")
-  
-  # diversification
-  ff <- function(t, env) {
-    return(0.002*env)
-  }
-  
-  # visualize the rate
-  r <- make.rate(ff, envF = InfTemp)
-  plot(t, r(t), type = 'l')
-  
-  # get diversity and plot it
-  div <- var.rate.div(ff, t = t, envF = InfTemp)
-  plot(t, div, type = 'l')
-  
-  ###
-  # we can also have a function that depends on both time AND temperature
-  
-  # diversification
-  ff <- function(t, env) {
-    return(0.03 * env - 0.01 * t)
-  }
-  
-  # visualize the rate
-  r <- make.rate(ff, envF = InfTemp)
-  plot(t, r(t), type = 'l')
-  
-  # get diversity and plot it
-  div <- var.rate.div(ff, t = t, envF = InfTemp)
-  plot(t, div, type = 'l')
-  
-  ###
-  # as mentioned above, we could also use ifelse() to construct a step function
-  # that is modulated by temperature
-  
-  # diversification
-  ff <- function(t, env) {
-    return(ifelse(t < 2, 0.1 + 0.01*env,
-                  ifelse(t < 5, 0.2 - 0.005*env,
-                         ifelse(t < 8, 0.1 + 0.005*env, 0))))
-  }
-  
-  # visualize the rate
-  r <- make.rate(ff, envF = InfTemp)
-  plot(t, r(t), type = 'l')
-  
-  div <- var.rate.div(ff, t = t, envF = InfTemp)
-  plot(t, div, type = 'l')
+ # get the temperature data
+ data(InfTemp, package = "RPANDA")
+ 
+ # diversification
+ ff <- function(t, env) {
+   return(0.002*env)
+ }
+ 
+ # visualize the rate
+ r <- make.rate(ff, envF = InfTemp)
+ plot(t, r(t), type = 'l')
+ 
+ # get diversity and plot it
+ div <- var.rate.div(ff, t = t, envF = InfTemp)
+ plot(t, div, type = 'l')
+ 
+ ###
+ # we can also have a function that depends on both time AND temperature
+ 
+ # diversification
+ ff <- function(t, env) {
+   return(0.03 * env - 0.01 * t)
+ }
+ 
+ # visualize the rate
+ r <- make.rate(ff, envF = InfTemp)
+ plot(t, r(t), type = 'l')
+ 
+ # get diversity and plot it
+ div <- var.rate.div(ff, t = t, envF = InfTemp)
+ plot(t, div, type = 'l')
+ 
+ ###
+ # as mentioned above, we could also use ifelse() to construct a step function
+ # that is modulated by temperature
+ 
+ # diversification
+ ff <- function(t, env) {
+   return(ifelse(t < 2, 0.1 + 0.01*env,
+                 ifelse(t < 5, 0.2 - 0.005*env,
+                        ifelse(t < 8, 0.1 + 0.005*env, 0))))
+ }
+ 
+ # visualize the rate
+ r <- make.rate(ff, envF = InfTemp)
+ plot(t, r(t), type = 'l')
+ 
+ div <- var.rate.div(ff, t = t, envF = InfTemp)
+ plot(t, div, type = 'l')
 }
 
 }

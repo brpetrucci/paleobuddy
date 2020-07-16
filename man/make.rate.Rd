@@ -4,22 +4,22 @@
 \alias{make.rate}
 \title{Create a flexible rate for birth-death or sampling simulations}
 \usage{
-make.rate(ff, tMax, envF = NULL, fShifts = NULL)
+make.rate(ff, tMax = NULL, envF = NULL, fShifts = NULL)
 }
 \arguments{
 \item{ff}{The baseline function with which to make the rate.
 It can be a
 
 \describe{
-\item{\code{Constant}}{For constant birth-death rates}
+\item{\code{Constant}}{For constant birth-death rates.}
 
 \item{\code{Function of time}}{For rates that vary with time. Note that this
 can be any function of time, but one should not supply a function that
 depends on more than one variable without an accompanying \code{envF} -
-that will result in an error}
+that will result in an error.}
 
 \item{\code{Vector of rates}}{To create step function rates. Note this must
-be accompanied by a corresponding vector of shifts \code{fShifts}}}}
+be accompanied by a corresponding vector of shifts \code{fShifts}.}}}
 
 \item{tMax}{A number corresponding to the maximum simulation time.
 Needed to ensure \code{fShifts} runs the correct way.}
@@ -125,9 +125,10 @@ ff <- c(0.1, 0.2, 0.3, 0.2)
 
 # vector of rate shifts
 fShifts <- c(0, 10, 20, 35)
+# this could be c(50, 40, 30, 15) for equivalent results
 
 # make the rate
-r <- make.rate(ff, fShifts = fShifts)
+r <- make.rate(ff, tMax = 50, fShifts = fShifts)
 
 # plot it
 plot(t, r(t),type = 'l')

@@ -36,14 +36,14 @@ total number of species generated lies within that interval.}
 A list of vectors, as follows
 
 \describe{
-\item{\code{TE}}{List of extinction times, with -0.01 as the time of
+\item{\code{TE}}{List of extinction times, with \code{-0.01} as the time of
 extinction for extant species.}
 
-\item{\code{TS}}{List of speciation times, with tMax+0.01 as the time of
+\item{\code{TS}}{List of speciation times, with \code{tMax+0.01} as the time of
 speciation for species that started the simulation.}
 
 \item{\code{PAR}}{List of parents. Species that started the simulation have
-NA, while species that were generated during the simulation have their
+\code{NA}, while species that were generated during the simulation have their
 parent's number. Species are numbered as they are born.}
 
 \item{\code{EXTANT}}{List of booleans representing whether each species is
@@ -54,10 +54,11 @@ Simulates a species birth-death process with constant rates for any number
 of starting species. Returns an object containing lists of speciation times,
 extinction times, parents and status (extant or not). Allows for constraining
 on the number of species at the end of the simulation, either total or extant.
+Returns \code{NA} and sends a warning if it cannot find a simulation with the
+desired number of species after \code{100000} tries.
 Note that while time runs from \code{0} to \code{tmax} on the function itself,
 it runs from \code{tmax} to \code{0} on the lists returned to conform with the
-literature. Returns \code{NA} and sends a warning if it cannot find a
-simulation with the desired number of species after \code{100000} tries.
+literature.
 }
 \examples{
 
@@ -134,7 +135,8 @@ sim <- bd.sim.constant(n0, p, q, tMax)
 
 # note nFinal has to be sensible
 \dontrun{
-# this would return an error
+# this would return a warning, since it is virtually impossible to get 100
+# species at a process with diversification rate -0.09 starting at n0 = 1
 sim <- bd.sim.constant(1, pp = 0.01, qq = 1, tMax = 100, nFinal = c(100, Inf))
 }
 

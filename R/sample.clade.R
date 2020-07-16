@@ -1,14 +1,17 @@
 #' General rate species sampling
 #' 
 #' Generates a data frame containing either true occurrence times or time ranges
-#' for each of the species specified using a Poisson process. Allows the Poisson
+#' for each of the desired species using a Poisson process. Allows the Poisson
 #' rate to be a constant, a vector of numbers or a function of time, and allows 
 #' as an optional parameter a distribution representing the expected occurrence 
 #' number over a species duration (in which case average rate must be constant). 
 #' Allows for further flexibility in (non-age dependent) rates by a shift times
 #' vector and environmental matrix parameters. Optionally takes a list of time
 #' bins representing geologic periods, so that if the user wishes occurrence 
-#' times can be presented as a range instead of true points.
+#' times can be presented as a range instead of true points. Finally, allows for
+#' an optional argument - the maximum of the distribution - that can make the
+#' simulation faster, and for extra arguments the age-dependent preservation
+#' function may take.
 #'
 #' @param S A list species numbers to be sampled. Could be only a subset of the
 #' species if the user wishes. The default is all species in \code{sim}.
@@ -16,11 +19,6 @@
 #' @param sim A simulation, usually the output of \code{bd.sim}.
 #'
 #' @param bins A vector of time intervals corresponding to geological time ranges.
-#' If \code{returnTrue} is false, \code{sample.clade} returns the occurrence
-#' times as ranges. In this way, we simulate the granularity in real world fossil
-#' records. If \code{returnTrue} is true, this is ignored. Note that failing to
-#' supply a \code{bins} vector when \code{returnTRUE == FALSE} will result in an
-#' error.
 #'
 #' @param rr A sampling rate function. May be a constant, a time-dependent
 #' function, a function dependent on time and environment, or a vector of
@@ -33,12 +31,12 @@
 #' @param envRR A matrix containing time points and values of an environmental
 #' variable, like temperature, for each time point. This will be used to create
 #' a sampling rate, so \code{rr} must be a function of time and said variable
-#' if \code{envRR} is not NULL.
+#' if \code{envRR} is not \code{NULL}.
 #'
 #' @param rShifts Vector of rate shifts. First element must be the starting
 #' time for the simulation (\code{0} or \code{tMax}). It must have the same length 
-#' as \code{pp}. Note that \code{c(0, x, tMax)} is equivalent to
-#' \code{c(tMax, tMax - x, 0)} for the purpose of \code{make.rate}.
+#' as \code{pp}. \code{c(0, x, tMax)} is equivalent to \code{c(tMax, tMax - x, 0)}
+#' for the purposes of \code{make.rate}.
 #'
 #' Note: using this method for step-function rates is currently slower than using
 #' \code{ifelse}.
@@ -47,6 +45,12 @@
 #' true times of sampling. If set to \code{FALSE}, we call \code{binner} and the
 #' the returned data frame will contain ranges of sampling times based on 
 #' \code{bins}.
+#' 
+#' If \code{returnTrue} is false, \code{sample.clade} returns the occurrence
+#' times as ranges. In this way, we simulate the granularity in real world fossil
+#' records. If \code{returnTrue} is true, this is ignored. If \code{bins} is not
+#' supplied and \code{returnTrue == FALSE}, the default is 
+#' \code{seq(tMax, 0, 0.1)}.
 #'
 #' @param dFun A density function representing the age-dependent
 #' preservation model. It must be a density function, and consequently
@@ -85,10 +89,6 @@
 #' @author Matheus Januario and Bruno do Rosario Petrucci.
 #'
 #' @examples
-#'
-#' # in all the coming examples we show histograms for visualization, but note
-#' # they might not look exactly as intended given the low sample size. See
-#' # vignettes for more thorough testing
 #' 
 #' ###
 #' # we can start with a constant case
@@ -144,7 +144,7 @@
 #' 
 #' # sampling rate
 #' r <- function(t) {
-#'   return(3 - 0.25*t)
+#'   return(3 - 0.15*t)
 #' }
 #' 
 #' # the resolution of the fossil dataset:
@@ -455,7 +455,7 @@
 #'        xlab = "Time (My)", probability = TRUE)
 #'   
 #'   # expected curve
-#'   curve(dTRImod2(x, e=sim$TE[sp], s=sim$TS[sp], sp=sp),from = sim$TE[sp],
+#'   curve(dTRImod2(x, e=sim$TE[sp], s=sim$TS[sp], sp = sp),from = sim$TE[sp],
 #'         to = sim$TS[sp], add=TRUE, col="red", n = 100)
 #' }
 #' # we provide curves for comparison here, but remember the low sample sizes 
@@ -468,7 +468,7 @@
 
 sample.clade <- function(S = NULL, sim, rr, tMax, envRR = NULL, rShifts = NULL,
                          returnTrue = FALSE, bins = NULL, 
-                         dFun = NULL, dFunMax = NULL,...) {
+                         dFun = NULL, dFunMax = NULL, ...) {
   # make S all species if it is NULL
   if (is.null(S)) {
     S = 1:length(sim$TE)
@@ -483,10 +483,10 @@ sample.clade <- function(S = NULL, sim, rr, tMax, envRR = NULL, rShifts = NULL,
       stop("ADPP cannot be used with time-varing preservation rates")
     }
   }
-  
-  # check if we have bins if we need them
-  if (!returnTrue & is.null(bins)) {
-    stop("sample.clade needs a bins vector to returned binned samples")
+
+  # set a default bin
+  if (is.null(bins) & !returnTrue) {
+    bins <- seq(tMax, 0, 0.1)
   }
 
   # adjusting bins
@@ -538,8 +538,8 @@ sample.clade <- function(S = NULL, sim, rr, tMax, envRR = NULL, rShifts = NULL,
           # make a row of the data frame
           aux <- data.frame(Species = i, 
                             Extant = NA, 
-                            MaxT = rep(bins[k], times = binned_occs[k]), 
-                            MinT = bins[k + 1])
+                            MinT = bins[k + 1],
+                            MaxT = rep(bins[k], times = binned_occs[k]))
           
           # add row to data frame
           res <- rbind(res, aux)

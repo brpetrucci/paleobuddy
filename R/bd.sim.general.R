@@ -25,7 +25,7 @@
 #' @param qq Similar to above, but for the extinction rate.
 #' 
 #' Note: this function is meant to be called by \code{bd.sim}, so it neither
-#' allows for as much flexibility, nor call \code{make.rate}. If the user wishes
+#' allows for as much flexibility, nor calls \code{make.rate}. If the user wishes
 #' to use \code{bd.sim.general} with environmental or step-function rates, they
 #' can generate the rate with \code{make.rate} and supply it to the function.
 #'
@@ -35,11 +35,16 @@
 #'
 #' @param pShape Shape parameter for the Weibull distribution for age-dependent
 #' speciation. Default is \code{NULL}, where \code{pp} will be considered a
-#' time-dependent exponential rate. For \code{pShape != NULL}, \code{pp} will
-#' be considered a scale, and \code{rexp.var} will draw a Weibull distribution
-#' instead.
+#' (possibly) time-dependent exponential rate. For \code{pShape != NULL}, 
+#' \code{pp} will be considered a scale, and \code{rexp.var} will draw a Weibull 
+#' distribution instead. 
 #'
-#' @param qShape Similar as above, but for the extinction rate.
+#' @param qShape similar to above, but for the extinction rate.
+#' 
+#' Note: Time-varying shape is implemented, so one could have \code{pShape} or
+#' \code{qShape} be a function of time. It is not thoroughly tested, however, so 
+#' it may be prudent to wait for a future release where this feature is well 
+#' established.
 #' 
 #' @param nFinal An interval of acceptable number of species at the end of the
 #' simulation. If not supplied, default is \code{c(0, Inf)}, so that any number
@@ -72,7 +77,7 @@
 #' of speciation for species that started the simulation.}
 #'
 #' \item{\code{PAR}}{List of parents. Species that started the simulation have
-#' NA, while species that were generated during the simulation have their
+#' \code{NA}, while species that were generated during the simulation have their
 #' parent's number. Species are numbered as they are born.}
 #'
 #' \item{\code{EXTANT}}{List of booleans representing whether each species is
@@ -120,7 +125,7 @@
 #' 
 #' # speciation
 #' p <- function(t) {
-#'   return(0.05 + 0.005*t)
+#'   return(0.03 + 0.005*t)
 #' }
 #' 
 #' # extinction
@@ -136,8 +141,7 @@
 #' }
 #' 
 #' ###
-#' # we can also create a step function. Keep in mind this is a slower way than by
-#' # creating step functions using ifelse()
+#' # we can also create a step function
 #' 
 #' # initial number of species
 #' n0 <- 1
@@ -151,14 +155,14 @@
 #' }
 #' 
 #' # list of extinction rates
-#' qList <- c(0.05, 0.08, 0.11)
+#' qList <- c(0.06, 0.09, 0.11)
 #' 
 #' # list of shift times. Note qShifts could be c(40, 20, 10) for
 #' # identical results
 #' qShifts <- c(0, 15, 25)
 #' 
 #' # let us take a look at how make.rate will make it a step function
-#' q <- make.rate(qList, fShifts = qShifts)
+#' q <- make.rate(qList, tMax = tMax, fShifts = qShifts)
 #' 
 #' # and plot it
 #' plot(seq(0, tMax, 0.1), q(seq(0, tMax, 0.1)), type = 'l',
@@ -167,15 +171,14 @@
 #' 
 #' # a different way to define the same extinction function
 #' q <- function(t) {
-#'   ifelse(t < 15, 0.05,
-#'          ifelse(t < 25, 0.08, 0.11))
+#'   ifelse(t < 15, 0.06,
+#'          ifelse(t < 25, 0.09, 0.11))
 #' }
 #' 
 #' # run the simulation
 #' sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
-#' # equivalent:
-#' # sim <- bd.sim.general(n0, p, qList, tMax, qShifts = qShifts)
-#' # this is, however, much slower
+#' # we could instead have used q made with make.rate
+#' # that is, however, much slower
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -256,7 +259,7 @@
 #'  data(InfTemp, package="RPANDA")
 #'
 #'  # speciation
-#'  p <- make.rate(p_t, tMax, envF = InfTemp)
+#'  p <- make.rate(p_t, envF = InfTemp)
 #'
 #'  # run simulations
 #'  sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
@@ -270,7 +273,8 @@
 #' 
 #' # note nFinal has to be sensible
 #' \dontrun{
-#' # this would return an error
+#' # this would return a warning, since it is virtually impossible to get 100
+#' # species at a process with diversification rate -0.09 starting at n0 = 1
 #' sim <- bd.sim.general(1, pp = 0.01, qq = 1, tMax = 100, nFinal = c(100, Inf))
 #' }
 #'

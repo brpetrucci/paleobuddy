@@ -2,13 +2,13 @@
 #'
 #' Finds and separates a \code{sim} object into \code{sim} objects each with a 
 #' mother species and its descendants. Returns by default the list of \code{sim}
-#' objects descended from each species with a \code{NA} parent in the original
+#' objects descended from each species with an \code{NA} parent in the original
 #' input. Allows for the user to input a list of species to be the mother of each
 #' resulting member of the returning list instead. Returns for each clade a list
 #' with the original identity of member species as well.
 #'
-#' @param sim A simulation from the \code{bd.sim} function. The function accepts
-#' simulations with any number of starting species.
+#' @param sim A simulation, usually a return from the \code{bd.sim} function. The 
+#' function accepts simulations with any number of starting species.
 #'
 #' @param S A list of species in \code{sim}. If not supplied, \code{S} will be
 #' the starting species in the simulation (i.e. those for which the parent is

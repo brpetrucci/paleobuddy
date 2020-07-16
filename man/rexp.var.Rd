@@ -11,7 +11,7 @@ rexp.var(
   tMax = Inf,
   shape = NULL,
   TS = NULL,
-  fast = TRUE
+  fast = FALSE
 )
 }
 \arguments{
@@ -39,7 +39,7 @@ a finite value.}
 distribution is taken to be a weibull. Otherwise, it is considered an
 exponential.
 
-Notes: Time-varying shape is implemented, so one could have \code{shape} be a
+Note: Time-varying shape is implemented, so one could have \code{shape} be a
 function of time. It is not thoroughly tested, however, so it may be prudent to
 wait for a future release where this feature is well established.}
 
@@ -58,8 +58,8 @@ with the given parameters.
 \description{
 Generates a waiting time following an exponential or Weibull distribution with
 constant or varying rates. Allows for an optional shape parameter, in which 
-case \code{lambda} will be taken as a scale. Requires information on the
-current time, to consider only rates starting from then, and the speciation
+case \code{lambda} will be taken as a Weibull scale. Requires information on
+the current time, to consider only rates starting from then, and the speciation
 time, optionally, in case shape is provided and the process is age-dependent.
 Allows for customization on the possibility of throwing away a waiting time
 higher than \code{tMax}, and therefore takes that time as a parameter.
@@ -157,7 +157,7 @@ t <- rexp.var(n = 1, lambda, now, tMax,
 t
 
 ###
-# shape = 1, the Weibull is an exponential, we could do better
+# when shape = 1, the Weibull is an exponential, we could do better
 
 # scale
 lambda <- 10

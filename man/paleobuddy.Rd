@@ -45,10 +45,10 @@ package. One can then use functions such as \code{ape::plot.phylo} and
 \code{ape::drop.fossil} to plot the phylogeny or analyze the molecular
 phylogeny. Since APE is not required for any function in the package, it is
 a suggested but not imported package. Note that, as above, the function
-\code{find.lineages} allows users to separate clades mother species of choice,
-the results of which can be passed to \code{make.phylo} to generate separate
-phylogenies for each clade. See \code{?make.phylo} and \code{?find.lineages}
-for more information.
+\code{find.lineages} allows users to separate clades with mother species of 
+choice, the results of which can be passed to \code{make.phylo} to generate 
+separate phylogenies for each clade. See \code{?make.phylo} and 
+\code{?find.lineages} for more information.
 }
 
 \section{Utility functions}{
@@ -63,7 +63,7 @@ with varying rates for any time period, and is useful when testing birth-death
 simulation functions. Finally, \code{binner} simply returns the number of 
 fossil occurrences in each time bin for an occurrence and a bins vector
 supplied by the user. This is mostly for use in the \code{sample.clade}
-function. See \code{?rexp.var}, \code{?var.rate.div} and \code{binner} for
+function. See \code{?rexp.var}, \code{?var.rate.div} and \code{?binner} for
 more information.
 }
 
@@ -111,7 +111,6 @@ samp <- sample.clade(sim = sim, rr = 0.75, tMax = 10,
 
 # take a look at the resulting data frame
 samp
-
 
 # we can separate it in three monophyletic clades
 clades <- find.lineages(sim = sim)

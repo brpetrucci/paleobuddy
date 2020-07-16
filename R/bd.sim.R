@@ -24,7 +24,7 @@
 #' a function of time and an environmental variable, or a vector of rates to be
 #' accompanied by a vector of rate shifts \code{pShifts}.
 #'
-#' @param qq Similar as above, but for the extinction rate.
+#' @param qq similar to above, but for the extinction rate.
 #'
 #' Note: \code{pp} and \code{qq} must always be greater than 0
 #'
@@ -34,28 +34,33 @@
 #'
 #' @param pShape Shape parameter for the Weibull distribution for age-dependent
 #' speciation. Default is \code{NULL}, where \code{pp} will be considered a
-#' time-dependent exponential rate. For \code{pShape != NULL}, \code{pp} will
-#' be considered a scale, and \code{rexp.var} will draw a Weibull distribution
-#' instead.
+#' (possibly) time-dependent exponential rate. For \code{pShape != NULL}, 
+#' \code{pp} will be considered a scale, and \code{rexp.var} will draw a Weibull 
+#' distribution instead. Note \code{pp} may still be time-dependent.
 #'
-#' @param qShape Similar as above, but for the extinction rate.
+#' @param qShape similar to above, but for the extinction rate.
+#' 
+#' Note: Time-varying shape is implemented, so one could have \code{pShape} or
+#' \code{qShape} be a function of time. It is not thoroughly tested, however, so 
+#' it may be prudent to wait for a future release where this feature is well 
+#' established.
 #'
 #' @param envPP A matrix representing an environmental variable (time, CO2, etc)
 #' with time. The first column must be time, second column the values of the 
 #' variable. This will be used to create a speciation rate using \code{make.rate},
 #' so \code{pp} must be a function of time and another variable.
 #'
-#' @param envQQ Similar as above, but for the extinction rate.
+#' @param envQQ similar to above, but for the extinction rate.
 #'
-#' @param pShifts Vector of rate shifts. First element must be the sstarting
+#' @param pShifts Vector of rate shifts. First element must be the starting
 #' time for the simulation (\code{0} or \code{tMax}). It must have the same length 
-#' as \code{pp}. Note that \code{c(0, x, tMax)} is equivalent to
-#' \code{c(tMax, tMax - x, 0)} for the purpose of \code{make.rate}.
+#' as \code{pp}. \code{c(0, x, tMax)} is equivalent to \code{c(tMax, tMax - x, 0)}
+#' for the purposes of \code{make.rate}.
+#'
+#' @param qShifts similar to above, but for the extinction rate.
 #' 
 #' Note that using this  method for step-function rates is currently slower than using
 #' \code{ifelse}.
-#'
-#' @param qShifts Similar as above, but for the extinction rate.
 #' 
 #' @param nFinal An interval of acceptable number of species at the end of the
 #' simulation. If not supplied, default is \code{c(0, Inf)}, so that any number
@@ -78,21 +83,21 @@
 #' 
 #' @param trueExt Used for \code{bd.sim.general}. When \code{TRUE}, time of 
 #' extinction of extant species will be the true time, otherwise it will be 
-#' tMax+0.01. Need to be \code{TRUE} when testing age-dependent 
+#' \code{tMax+0.01}. Need to be \code{TRUE} when testing age-dependent 
 #' extinction.
 #'
 #' @return The return list of either \code{bd.sim.constant} or
 #' \code{bd.sim.general}, which have the same elements, as follows
 #'
 #' \describe{
-#' \item{\code{TE}}{List of extinction times, with -0.01 as the time of
+#' \item{\code{TE}}{List of extinction times, with \code{-0.01} as the time of
 #' extinction for extant species.}
 #'
-#' \item{\code{TS}}{List of speciation times, with tMax+0.01 as the time of
+#' \item{\code{TS}}{List of speciation times, with \code{tMax+0.01} as the time of
 #' speciation for species that started the simulation.}
 #'
 #' \item{\code{PAR}}{List of parents. Species that started the simulation have
-#' NA, while species that were generated during the simulation have their
+#' \code{NA}, while species that were generated during the simulation have their
 #' parent's number. Species are numbered as they are born.}
 #'
 #' \item{\code{EXTANT}}{List of booleans representing whether each species is
@@ -125,7 +130,6 @@
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   # full phylogeny
 #'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
@@ -141,7 +145,7 @@
 #' 
 #' # speciation rate
 #' p <- function(t) {
-#'   return(0.05 + 0.005*t)
+#'   return(0.03 + 0.005*t)
 #' }
 #' 
 #' # extinction rate
@@ -166,7 +170,7 @@
 #' qShifts <- c(0, 20, 35)
 #' 
 #' # let us take a look at how make.rate will make it a step function
-#' q <- make.rate(qList, fShifts = qShifts)
+#' q <- make.rate(qList, tMax = tMax, fShifts = qShifts)
 #' 
 #' # and plot it
 #' plot(seq(0, tMax, 0.1), q(seq(0, tMax, 0.1)), type = 'l',
@@ -194,9 +198,8 @@
 #' 
 #' # run the simulation
 #' sim <- bd.sim(n0, p, q, tMax, nFinal = c(2, Inf))
-#' # equivalent:
-#' # sim <- bd.sim.general(n0, p, qList, tMax, qShifts = qShifts)
-#' # this is, however, much slower
+#' # we could instead have used q made with make.rate
+#' # that is, however, much slower
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -341,7 +344,8 @@
 #' 
 #' # note nFinal has to be sensible
 #' \dontrun{
-#' # this would return an error
+#' # this would return a warning, since it is virtually impossible to get 100
+#' # species at a process with diversification rate -0.09 starting at n0 = 1
 #' sim <- bd.sim(1, pp = 0.01, qq = 1, tMax = 100, nFinal = c(100, Inf))
 #' }
 #' 

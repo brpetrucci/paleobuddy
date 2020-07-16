@@ -2,7 +2,7 @@
 % Please edit documentation in R/sample.R
 \name{sample}
 \alias{sample}
-\title{Constant and non-constant rate species sampling}
+\title{Constant and time-dependent rate species sampling}
 \usage{
 sample(S, sim, rr, tMax)
 }
@@ -27,7 +27,7 @@ A list of occurrences for that species.
 }
 \description{
 Generates a list of occurrence times for a species in a simulation using a
-constant or function of absolute time as a rate for a Poisson process. For
+constant or a function of absolute time as a rate for a Poisson process. For
 sampling of more than one species and/or taking into account species age
 instead of absolute time, see \code{sample.clade} and \code{sample.adpp}.
 Note that while the Poisson process occurs in forward time, we return (both in
@@ -53,7 +53,7 @@ r <- function(t) {
 }
 
 # time
-t<-seq(0, 10, by = 0.1)
+t <- seq(0, 10, by = 0.1)
 
 # visualizing from the past to the present
 plot(x = t, y = rev(r(t)), main="Simulated preservation", type = "l",
@@ -181,6 +181,7 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   hist(occs,
        xlim = c(10, sim$TE[1]),
        xlab = "Mya")
+  lines(t, rev(r(t)))
 }
 
 }

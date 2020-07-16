@@ -11,15 +11,15 @@
 #' It can be a
 #'
 #' \describe{
-#' \item{\code{Constant}}{For constant birth-death rates}
+#' \item{\code{Constant}}{For constant birth-death rates.}
 #'
 #' \item{\code{Function of time}}{For rates that vary with time. Note that this
 #' can be any function of time, but one should not supply a function that
 #' depends on more than one variable without an accompanying \code{envF} -
-#' that will result in an error}
+#' that will result in an error.}
 #'
 #' \item{\code{Vector of rates}}{To create step function rates. Note this must
-#' be accompanied by a corresponding vector of shifts \code{fShifts}}}
+#' be accompanied by a corresponding vector of shifts \code{fShifts}.}}
 #'
 #' @param tMax A number corresponding to the maximum simulation time.
 #' Needed to ensure \code{fShifts} runs the correct way.
@@ -118,9 +118,10 @@
 #' 
 #' # vector of rate shifts
 #' fShifts <- c(0, 10, 20, 35)
+#' # this could be c(50, 40, 30, 15) for equivalent results
 #' 
 #' # make the rate
-#' r <- make.rate(ff, fShifts = fShifts)
+#' r <- make.rate(ff, tMax = 50, fShifts = fShifts)
 #' 
 #' # plot it
 #' plot(t, r(t),type = 'l')
@@ -187,7 +188,7 @@
 #' @rdname make.rate
 #' @export
 
-make.rate <- function(ff, tMax, envF = NULL, fShifts = NULL) {
+make.rate <- function(ff, tMax = NULL, envF = NULL, fShifts = NULL) {
   # use this to check for length and how many arguments
   nargs = ifelse(is.numeric(ff), length(ff), length(formals(ff)))
 
@@ -256,6 +257,10 @@ make.rate <- function(ff, tMax, envF = NULL, fShifts = NULL) {
 
   # check if there are shifts - i.e. if the rate is a step function
   if (!is.null(fShifts)) {
+    # check that we have tMax in case we want to invert time
+    if (is.null(tMax)) {
+      stop("need tMax for creating step functions")
+    }
 
     fList <- ff
 

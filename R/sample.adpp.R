@@ -1,11 +1,12 @@
 #' Age-dependent rate species sampling
 #'
-#' Generates a list of occurrence times for each of the species specified using a
+#' Generates a list of occurrence times for each of the desired species using a
 #' Poisson process with constant average rate and occurrences distributed based on
 #' a model of species age. Allows for any distribution as the model of occurrences
 #' during a species life, given certain requirements (see below). Allows for an
 #' optional argument - the maximum of the distribution - that can make the
-#' simulation faster.
+#' simulation faster. Also allows for extra arguments the age-dependent
+#' preservation function may take.
 #'
 #' @param S A list species numbers to be sampled.
 #'
@@ -393,7 +394,7 @@
 #'   mid <- par[sp] + par1[sp]
 #'   
 #'   # expected curve
-#'   curve(dTRImod2(x, e = sim$TE[sp], s = sim$TS[sp]), 10, 0, add = TRUE,
+#'   curve(dTRImod2(x, e = sim$TE[sp], s = sim$TS[sp], sp), 10, 0, add = TRUE,
 #'         col = "red", n = 100)
 #'   abline(v = mid, col = "red")
 #' }

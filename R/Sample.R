@@ -1,7 +1,7 @@
-#' Constant and non-constant rate species sampling
+#' Constant and time-dependent rate species sampling
 #' 
 #' Generates a list of occurrence times for a species in a simulation using a
-#' constant or function of absolute time as a rate for a Poisson process. For
+#' constant or a function of absolute time as a rate for a Poisson process. For
 #' sampling of more than one species and/or taking into account species age
 #' instead of absolute time, see \code{sample.clade} and \code{sample.adpp}.
 #' Note that while the Poisson process occurs in forward time, we return (both in
@@ -46,7 +46,7 @@
 #' }
 #' 
 #' # time
-#' t<-seq(0, 10, by = 0.1)
+#' t <- seq(0, 10, by = 0.1)
 #' 
 #' # visualizing from the past to the present
 #' plot(x = t, y = rev(r(t)), main="Simulated preservation", type = "l",
@@ -174,6 +174,7 @@
 #'   hist(occs,
 #'        xlim = c(10, sim$TE[1]),
 #'        xlab = "Mya")
+#'   lines(t, rev(r(t)))
 #' }
 #' 
 #' @name sample
