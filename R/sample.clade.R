@@ -116,7 +116,7 @@
 #' ids <- unique(dt$Species)
 #' 
 #' # approximate sampling time (since it is a range)
-#' mids <- (dt$MaxT - dt$MinT) + dt$MinT
+#' mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 #' 
 #' # for each species
 #' for (i in 1:length(ids)) {
@@ -159,7 +159,7 @@
 #' ids <- unique(dt$Species)
 #' 
 #' # approximate sampling time (since it is a range)
-#' mids <- (dt$MaxT - dt$MinT) + dt$MinT
+#' mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 #' 
 #' # for each species
 #' for (i in 1:length(ids)) {
@@ -210,7 +210,7 @@
 #' ids <- unique(dt$Species)
 #' 
 #' # approximate sampling time (since it is a range)
-#' mids <- (dt$MaxT - dt$MinT) + dt$MinT
+#' mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 #' 
 #' # for each species
 #' for (i in 1:length(ids)) {
@@ -267,7 +267,7 @@
 #'   ids <- unique(dt$Species)
 #'   
 #'   # approximate sampling time (since it is a range)
-#'   mids <- (dt$MaxT - dt$MinT) + dt$MinT
+#'   mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 #'   
 #'   # for each species
 #'   for (i in 1:length(ids)) {
@@ -350,7 +350,7 @@
 #' ids <- unique(dt$Species)
 #' 
 #' # approximate sampling time (since it is a range)
-#' mids <- (dt$MaxT - dt$MinT) + dt$MinT
+#' mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 #' 
 #' # for each species
 #' for (i in 1:length(ids)) {
@@ -441,7 +441,7 @@
 #' ids <- unique(dt$Species)
 #' 
 #' # approximate sampling time (since it is a range)
-#' mids <- (dt$MaxT - dt$MinT) + dt$MinT
+#' mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 #' 
 #' # for each species
 #' for (i in 1:length(ids)) {

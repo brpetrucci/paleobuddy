@@ -135,7 +135,7 @@ dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, bins = bins)
 ids <- unique(dt$Species)
 
 # approximate sampling time (since it is a range)
-mids <- (dt$MaxT - dt$MinT) + dt$MinT
+mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 
 # for each species
 for (i in 1:length(ids)) {
@@ -178,7 +178,7 @@ dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, bins = bins)
 ids <- unique(dt$Species)
 
 # approximate sampling time (since it is a range)
-mids <- (dt$MaxT - dt$MinT) + dt$MinT
+mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 
 # for each species
 for (i in 1:length(ids)) {
@@ -229,7 +229,7 @@ dt <- sample.clade(1:length(sim$TE), sim, rlist, rShifts = rShifts,
 ids <- unique(dt$Species)
 
 # approximate sampling time (since it is a range)
-mids <- (dt$MaxT - dt$MinT) + dt$MinT
+mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 
 # for each species
 for (i in 1:length(ids)) {
@@ -286,7 +286,7 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   ids <- unique(dt$Species)
   
   # approximate sampling time (since it is a range)
-  mids <- (dt$MaxT - dt$MinT) + dt$MinT
+  mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
   
   # for each species
   for (i in 1:length(ids)) {
@@ -369,7 +369,7 @@ dt <- sample.clade(1:length(sim$TE), sim, rr = 3, tMax = 10, bins = bins,
 ids <- unique(dt$Species)
 
 # approximate sampling time (since it is a range)
-mids <- (dt$MaxT - dt$MinT) + dt$MinT
+mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 
 # for each species
 for (i in 1:length(ids)) {
@@ -460,7 +460,7 @@ dt <- sample.clade(1:length(sim$TE), sim, rr = 4, tMax = 10, bins = bins,
 ids <- unique(dt$Species)
 
 # approximate sampling time (since it is a range)
-mids <- (dt$MaxT - dt$MinT) + dt$MinT
+mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 
 # for each species
 for (i in 1:length(ids)) {
