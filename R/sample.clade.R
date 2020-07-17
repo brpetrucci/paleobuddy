@@ -486,7 +486,7 @@ sample.clade <- function(S = NULL, sim, rr, tMax, envRR = NULL, rShifts = NULL,
 
   # set a default bin
   if (is.null(bins) & !returnTrue) {
-    bins <- seq(tMax, 0, 0.1)
+    bins <- seq(tMax, 0, -0.1)
   }
 
   # adjusting bins
@@ -498,7 +498,8 @@ sample.clade <- function(S = NULL, sim, rr, tMax, envRR = NULL, rShifts = NULL,
   # lineage's age)
   if (is.null(dFun)) { 
     # find occurrences times
-    pointEstimates <- lapply(S, sample, sim = sim, rr = rr, tMax = tMax)
+    pointEstimates <- lapply(S, sample.species, sim = sim, rr = rr, 
+                             tMax = tMax)
     
     # which species left no occurrences
     zeroOccs <- which(lapply(pointEstimates, length) == 0)

@@ -53,7 +53,7 @@ binnedSamp
 sim <- bd.sim(1, pp = 0.1, qq = 0.05, tMax = 15)
 
 # sample it
-sampled <- sample(S = 1, sim = sim, rr = 1, tMax = 15)
+sampled <- sample.species(S = 1, sim = sim, rr = 1, tMax = 15)
 
 # bins list
 bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
@@ -71,7 +71,7 @@ sim <- bd.sim(1, pp = function(t) {
 }, qq = 0.05, tMax = 20)
 
 # sample it
-sampled <- sample(S = 1, sim = sim, rr = 1, tMax = 15)
+sampled <- sample.species(S = 1, sim = sim, rr = 1, tMax = 15)
 
 # bins list
 bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)

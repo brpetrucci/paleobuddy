@@ -6,11 +6,12 @@
 #' instead of absolute time, see \code{sample.clade} and \code{sample.adpp}.
 #' Note that while the Poisson process occurs in forward time, we return (both in
 #' birth-death functions and here) results in backwards time, so that time is
-#' inverted using \code{tMax} both at the beginning and end of \code{sample}.
+#' inverted using \code{tMax} both at the beginning and end of 
+#' \code{sample.species}.
 #'
-#' @param S The species number to be sampled. Since \code{sample} will be called
-#' by a wrapper using \code{lapply}, it is through \code{S} that we apply this
-#' function.
+#' @param S The species number to be sampled. Since \code{sample.species} will be 
+#' called by a wrapper using \code{lapply}, it is through \code{S} that we apply
+#' this function.
 #'
 #' @param sim A \code{sim} object, usually an output of \code{bd.sim}.
 #'
@@ -54,7 +55,7 @@
 #'      xlim = c(10, sim$TE[1]))
 #' 
 #' # sample
-#' occs <- sample(S = 1, sim = sim, rr = r, tMax = 10)
+#' occs <- sample.species(S = 1, sim = sim, rr = r, tMax = 10)
 #' 
 #' # check histogram
 #' hist(occs,
@@ -94,7 +95,7 @@
 #'      xlim = c(10, sim$TE[1]))
 #' 
 #' # sample
-#' occs <- sample(S = 1, sim = sim, rr = r, tMax = 10)
+#' occs <- sample.species(S = 1, sim = sim, rr = r, tMax = 10)
 #' 
 #' # check histogram
 #' hist(occs,
@@ -131,7 +132,7 @@
 #'      xlim = c(10, sim$TE[1]))
 #' 
 #' # sample
-#' occs <- sample(S = 1, sim = sim, rr = r, tMax = 10)
+#' occs <- sample.species(S = 1, sim = sim, rr = r, tMax = 10)
 #' 
 #' # check histogram
 #' hist(occs,
@@ -168,7 +169,7 @@
 #'        xlim = c(10, sim$TE[1]))
 #'   
 #'   # sample
-#'   occs <- sample(S = 1, sim = sim, rr = r, tMax = 10)
+#'   occs <- sample.species(S = 1, sim = sim, rr = r, tMax = 10)
 #'   
 #'   # check histogram
 #'   hist(occs,
@@ -177,11 +178,11 @@
 #'   lines(t, rev(r(t)))
 #' }
 #' 
-#' @name sample
-#' @rdname sample
+#' @name sample.species
+#' @rdname sample.species
 #' @export
 
-sample<-function(S, sim, rr, tMax) {
+sample.species <- function(S, sim, rr, tMax) {
   # invert times since simulation goes from 0 to tMax
   TE <- tMax - sim$TE
   TS <- tMax - sim$TS
