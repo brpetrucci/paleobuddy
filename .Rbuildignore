@@ -1,0 +1,11 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.RData$
+^\.Rhistory$
+^\.gitignore$
+^LICENSE\.md$
+^cran-comments\.md$
+^\.travis\.yml$
+^\.Rprofile$
+^doc$
+^Meta$
