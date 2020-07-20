@@ -294,14 +294,14 @@ bd.sim.general <- function(n0, pp, qq, tMax,
   counter <- 1
   
   # if shape is not null, make scale a function to facilitate checking
-  if (!is.null(pShape)) {
+  if (!is.null(pShape) & is.numeric(pp)) {
     p <- pp
-    pp <- ifelse(is.numeric(p), Vectorize(function(t) p), p)
+    pp <- Vectorize(function(t) p)
   }
   
-  if (!is.null(qShape)) {
+  if (!is.null(qShape) & is.numeric(qq)) {
     q <- qq
-    qq <- ifelse(is.numeric(q), Vectorize(function(t) q), q)
+    qq <- Vectorize(function(t) q)
   }
   
   while (len < nFinal[1] | len > nFinal[2]) {

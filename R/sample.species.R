@@ -196,9 +196,11 @@ sample.species <- function(S, sim, rr, tMax) {
   End<-ifelse(TE[S] > tMax, tMax, TE[S])
 
   # make rr a function if it isn't
-  r <- rr
-  rr <- ifelse(is.numeric(r), Vectorize(function(t) r), r)
-
+  if (is.numeric(rr)) {
+    r <- rr
+    rr <- Vectorize(function(t) r)
+  }
+  
   # initialize vector
   sampled <- c()
 

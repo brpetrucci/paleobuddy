@@ -271,14 +271,18 @@ rexp.var<-function(n = 1, lambda, now = 0, tMax = Inf, shape = NULL, TS = NULL, 
   AD <- FALSE
 
   # make lambda a function if it is a constant
-  l <- lambda
-  lambda <- ifelse(is.numeric(l), Vectorize(function(t) l), l)
-
+  if (is.numeric(lambda)) {
+    l <- lambda
+    lambda <- Vectorize(function(t) l)
+  }
+  
   # same for shape
   if (!is.null(shape)) {
     AD <- TRUE
-    s <- shape
-    shape <- ifelse(is.numeric(s), Vectorize(function(t) s), s)
+    if (is.numeric(shape)) {
+      s <- shape
+      shape <- Vectorize(function(t) s)
+    }
   }
 
   # if tMax is Inf, need another upper for uniroot
