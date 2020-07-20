@@ -295,7 +295,7 @@
 #'   envQQ <- InfTemp
 #'   
 #'   # run the simulation
-#'   sim <- bd.sim(n0, p, q, tMax, pShape = pShape, envQQ = InfTemp,
+#'   sim <- bd.sim(n0, p, q, tMax, pShape = pShape, envQQ = envQQ,
 #'                nFinal = c(2, Inf))
 #'   
 #'   # we can plot the phylogeny to take a look
