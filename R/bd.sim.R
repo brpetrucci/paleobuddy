@@ -298,9 +298,18 @@
 #'   # need a variable to tell bd.sim the extinction is environmentally dependent
 #'   envQQ <- InfTemp
 #'   
+#'   # by passing q and envQQ to bd.sim, internally bd.sim will make q into a 
+#'   # function dependent only on time, using make.rate
+#'   qq <- make.rate(q, envF = envQQ)
+#'   
+#'   # take a look at how the rate itself will be
+#'   plot(seq(0, tMax, 0.1), qq(seq(0, tMax, 0.1)), 
+#'        main = "Extinction rate varying with temperature", xlab = "Time (My)",
+#'        ylab = "Rate", type = )
+#'   
 #'   # run the simulation
 #'   sim <- bd.sim(n0, p, q, tMax, pShape = pShape, envQQ = envQQ,
-#'                nFinal = c(2, Inf))
+#'                 nFinal = c(2, Inf))
 #'   
 #'   # we can plot the phylogeny to take a look
 #'   if (requireNamespace("ape", quietly = TRUE)) {
@@ -316,18 +325,28 @@
 #'   
 #'   # initial number of species
 #'   n0 <- 1
-#'   
+#' 
 #'   # speciation - a step function of temperature built using ifelse()
 #'   p <- function(t, env) {
 #'     ifelse(t < 20, 2*env,
 #'            ifelse(t < 30, env/2, 2*env/3))
 #'   }
-#'   
+#' 
 #'   # speciation shape
 #'   pShape <- 2
-#'   
+#' 
 #'   # environment variable to use - temperature
 #'   envPP <- InfTemp
+#'   
+#'   # this is kind of a complicated scale, let us take a look
+#'   
+#'   # make it a function of time
+#'   pp <- make.rate(p, envF = envPP)
+#'   
+#'   # plot it
+#'   plot(seq(0, tMax, 0.1), pp(seq(0, tMax, 0.1)), 
+#'        main = "Speciation scale varying with temperature", xlab = "Time (My)",
+#'        ylab = "Scale", type = 'l')
 #'   
 #'   # extinction - high so this does not take too long to run
 #'   q <- 0.3
@@ -388,3 +407,4 @@ bd.sim <- function(n0, pp, qq, tMax,
                           nFinal, extOnly, fast, trueExt))
   }
 }
+

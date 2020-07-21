@@ -291,6 +291,31 @@ bd.sim.general <- function(n0, pp, qq, tMax,
                          pShape = NULL, qShape = NULL,
                          nFinal = c(0, Inf), extOnly = FALSE,
                          fast = TRUE, trueExt = FALSE) {
+  # error check - rate cannot be negative
+  if ((is.numeric(pp))) {
+    if (pp < 0) {
+      stop("speciation rate cannot be negative")
+    }
+  }
+  
+  else {
+    if (sum(pp(seq(0, tMax, 0.1)) < 0) > 0) {
+      stop("speciation rate cannot be negative")
+    }
+  }
+  
+  if ((is.numeric(qq))) {
+    if (qq < 0) {
+      stop("extinction rate cannot be negative")
+    }
+  }
+  
+  else {
+    if (sum(qq(seq(0, tMax, 0.1)) < 0) > 0) {
+      stop("extinction rate cannot be negative")
+    }
+  }
+  
   # initialize species count with a value that makes sure the while loop runs
   len <- -1
   
@@ -347,11 +372,11 @@ bd.sim.general <- function(n0, pp, qq, tMax,
       # find the waiting time using rexp.var if pp is not constant
       # note we need to pass NULL for TS if the corresponding shape is NULL
       waitTimeS <- ifelse(
-        is.numeric(pp), rexp(1, pp), 
+        is.numeric(pp), ifelse(pp > 0, rexp(1, pp), Inf) ,
         ifelse(pp(tNow) > 0, 
                rexp.var(1, pp, tNow, tMax, pShape, pSpecT, fast), Inf))
       waitTimeE <- ifelse(
-        is.numeric(qq), rexp(1, qq), 
+        is.numeric(qq), ifelse(qq > 0, rexp(1, qq), Inf),
         ifelse(qq(tNow) > 0,
                rexp.var(1, qq, tNow, tMax, qShape, qSpecT, fast), Inf))
   
@@ -371,7 +396,7 @@ bd.sim.general <- function(n0, pp, qq, tMax,
   
         # get a new speciation waiting time, and include it in the vector
         waitTimeS <- ifelse(
-          is.numeric(pp), rexp(1, pp), 
+          is.numeric(pp), ifelse(pp > 0, rexp(1, pp), Inf),
           ifelse(pp(tNow) > 0, 
                  rexp.var(1, pp, tNow, tMax, pShape, pSpecT, fast), Inf))
       }
