@@ -46,6 +46,10 @@ distribution instead. Note \code{pp} may still be time-dependent.}
 
 \item{qShape}{similar to above, but for the extinction rate.
 
+Note: when shape is not \code{NULL}, rate will be interpreted as a Weibull
+scale, so that instead of events taking on average \code{1/rate} million 
+years they would take \code{rate} million years (for \code{shape = 1}).
+
 Note: Time-varying shape is implemented, so one could have \code{pShape} or
 \code{qShape} be a function of time. It is not thoroughly tested, however, so 
 it may be prudent to wait for a future release where this feature is well 
@@ -317,7 +321,7 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   envQQ <- InfTemp
   
   # run the simulation
-  sim <- bd.sim(n0, p, q, tMax, pShape = pShape, envQQ = InfTemp,
+  sim <- bd.sim(n0, p, q, tMax, pShape = pShape, envQQ = envQQ,
                nFinal = c(2, Inf))
   
   # we can plot the phylogeny to take a look

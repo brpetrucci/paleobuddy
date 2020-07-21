@@ -41,6 +41,10 @@
 #'
 #' @param qShape similar to above, but for the extinction rate.
 #' 
+#' Note: when shape is not \code{NULL}, rate will be interpreted as a Weibull
+#' scale, so that instead of events taking on average \code{1/rate} million 
+#' years they would take \code{rate} million years (for \code{shape = 1}).
+#' 
 #' Note: Time-varying shape is implemented, so one could have \code{pShape} or
 #' \code{qShape} be a function of time. It is not thoroughly tested, however, so 
 #' it may be prudent to wait for a future release where this feature is well 
@@ -294,14 +298,24 @@ bd.sim.general <- function(n0, pp, qq, tMax,
   counter <- 1
   
   # if shape is not null, make scale a function to facilitate checking
-  if (!is.null(pShape) & is.numeric(pp)) {
-    p <- pp
-    pp <- Vectorize(function(t) p)
+  if (!is.null(pShape)) {
+    warning("since pShape is not null, pp will be a Weibull scale and therefore
+            correspond to 1/rate. See ?bd.sim for more information")
+    
+    if (is.numeric(pp)) {
+      p <- pp
+      pp <- Vectorize(function(t) p)
+    }
   }
   
-  if (!is.null(qShape) & is.numeric(qq)) {
-    q <- qq
-    qq <- Vectorize(function(t) q)
+  if (!is.null(qShape)) {
+    warning("since qShape is not null, qq will be a Weibull scale and therefore
+            correspond to 1/rate. See ?bd.sim for more information")
+    
+    if (is.numeric(qq)) {
+      q <- qq
+      qq <- Vectorize(function(t) q)
+    }
   }
   
   while (len < nFinal[1] | len > nFinal[2]) {

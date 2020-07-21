@@ -31,6 +31,11 @@
 #' @param shape The shape of a weibull distribution. If not \code{NULL}, the 
 #' distribution is taken to be a weibull. Otherwise, it is considered an
 #' exponential.
+#' 
+#' Note: Time-varying shape is implemented, so one could have \code{pShape} or
+#' \code{qShape} be a function of time. It is not thoroughly tested, however, so 
+#' it may be prudent to wait for a future release where this feature is well 
+#' established.
 #'
 #' Note: Time-varying shape is implemented, so one could have \code{shape} be a
 #' function of time. It is not thoroughly tested, however, so it may be prudent to
@@ -248,7 +253,8 @@
 #' @rdname rexp.var
 #' @export
 
-rexp.var<-function(n = 1, lambda, now = 0, tMax = Inf, shape = NULL, TS = NULL, fast = FALSE) {
+rexp.var<-function(n = 1, lambda, now = 0, tMax = Inf, shape = NULL, 
+                   TS = NULL, fast = FALSE) {
   # some error checking
   if ((is.null(TS) & !is.null(shape)) | (!is.null(TS) & is.null(shape))) {
     stop("TS and shape must be supplied together")
@@ -299,7 +305,7 @@ rexp.var<-function(n = 1, lambda, now = 0, tMax = Inf, shape = NULL, TS = NULL, 
       # calculate the probability that the event will happen at all
       total <- 1 - exp(-(integrate(
         Vectorize(function(x) 1/lambda(x + TS)), lower = spnow, 
-        upper = upper - TS, subdivisions = 2000)$value) ^ shape(tMax))
+        upper = upper - TS, subdivisions = 2000)$value) ^ shape(upper))
 
       # if the probability is lower than p, the event will not happen
       if (total < p & fast) {

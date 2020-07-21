@@ -39,6 +39,11 @@ a finite value.}
 distribution is taken to be a weibull. Otherwise, it is considered an
 exponential.
 
+Note: Time-varying shape is implemented, so one could have \code{pShape} or
+\code{qShape} be a function of time. It is not thoroughly tested, however, so 
+it may be prudent to wait for a future release where this feature is well 
+established.
+
 Note: Time-varying shape is implemented, so one could have \code{shape} be a
 function of time. It is not thoroughly tested, however, so it may be prudent to
 wait for a future release where this feature is well established.}
