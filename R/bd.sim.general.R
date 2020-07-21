@@ -299,7 +299,7 @@ bd.sim.general <- function(n0, pp, qq, tMax,
   
   # if shape is not null, make scale a function to facilitate checking
   if (!is.null(pShape)) {
-    warning("since pShape is not null, pp will be a Weibull scale and therefore
+    message("since pShape is not null, pp will be a Weibull scale and therefore
             correspond to 1/rate. See ?bd.sim for more information")
     
     if (is.numeric(pp)) {
@@ -309,7 +309,7 @@ bd.sim.general <- function(n0, pp, qq, tMax,
   }
   
   if (!is.null(qShape)) {
-    warning("since qShape is not null, qq will be a Weibull scale and therefore
+    message("since qShape is not null, qq will be a Weibull scale and therefore
             correspond to 1/rate. See ?bd.sim for more information")
     
     if (is.numeric(qq)) {
