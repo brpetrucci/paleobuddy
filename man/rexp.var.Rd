@@ -4,19 +4,11 @@
 \alias{rexp.var}
 \title{General rate exponential and Weibull waiting times}
 \usage{
-rexp.var(
-  n = 1,
-  lambda,
-  now = 0,
-  tMax = Inf,
-  shape = NULL,
-  TS = NULL,
-  fast = FALSE
-)
+rexp.var(n, lambda, now = 0, tMax = Inf, shape = NULL, TS = NULL, fast = FALSE)
 }
 \arguments{
-\item{n}{The number of waiting times to return. The default is 1, but we
-allow for a higher \code{n} to be consistent with the \code{rexp} function.}
+\item{n}{The number of waiting times to return. Usually 1, but we allow for
+a higher \code{n} to be consistent with the \code{rexp} function.}
 
 \item{lambda}{The rate parameter for the exponential distribution. If
 \code{shape} is not \code{NULL}, \code{lambda} is a scale for a Weibull

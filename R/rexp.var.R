@@ -8,8 +8,8 @@
 #' Allows for customization on the possibility of throwing away a waiting time
 #' higher than \code{tMax}, and therefore takes that time as a parameter.
 #'
-#' @param n The number of waiting times to return. The default is 1, but we
-#'  allow for a higher \code{n} to be consistent with the \code{rexp} function.
+#' @param n The number of waiting times to return. Usually 1, but we allow for
+#' a higher \code{n} to be consistent with the \code{rexp} function.
 #' 
 #' @param lambda The rate parameter for the exponential distribution. If
 #' \code{shape} is not \code{NULL}, \code{lambda} is a scale for a Weibull
@@ -253,7 +253,7 @@
 #' @rdname rexp.var
 #' @export
 
-rexp.var<-function(n = 1, lambda, now = 0, tMax = Inf, shape = NULL, 
+rexp.var<-function(n, lambda, now = 0, tMax = Inf, shape = NULL, 
                    TS = NULL, fast = FALSE) {
   # some error checking
   if ((is.null(TS) & !is.null(shape)) | (!is.null(TS) & is.null(shape))) {

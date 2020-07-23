@@ -4,7 +4,7 @@
 \alias{bd.sim.constant}
 \title{Constant rate Birth-Death simulation}
 \usage{
-bd.sim.constant(n0 = 1, pp, qq, tMax, nFinal = c(0, Inf), extOnly = FALSE)
+bd.sim.constant(n0, pp, qq, tMax, nFinal = c(0, Inf), extOnly = FALSE)
 }
 \arguments{
 \item{n0}{Initial number of species, usually 1. Good parameter

@@ -140,7 +140,7 @@
 #' @export
 
 
-bd.sim.constant <- function(n0 = 1, pp, qq, tMax, 
+bd.sim.constant <- function(n0, pp, qq, tMax, 
                             nFinal = c(0, Inf), extOnly = FALSE) {
   # check that the rates are constant
   if (!(is.numeric(pp) & length(pp) == 1 &
@@ -151,6 +151,11 @@ bd.sim.constant <- function(n0 = 1, pp, qq, tMax,
   # check that the rates are non-negative
   if (pp < 0 || qq < 0) {
     stop("rates cannot be negative")
+  }
+  
+  # check that n0 is not negative
+  if (n0 <= 0) {
+    stop("initial number of species must be positive")
   }
   
   # check nFinal's length

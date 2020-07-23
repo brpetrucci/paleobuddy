@@ -78,6 +78,16 @@
 #' @export
 
 binner <- function(x, bins) {
+  # check that bins and x are numeric vectors
+  if (!is.numeric(x) || !is.numeric(bins)) {
+    stop("x and bins must be numeric vectors")
+  }
+  
+  # check there is more than 1 bin
+  if (length(bins) < 2) {
+    stop("bins requires at least two time points")
+  }
+  
   # create result
   res <- vector()
 

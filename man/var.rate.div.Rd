@@ -4,7 +4,7 @@
 \alias{var.rate.div}
 \title{Expected diversity for general exponential rates}
 \usage{
-var.rate.div(ff, n0 = 1, t, tMax = NULL, envF = NULL, fShifts = NULL)
+var.rate.div(ff, t, n0 = 1, tMax = NULL, envF = NULL, fShifts = NULL)
 }
 \arguments{
 \item{ff}{A rate for the exponential distribution that can be any function of
@@ -15,6 +15,8 @@ of time and said variable. Finally, one can instead supply a vector of rates to
 is more efficient to create a step function using \code{ifelse} however (see 
 examples below).}
 
+\item{t}{A time vector over which to consider the distribution.}
+
 \item{n0}{The initial number of species is by default 1, but one can change to
 any positive number. We allow for negative initial values as well, but of 
 course that is not biologically sound.
@@ -23,8 +25,6 @@ Note: \code{var.rate.div} will find the expected number of daughters given a
 rate \code{ff} and an initial number of parents \code{n0}, so in a
 biological context \code{ff} is diversification rate, not speciation (unless
 extinction is \code{0}).}
-
-\item{t}{A time vector over which to consider the distribution.}
 
 \item{tMax}{A number corresponding to the maximum simulation time.
 Needed to ensure \code{fShifts} runs the correct way.}
@@ -68,7 +68,7 @@ r <- make.rate(0.5)
 plot(t, rep(r, length(t)), type = 'l')
 
 # get the diversity and plot it
-div <- var.rate.div(ff, t = t)
+div <- var.rate.div(ff, t)
 plot(t, div, type = 'l')
 
 ###
@@ -108,7 +108,7 @@ r <- make.rate(ff)
 plot(t, r(t), type = 'l')
 
 # get diversity and plot it
-div <- var.rate.div(ff, n0 = 2, t)
+div <- var.rate.div(ff, t, n0 = 2)
 plot(t, div, type = 'l')
 
 ###
@@ -124,7 +124,7 @@ r <- make.rate(ff)
 plot(t, r(t), type = 'l')
 
 # we can have any number of starting species
-div <- var.rate.div(ff, n0 = 2, t)
+div <- var.rate.div(ff, t, n0 = 2)
 plot(t, div, type = 'l')
 
 ###
@@ -143,7 +143,7 @@ r <- make.rate(ff)
 plot(t, r(t), type = 'l')
 
 # get the diversity and plot it
-div <- var.rate.div(ff, t = t)
+div <- var.rate.div(ff, t)
 plot(t, div, type = 'l')
 
 # important note: this method of creating a step function might be annoying,
@@ -168,7 +168,7 @@ plot(t, r(t),type = 'l')
 # interested in the usability of the function may feel free to run them
 \dontrun{
   # get the diversity and plot it
-  div <- var.rate.div(ff, t = t, tMax = 10, fShifts = fShifts)
+  div <- var.rate.div(ff, t, tMax = 10, fShifts = fShifts)
   plot(t, div, type = 'l')
 }
 
@@ -199,7 +199,7 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   plot(t, r(t), type = 'l')
   
   # get diversity and plot it
-  div <- var.rate.div(ff, t = t, envF = InfTemp)
+  div <- var.rate.div(ff, t, envF = InfTemp)
   plot(t, div, type = 'l')
   
   ###
@@ -216,7 +216,7 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   
   \dontrun{
     # get diversity and plot it
-    div <- var.rate.div(ff, t = t, envF = InfTemp)
+    div <- var.rate.div(ff, t, envF = InfTemp)
     plot(t, div, type = 'l')
 } 
   ###
@@ -234,7 +234,7 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   r <- make.rate(ff, envF = InfTemp)
   plot(t, r(t), type = 'l')
 \dontrun{
-    div <- var.rate.div(ff, t = t, envF = InfTemp)
+    div <- var.rate.div(ff, t, envF = InfTemp)
     plot(t, div, type = 'l')
 }
 }

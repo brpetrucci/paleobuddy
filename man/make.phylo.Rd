@@ -11,7 +11,8 @@ make.phylo(sim)
 times, parent identities and status (extant or extinct).}
 }
 \value{
-A \code{phylo} object from the APE package. 
+A \code{phylo} object from the APE package. Tip labels are numbered
+following the order of species in the \code{sim} object.
 
 Note this package does not
 depend on APE since it is never used inside its functions, but it is suggested

@@ -314,6 +314,17 @@ bd.sim.general <- function(n0, pp, qq, tMax,
     }
   }
   
+  # check that n0 is not negative
+  if (n0 <= 0) {
+    stop("initial number of species must be positive")
+  }
+  
+  # check nFinal's length
+  if (length(nFinal) != 2) {
+    stop("nFinal must be a vector with a minimum and maximum number 
+         of species")
+  }
+  
   # initialize species count with a value that makes sure the while loop runs
   len <- -1
   
