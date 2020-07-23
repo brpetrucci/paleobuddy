@@ -1,14 +1,14 @@
 #' Constant rate Birth-Death simulation
 #'
 #' Simulates a species birth-death process with constant rates for any number
-#' of starting species. Returns an object containing lists of speciation times,
+#' of starting species. Returns an object containing vectors of speciation times,
 #' extinction times, parents and status (extant or not). Allows for constraining
 #' on the number of species at the end of the simulation, either total or extant.
 #' Returns \code{NA} and sends a warning if it cannot find a simulation with the
 #' desired number of species after \code{100000} tries.
 #' Note that while time runs from \code{0} to \code{tmax} on the function itself,
-#' it runs from \code{tmax} to \code{0} on the lists returned to conform with the
-#' literature.
+#' it runs from \code{tmax} to \code{0} on the vectors returned to conform with
+#' the literature.
 #'
 #' @param n0 Initial number of species, usually 1. Good parameter
 #' to tweak if one is observing a low sample size when testing.

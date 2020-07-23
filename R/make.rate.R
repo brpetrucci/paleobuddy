@@ -2,7 +2,7 @@
 #' 
 #' Generates a rate to be used on birth-death or sampling functions. Takes as the
 #' base rate a constant, function of time, function of time and an environmental
-#' variable or a list of numbers. Allows for modifying using a list of rate 
+#' variable or a vector of numbers. Allows for modifying using a vector of rate 
 #' shift times or a matrix containing time and environmental data. Also requires
 #' \code{tMax}, the maximum simulation time, so it can recognize both forward and
 #' backward time vector rates.
@@ -194,7 +194,7 @@ make.rate <- function(ff, tMax = NULL, envF = NULL, fShifts = NULL) {
 
   # let us first check for some errors
   
-  # if the given rate is a number or list of numbers
+  # if the given rate is a number or vector of numbers
   if (is.numeric(ff)) {
     # if ff is constant, we should not see any envF or fShifts
     if (nargs == 1) {
@@ -264,7 +264,7 @@ make.rate <- function(ff, tMax = NULL, envF = NULL, fShifts = NULL) {
 
     fList <- ff
 
-    # if user gave a list from past to present, make it from present to past
+    # if user gave a vector from past to present, make it from present to past
     if (fShifts[2] < fShifts[1]) {
       fShifts <- tMax - fShifts
     }

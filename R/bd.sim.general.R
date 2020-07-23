@@ -4,7 +4,7 @@
 #' starting species. Allows for the speciation/extinction rate to be constant or
 #' a function of time. Takes an optional shape argument for speciation and/or 
 #' extinction, under which the corresponding rate will be taken to be a Weibull 
-#' scale for age-dependent dynamics. Returns an object containing lists of 
+#' scale for age-dependent dynamics. Returns an object containing vectors of 
 #' speciation times, extinction times, parents and status (extant or not). Can 
 #' return true extinction times or simply information on whether species lived
 #' after maximum simulation time. Allows for constraining on the number of species
@@ -12,8 +12,8 @@
 #' sends a warning if it cannot find a simulation with the desired number of 
 #' species after \code{100000} tries.
 #' Note that while time runs from \code{0} to \code{tmax} on the function itself,
-#' it runs from \code{tmax} to \code{0} on the lists returned to conform with the
-#' literature. 
+#' it runs from \code{tmax} to \code{0} on the vectors returned to conform with 
+#' the literature. 
 #'
 #' @param n0 Initial number of species, usually 1. Good parameter
 #' to tweak if one is observing a low sample size when testing.
@@ -158,10 +158,10 @@
 #'   return(0.03 + 0.005*t)
 #' }
 #' 
-#' # list of extinction rates
+#' # vector of extinction rates
 #' qList <- c(0.06, 0.09, 0.11)
 #' 
-#' # list of shift times. Note qShifts could be c(40, 20, 10) for
+#' # vector of shift times. Note qShifts could be c(40, 20, 10) for
 #' # identical results
 #' qShifts <- c(0, 15, 25)
 #' 

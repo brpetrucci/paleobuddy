@@ -1,7 +1,7 @@
 #' Expected diversity for general exponential rates
 #'
 #' Calculates the expected species diversity on an interval given a (possibly time
-#' dependent) exponential rate. Takes any number, list of numbers, function of 
+#' dependent) exponential rate. Takes any number, vector of numbers, function of 
 #' time or function of time and an environmental variable as a rate. Allows for 
 #' flexibility by optionally taking a number of initial species, environmental 
 #' data and vector of rate shift times. Calculates the diversity for any vector

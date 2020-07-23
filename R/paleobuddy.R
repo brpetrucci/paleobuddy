@@ -107,7 +107,7 @@
 #' # we can separate it in three monophyletic clades
 #' clades <- find.lineages(sim = sim)
 #' # note if we wanted to check for clades originated from specific species we
-#' # need only pass S as a list with those species to find.lineages
+#' # need only pass S as a vector with those species to find.lineages
 #' 
 #' # get a phylogeny for whichever one has a lot of species
 #' for (c in clades) {

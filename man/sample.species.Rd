@@ -23,10 +23,10 @@ to ensure time follows the correct direction both in the Poisson process and
 in the return.}
 }
 \value{
-A list of occurrences for that species.
+A vector of occurrences for that species.
 }
 \description{
-Generates a list of occurrence times for a species in a simulation using a
+Generates a vector of occurrence times for a species in a simulation using a
 constant or a function of absolute time as a rate for a Poisson process. For
 sampling of more than one species and/or taking into account species age
 instead of absolute time, see \code{sample.clade} and \code{sample.adpp}.
@@ -84,14 +84,14 @@ while ((sim$TS[1] - sim$TE[1]) < 10) {
 # we can create the sampling rate here from a few vectors
 
 # rates
-rlist <- c(1, 3, 0.5)
+rList <- c(1, 3, 0.5)
 
 # rate shift times -  this could be c(10, 6, 2)
 # and would produce the same function
 rShifts <- c(0, 4, 8)
 
 # create the rate to visualize it
-r <- make.rate(rlist, tMax = 10, fShifts = rShifts)
+r <- make.rate(rList, tMax = 10, fShifts = rShifts)
 
 # time
 t <- seq(0, 10, by = 0.1)

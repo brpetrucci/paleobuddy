@@ -1,13 +1,13 @@
 #' Bin occurrences in geologic intervals
 #'
-#' Given a list of fossil occurrences and time bins to represent geological
+#' Given a vector of fossil occurrences and time bins to represent geological
 #' ranges, returns the occurrence counts in each bin.
 #'
-#' @param x The list containing occurrence times for a given species.
+#' @param x The vector containing occurrence times for a given species.
 #'
 #' @param bins A vector of time intervals corresponding to geological time ranges.
 #'
-#' @return A list of occurrence counts for each interval.
+#' @return A vector of occurrence counts for each interval.
 #'
 #' @author Matheus Januario and Bruno do Rosario Petrucci
 #'
@@ -16,10 +16,10 @@
 #' ###
 #' # first let us create some artificial occurrence data and check
 #' 
-#' # occurrence list
+#' # occurrence vector
 #' x <- c(5.2, 4.9, 4.1, 3.2, 1, 0.2)
 #' 
-#' # bins list
+#' # bins vector
 #' bins <- c(6, 5, 4, 3, 2, 1, 0)
 #' 
 #' # result
@@ -29,10 +29,10 @@
 #' ###
 #' # it should work with any type of number in bins
 #' 
-#' # occurrence list
+#' # occurrence vector
 #' x <- c(6.7, 5.03, 4.2, 3.4, 1.2, 0.4)
 #' 
-#' # bins list
+#' # bins vector
 #' bins <- c(7.2, 6.1, 5.6, 4.3, 3.2, sqrt(2), 1, 0)
 #' 
 #' # result
@@ -48,7 +48,7 @@
 #' # sample it
 #' sampled <- sample.species(S = 1, sim = sim, rr = 1, tMax = 15)
 #' 
-#' # bins list
+#' # bins vector
 #' bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
 #' 
 #' # result
@@ -66,7 +66,7 @@
 #' # sample it
 #' sampled <- sample.species(S = 1, sim = sim, rr = 1, tMax = 15)
 #' 
-#' # bins list
+#' # bins vector
 #' bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
 #' 
 #' # result

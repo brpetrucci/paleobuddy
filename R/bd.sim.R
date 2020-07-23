@@ -2,19 +2,19 @@
 #' 
 #' Simulates a species birth-death process with general rates for any number of
 #' starting species. Allows for the speciation/extinction rate to be constant,
-#' a function of time, a function of time and an environmental variable, or a list
-#' of numbers. Takes an optional shape argument for speciation and/or extinction,
-#' under which the corresponding rate will be taken to be a Weibull scale for 
-#' age-dependent dynamics. Also may take a list of rate shifts, if the
-#' corresponding rate is a list of numbers, or a dataframe with environmental 
-#' data. Returns an object containing lists of speciation times, extinction times, 
-#' parents and status (extant or not). Can return true extinction times or simply 
-#' information on whether species lived after maximum simulation time. Allows for
-#' constraining on the number of species at the end of the simulation, either 
-#' total or extant.
+#' a function of time, a function of time and an environmental variable, or a 
+#' vector of numbers. Takes an optional shape argument for speciation and/or 
+#' extinction, under which the corresponding rate will be taken to be a Weibull 
+#' scale for age-dependent dynamics. Also may take a list of rate shifts, if the
+#' corresponding rate is a vector of numbers, or a dataframe with environmental 
+#' data. Returns an object containing vectors of speciation times, extinction 
+#' times, parents and status (extant or not). Can return true extinction times or 
+#' simply information on whether species lived after maximum simulation time. 
+#' Allows for constraining on the number of species at the end of the simulation, 
+#' either total or extant.
 #' Note that while time runs from \code{0} to \code{tmax} on the function itself,
-#' it runs from \code{tmax} to \code{0} on the lists returned to conform with the
-#' literature.
+#' it runs from \code{tmax} to \code{0} on the vectors returned to conform with 
+#' the literature.
 #'
 #' @param n0 Initial number of species, usually 1. Good parameter
 #' to tweak if one is observing a low sample size when testing.
@@ -167,10 +167,10 @@
 #' 
 #' # what if we want q to be a step function?
 #' 
-#' # list of extinction rates
+#' # vector of extinction rates
 #' qList <- c(0.09, 0.08, 0.1)
 #' 
-#' # list of shift times. Note qShifts could be c(40, 20, 5) for identical results
+#' # vector of shift times. Note qShifts could be c(40, 20, 5) for identical results
 #' qShifts <- c(0, 20, 35)
 #' 
 #' # let us take a look at how make.rate will make it a step function

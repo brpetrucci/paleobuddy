@@ -10,13 +10,13 @@ find.lineages(sim, S = NULL)
 \item{sim}{A simulation, usually a return from the \code{bd.sim} function. The 
 function accepts simulations with any number of starting species.}
 
-\item{S}{A list of species in \code{sim}. If not supplied, \code{S} will be
+\item{S}{A vector of species in \code{sim}. If not supplied, \code{S} will be
 the starting species in the simulation (i.e. those for which the parent is
 \code{NA}).}
 }
 \value{
 A \code{list} object with (named) \code{sim} objects corresponding to
-the clades descended from species in \code{S}. For each clade, an extra list
+the clades descended from species in \code{S}. For each clade, an extra vector
 \code{sim$LIN} is included so the user can identify the order of species
 in the return with the order of species in the original simulation.
 }
@@ -24,9 +24,9 @@ in the return with the order of species in the original simulation.
 Finds and separates a \code{sim} object into \code{sim} objects each with a 
 mother species and its descendants. Returns by default the list of \code{sim}
 objects descended from each species with an \code{NA} parent in the original
-input. Allows for the user to input a list of species to be the mother of each
-resulting member of the returning list instead. Returns for each clade a list
-with the original identity of member species as well.
+input. Allows for the user to input a vector of species to be the mother of 
+each resulting member of the returning list instead. Returns for each clade a 
+vector with the original identity of member species as well.
 }
 \examples{
 

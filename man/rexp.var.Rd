@@ -156,7 +156,7 @@ tMax <- 40
 # speciation time
 TS <- 0
 
-# find the list of waiting time
+# find the vector of waiting time
 t <- rexp.var(n = 1, lambda, now, tMax,
               shape = shape, TS = TS)
 t
@@ -179,7 +179,7 @@ tMax <- 40
 # speciation time
 TS <- 0
 
-# find the list of waiting times - it doesn't need to be just one
+# find the vector of waiting times - it doesn't need to be just one
 t <- rexp.var(n = 5, lambda, now, tMax,
               shape = shape, TS = TS)
 t
@@ -204,7 +204,7 @@ tMax <- 40
 # rescale accordingly
 TS <- 2.5
 
-# find the list of waiting times
+# find the vector of waiting times
 t <- rexp.var(n = 3, lambda, now, tMax,
               shape = shape, TS = TS)
 t
@@ -231,7 +231,7 @@ tMax <- 40
 # speciation time
 TS <- 0
 
-# find the list of waiting times - it doesn't need to be just one
+# find the vector of waiting times - it doesn't need to be just one
 t <- rexp.var(n = 5, lambda, now, tMax,
               shape = shape, TS = TS)
 t
@@ -256,7 +256,7 @@ tMax <- 40
 # speciation time
 TS <- 0
 
-# find the list of waiting times - it doesn't need to be just one
+# find the vector of waiting times - it doesn't need to be just one
 t <- rexp.var(n = 2, lambda, now, tMax,
               shape = shape, TS = TS)
 t

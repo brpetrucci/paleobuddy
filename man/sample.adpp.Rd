@@ -7,7 +7,7 @@
 sample.adpp(S = NULL, sim, rr, dFun, dFunMax = NULL, ...)
 }
 \arguments{
-\item{S}{A list species numbers to be sampled.}
+\item{S}{A vector species numbers to be sampled.}
 
 \item{sim}{A \code{sim} object, usually an output of \code{bd.sim}.}
 

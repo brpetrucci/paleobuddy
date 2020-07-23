@@ -8,7 +8,7 @@
 #' simulation faster. Also allows for extra arguments the age-dependent
 #' preservation function may take.
 #'
-#' @param S A list species numbers to be sampled.
+#' @param S A vector species numbers to be sampled.
 #'
 #' @param sim A \code{sim} object, usually an output of \code{bd.sim}.
 #'

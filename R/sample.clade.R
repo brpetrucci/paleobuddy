@@ -6,14 +6,14 @@
 #' as an optional parameter a distribution representing the expected occurrence 
 #' number over a species duration (in which case average rate must be constant). 
 #' Allows for further flexibility in (non-age dependent) rates by a shift times
-#' vector and environmental matrix parameters. Optionally takes a list of time
+#' vector and environmental matrix parameters. Optionally takes a vector of time
 #' bins representing geologic periods, so that if the user wishes occurrence 
 #' times can be presented as a range instead of true points. Finally, allows for
 #' an optional argument - the maximum of the distribution - that can make the
 #' simulation faster, and for extra arguments the age-dependent preservation
 #' function may take.
 #'
-#' @param S A list species numbers to be sampled. Could be only a subset of the
+#' @param S A vector species numbers to be sampled. Could be only a subset of the
 #' species if the user wishes. The default is all species in \code{sim}.
 #'
 #' @param sim A simulation, usually the output of \code{bd.sim}.
@@ -189,13 +189,13 @@
 #' # one could instead use ifelse()
 #' 
 #' # rates vector
-#' rlist <- c(1, 2, 0.5)
+#' rList <- c(1, 2, 0.5)
 #' 
 #' # rate shifts vector
 #' rShifts <- c(0, 4, 8)
 #' 
 #' # make it a function so we can plot it
-#' r <- make.rate(rlist, 10, fShifts=rShifts)
+#' r <- make.rate(rList, 10, fShifts=rShifts)
 #' 
 #' # the resolution of the fossil dataset:
 #' bins <- seq(from = 10, to = 0,
@@ -203,7 +203,7 @@
 #' # note that we will provide a very high resolution to test the function
 #' 
 #' # find the occurrence data frame
-#' dt <- sample.clade(1:length(sim$TE), sim, rlist, rShifts = rShifts, 
+#' dt <- sample.clade(1:length(sim$TE), sim, rList, rShifts = rShifts, 
 #'                    tMax = 10, bins = bins)
 #' 
 #' # extract species identity
@@ -550,7 +550,7 @@ sample.clade <- function(S = NULL, sim, rr, tMax, envRR = NULL, rShifts = NULL,
     # make the extant column
     res$Extant <- FALSE
     
-    # based on the list in sim
+    # based on the vector in sim
     res$Extant[res$Species %in% which(sim$EXTANT)] <- TRUE
 
     # and the species column
@@ -574,7 +574,7 @@ sample.clade <- function(S = NULL, sim, rr, tMax, envRR = NULL, rShifts = NULL,
       # make the extant column
       res$Extant <- FALSE
       
-      # based on the list in sim
+      # based on the vector in sim
       res$Extant[res$Species %in% which(sim$EXTANT)] <- TRUE
       
       # name the species 

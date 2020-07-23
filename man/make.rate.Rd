@@ -45,7 +45,7 @@ usually set as time.
 \description{
 Generates a rate to be used on birth-death or sampling functions. Takes as the
 base rate a constant, function of time, function of time and an environmental
-variable or a list of numbers. Allows for modifying using a list of rate 
+variable or a vector of numbers. Allows for modifying using a vector of rate 
 shift times or a matrix containing time and environmental data. Also requires
 \code{tMax}, the maximum simulation time, so it can recognize both forward and
 backward time vector rates.

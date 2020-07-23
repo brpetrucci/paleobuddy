@@ -7,15 +7,15 @@
 binner(x, bins)
 }
 \arguments{
-\item{x}{The list containing occurrence times for a given species.}
+\item{x}{The vector containing occurrence times for a given species.}
 
 \item{bins}{A vector of time intervals corresponding to geological time ranges.}
 }
 \value{
-A list of occurrence counts for each interval.
+A vector of occurrence counts for each interval.
 }
 \description{
-Given a list of fossil occurrences and time bins to represent geological
+Given a vector of fossil occurrences and time bins to represent geological
 ranges, returns the occurrence counts in each bin.
 }
 \examples{
@@ -23,10 +23,10 @@ ranges, returns the occurrence counts in each bin.
 ###
 # first let us create some artificial occurrence data and check
 
-# occurrence list
+# occurrence vector
 x <- c(5.2, 4.9, 4.1, 3.2, 1, 0.2)
 
-# bins list
+# bins vector
 bins <- c(6, 5, 4, 3, 2, 1, 0)
 
 # result
@@ -36,10 +36,10 @@ binnedSamp
 ###
 # it should work with any type of number in bins
 
-# occurrence list
+# occurrence vector
 x <- c(6.7, 5.03, 4.2, 3.4, 1.2, 0.4)
 
-# bins list
+# bins vector
 bins <- c(7.2, 6.1, 5.6, 4.3, 3.2, sqrt(2), 1, 0)
 
 # result
@@ -55,7 +55,7 @@ sim <- bd.sim(1, pp = 0.1, qq = 0.05, tMax = 15)
 # sample it
 sampled <- sample.species(S = 1, sim = sim, rr = 1, tMax = 15)
 
-# bins list
+# bins vector
 bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
 
 # result
@@ -73,7 +73,7 @@ sim <- bd.sim(1, pp = function(t) {
 # sample it
 sampled <- sample.species(S = 1, sim = sim, rr = 1, tMax = 15)
 
-# bins list
+# bins vector
 bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
 
 # result
