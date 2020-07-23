@@ -11,7 +11,8 @@
 #' times can be presented as a range instead of true points. Finally, allows for
 #' an optional argument - the maximum of the distribution - that can make the
 #' simulation faster, and for extra arguments the age-dependent preservation
-#' function may take.
+#' function may take. See \code{sample.species} - absolute time-dependent sampling
+#' - and \code{sample.adpp} - age-dependent sampling - for more information.
 #'
 #' @param S A vector species numbers to be sampled. Could be only a subset of the
 #' species if the user wishes. The default is all species in \code{sim}.

@@ -56,7 +56,9 @@ a model of species age. Allows for any distribution as the model of occurrences
 during a species life, given certain requirements (see below). Allows for an
 optional argument - the maximum of the distribution - that can make the
 simulation faster. Also allows for extra arguments the age-dependent
-preservation function may take.
+preservation function may take. For time-varying sampling rates without 
+age-dependency, see \code{sample.species}. For a function that unites both
+cases and returns an organize data frame, see \code{sample.clade}.
 }
 \examples{
 

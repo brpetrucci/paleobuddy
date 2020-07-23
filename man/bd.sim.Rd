@@ -126,7 +126,9 @@ data. Returns an object containing vectors of speciation times, extinction
 times, parents and status (extant or not). Can return true extinction times or 
 simply information on whether species lived after maximum simulation time. 
 Allows for constraining on the number of species at the end of the simulation, 
-either total or extant.
+either total or extant. See \code{bd.sim.constant} - constant rates - and
+\code{bd.sim.general} - time-varying and age-dependent rates - for more
+information.
 Note that while time runs from \code{0} to \code{tmax} on the function itself,
 it runs from \code{tmax} to \code{0} on the vectors returned to conform with 
 the literature.

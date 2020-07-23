@@ -5,10 +5,12 @@
 #' extinction times, parents and status (extant or not). Allows for constraining
 #' on the number of species at the end of the simulation, either total or extant.
 #' Returns \code{NA} and sends a warning if it cannot find a simulation with the
-#' desired number of species after \code{100000} tries.
+#' desired number of species after \code{100000} tries. For time-varying and 
+#' age-dependent simulations, see \code{bd.sim.general}. For a function that
+#' unites both scenarios, see \code{bd.sim}.
 #' Note that while time runs from \code{0} to \code{tmax} on the function itself,
 #' it runs from \code{tmax} to \code{0} on the vectors returned to conform with
-#' the literature.
+#' the literature. 
 #'
 #' @param n0 Initial number of species, usually 1. Good parameter
 #' to tweak if one is observing a low sample size when testing.
