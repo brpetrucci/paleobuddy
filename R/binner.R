@@ -86,13 +86,10 @@ binner <- function(x, bins) {
   x <- sort(x, decreasing = TRUE)
 
   # for each bin,
-  for (i in 2:(length(bins) - 1)) {
+  for (i in 2:length(bins)) {
     # get the occurrences before this bin and after previous
     res <- c(res, sum(x < bins[i-1] & x >= bins[i]))
   }
-
-  # find the last one
-  i <- length(bins)
-  res <- c(res, sum(x < bins[i-1] & x >= bins[i]))
+  
   return(res)
 }

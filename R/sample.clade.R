@@ -14,8 +14,9 @@
 #' function may take. See \code{sample.species} - absolute time-dependent sampling
 #' - and \code{sample.adpp} - age-dependent sampling - for more information.
 #'
-#' @param S A vector species numbers to be sampled. Could be only a subset of the
-#' species if the user wishes. The default is all species in \code{sim}.
+#' @param S A vector of species numbers to be sampled. Could be only a subset of 
+#' the species if the user wishes. The default is all species in \code{sim}. 
+#' Species not included in \code{S} will not be sampled by the function.
 #'
 #' @param sim A simulation, usually the output of \code{bd.sim}.
 #'
@@ -111,7 +112,8 @@
 #' # note that we will provide a very high resolution to test the function
 #' 
 #' # find the occurrence data frame
-#' dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, bins = bins)
+#' dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, bins = bins, 
+#'                    returnTrue = FALSE)
 #' 
 #' # extract species identity
 #' ids <- unique(dt$Species)
@@ -154,7 +156,8 @@
 #' # note that we will provide a very high resolution to test the function
 #' 
 #' # find the occurrence data frame
-#' dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, bins = bins)
+#' dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, bins = bins, 
+#'                    returnTrue = FALSE)
 #' 
 #' # extract species identity
 #' ids <- unique(dt$Species)
@@ -205,7 +208,7 @@
 #' 
 #' # find the occurrence data frame
 #' dt <- sample.clade(1:length(sim$TE), sim, rList, rShifts = rShifts, 
-#'                    tMax = 10, bins = bins)
+#'                    tMax = 10, bins = bins, returnTrue = FALSE)
 #' 
 #' # extract species identity
 #' ids <- unique(dt$Species)
@@ -227,7 +230,7 @@
 #' }
 #' 
 #' ###
-#' # finally, \code{sample.clade} also accepts an environmental variable
+#' # finally, sample.clade also accepts an environmental variable
 #' if (requireNamespace("RPANDA", quietly = TRUE)) {
 #'   # get temperature data
 #'   data(InfTemp, package = "RPANDA")
@@ -262,7 +265,7 @@
 #'   
 #'   # find the occurrence data frame
 #'   dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, envRR = envR,
-#'                     bins = bins)
+#'                     bins = bins, returnTrue = FALSE)
 #'   
 #'   # extract species identity
 #'   ids <- unique(dt$Species)
@@ -345,7 +348,7 @@
 #' # note that we will provide a very high resolution to test the function
 #' 
 #' dt <- sample.clade(1:length(sim$TE), sim, rr = 3, tMax = 10, bins = bins,
-#'                   dFun = dPERT, dFunMax = dPERTmax)
+#'                   dFun = dPERT, dFunMax = dPERTmax, returnTrue = FALSE)
 #' 
 #' # extract species identity
 #' ids <- unique(dt$Species)
@@ -436,7 +439,7 @@
 #' # note that we will provide a very high resolution to test the function
 #' 
 #' dt <- sample.clade(1:length(sim$TE), sim, rr = 4, tMax = 10, bins = bins,
-#'                   dFun = dTRImod2, dFunMax = dTRImaxmod2)
+#'                   dFun = dTRImod2, dFunMax = dTRImaxmod2, returnTrue = FALSE)
 #' 
 #' # extract species identity
 #' ids <- unique(dt$Species)
@@ -468,7 +471,7 @@
 #' @export
 
 sample.clade <- function(S = NULL, sim, rr, tMax, envRR = NULL, rShifts = NULL,
-                         returnTrue = FALSE, bins = NULL, 
+                         returnTrue = TRUE, bins = NULL, 
                          dFun = NULL, dFunMax = NULL, ...) {
   # make S all species if it is NULL
   if (is.null(S)) {
@@ -481,7 +484,8 @@ sample.clade <- function(S = NULL, sim, rr, tMax, envRR = NULL, rShifts = NULL,
     rr <- make.rate(rr, tMax, envRR, rShifts)
   } else {
     if (!is.numeric(rr) | length(rr)>1) {
-      stop("ADPP cannot be used with time-varing preservation rates")
+      stop("age-dependent sampling cannot be used with time-varing 
+           preservation rates")
     }
   }
 

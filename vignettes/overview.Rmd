@@ -153,7 +153,10 @@ set.seed(1)
 rr <- 1
 
 # run the sampling simulation only for the first 15 species for brevity's sake
-samp <- suppressMessages(sample.clade(S = 1:15, sim = sim, rr = rr, tMax = tMax))
+# returnTrue = FALSE makes it so the occurrences are binned (i.e. an occurrence
+# at time 42.34 is between 42.4 and 42.3)
+samp <- suppressMessages(sample.clade(S = 1:15, sim = sim, rr = rr, 
+                                      tMax = tMax, returnTrue = FALSE))
 # suppressing messages - the message is to inform the user how many species
 # left no fossils. In this case, it was 0
 
@@ -388,8 +391,8 @@ sim <- bd.sim(n0, pp = 0.1, qq = 0.05, tMax = 20)
 set.seed(1)
 
 # sample - high sampling rate so we can visualize the age-dependency
-samp <- sample.clade(sim = sim, rr = 30, tMax = 20, bins = bins,
-                  dFun = dPERT, dFunMax = dPERTmax)
+samp <- sample.clade(sim = sim, rr = 30, tMax = 20, bins = bins, 
+                     returnTrue = FALSE, dFun = dPERT, dFunMax = dPERTmax)
 
 # extract species identity
 ids <- unique(samp$Species)

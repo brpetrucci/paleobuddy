@@ -2,7 +2,7 @@
 % Please edit documentation in R/sample.adpp.R
 \name{sample.adpp}
 \alias{sample.adpp}
-\title{Age-dependent rate species sampling}
+\title{Age-dependent Poisson Process species sampling}
 \usage{
 sample.adpp(S = NULL, sim, rr, dFun, dFunMax = NULL, ...)
 }

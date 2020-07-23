@@ -1,4 +1,4 @@
-#' Age-dependent rate species sampling
+#' Age-dependent Poisson Process species sampling
 #'
 #' Generates a list of occurrence times for each of the desired species using a
 #' Poisson process with constant average rate and occurrences distributed based on
@@ -10,7 +10,9 @@
 #' age-dependency, see \code{sample.species}. For a function that unites both
 #' cases and returns an organize data frame, see \code{sample.clade}.
 #'
-#' @param S A vector species numbers to be sampled.
+#' @param S A vector of species numbers to be sampled. Could be only a subset of 
+#' the species if the user wishes. The default is all species in \code{sim}. 
+#' Species not included in \code{S} will not be sampled by the function.
 #'
 #' @param sim A \code{sim} object, usually an output of \code{bd.sim}.
 #'

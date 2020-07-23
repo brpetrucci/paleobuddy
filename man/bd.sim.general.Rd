@@ -13,7 +13,6 @@ bd.sim.general(
   qShape = NULL,
   nFinal = c(0, Inf),
   extOnly = FALSE,
-  fast = TRUE,
   trueExt = FALSE
 )
 }
@@ -64,11 +63,6 @@ the number of total or extant species during the simulation. If \code{TRUE},
 \code{bd.sim.general} will run until the number of extant species lies within
 the \code{nFinal} interval. If \code{FALSE}, as default, it will run until the
 total number of species generated lies within that interval.}
-
-\item{fast}{When \code{TRUE}, sets \code{rexp.var} to throw away waiting times 
-higher than the maximum simulation time. Should be \code{FALSE} for unbiased 
-testing of age dependency. User might also se it to \code{FALSE} for more 
-accurate waiting times.}
 
 \item{trueExt}{When \code{TRUE}, time of extinction of extant species will be 
 the true time, otherwise it will be \code{tMax+0.01}. Need to be \code{TRUE} 

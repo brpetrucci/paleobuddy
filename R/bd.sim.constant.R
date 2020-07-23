@@ -142,6 +142,23 @@
 
 bd.sim.constant <- function(n0 = 1, pp, qq, tMax, 
                             nFinal = c(0, Inf), extOnly = FALSE) {
+  # check that the rates are constant
+  if (!(is.numeric(pp) & length(pp) == 1 &
+        is.numeric(qq) * length(qq) == 1)) {
+    stop("bd.sim.constant requires constant rates")
+  }
+  
+  # check that the rates are non-negative
+  if (pp < 0 || qq < 0) {
+    stop("rates cannot be negative")
+  }
+  
+  # check nFinal's length
+  if (length(nFinal) != 2) {
+    stop("nFinal must be a vector with a minimum and maximum number 
+         of species")
+  }
+  
   # initialize species count with a value that makes sure the while loop runs
   len <- -1
   
@@ -149,10 +166,12 @@ bd.sim.constant <- function(n0 = 1, pp, qq, tMax,
   counter <- 1
   
   while (len < nFinal[1] | len > nFinal[2]) {
-    # check that the rates are constant
-    if (!(is.numeric(pp) & length(pp) == 1 &
-        is.numeric(qq) * length(qq) == 1)) {
-      stop("bd.sim.constant requires constant rates")
+    # if we have gone through more than 100000 simulations, it is probably 
+    # impossible to achieve the nFinal we want
+    if (counter > 100000) {
+      warning("This value of nFinal took more than 100000 simulations 
+              to achieve")
+      return(NA)
     }
     
     # initialize the vectors to hold times of speciation and extinction, parents
@@ -216,11 +235,6 @@ bd.sim.constant <- function(n0 = 1, pp, qq, tMax,
     
     # if we have ran for too long, stop
     counter <- counter + 1
-    if (counter > 100000) {
-      warning("This value of nFinal took more than 100000 simulations 
-              to achieve")
-      return(NA)
-    }
   }
 
   return(list(TE = TE, TS = TS, PAR = parent, EXTANT = isExtant))

@@ -65,11 +65,6 @@
 #' the \code{nFinal} interval. If \code{FALSE}, as default, it will run until the
 #' total number of species generated lies within that interval.
 #' 
-#' @param fast When \code{TRUE}, sets \code{rexp.var} to throw away waiting times 
-#' higher than the maximum simulation time. Should be \code{FALSE} for unbiased 
-#' testing of age dependency. User might also se it to \code{FALSE} for more 
-#' accurate waiting times.
-#' 
 #' @param trueExt When \code{TRUE}, time of extinction of extant species will be 
 #' the true time, otherwise it will be \code{tMax+0.01}. Need to be \code{TRUE} 
 #' when testing age-dependent extinction.
@@ -293,7 +288,7 @@
 bd.sim.general <- function(n0, pp, qq, tMax, 
                          pShape = NULL, qShape = NULL,
                          nFinal = c(0, Inf), extOnly = FALSE,
-                         fast = TRUE, trueExt = FALSE) {
+                         trueExt = FALSE) {
   # error check - rate cannot be negative
   if ((is.numeric(pp))) {
     if (pp < 0) {
@@ -377,11 +372,13 @@ bd.sim.general <- function(n0, pp, qq, tMax,
       waitTimeS <- ifelse(
         is.numeric(pp), ifelse(pp > 0, rexp(1, pp), Inf) ,
         ifelse(pp(tNow) > 0, 
-               rexp.var(1, pp, tNow, tMax, pShape, pSpecT, fast), Inf))
+               rexp.var(1, pp, tNow, tMax, pShape, pSpecT, 
+                        fast = !trueExt), Inf))
       waitTimeE <- ifelse(
         is.numeric(qq), ifelse(qq > 0, rexp(1, qq), Inf),
         ifelse(qq(tNow) > 0,
-               rexp.var(1, qq, tNow, tMax, qShape, qSpecT, fast), Inf))
+               rexp.var(1, qq, tNow, tMax, qShape, qSpecT, 
+                        fast = !trueExt), Inf))
   
       tExp <- tNow + waitTimeE
   
@@ -401,7 +398,8 @@ bd.sim.general <- function(n0, pp, qq, tMax,
         waitTimeS <- ifelse(
           is.numeric(pp), ifelse(pp > 0, rexp(1, pp), Inf),
           ifelse(pp(tNow) > 0, 
-                 rexp.var(1, pp, tNow, tMax, pShape, pSpecT, fast), Inf))
+                 rexp.var(1, pp, tNow, tMax, pShape, pSpecT, 
+                          fast = !trueExt), Inf))
       }
   
       # reached the time of extinction

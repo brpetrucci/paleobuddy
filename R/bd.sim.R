@@ -81,12 +81,6 @@
 #' species lies within the \code{nFinal} interval. If \code{FALSE}, as default, it 
 #' will run until the total number of species generated lies within that interval.
 #' 
-#' @param fast Used for \code{bd.sim.general}. When \code{TRUE}, sets 
-#' \code{rexp.var} to throw away waiting times higher than the maximum 
-#' simulation time. Should be \code{FALSE} for unbiased testing of age 
-#' dependency. User might also se it to \code{FALSE} for more accurate waiting
-#' times.
-#' 
 #' @param trueExt Used for \code{bd.sim.general}. When \code{TRUE}, time of 
 #' extinction of extant species will be the true time, otherwise it will be 
 #' \code{tMax+0.01}. Need to be \code{TRUE} when testing age-dependent 
@@ -383,7 +377,7 @@ bd.sim <- function(n0, pp, qq, tMax,
                   envPP = NULL, envQQ = NULL, 
                   pShifts = NULL, qShifts = NULL, 
                   nFinal = c(0, Inf), extOnly = FALSE,
-                  fast = TRUE, trueExt = FALSE) {
+                  trueExt = FALSE) {
   
   # if we have ONLY numbers for pp and qq, it is constant
   if ((is.numeric(pp) & length(pp) == 1) &
@@ -406,7 +400,7 @@ bd.sim <- function(n0, pp, qq, tMax,
 
     # call bd.sim.general
     return(bd.sim.general(n0, p, q, tMax, pShape, qShape, 
-                          nFinal, extOnly, fast, trueExt))
+                          nFinal, extOnly, trueExt))
   }
 }
 
