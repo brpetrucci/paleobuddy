@@ -5,10 +5,10 @@
 \title{General rate species sampling}
 \usage{
 sample.clade(
-  S = NULL,
   sim,
   rr,
   tMax,
+  S = NULL,
   envRR = NULL,
   rShifts = NULL,
   returnTrue = TRUE,
@@ -19,10 +19,6 @@ sample.clade(
 )
 }
 \arguments{
-\item{S}{A vector of species numbers to be sampled. Could be only a subset of 
-the species if the user wishes. The default is all species in \code{sim}. 
-Species not included in \code{S} will not be sampled by the function.}
-
 \item{sim}{A \code{sim} object, usually an output of \code{bd.sim}.}
 
 \item{rr}{Sampling rate (per species per million years) over time. It can be 
@@ -39,6 +35,10 @@ time greater than \code{tMax} would mean the occurrence is sampled after the
 present, so for consistency we require this argument. This is also required
 to ensure time follows the correct direction both in the Poisson process and
 in the return.}
+
+\item{S}{A vector of species numbers to be sampled. Could be only a subset of 
+the species if the user wishes. The default is all species in \code{sim}. 
+Species not included in \code{S} will not be sampled by the function.}
 
 \item{envRR}{A matrix containing time points and values of an environmental
 variable, like temperature, for each time point. This will be used to create
@@ -141,8 +141,7 @@ bins <- seq(from = 10, to = 0,
 # note that we will provide a very high resolution to test the function
 
 # find the occurrence data frame
-dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, bins = bins, 
-                   returnTrue = FALSE)
+dt <- sample.clade(sim, r, tMax = 10, bins = bins, returnTrue = FALSE)
 
 # extract species identity
 ids <- unique(dt$Species)
@@ -185,8 +184,7 @@ bins <- seq(from = 10, to = 0,
 # note that we will provide a very high resolution to test the function
 
 # find the occurrence data frame
-dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, bins = bins, 
-                   returnTrue = FALSE)
+dt <- sample.clade(sim, r, tMax = 10, bins = bins, returnTrue = FALSE)
 
 # extract species identity
 ids <- unique(dt$Species)
@@ -236,7 +234,7 @@ bins <- seq(from = 10, to = 0,
 # note that we will provide a very high resolution to test the function
 
 # find the occurrence data frame
-dt <- sample.clade(1:length(sim$TE), sim, rList, rShifts = rShifts, 
+dt <- sample.clade(sim, rList, rShifts = rShifts, 
                    tMax = 10, bins = bins, returnTrue = FALSE)
 
 # extract species identity
@@ -293,8 +291,8 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
   # note that we will provide a very high resolution to test the function
   
   # find the occurrence data frame
-  dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, envRR = envR,
-                    bins = bins, returnTrue = FALSE)
+  dt <- sample.clade(sim, r, tMax = 10, envRR = envR,
+                     bins = bins, returnTrue = FALSE)
   
   # extract species identity
   ids <- unique(dt$Species)
@@ -376,8 +374,8 @@ bins <- seq(from = 10, to = 0,
             by = -0.1)
 # note that we will provide a very high resolution to test the function
 
-dt <- sample.clade(1:length(sim$TE), sim, rr = 3, tMax = 10, bins = bins,
-                  dFun = dPERT, dFunMax = dPERTmax, returnTrue = FALSE)
+dt <- sample.clade(sim, rr = 3, tMax = 10, bins = bins,
+                   dFun = dPERT, dFunMax = dPERTmax, returnTrue = FALSE)
 
 # extract species identity
 ids <- unique(dt$Species)
@@ -467,8 +465,8 @@ bins <- seq(from = 10, to = 0,
             by = -0.1)
 # note that we will provide a very high resolution to test the function
 
-dt <- sample.clade(1:length(sim$TE), sim, rr = 4, tMax = 10, bins = bins,
-                  dFun = dTRImod2, dFunMax = dTRImaxmod2, returnTrue = FALSE)
+dt <- sample.clade(sim, rr = 4, tMax = 10, bins = bins,
+                   dFun = dTRImod2, dFunMax = dTRImaxmod2, returnTrue = FALSE)
 
 # extract species identity
 ids <- unique(dt$Species)

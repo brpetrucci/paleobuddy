@@ -4,13 +4,9 @@
 \alias{sample.species}
 \title{Constant and time-dependent rate species sampling}
 \usage{
-sample.species(S, sim, rr, tMax)
+sample.species(sim, rr, tMax, S)
 }
 \arguments{
-\item{S}{The species number to be sampled. Since \code{sample.species} will be 
-called by a wrapper using \code{lapply}, it is through \code{S} that we apply
-this function.}
-
 \item{sim}{A \code{sim} object, usually an output of \code{bd.sim}.}
 
 \item{rr}{Sampling rate (per species per million years) over time. It can be 
@@ -27,6 +23,10 @@ time greater than \code{tMax} would mean the occurrence is sampled after the
 present, so for consistency we require this argument. This is also required
 to ensure time follows the correct direction both in the Poisson process and
 in the return.}
+
+\item{S}{The species number to be sampled. Since \code{sample.species} will be 
+called by a wrapper using \code{lapply}, it is through \code{S} that we apply
+this function.}
 }
 \value{
 A vector of occurrence times for that species.
@@ -70,7 +70,7 @@ plot(x = t, y = rev(r(t)), main="Simulated preservation", type = "l",
      xlim = c(10, sim$TE[1]))
 
 # sample
-occs <- sample.species(S = 1, sim = sim, rr = r, tMax = 10)
+occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
 
 # check histogram
 hist(occs,
@@ -110,7 +110,7 @@ plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
      xlim = c(10, sim$TE[1]))
 
 # sample
-occs <- sample.species(S = 1, sim = sim, rr = r, tMax = 10)
+occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
 
 # check histogram
 hist(occs,
@@ -147,7 +147,7 @@ plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
      xlim = c(10, sim$TE[1]))
 
 # sample
-occs <- sample.species(S = 1, sim = sim, rr = r, tMax = 10)
+occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
 
 # check histogram
 hist(occs,
@@ -184,7 +184,7 @@ if (requireNamespace("RPANDA", quietly = TRUE)) {
        xlim = c(10, sim$TE[1]))
   
   # sample
-  occs <- sample.species(S = 1, sim = sim, rr = r, tMax = 10)
+  occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
   
   # check histogram
   hist(occs,

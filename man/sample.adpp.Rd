@@ -4,13 +4,9 @@
 \alias{sample.adpp}
 \title{Age-dependent Poisson Process species sampling}
 \usage{
-sample.adpp(S = NULL, sim, rr, dFun, dFunMax = NULL, ...)
+sample.adpp(sim, rr, dFun, S = NULL, dFunMax = NULL, ...)
 }
 \arguments{
-\item{S}{A vector of species numbers to be sampled. Could be only a subset of 
-the species if the user wishes. The default is all species in \code{sim}. 
-Species not included in \code{S} will not be sampled by the function.}
-
 \item{sim}{A \code{sim} object, usually an output of \code{bd.sim}.}
 
 \item{rr}{A mean sampling rate (equivalent to the \code{lambda} of a Poisson)
@@ -37,6 +33,10 @@ extinction in geological time), with \code{s} > \code{e}.
 The argument sp is used to pass species-specific parameters (see examples),
 allowing for \code{dFun} to be species-inhomogeneous.
 }}
+
+\item{S}{A vector of species numbers to be sampled. Could be only a subset of 
+the species if the user wishes. The default is all species in \code{sim}. 
+Species not included in \code{S} will not be sampled by the function.}
 
 \item{dFunMax}{A function that calculates the maximum (density) value of
 \code{dFun} using its arguments, excluding \code{t}. It can also be a number 
@@ -120,7 +120,7 @@ dPERTmax <- function(s, e, sp) {
 }
 
 # find occurrences
-occs <- sample.adpp(S = 1, sim = sim, rr = 1, dFun = dPERT, dFunMax = dPERTmax)
+occs <- sample.adpp(sim = sim, rr = 1, dFun = dPERT, S = 1, dFunMax = dPERTmax)
 
 # check histogram
 hist(unlist(occs), probability = TRUE)
@@ -158,7 +158,7 @@ custom.uniform <- function(t, s, e, sp) {
 
 # we will not give a dFunMax function this time. sample.adpp() will try to find
 # the maximum density with a very simple numerical simulation
-occs <- sample.adpp(S = 1, sim = sim, rr = 2, dFun = custom.uniform)
+occs <- sample.adpp(sim = sim, rr = 2, dFun = custom.uniform, S = 1)
 
 # check histogram
 hist(unlist(occs[[1]]), probability = TRUE)
@@ -235,8 +235,8 @@ dTRImax <- function(s, e, sp, md) {
 }
 
 # note we are providing the mode for the triangular sampling as an ... argument
-occs <- sample.adpp(S = 1, sim = sim, rr = 2.5, dFun = dTRI,
-                   dFunMax = dTRImax, md = 8)
+occs <- sample.adpp(sim = sim, rr = 2.5, dFun = dTRI,
+                   dFunMax = dTRImax, S = 1, md = 8)
 
 # please note in the original parametrization, the "md" parameter (mode) is
 # in "absolute time", i.e. a specific number in the absolute scale. This is not,
@@ -314,8 +314,8 @@ dTRImaxmod1<-function(s, e, sp) {
 }
 
 # find occurrences
-occs <- sample.adpp(S = 1, sim = sim, rr = 5,
-                    dFun = dTRImod1, dFunMax = dTRImaxmod1)
+occs <- sample.adpp(sim = sim, rr = 5,
+                    dFun = dTRImod1, S = 1, dFunMax = dTRImaxmod1)
 
 # we do not have the "md" parameter (see example 3) as it corresponds to the
 # last quarter of the duration of each lineage
@@ -389,7 +389,7 @@ par <- runif (n = length(sim$TE), min = sim$TE, max = sim$TS)
 par1 <- (((sim$TS - sim$TE)/2) + sim$TE) - par
 
 # find occurrence list
-occs <- sample.adpp(S = 1:length(sim$TE), sim = sim, rr = 10,
+occs <- sample.adpp(sim = sim, rr = 10,
                     dFun = dTRImod2, dFunMax = dTRImaxmod2)
 
 # we do not have the "md" parameter (see example 3) as it corresponds to

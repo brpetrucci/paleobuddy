@@ -46,7 +46,7 @@
 #' sim <- bd.sim(1, pp = 0.1, qq = 0.05, tMax = 15)
 #' 
 #' # sample it
-#' sampled <- sample.species(S = 1, sim = sim, rr = 1, tMax = 15)
+#' sampled <- sample.species(sim = sim, rr = 1, tMax = 15, S = 1)
 #' 
 #' # bins vector
 #' bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
@@ -64,7 +64,7 @@
 #' }, qq = 0.05, tMax = 20)
 #' 
 #' # sample it
-#' sampled <- sample.species(S = 1, sim = sim, rr = 1, tMax = 15)
+#' sampled <- sample.species(sim = sim, rr = 1, tMax = 15, S = 1)
 #' 
 #' # bins vector
 #' bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)

@@ -87,8 +87,7 @@
 #' # note that we will provide a very high resolution to test the function
 #' 
 #' # find the occurrence data frame
-#' dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, bins = bins, 
-#'                    returnTrue = FALSE)
+#' dt <- sample.clade(sim, r, tMax = 10, bins = bins, returnTrue = FALSE)
 #' 
 #' # extract species identity
 #' ids <- unique(dt$Species)
@@ -131,8 +130,7 @@
 #' # note that we will provide a very high resolution to test the function
 #' 
 #' # find the occurrence data frame
-#' dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, bins = bins, 
-#'                    returnTrue = FALSE)
+#' dt <- sample.clade(sim, r, tMax = 10, bins = bins, returnTrue = FALSE)
 #' 
 #' # extract species identity
 #' ids <- unique(dt$Species)
@@ -182,7 +180,7 @@
 #' # note that we will provide a very high resolution to test the function
 #' 
 #' # find the occurrence data frame
-#' dt <- sample.clade(1:length(sim$TE), sim, rList, rShifts = rShifts, 
+#' dt <- sample.clade(sim, rList, rShifts = rShifts, 
 #'                    tMax = 10, bins = bins, returnTrue = FALSE)
 #' 
 #' # extract species identity
@@ -239,8 +237,8 @@
 #'   # note that we will provide a very high resolution to test the function
 #'   
 #'   # find the occurrence data frame
-#'   dt <- sample.clade(1:length(sim$TE), sim, r, tMax = 10, envRR = envR,
-#'                     bins = bins, returnTrue = FALSE)
+#'   dt <- sample.clade(sim, r, tMax = 10, envRR = envR,
+#'                      bins = bins, returnTrue = FALSE)
 #'   
 #'   # extract species identity
 #'   ids <- unique(dt$Species)
@@ -322,8 +320,8 @@
 #'             by = -0.1)
 #' # note that we will provide a very high resolution to test the function
 #' 
-#' dt <- sample.clade(1:length(sim$TE), sim, rr = 3, tMax = 10, bins = bins,
-#'                   dFun = dPERT, dFunMax = dPERTmax, returnTrue = FALSE)
+#' dt <- sample.clade(sim, rr = 3, tMax = 10, bins = bins,
+#'                    dFun = dPERT, dFunMax = dPERTmax, returnTrue = FALSE)
 #' 
 #' # extract species identity
 #' ids <- unique(dt$Species)
@@ -413,8 +411,8 @@
 #'             by = -0.1)
 #' # note that we will provide a very high resolution to test the function
 #' 
-#' dt <- sample.clade(1:length(sim$TE), sim, rr = 4, tMax = 10, bins = bins,
-#'                   dFun = dTRImod2, dFunMax = dTRImaxmod2, returnTrue = FALSE)
+#' dt <- sample.clade(sim, rr = 4, tMax = 10, bins = bins,
+#'                    dFun = dTRImod2, dFunMax = dTRImaxmod2, returnTrue = FALSE)
 #' 
 #' # extract species identity
 #' ids <- unique(dt$Species)
@@ -445,7 +443,7 @@
 #' @rdname sample.clade
 #' @export
 
-sample.clade <- function(S = NULL, sim, rr, tMax, envRR = NULL, rShifts = NULL,
+sample.clade <- function(sim, rr, tMax, S = NULL, envRR = NULL, rShifts = NULL,
                          returnTrue = TRUE, bins = NULL, 
                          dFun = NULL, dFunMax = NULL, ...) {
   # make S all species if it is NULL

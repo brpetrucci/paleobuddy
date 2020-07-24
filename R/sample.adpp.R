@@ -113,7 +113,7 @@
 #' }
 #' 
 #' # find occurrences
-#' occs <- sample.adpp(S = 1, sim = sim, rr = 1, dFun = dPERT, dFunMax = dPERTmax)
+#' occs <- sample.adpp(sim = sim, rr = 1, dFun = dPERT, S = 1, dFunMax = dPERTmax)
 #' 
 #' # check histogram
 #' hist(unlist(occs), probability = TRUE)
@@ -151,7 +151,7 @@
 #' 
 #' # we will not give a dFunMax function this time. sample.adpp() will try to find
 #' # the maximum density with a very simple numerical simulation
-#' occs <- sample.adpp(S = 1, sim = sim, rr = 2, dFun = custom.uniform)
+#' occs <- sample.adpp(sim = sim, rr = 2, dFun = custom.uniform, S = 1)
 #' 
 #' # check histogram
 #' hist(unlist(occs[[1]]), probability = TRUE)
@@ -228,8 +228,8 @@
 #' }
 #' 
 #' # note we are providing the mode for the triangular sampling as an ... argument
-#' occs <- sample.adpp(S = 1, sim = sim, rr = 2.5, dFun = dTRI,
-#'                    dFunMax = dTRImax, md = 8)
+#' occs <- sample.adpp(sim = sim, rr = 2.5, dFun = dTRI,
+#'                    dFunMax = dTRImax, S = 1, md = 8)
 #' 
 #' # please note in the original parametrization, the "md" parameter (mode) is
 #' # in "absolute time", i.e. a specific number in the absolute scale. This is not,
@@ -307,8 +307,8 @@
 #' }
 #' 
 #' # find occurrences
-#' occs <- sample.adpp(S = 1, sim = sim, rr = 5,
-#'                     dFun = dTRImod1, dFunMax = dTRImaxmod1)
+#' occs <- sample.adpp(sim = sim, rr = 5,
+#'                     dFun = dTRImod1, S = 1, dFunMax = dTRImaxmod1)
 #' 
 #' # we do not have the "md" parameter (see example 3) as it corresponds to the
 #' # last quarter of the duration of each lineage
@@ -382,7 +382,7 @@
 #' par1 <- (((sim$TS - sim$TE)/2) + sim$TE) - par
 #' 
 #' # find occurrence list
-#' occs <- sample.adpp(S = 1:length(sim$TE), sim = sim, rr = 10,
+#' occs <- sample.adpp(sim = sim, rr = 10,
 #'                     dFun = dTRImod2, dFunMax = dTRImaxmod2)
 #' 
 #' # we do not have the "md" parameter (see example 3) as it corresponds to
@@ -408,7 +408,7 @@
 #' @rdname sample.adpp
 #' @export
 
-sample.adpp <- function(S = NULL, sim, rr, dFun, dFunMax = NULL, ...) {
+sample.adpp <- function(sim, rr, dFun, S = NULL, dFunMax = NULL, ...) {
   # some error checking
   if (sum(S %in% 1:length(sim$TS)) != length(S)) {
     stop("One or more species numbers provided not in simulation")

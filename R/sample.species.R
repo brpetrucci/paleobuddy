@@ -48,7 +48,7 @@
 #'      xlim = c(10, sim$TE[1]))
 #' 
 #' # sample
-#' occs <- sample.species(S = 1, sim = sim, rr = r, tMax = 10)
+#' occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
 #' 
 #' # check histogram
 #' hist(occs,
@@ -88,7 +88,7 @@
 #'      xlim = c(10, sim$TE[1]))
 #' 
 #' # sample
-#' occs <- sample.species(S = 1, sim = sim, rr = r, tMax = 10)
+#' occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
 #' 
 #' # check histogram
 #' hist(occs,
@@ -125,7 +125,7 @@
 #'      xlim = c(10, sim$TE[1]))
 #' 
 #' # sample
-#' occs <- sample.species(S = 1, sim = sim, rr = r, tMax = 10)
+#' occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
 #' 
 #' # check histogram
 #' hist(occs,
@@ -162,7 +162,7 @@
 #'        xlim = c(10, sim$TE[1]))
 #'   
 #'   # sample
-#'   occs <- sample.species(S = 1, sim = sim, rr = r, tMax = 10)
+#'   occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
 #'   
 #'   # check histogram
 #'   hist(occs,
@@ -175,7 +175,7 @@
 #' @rdname sample.species
 #' @export
 
-sample.species <- function(S, sim, rr, tMax) {
+sample.species <- function(sim, rr, tMax, S) {
   # invert times since simulation goes from 0 to tMax
   TE <- tMax - sim$TE
   TS <- tMax - sim$TS
