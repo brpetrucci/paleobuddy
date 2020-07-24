@@ -330,13 +330,6 @@ bd.sim.general <- function(n0, pp, qq, tMax,
     while (length(TE) >= sCount) {
       # actual speciation time
       specT <- ifelse(TS[sCount] < 0, 0, TS[sCount])
-      
-      # need this to pass speciation time to rexp.var only when shape is there
-      pSpecT <- NULL
-      if (!is.null(pShape)) pSpecT <- specT
-      
-      qSpecT <- NULL
-      if (!is.null(qShape)) qSpecT <- specT
   
       # get the time of speciation, or 0 if the species
       # was there at the beginning
@@ -347,12 +340,12 @@ bd.sim.general <- function(n0, pp, qq, tMax,
       waitTimeS <- ifelse(
         is.numeric(pp), ifelse(pp > 0, rexp(1, pp), Inf) ,
         ifelse(pp(tNow) > 0, 
-               rexp.var(1, pp, tNow, tMax, pShape, pSpecT, 
+               rexp.var(1, pp, tNow, tMax, pShape, specT, 
                         fast = !trueExt), Inf))
       waitTimeE <- ifelse(
         is.numeric(qq), ifelse(qq > 0, rexp(1, qq), Inf),
         ifelse(qq(tNow) > 0,
-               rexp.var(1, qq, tNow, tMax, qShape, qSpecT, 
+               rexp.var(1, qq, tNow, tMax, qShape, specT, 
                         fast = !trueExt), Inf))
   
       tExp <- tNow + waitTimeE
@@ -373,7 +366,7 @@ bd.sim.general <- function(n0, pp, qq, tMax,
         waitTimeS <- ifelse(
           is.numeric(pp), ifelse(pp > 0, rexp(1, pp), Inf),
           ifelse(pp(tNow) > 0, 
-                 rexp.var(1, pp, tNow, tMax, pShape, pSpecT, 
+                 rexp.var(1, pp, tNow, tMax, pShape, specT, 
                           fast = !trueExt), Inf))
       }
   

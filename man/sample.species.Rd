@@ -13,8 +13,14 @@ this function.}
 
 \item{sim}{A \code{sim} object, usually an output of \code{bd.sim}.}
 
-\item{rr}{A sampling rate function. Can be created by \code{make.rate} for
-simplicity, but can be any time-varying function, or a constant.}
+\item{rr}{Sampling rate (per species per million years) over time. It can be 
+a \code{numeric} describing a constant rate, a \code{function(t)} describing 
+the variation in sampling over time \code{t}, a \code{function(t, env)} 
+describing the variation in sampling over time following both time AND 
+an environmental variable (please see \code{envRR} for details) or a 
+\code{vector} containing rates that correspond to each rate between sampling
+rate shift times times (please see \code{rShifts}). Note that \code{rr} should
+should always be greater than or equal to zero.}
 
 \item{tMax}{The maximum simulation time, used by \code{rexp.var}. A sampling
 time greater than \code{tMax} would mean the occurrence is sampled after the
@@ -23,13 +29,15 @@ to ensure time follows the correct direction both in the Poisson process and
 in the return.}
 }
 \value{
-A vector of occurrences for that species.
+A vector of occurrence times for that species.
 }
 \description{
 Generates a vector of occurrence times for a species in a simulation using a
-constant or a function of absolute time as a rate for a Poisson process. For
-sampling of more than one species and/or taking into account species age
-instead of absolute time, see \code{sample.clade} and \code{sample.adpp}.
+a Poisson process. Allows for the Poisson rate to be (1) a constant, (2) a 
+function of time, (3) a function of time and an environmental variable, or (4)
+a vector of numbers. For sampling of more than one species and/or taking into 
+account species age instead of absolute time, see \code{sample.clade} and 
+\code{sample.adpp}.
 Note that while the Poisson process occurs in forward time, we return (both in
 birth-death functions and here) results in backwards time, so that time is
 inverted using \code{tMax} both at the beginning and end of 

@@ -1,35 +1,40 @@
 #' General rate species sampling
 #' 
-#' Generates a data frame containing either true occurrence times or time ranges
-#' for each of the desired species using a Poisson process. Allows the Poisson
-#' rate to be a constant, a vector of numbers or a function of time, and allows 
+#' Generates a \code{data.frame} containing either true occurrence times or time 
+#' ranges for each of the desired species using a Poisson process. Allows for the 
+#' Poisson rate to be (1) a constant, (2) a function of time, (3) a function of 
+#' time and an environmental variable, or (4) a vector of numbers. Also allows 
 #' as an optional parameter a distribution representing the expected occurrence 
 #' number over a species duration (in which case average rate must be constant). 
 #' Allows for further flexibility in (non-age dependent) rates by a shift times
 #' vector and environmental matrix parameters. Optionally takes a vector of time
 #' bins representing geologic periods, so that if the user wishes occurrence 
 #' times can be presented as a range instead of true points. Finally, allows for
-#' an optional argument - the maximum of the distribution - that can make the
-#' simulation faster, and for extra arguments the age-dependent preservation
-#' function may take. See \code{sample.species} - absolute time-dependent sampling
-#' - and \code{sample.adpp} - age-dependent sampling - for more information.
-#'
-#' @param S A vector of species numbers to be sampled. Could be only a subset of 
-#' the species if the user wishes. The default is all species in \code{sim}. 
-#' Species not included in \code{S} will not be sampled by the function.
-#'
-#' @param sim A simulation, usually the output of \code{bd.sim}.
+#' an optional argument - the maximum of the age-dependent distribution - that can
+#' make the simulation faster, and for extra arguments the age-dependent 
+#' preservation function may take. See \code{sample.species} - absolute 
+#' time-dependent sampling - and \code{sample.adpp} - age-dependent sampling - for
+#' more information.
 #'
 #' @param bins A vector of time intervals corresponding to geological time ranges.
-#'
-#' @param rr A sampling rate function. May be a constant, a time-dependent
-#' function, a function dependent on time and environment, or a vector of
-#' rates corresponding to the times in \code{rShifts}.
 #' 
-#' Note: must be a constant if \code{dFun} is not \code{NULL}.
+#' @inheritParams sample.adpp
 #'
-#' @param tMax The maximum simulation time, used by \code{rexp.var}.
-#' 
+#' @param rr Sampling rate (per species per million years) over time. It can be 
+#' a \code{numeric} describing a constant rate, a \code{function(t)} describing 
+#' the variation in sampling over time \code{t}, a \code{function(t, env)} 
+#' describing the variation in sampling over time following both time AND 
+#' an environmental variable (please see \code{envRR} for details) or a 
+#' \code{vector} containing rates that correspond to each rate between sampling
+#' rate shift times times (please see \code{rShifts}). Note that \code{rr} should
+#' should always be greater than or equal to zero.
+#'
+#' @param tMax The maximum simulation time, used by \code{rexp.var}. A sampling
+#' time greater than \code{tMax} would mean the occurrence is sampled after the
+#' present, so for consistency we require this argument. This is also required
+#' to ensure time follows the correct direction both in the Poisson process and
+#' in the return.
+#'  
 #' @param envRR A matrix containing time points and values of an environmental
 #' variable, like temperature, for each time point. This will be used to create
 #' a sampling rate, so \code{rr} must be a function of time and said variable
@@ -54,39 +59,9 @@
 #' supplied and \code{returnTrue == FALSE}, the default is 
 #' \code{seq(tMax, 0, 0.1)}.
 #'
-#' @param dFun A density function representing the age-dependent
-#' preservation model. It must be a density function, and consequently
-#'
-#' \itemize{
-#'
-#' \item integrate to 1 (though this condition is not verified by the function,
-#' it is the user's responsibility to check this property).
-#'
-#' \item describe the density of sampling a lineage in a given point \code{t} in
-#' geological time.
-#'
-#' \item be parametrized in absolute geological time (i.e. should be relative to
-#' absolute geological time, in Mya).
-#'
-#' \item should be limited between \code{s} (i.e. the lineage's
-#' speciation/origination geological time) and \code{e} (i.e. the lineage's 
-#' extinction geological time), with \code{s} > \code{e}.
-#'
-#' \item include the arguments \code{t}, \code{s}, \code{e} and \code{sp}.
-#' }
-#'
-#' @param dFunMax A function that calculates the maximum (density) value of
-#' \code{dFun} using its arguments. It can also be a number representing the
-#' maximum density.
-#'
-#' Note: if it not provided, it will be approximated numerically, leading to
-#' longer running times.
-#'
-#' @param ... Additional parameters related to \code{dFun} and \code{dFunMax}.
-#'
-#' @return A data frame containing species names/numbers, whether each species
-#' is extant, and either the true occurrence times of species or a range of
-#' occurrence times based on \code{bins}.
+#' @return A \code{data.frame} containing species names/numbers, whether each 
+#' species is extant, and either the true occurrence times of species or a range 
+#' of occurrence times based on \code{bins}.
 #'
 #' @author Matheus Januario and Bruno do Rosario Petrucci.
 #'

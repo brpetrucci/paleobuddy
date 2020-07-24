@@ -14,32 +14,33 @@ Species not included in \code{S} will not be sampled by the function.}
 \item{sim}{A \code{sim} object, usually an output of \code{bd.sim}.}
 
 \item{rr}{A mean sampling rate (equivalent to the \code{lambda} of a Poisson)
-in the Poisson process.}
+in the Poisson process. Must be a number greater than or equal to zero.}
 
 \item{dFun}{A density function representing the age-dependent
-preservation model. It must be a density function, and consequently
+preservation model. It must be a density function, and consequently integrate
+to 1 (though this condition is not verified by the function). Additionally, the
+function must have the following properties:
 
 \itemize{
 
-\item integrate to 1 (though this condition is not verified by the function,
-it is the user's responsibility to check this property).
+\item Returns a vector of preservation densities for each time in a given
+vector \code{t} in geological time. 
 
-\item describe the density of sampling a lineage in a given point \code{t} in
-geological time.
+\item Be parametrized in absolute geological time (i.e. should be relative to
+absolute geological time, in Mya, \emph{not} the lineage's age).
 
-\item be parametrized in absolute geological time (i.e. should be relative to
-absolute geological time, in Mya).
+\item Should be limited between \code{s} (i.e. the lineage's
+speciation/origination in geological time) and \code{e} (i.e. the lineage's 
+extinction in geological time), with \code{s} > \code{e}.
 
-\item should be limited between \code{s} (i.e. the lineage's
-speciation/origination geological time) and \code{e} (i.e. the lineage's 
-extinction geological time), with \code{s} > \code{e}.
-
-\item include the arguments \code{t}, \code{s}, \code{e} and \code{sp}.
+\item Include the arguments \code{t}, \code{s}, \code{e} and \code{sp}. 
+The argument sp is used to pass species-specific parameters (see examples),
+allowing for \code{dFun} to be species-inhomogeneous.
 }}
 
 \item{dFunMax}{A function that calculates the maximum (density) value of
-\code{dFun} using its arguments. It can also be a number representing the
-maximum density.
+\code{dFun} using its arguments, excluding \code{t}. It can also be a number 
+representing the maximum density.
 
 Note: if it not provided, it will be approximated numerically, leading to
 longer running times.}
@@ -48,8 +49,8 @@ longer running times.}
 }
 \value{
 A list of occurrences for that species, expected to be around 
-\code{(TS - TE)*rr} occurrences, with their distribution in species relative 
-time given by the function provided by the user.
+\code{(s - e)*rr} occurrences, with their distribution in species relative 
+time given by the \code{dFun} function provided by the user.
 }
 \description{
 Generates a list of occurrence times for each of the desired species using a

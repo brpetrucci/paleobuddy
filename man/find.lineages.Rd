@@ -7,18 +7,18 @@
 find.lineages(sim, S = NULL)
 }
 \arguments{
-\item{sim}{A simulation, usually a return from the \code{bd.sim} function. The 
-function accepts simulations with any number of starting species.}
+\item{sim}{a simulation containing lists for the speciation times, extinction
+times, parent identities and status (extant or extinct).}
 
 \item{S}{A vector of species in \code{sim}. If not supplied, \code{S} will be
 the starting species in the simulation (i.e. those for which the parent is
 \code{NA}).}
 }
 \value{
-A \code{list} object with (named) \code{sim} objects corresponding to
-the clades descended from species in \code{S}. For each clade, an extra vector
-\code{sim$LIN} is included so the user can identify the order of species
-in the return with the order of species in the original simulation.
+A \code{list} object with (named) \code{sim} objects corresponding to 
+the clades descended from species in \code{S}. For each clade, an extra vector 
+\code{sim$LIN} is included so the user can identify the order of species in the
+return with the order of species in the original simulation.
 }
 \description{
 Finds and separates a \code{sim} object into \code{sim} objects each with a 

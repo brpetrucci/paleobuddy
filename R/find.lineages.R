@@ -7,8 +7,7 @@
 #' each resulting member of the returning list instead. Returns for each clade a 
 #' vector with the original identity of member species as well.
 #'
-#' @param sim A simulation, usually a return from the \code{bd.sim} function. The 
-#' function accepts simulations with any number of starting species.
+#' @inheritParams make.phylo
 #'
 #' @param S A vector of species in \code{sim}. If not supplied, \code{S} will be
 #' the starting species in the simulation (i.e. those for which the parent is
@@ -16,10 +15,10 @@
 #'
 #' @author Bruno Petrucci and Matheus Januario.
 #'
-#' @return A \code{list} object with (named) \code{sim} objects corresponding to
-#' the clades descended from species in \code{S}. For each clade, an extra vector
-#' \code{sim$LIN} is included so the user can identify the order of species
-#' in the return with the order of species in the original simulation.
+#' @return A \code{list} object with (named) \code{sim} objects corresponding to 
+#' the clades descended from species in \code{S}. For each clade, an extra vector 
+#' \code{sim$LIN} is included so the user can identify the order of species in the
+#' return with the order of species in the original simulation.
 #'
 #' @examples
 #'

@@ -1,45 +1,45 @@
 #' Create a flexible rate for birth-death or sampling simulations
 #' 
-#' Generates a rate to be used on birth-death or sampling functions. Takes as the
-#' base rate a constant, function of time, function of time and an environmental
-#' variable or a vector of numbers. Allows for modifying using a vector of rate 
-#' shift times or a matrix containing time and environmental data. Also requires
-#' \code{tMax}, the maximum simulation time, so it can recognize both forward and
-#' backward time vector rates.
+#' Generates a rate to be used on birth-death or sampling functions. Takes as the 
+#' base rate (1) a constant, (2) a function of time, (3) a function of time 
+#' interacting with an environmental variable, or (4) a vector of numbers 
+#' describing rates as a step function. Requires information regarding the maximum
+#' simulation time, and allows for optional extra parameters to tweak the baseline
+#' rate.
 #'
 #' @param ff The baseline function with which to make the rate.
 #' It can be a
 #'
 #' \describe{
-#' \item{\code{Constant}}{For constant birth-death rates.}
+#' \item{\code{A number}}{For constant birth-death rates.}
 #'
-#' \item{\code{Function of time}}{For rates that vary with time. Note that this
+#' \item{\code{A function of time}}{For rates that vary with time. Note that this
 #' can be any function of time, but one should not supply a function that
 #' depends on more than one variable without an accompanying \code{envF} -
 #' that will result in an error.}
 #'
-#' \item{\code{Vector of rates}}{To create step function rates. Note this must
-#' be accompanied by a corresponding vector of shifts \code{fShifts}.}}
+#' \item{\code{A numeric vector}}{To create step function rates. Note this must be
+#'  accompanied by a corresponding vector of shifts \code{fShifts}.}}
 #'
-#' @param tMax A number corresponding to the maximum simulation time.
-#' Needed to ensure \code{fShifts} runs the correct way.
+#' @param tMax Ending time of simulation, in million years after the clade's 
+#' origin. Needed to ensure \code{fShifts} runs the correct way.
 #'
-#' @param envF A matrix representing an environmental variable (time, CO2, etc)
-#' with time. The first column must be time, second column the values of the 
-#' variable. Note that supplying \code{envF} with \code{ff} being a function of
-#' only one variable or a constant results in an error.
+#' @param envF A \code{data.frame} representing the variation of an environmental 
+#' variable (e.g. CO2, temperature, available niches, etc) with time. The first 
+#' column of this \code{data.frame} must be time, and the second column must be 
+#' the values of the variable. The function will return an error if supplying 
+#' \code{envF} without \code{ff} being a function of two variables.
 #'
-#' @param fShifts A vector of rate shifts. The first element must
-#' be the first time point for the simulation. This may be \code{0} or 
-#' \code{tMax}. Since functions in paleobuddy run from \code{0} to \code{tMax}, if
-#' \code{fShifts} runs from past to present (\code{fShifts[2] < fShifts[1]}), we 
-#' take \code{tMax - fShifts} as the shifts vector. Note that supplying 
-#' \code{fShifts} when \code{ff} is not a rates vector will result in an error.
+#' @param fShifts A vector indicating the time placement of rate shifts in a step 
+#' function. The first element must be the first time point for the simulation. 
+#' This may be \code{0} or \code{tMax}. Since functions in paleobuddy run from 
+#' \code{0} to \code{tMax}, if \code{fShifts} runs from past to present 
+#' (\code{fShifts[2] < fShifts[1]}), we take \code{tMax - fShifts} as the shifts 
+#' vector. Note that supplying \code{fShifts} when \code{ff} is not a numeric 
+#' vector of the same length will result in an error.
 #'
 #' @return A constant or time-varying function (depending on input) that can
-#' then be used as a rate in the other \code{paleobuddy} functions. The returned
-#' function will invariably be either a number or a function of one variable only, 
-#' usually set as time.
+#' then be used as a rate in the other \code{paleobuddy} functions. 
 #'
 #' @author Bruno do Rosario Petrucci
 #'

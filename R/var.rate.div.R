@@ -1,19 +1,14 @@
 #' Expected diversity for general exponential rates
 #'
 #' Calculates the expected species diversity on an interval given a (possibly time
-#' dependent) exponential rate. Takes any number, vector of numbers, function of 
-#' time or function of time and an environmental variable as a rate. Allows for 
-#' flexibility by optionally taking a number of initial species, environmental 
-#' data and vector of rate shift times. Calculates the diversity for any vector
-#' of time.
+#' dependent) exponential rate.  Takes as the base rate (1) a constant, (2) a 
+#' function of time, (3) a function of time interacting with an environmental 
+#' variable, or (4) a vector of numbers describing rates as a step function. 
+#' Requires information regarding the maximum simulation time, and allows for 
+#' optional extra parameters to tweak the baseline rate. For more information on
+#' the creation of the final rate, see \code{make.rate}.
 #'
-#' @param ff A rate for the exponential distribution that can be any function of
-#' time. One can also supply data for an environmental variable (see below for the
-#' \code{envF} param) and get the expected number of species for a hybrid function 
-#' of time and said variable. Finally, one can instead supply a vector of rates to 
-#' \code{ff} and a vector of shifts to \code{fShifts} and get a step function. It 
-#' is more efficient to create a step function using \code{ifelse} however (see 
-#' examples below).
+#' @inheritParams make.rate
 #' 
 #' @param t A time vector over which to consider the distribution.
 #'
@@ -25,19 +20,6 @@
 #' rate \code{ff} and an initial number of parents \code{n0}, so in a
 #' biological context \code{ff} is diversification rate, not speciation (unless
 #' extinction is \code{0}).
-#' 
-#' @param tMax A number corresponding to the maximum simulation time.
-#' Needed to ensure \code{fShifts} runs the correct way.
-#'
-#' @param envF A two dimensional matrix with time as the first column and the
-#' desired environmental variable as the second. Note that supplying a function 
-#' with one argument and a non-\code{NULL} \code{envF}, and vice versa, will 
-#' return an error.
-#'
-#' @param fShifts Vector of rate shifts. First element must be the starting
-#' time for the simulation (\code{0} or \code{tMax}). It must have the same length 
-#' as \code{pp}. \code{c(0, x, tMax)} is equivalent to \code{c(tMax, tMax - x, 0)}
-#' for the purposes of \code{make.rate}.
 #'
 #' @return A vector of the expected number of species per time point supplied
 #' in \code{t}, which can then be used to plot vs. \code{t}.

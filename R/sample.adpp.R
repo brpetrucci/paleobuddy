@@ -17,32 +17,33 @@
 #' @param sim A \code{sim} object, usually an output of \code{bd.sim}.
 #'
 #' @param rr A mean sampling rate (equivalent to the \code{lambda} of a Poisson)
-#' in the Poisson process.
+#' in the Poisson process. Must be a number greater than or equal to zero.
 #'
 #' @param dFun A density function representing the age-dependent
-#' preservation model. It must be a density function, and consequently
+#' preservation model. It must be a density function, and consequently integrate
+#' to 1 (though this condition is not verified by the function). Additionally, the
+#' function must have the following properties:
 #'
 #' \itemize{
 #'
-#' \item integrate to 1 (though this condition is not verified by the function,
-#' it is the user's responsibility to check this property).
+#' \item Returns a vector of preservation densities for each time in a given
+#' vector \code{t} in geological time. 
 #'
-#' \item describe the density of sampling a lineage in a given point \code{t} in
-#' geological time.
+#' \item Be parametrized in absolute geological time (i.e. should be relative to
+#' absolute geological time, in Mya, \emph{not} the lineage's age).
 #'
-#' \item be parametrized in absolute geological time (i.e. should be relative to
-#' absolute geological time, in Mya).
+#' \item Should be limited between \code{s} (i.e. the lineage's
+#' speciation/origination in geological time) and \code{e} (i.e. the lineage's 
+#' extinction in geological time), with \code{s} > \code{e}.
 #'
-#' \item should be limited between \code{s} (i.e. the lineage's
-#' speciation/origination geological time) and \code{e} (i.e. the lineage's 
-#' extinction geological time), with \code{s} > \code{e}.
-#'
-#' \item include the arguments \code{t}, \code{s}, \code{e} and \code{sp}.
+#' \item Include the arguments \code{t}, \code{s}, \code{e} and \code{sp}. 
+#' The argument sp is used to pass species-specific parameters (see examples),
+#' allowing for \code{dFun} to be species-inhomogeneous.
 #' }
 #'
 #' @param dFunMax A function that calculates the maximum (density) value of
-#' \code{dFun} using its arguments. It can also be a number representing the
-#' maximum density.
+#' \code{dFun} using its arguments, excluding \code{t}. It can also be a number 
+#' representing the maximum density.
 #'
 #' Note: if it not provided, it will be approximated numerically, leading to
 #' longer running times.
@@ -50,8 +51,8 @@
 #' @param ... Additional parameters related to \code{dFun} and \code{dFunMax}.
 #'
 #' @return A list of occurrences for that species, expected to be around 
-#' \code{(TS - TE)*rr} occurrences, with their distribution in species relative 
-#' time given by the function provided by the user.
+#' \code{(s - e)*rr} occurrences, with their distribution in species relative 
+#' time given by the \code{dFun} function provided by the user.
 #'
 #' @author Matheus Januario.
 #'
@@ -412,6 +413,13 @@ sample.adpp <- function(S = NULL, sim, rr, dFun, dFunMax = NULL, ...) {
   if (sum(S %in% 1:length(sim$TS)) != length(S)) {
     stop("One or more species numbers provided not in simulation")
   }
+  
+  # check rr is a constant greater than or equal to 0
+  if (!is.numeric(rr) | (is.numeric(rr) & length(rr) != 1) |
+      (is.numeric(rr) & length(rr) == 1 & rr < 0)) {
+    stop("rr must be a number greater than or equal to 0")
+  }
+      
   
   # make S all species if it is NULL
   if (is.null(S)) {

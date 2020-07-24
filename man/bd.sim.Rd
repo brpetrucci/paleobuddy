@@ -30,12 +30,12 @@ diversification of a paraphyletic group.}
 
 \item{pp}{Speciation rate (per species per million years) over time. It can be 
 a \code{numeric} describing a constant rate, a \code{function(t)} describing 
-the variation in speciation over time \code{t} a \code{function(t, env)} 
-describing the variation in speciation over time following both a function AND 
-an environmental variable (please see \code{envPP} and details) or a 
-\code{vector} containing rates that correspond to each speciation rate between 
-speciation shift times times (please see \code{pShifts}). Please note that 
-\code{pp} should always be greater than or equal to zero.}
+the variation in speciation over time \code{t}, a \code{function(t, env)} 
+describing the variation in speciation over time following both time AND 
+an environmental variable (please see \code{envPP} for details) or a 
+\code{vector} containing rates that correspond to each rate between speciation
+rate shift times times (please see \code{pShifts}). Note that \code{pp} should
+should always be greater than or equal to zero.}
 
 \item{qq}{Similar to \code{pp}, but for the extinction rate.}
 

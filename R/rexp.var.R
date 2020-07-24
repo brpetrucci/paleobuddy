@@ -2,10 +2,10 @@
 #' 
 #' Generates a waiting time following an exponential or Weibull distribution with
 #' constant or varying rates. Allows for an optional shape parameter, in which 
-#' case \code{lambda} will be taken as a Weibull scale. Requires information on
+#' case \code{lambda} will be taken as a Weibull scale. Allows for information on
 #' the current time, to consider only rates starting from then, and the speciation
-#' time, optionally, in case shape is provided and the process is age-dependent.
-#' Allows for customization on the possibility of throwing away a waiting time
+#' time, optionally, in case shape is provided, as the process is age-dependent.
+#' Allows for customization on the possibility of throwing away waiting times
 #' higher than \code{tMax}, and therefore takes that time as a parameter.
 #'
 #' @param n The number of waiting times to return. Usually 1, but we allow for
@@ -13,37 +13,37 @@
 #' 
 #' @param lambda The rate parameter for the exponential distribution. If
 #' \code{shape} is not \code{NULL}, \code{lambda} is a scale for a Weibull
-#' distribution. In both cases we allow for any time-varying function. If one
-#' wants to use a constant rate, please use 
-#' \code{lambda <- Vectorize(function(t) c)}, or \code{rexp}.
+#' distribution. In both cases we allow for any time-varying function. Note
+#' \code{lambda} can be constant, so that it
 #'
-#' @param now The current time. Needed so that we consider only the interval
+#' @param now The current time. Needed if one wants to consider only the interval
 #' between the current time and the maximum time for the time-varying rate.
-#' Notice this does means the waiting time is \code{>= now}, so we also
-#' subtract \code{now} from the result before returning. The default is \code{0}.
+#' Notice this does means the waiting time is \code{>= now}, so we also subtract
+#' \code{now} from the result before returning. The default is \code{0}.
 #'
 #' @param tMax The simulation ending time. If the waiting time would be too
 #' high, we return \code{tMax + 0.01} to signify the event never happens, if
-#' \code{FAST == TRUE}. Otherwise we return the true waiting time. By default,
+#' \code{fast == TRUE}. Otherwise we return the true waiting time. By default,
 #' \code{tMax} will be \code{Inf}, but if \code{FAST == TRUE} one must supply
 #' a finite value.
 #'
-#' @param shape The shape of a weibull distribution. If not \code{NULL}, the 
-#' distribution is taken to be a weibull. Otherwise, it is considered an
-#' exponential. 
-#' 
-#' Note: when shape is not \code{NULL}, rate will be interpreted as a Weibull
-#' scale, so that instead of events taking on average \code{1/rate} million 
-#' years they would take \code{rate} million years (for \code{shape = 1}).
-#' This means Weibull(rate, 1) = Exponential(1/rate).
+#' @param shape Shape of the Weibull distribution. This will be when smaller than 
+#' one, rate will decrease along species' age (negative age-dependency). When 
+#' larger than one, rate will increase along each species's age (positive 
+#' age-dependency). Default is \code{NULL}, equivalent to an exponential
+#' distribution. For \code{pShape != NULL} (including when equal to 
+#' one), \code{pp} will be considered a scale (= 1/rate), and \code{rexp.var} will
+#' draw a Weibull distribution instead of an exponential. This means 
+#' Weibull(rate, 1) = Exponential(1/rate). Notice even when \code{pShape != NULL}, 
+#' \code{pp} may still be time-dependent. 
 #'
 #' Note: Time-varying shape is implemented, so one could have \code{shape} be a
 #' function of time. It is not thoroughly tested, however, so it may be prudent to
 #' wait for a future release where this feature is well established.
 #'
-#' @param TS If shape is given, there must be a \code{TS} parameter to account
-#' for the scaling between simulation and species time. Supplying one without the
-#' other leads to an error. The default is \code{0}.
+#' @param TS Speciation time, used to account for the scaling between simulation 
+#' and species time. The default is \code{0}. Supplying a \code{TS > now} will
+#' return an error.
 #'
 #' @param fast If set to \code{FALSE}, waiting times larger than \code{tMax} will
 #' not be thrown away. This argument is needed so one can test the function
@@ -253,21 +253,17 @@
 #' @rdname rexp.var
 #' @export
 
-rexp.var<-function(n, lambda, now = 0, tMax = Inf, shape = NULL, 
-                   TS = NULL, fast = FALSE) {
+rexp.var <- function(n, lambda, now = 0, tMax = Inf, shape = NULL, 
+                   TS = 0, fast = FALSE) {
+  print(now)
+  print(TS)
   # some error checking
-  if ((is.null(TS) & !is.null(shape)) | (!is.null(TS) & is.null(shape))) {
-    stop("TS and shape must be supplied together")
-  }
-  
   if (tMax == Inf & fast) {
     stop("Need a valid tMax for fast computation")
   }
   
-  if (!is.null(TS)) {
-    if (now < TS) {
-      stop("TS must be greater than the current time")
-    }
+  if (now < TS) {
+    stop("TS must be greater than the current time")
   }
   
   # make a vector to hold the results
