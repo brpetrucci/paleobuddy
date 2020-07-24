@@ -45,6 +45,7 @@
 #' Note: when shape is not \code{NULL}, rate will be interpreted as a Weibull
 #' scale, so that instead of events taking on average \code{1/rate} million 
 #' years they would take \code{rate} million years (for \code{shape = 1}).
+#' This means Weibull(rate, 1) = Exponential(1/rate).
 #' 
 #' Note: Time-varying shape is implemented, so one could have \code{pShape} or
 #' \code{qShape} be a function of time. It is not thoroughly tested, however, so 

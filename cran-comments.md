@@ -8,6 +8,8 @@
 There were no ERRORs, WARNINGs or NOTEs
 
 This is the first submission of this package, so there may be a first submission NOTE.
+In some machines (e.g. win_builder()) total example time in some functions might be 
+more than 10 seconds, which could lead to a NOTE.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package
