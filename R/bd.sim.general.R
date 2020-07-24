@@ -1,26 +1,27 @@
 #' Non-constant rate Birth-Death simulation
 #'
 #' Simulates a species birth-death process with general rates for any number of
-#' starting species. Allows for the speciation/extinction rate to be constant or
-#' a function of time. Takes an optional shape argument for speciation and/or 
-#' extinction, under which the corresponding rate will be taken to be a Weibull 
-#' scale for age-dependent dynamics. Returns an object containing vectors of 
-#' speciation times, extinction times, parents and status (extant or not). Can 
-#' return true extinction times or simply information on whether species lived
-#' after maximum simulation time. Allows for constraining on the number of species
-#' at the end of the simulation, either total or extant. Returns \code{NA} and 
-#' sends a warning if it cannot find a simulation with the desired number of 
-#' species after \code{100000} tries. For constant rate simulations, see
+#' starting species. Allows for the speciation/extinction rate to be (1) a 
+#' constant, or (2) a function of time. Allows for constraining results on the 
+#' number of species at the end of the simulation, either total or extant. The 
+#' function can also take an optional shape argument to generate age-dependence on
+#' speciation and/or extinction, assuming a Weibull distribution as a model of 
+#' age-dependence. Returns an object containing vectors of speciation times, 
+#' extinction times, parents (= species' mother species) and status at the end of 
+#' the simulation (extant or not) for each species in the simulation. 
+#' It may return true extinction times or simply information on whether species 
+#' lived after the maximum simulation time. For constant rate simulations, see
 #' \code{bd.sim.constant}. For a function that unites all scenarios, see 
 #' \code{bd.sim}. \code{bd.sim} also allows for extra inputs, creating a
-#' time-dependent only rate internally.
-#' Note that while time runs from \code{0} to \code{tmax} on the function itself,
-#' it runs from \code{tmax} to \code{0} on the vectors returned to conform with 
-#' the literature. 
+#' time-dependent only rate internally through \code{make.rate}. For similar
+#' flexibility, use \code{make.rate} to generate the desired rate.
+#' Please note while time runs from \code{0} to \code{tMax} in the simulation, it 
+#' returns speciation/extinction times as \code{tMax} (origin of the group) to 
+#' \code{0} (the "present" and end of simulation), so as to conform to other
+#' packages in the literature.
 #'
-#' @param n0 Initial number of species, usually 1. Good parameter
-#' to tweak if one is observing a low sample size when testing.
-#'
+#' @inheritParams bd.sim
+#' 
 #' @param pp Function to hold the speciation rate over time. It will either be
 #' interpreted as an exponential rate, or a Weibull scale if 
 #' \code{pShape != NULL}.
@@ -31,44 +32,6 @@
 #' allows for as much flexibility, nor calls \code{make.rate}. If the user wishes
 #' to use \code{bd.sim.general} with environmental or step-function rates, they
 #' can generate the rate with \code{make.rate} and supply it to the function.
-#'
-#' @param tMax Ending time of simulation. Any species still living after
-#' \code{tMax} is considered extant, and any species that would be generated
-#' after \code{tMax} is not born.
-#'
-#' @param pShape Shape parameter for the Weibull distribution for age-dependent
-#' speciation. Default is \code{NULL}, where \code{pp} will be considered a
-#' (possibly) time-dependent exponential rate. For \code{pShape != NULL}, 
-#' \code{pp} will be considered a scale, and \code{rexp.var} will draw a Weibull 
-#' distribution instead. 
-#'
-#' @param qShape similar to above, but for the extinction rate.
-#' 
-#' Note: when shape is not \code{NULL}, rate will be interpreted as a Weibull
-#' scale, so that instead of events taking on average \code{1/rate} million 
-#' years they would take \code{rate} million years (for \code{shape = 1}).
-#' This means Weibull(rate, 1) = Exponential(1/rate).
-#' 
-#' Note: Time-varying shape is implemented, so one could have \code{pShape} or
-#' \code{qShape} be a function of time. It is not thoroughly tested, however, so 
-#' it may be prudent to wait for a future release where this feature is well 
-#' established.
-#' 
-#' @param nFinal An interval of acceptable number of species at the end of the
-#' simulation. If not supplied, default is \code{c(0, Inf)}, so that any number
-#' of species is accepted. If supplied, \code{bd.sim.general} will run until the
-#' number of total species generated, or, if \code{extOnly = TRUE}, the number of
-#' extant species at the end of the simulation, lies within the interval.
-#' 
-#' @param extOnly A boolean indicating whether \code{nFinal} should be taken as
-#' the number of total or extant species during the simulation. If \code{TRUE},
-#' \code{bd.sim.general} will run until the number of extant species lies within
-#' the \code{nFinal} interval. If \code{FALSE}, as default, it will run until the
-#' total number of species generated lies within that interval.
-#' 
-#' @param trueExt When \code{TRUE}, time of extinction of extant species will be 
-#' the true time, otherwise it will be \code{tMax+0.01}. Need to be \code{TRUE} 
-#' when testing age-dependent extinction.
 #'
 #' @return A list of vectors, as follows
 #'

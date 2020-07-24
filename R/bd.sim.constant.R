@@ -1,41 +1,26 @@
 #' Constant rate Birth-Death simulation
-#'
-#' Simulates a species birth-death process with constant rates for any number
-#' of starting species. Returns an object containing vectors of speciation times,
-#' extinction times, parents and status (extant or not). Allows for constraining
-#' on the number of species at the end of the simulation, either total or extant.
-#' Returns \code{NA} and sends a warning if it cannot find a simulation with the
-#' desired number of species after \code{100000} tries. For time-varying and 
-#' age-dependent simulations, see \code{bd.sim.general}. For a function that
-#' unites both scenarios, see \code{bd.sim}.
-#' Note that while time runs from \code{0} to \code{tmax} on the function itself,
-#' it runs from \code{tmax} to \code{0} on the vectors returned to conform with
-#' the literature. 
-#'
-#' @param n0 Initial number of species, usually 1. Good parameter
-#' to tweak if one is observing a low sample size when testing.
-#'
+#' 
+#' Simulates a species birth-death process with general rates for any number of
+#' starting species. Allows for constraining results on the number of species at 
+#' the end of the simulation, either total or extant. Returns an object containing 
+#' vectors of speciation times, extinction times, parents (= species' mother 
+#' species) and status at the end of the simulation (extant or not) for each 
+#' species in the simulation. It may return true extinction times or simply 
+#' information on whether species lived after the maximum simulation time. For 
+#' time-varying and age-dependent simulations, see \code{bd.sim.general}. For a 
+#' function that unites both scenarios, see \code{bd.sim}.
+#' Please note while time runs from \code{0} to \code{tMax} in the simulation, it 
+#' returns speciation/extinction times as \code{tMax} (origin of the group) to 
+#' \code{0} (the "present" and end of simulation), so as to conform to other
+#' packages in the literature.
+#' 
+#' @inheritParams bd.sim 
+#' 
 #' @param pp Speciation rate. Must be constant.
 #'
 #' @param qq Extinction rate, similar to above.
 #' 
 #' Note: \code{pp} and \code{qq} must always be greater than 0
-#'
-#' @param tMax Ending time of simulation. Any species still living after
-#' \code{tMax} is considered extant, and any species that would be generated
-#' after \code{tMax} is not born.
-#' 
-#' @param nFinal An interval of acceptable number of species at the end of the
-#' simulation. If not supplied, default is \code{c(0, Inf)}, so that any number
-#' of species is accepted. If supplied, \code{bd.sim.constant} will run until the
-#' number of total species generated, or, if \code{extOnly = TRUE}, the number of
-#' extant species at the end of the simulation, lies within the interval.
-#' 
-#' @param extOnly A boolean indicating whether \code{nFinal} should be taken as
-#' the number of total or extant species during the simulation. If \code{TRUE},
-#' \code{bd.sim.constant} will run until the number of extant species lies within
-#' the \code{nFinal} interval. If \code{FALSE}, as default, it will run until the
-#' total number of species generated lies within that interval.
 #'
 #' @return A list of vectors, as follows
 #'
@@ -141,7 +126,8 @@
 
 
 bd.sim.constant <- function(n0, pp, qq, tMax, 
-                            nFinal = c(0, Inf), extOnly = FALSE) {
+                            nFinal = c(0, Inf), extOnly = FALSE,
+                            trueExt = FALSE) {
   # check that the rates are constant
   if (!(is.numeric(pp) & length(pp) == 1 &
         is.numeric(qq) * length(qq) == 1)) {
@@ -196,16 +182,16 @@ bd.sim.constant <- function(n0, pp, qq, tMax,
       tNow <- ifelse(TS[sCount] < 0, 0, TS[sCount])
   
       # draw waiting times with rexp()
-      waittimeS <- ifelse(pp > 0, rexp(1, pp), Inf)
-      waittimeE <- ifelse(qq > 0, rexp(1, qq), Inf)
+      waitTimeS <- ifelse(pp > 0, rexp(1, pp), Inf)
+      waitTimeE <- ifelse(qq > 0, rexp(1, qq), Inf)
   
       # if the time of extinction is after the end of the simulation, make it tMax
-      tExp <- min(tNow + waittimeE, tMax)
+      tExp <- tNow + waitTimeE
   
       # while there are fast enough speciations before the species goes extinct,
-      while ((tNow + waittimeS) <= tExp) {
+      while ((tNow + waitTimeS) <= min(tExp, tMax)) {
         # update time
-        tNow<-tNow + waittimeS
+        tNow <- tNow + waitTimeS
   
         # create a new species with corresponding TE, TS and parent
         TS <- c(TS, tNow)
@@ -213,16 +199,16 @@ bd.sim.constant <- function(n0, pp, qq, tMax,
         parent <- c(parent, sCount)
         isExtant <- c(isExtant, TRUE) # it is alive
   
-        # take a new waiting time - if now + waittimeS is still less than when
+        # take a new waiting time - if now + waitTimeS is still less than when
         # the species goes extinct, repeat
-        waittimeS <- ifelse(pp > 0, rexp(1, pp), Inf)
+        waitTimeS <- ifelse(pp > 0, rexp(1, pp), Inf)
       }
   
       # reached the time of the species extinction
       tNow <- tExp
   
       # record the extinction - if tExp >= tMax, it didn't go extinct
-      TE[sCount] <- ifelse(tNow < tMax, tNow, tMax + 0.01)
+      TE[sCount] <- ifelse(tNow < tMax | trueExt, tNow, tMax + 0.01)
       isExtant[sCount] <- ifelse(TE[sCount] > tMax, TRUE, FALSE)
   
       # next species
