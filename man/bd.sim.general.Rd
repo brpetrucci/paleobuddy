@@ -92,8 +92,8 @@ A list of vectors, as follows
 \item{\code{TE}}{List of extinction times, with \code{-0.01} as the time of
 extinction for extant species.}
 
-\item{\code{TS}}{List of speciation times, with \code{tMax + 0.01} as the time 
-of speciation for species that started the simulation.}
+\item{\code{TS}}{List of speciation times, with \code{tMax} as the time of
+speciation for species that started the simulation.}
 
 \item{\code{PAR}}{List of parents. Species that started the simulation have
 \code{NA}, while species that were generated during the simulation have their
@@ -278,35 +278,33 @@ if (requireNamespace("ape", quietly = TRUE)) {
 
 ###
 # finally, we could have environmental dependency on a rate
-if (requireNamespace("RPANDA", quietly = TRUE)) {
-  # initial number of species
- n0 <- 1
+# initial number of species
+n0 <- 1
 
- # maximum simulation time
- tMax <- 40
- 
- # temperature-dependent speciation
- p_t <- function(t, temp) {
-   return(0.04*exp(0.15*temp))
- }
+# maximum simulation time
+tMax <- 40
 
- # extinction
- q <- 0.075
+# temperature-dependent speciation
+p_t <- function(t, temp) {
+ return(0.025*exp(0.1*temp))
+}
 
- # using RPANDA to get the temperature data
- data(InfTemp, package="RPANDA")
+# extinction
+q <- 0.075
 
- # speciation
- p <- make.rate(p_t, envF = InfTemp)
+# get the temperature data
+data(temp)
 
- # run simulations
- sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
-  
-  # we can plot the phylogeny to take a look
-  if (requireNamespace("ape", quietly = TRUE)) {
-    phy <- make.phylo(sim)
-    ape::plot.phylo(phy)
-  }
+# speciation
+p <- make.rate(p_t, envF = temp)
+
+# run simulations
+sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
+
+# we can plot the phylogeny to take a look
+if (requireNamespace("ape", quietly = TRUE)) {
+  phy <- make.phylo(sim)
+  ape::plot.phylo(phy)
 }
 
 # note nFinal has to be sensible

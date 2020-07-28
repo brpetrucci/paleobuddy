@@ -39,8 +39,8 @@
 #' \item{\code{TE}}{List of extinction times, with \code{-0.01} as the time of
 #' extinction for extant species.}
 #'
-#' \item{\code{TS}}{List of speciation times, with \code{tMax + 0.01} as the time 
-#' of speciation for species that started the simulation.}
+#' \item{\code{TS}}{List of speciation times, with \code{tMax} as the time of
+#' speciation for species that started the simulation.}
 #'
 #' \item{\code{PAR}}{List of parents. Species that started the simulation have
 #' \code{NA}, while species that were generated during the simulation have their
@@ -206,35 +206,33 @@
 #' 
 #' ###
 #' # finally, we could have environmental dependency on a rate
-#' if (requireNamespace("RPANDA", quietly = TRUE)) {
-#'   # initial number of species
-#'  n0 <- 1
-#'
-#'  # maximum simulation time
-#'  tMax <- 40
-#'  
-#'  # temperature-dependent speciation
-#'  p_t <- function(t, temp) {
-#'    return(0.04*exp(0.15*temp))
-#'  }
-#'
-#'  # extinction
-#'  q <- 0.075
-#'
-#'  # using RPANDA to get the temperature data
-#'  data(InfTemp, package="RPANDA")
-#'
-#'  # speciation
-#'  p <- make.rate(p_t, envF = InfTemp)
-#'
-#'  # run simulations
-#'  sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
-#'   
-#'   # we can plot the phylogeny to take a look
-#'   if (requireNamespace("ape", quietly = TRUE)) {
-#'     phy <- make.phylo(sim)
-#'     ape::plot.phylo(phy)
-#'   }
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 40
+#' 
+#' # temperature-dependent speciation
+#' p_t <- function(t, temp) {
+#'  return(0.025*exp(0.1*temp))
+#' }
+#' 
+#' # extinction
+#' q <- 0.075
+#' 
+#' # get the temperature data
+#' data(temp)
+#' 
+#' # speciation
+#' p <- make.rate(p_t, envF = temp)
+#' 
+#' # run simulations
+#' sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- make.phylo(sim)
+#'   ape::plot.phylo(phy)
 #' }
 #' 
 #' # note nFinal has to be sensible
@@ -318,7 +316,7 @@ bd.sim.general <- function(n0, pp, qq, tMax,
   
   while (len < nFinal[1] | len > nFinal[2]) {
     # create vectors to hold times of speciation, extinction, parents and status
-    TS <- rep(-0.01, n0)
+    TS <- rep(0, n0)
     TE <- rep(NA, n0)
     parent <- rep(NA, n0)
     isExtant <- rep(TRUE, n0)
@@ -328,24 +326,20 @@ bd.sim.general <- function(n0, pp, qq, tMax,
   
     # while we have species to be analyzed still
     while (length(TE) >= sCount) {
-      # actual speciation time
-      specT <- ifelse(TS[sCount] < 0, 0, TS[sCount])
-  
-      # get the time of speciation, or 0 if the species
-      # was there at the beginning
-      tNow <- specT
+      # start at the time of speciation of sCount
+      tNow <- TS[sCount]
 
       # find the waiting time using rexp.var if pp is not constant
       # note we need to pass NULL for TS if the corresponding shape is NULL
       waitTimeS <- ifelse(
-        is.numeric(pp), ifelse(pp > 0, rexp(1, pp), Inf) ,
+        is.numeric(pp), ifelse(pp > 0, rexp(1, pp), Inf),
         ifelse(pp(tNow) > 0, 
-               rexp.var(1, pp, tNow, tMax, pShape, specT, 
+               rexp.var(1, pp, tNow, tMax, pShape, TS[sCount], 
                         fast = !trueExt), Inf))
       waitTimeE <- ifelse(
         is.numeric(qq), ifelse(qq > 0, rexp(1, qq), Inf),
         ifelse(qq(tNow) > 0,
-               rexp.var(1, qq, tNow, tMax, qShape, specT, 
+               rexp.var(1, qq, tNow, tMax, qShape, TS[sCount], 
                         fast = !trueExt), Inf))
   
       tExp <- tNow + waitTimeE
@@ -366,16 +360,15 @@ bd.sim.general <- function(n0, pp, qq, tMax,
         waitTimeS <- ifelse(
           is.numeric(pp), ifelse(pp > 0, rexp(1, pp), Inf),
           ifelse(pp(tNow) > 0, 
-                 rexp.var(1, pp, tNow, tMax, pShape, specT, 
+                 rexp.var(1, pp, tNow, tMax, pShape, TS[sCount], 
                           fast = !trueExt), Inf))
       }
   
       # reached the time of extinction
       tNow <- tExp
   
-      # record extinction, and if species is extant make it more than tMax
-      TE[sCount] <- ifelse(tNow < tMax | trueExt, tNow, tMax + 0.01)
-      isExtant[sCount] <- ifelse(TE[sCount] > tMax, TRUE, FALSE)
+      # record the extinction - if TE[sCount] is NA, it is extant
+      isExtant[sCount] <- ifelse(is.na(TE[sCount]), TRUE, FALSE)
   
       # next species
       sCount <- sCount + 1

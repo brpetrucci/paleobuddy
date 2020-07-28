@@ -65,9 +65,13 @@
 #' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
-#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 #'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
+#' 
+#' # we will need to get exact durations for some examples, so
+#' sim$TE[sim$EXTANT] <- 0
+#' # this is necessary since the default is to have -0.01 for extant species
 #' 
 #' # here we will use the PERT function. It is described in:
 #' # Silvestro et al 2014
@@ -130,9 +134,13 @@
 #' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
-#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 #'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
+#' 
+#' # we will need to get exact durations for some examples, so
+#' sim$TE[sim$EXTANT] <- 0
+#' # this is necessary since the default is to have -0.01 for extant species
 #' 
 #' # preservation function in respect to age
 #' # occurrences are uniformly distributed
@@ -168,9 +176,13 @@
 #' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
-#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 #'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
+#' 
+#' # we will need to get exact durations for some examples, so
+#' sim$TE[sim$EXTANT] <- 0
+#' # this is necessary since the default is to have -0.01 for extant species
 #' 
 #' # here we will use the triangular distribution. We have some empirical evidence
 #' # that taxa occurrences might present triangular shape
@@ -254,9 +266,13 @@
 #' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
-#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 #'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
+#' 
+#' # we will need to get exact durations for some examples, so
+#' sim$TE[sim$EXTANT] <- 0
+#' # this is necessary since the default is to have -0.01 for extant species
 #' 
 #' # preservation function, with the "mde" of the triangle being exactly at the
 #' # last quarter of the duration of EACH lineage
@@ -333,9 +349,13 @@
 #' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
-#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 #'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
+#' 
+#' # we will need to get exact durations for some examples, so
+#' sim$TE[sim$EXTANT] <- 0
+#' # this is necessary since the default is to have -0.01 for extant species
 #' 
 #' # preservation function in respect to age, with the "mode" of the triangle
 #' # being exactly at the last quarter of the duration of EACH lineage.
@@ -426,11 +446,13 @@ sample.adpp <- function(sim, rr, dFun, S = NULL, dFunMax = NULL, ...) {
     S = 1:length(sim$TE)
   }
   
-  # get the speciation and extinction times vectors, constraining them between 
-  # 0 and tMax
-  TE <- ifelse(sim$TE < 0, 0, sim$TE)
-  TS <- ifelse(is.na(sim$PAR), sim$TS - 0.01, sim$TS)
+  # get the speciation and extinction times vectors
+  TE <- sim$TE
+  TS <- sim$TS
   
+  # make TE sensible
+  TE[sim$EXTANT] <- 0
+    
   # setting things and checking inputs
   printMessage <- TRUE
   

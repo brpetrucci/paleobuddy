@@ -71,7 +71,7 @@ sim <- bd.sim(1, pp = function(t) {
 }, qq = 0.05, tMax = 20)
 
 # sample it
-sampled <- sample.species(sim = sim, rr = 1, tMax = 15, S = 1)
+sampled <- sample.species(sim = sim, rr = 1, tMax = 20, S = 1)
 
 # bins vector
 bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)

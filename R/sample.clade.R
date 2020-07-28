@@ -74,9 +74,13 @@
 #' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
-#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 #'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
+#' 
+#' # we will need to get exact durations for some examples, so
+#' sim$TE[sim$EXTANT] <- 0
+#' # this is necessary since the default is to have -0.01 for extant species
 #' 
 #' # sampling rate
 #' r <- 2
@@ -115,9 +119,13 @@
 #' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
-#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 #'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
+#' 
+#' # we will need to get exact durations for some examples, so
+#' sim$TE[sim$EXTANT] <- 0
+#' # this is necessary since the default is to have -0.01 for extant species
 #' 
 #' # sampling rate
 #' r <- function(t) {
@@ -158,9 +166,13 @@
 #' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
-#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 #'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
+#' 
+#' # we will need to get exact durations for some examples, so
+#' sim$TE[sim$EXTANT] <- 0
+#' # this is necessary since the default is to have -0.01 for extant species
 #' 
 #' # we will use the less efficient method of creating a step function
 #' # one could instead use ifelse()
@@ -204,60 +216,63 @@
 #' 
 #' ###
 #' # finally, sample.clade also accepts an environmental variable
-#' if (requireNamespace("RPANDA", quietly = TRUE)) {
-#'   # get temperature data
-#'   data(InfTemp, package = "RPANDA")
-#'   
-#'   # simulate a group
+#' 
+#' # get temperature data
+#' data(temp)
+#' 
+#' # simulate a group
+#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' 
+#' # in case first simulation is short-lived
+#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 #'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
-#'   
-#'   # in case first simulation is short-lived
-#'   while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'     sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
-#'   }
-#'   
-#'   # make temperature the environmental dependency of r
-#'   envR <- InfTemp
-#'   
-#'   # we can then make sampling dependent on the temperature
-#'   r <- function(t, env) {
-#'     return(0.5*env)
-#'   }
-#'   
-#'   # make it a function so we can plot it
-#'   rr <- make.rate(r, envF = envR)
-#'   
-#'   # let us check that r is high enough to see a pattern
-#'   plot(1:10, rr(1:10), type = 'l', main = "Sampling rate",
-#'        xlab = "My", ylab = "r")
-#'   
-#'   # the resolution of the fossil dataset:
-#'   bins <- seq(from = 10, to = 0,
-#'               by = -0.1)
-#'   # note that we will provide a very high resolution to test the function
-#'   
-#'   # find the occurrence data frame
-#'   dt <- sample.clade(sim, r, tMax = 10, envRR = envR,
-#'                      bins = bins, returnTrue = FALSE)
-#'   
-#'   # extract species identity
-#'   ids <- unique(dt$Species)
-#'   
-#'   # approximate sampling time (since it is a range)
-#'   mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
-#'   
-#'   # for each species
-#'   for (i in 1:length(ids)) {
-#'     # get the species number
-#'     sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
-#'     
-#'     # check the histogram
-#'     hist(mids[dt$Species == ids[i]],
-#'          main = paste0("spp = ", sp, "; duration ~ ",
-#'                        round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
-#'          xlab = "Time (My)",
-#'          xlim = c(sim$TS[i], sim$TE[i]))
-#'   }
+#' }
+#' 
+#' # we will need to get exact durations for some examples, so
+#' sim$TE[sim$EXTANT] <- 0
+#' # this is necessary since the default is to have -0.01 for extant species
+#' 
+#' # make temperature the environmental dependency of r
+#' envR <- temp
+#' 
+#' # we can then make sampling dependent on the temperature
+#' r <- function(t, env) {
+#'   return(0.5*env)
+#' }
+#' 
+#' # make it a function so we can plot it
+#' rr <- make.rate(r, envF = envR)
+#' 
+#' # let us check that r is high enough to see a pattern
+#' plot(1:10, rr(1:10), type = 'l', main = "Sampling rate",
+#'      xlab = "My", ylab = "r")
+#' 
+#' # the resolution of the fossil dataset:
+#' bins <- seq(from = 10, to = 0,
+#'             by = -0.1)
+#' # note that we will provide a very high resolution to test the function
+#' 
+#' # find the occurrence data frame
+#' dt <- sample.clade(sim, r, tMax = 10, envRR = envR,
+#'                    bins = bins, returnTrue = FALSE)
+#' 
+#' # extract species identity
+#' ids <- unique(dt$Species)
+#' 
+#' # approximate sampling time (since it is a range)
+#' mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
+#' 
+#' # for each species
+#' for (i in 1:length(ids)) {
+#'   # get the species number
+#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#' 
+#'   # check the histogram
+#'   hist(mids[dt$Species == ids[i]],
+#'        main = paste0("spp = ", sp, "; duration ~ ",
+#'                      round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
+#'        xlab = "Time (My)",
+#'        xlim = c(sim$TS[i], sim$TE[i]))
 #' }
 #' 
 #' # we will now do some tests with age-dependent rates. For more details,
@@ -268,9 +283,13 @@
 #' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
-#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 #'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
+#' 
+#' # we will need to get exact durations for some examples, so
+#' sim$TE[sim$EXTANT] <- 0
+#' # this is necessary since the default is to have -0.01 for extant species
 #' 
 #' # here we will use the PERT function. It is described in:
 #' # Silvestro et al 2014
@@ -356,9 +375,13 @@
 #' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation is short-lived
-#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 #'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
+#' 
+#' # we will need to get exact durations for some examples, so
+#' sim$TE[sim$EXTANT] <- 0
+#' # this is necessary since the default is to have -0.01 for extant species
 #' 
 #' # preservation function in respect to age, with the "mode" of the triangle
 #' # being exactly at the last quarter of the duration of EACH lineage.
@@ -467,9 +490,8 @@ sample.clade <- function(sim, rr, tMax, S = NULL, envRR = NULL, rShifts = NULL,
     bins <- seq(tMax, 0, -0.1)
   }
   
-  # make TE and TS sensible
-  sim$TE <- ifelse(sim$TE < 0, 0, sim$TE)
-  sim$TS <- ifelse(sim$TS > tMax, tMax, sim$TS)
+  # make TE
+  sim$TE[sim$EXTANT] <- 0
 
   # adjusting bins
   bins <- sort(bins, decreasing = TRUE)

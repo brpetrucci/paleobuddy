@@ -79,9 +79,8 @@ make.phylo <- function(sim) {
     return(NA)
   }
   
-  # make TE and TS sensible
-  sim$TE <- ifelse(sim$TE < 0, 0, sim$TE)
-  sim$TS[is.na(sim$PAR)] <- sim$TS[is.na(sim$PAR)] - 0.01
+  # make TE sensible
+  sim$TE[sim$EXTANT] = 0
 
   all.dir.daughter <- function(lin, x) {
     # all.dir.daughters returns the name of each direct daughter species

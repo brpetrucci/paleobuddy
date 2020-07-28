@@ -55,6 +55,27 @@ ape::plot.phylo(phy) # plot it (requires APE)
 ape::plot.phylo(ape::drop.fossil(phy)) # plot the molecular phylogeny
 ```
 
+## Data
+
+Given the possibility of functions in `paleobuddy` to use environmentally-dependent rates, we have included with the package data frames containing environmental data, for example temperature (`temp`). These have been modified from data on RPANDA (Environmental data modified from that in RPANDA: Morlon H. et al (2016) RPANDA: an R package for macroevolutionary analyses on phylogenetic trees. \emph{Methods in Ecology and Evolution} 7: 589-597). To see more about the origin of the data, see `?data` for each data frame.
+
+The usage is simple,
+
+```
+data(temp) # load the data
+plot(temp, type = 'l') # visualize
+
+# simulate
+n0 <- 1 # initial number of species
+pp <- function(t, env) {
+    0.1 * exp(0.01*env)
+} # speciation as a function of env, in this case temperature
+envPP <- temp # vector to tell bd.sim what is the environmental dependency
+qq <- 0.05 # speciation
+tMax <- 10 # maximum simulation time
+sim <- bd.sim(n0, pp, qq, tMax, envPP = temp)
+```
+
 ## Authors
 
 `paleobuddy` was idealized by Bruno do Rosario Petrucci and Tiago Bosisio Quental. The birth-death, statistical and part of the sampling functions were written by Bruno. Most of the sampling functions were written by Matheus Januário.

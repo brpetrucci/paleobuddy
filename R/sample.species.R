@@ -30,9 +30,13 @@
 #' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation was short-lived
-#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 #'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
+#' 
+#' # we will need to get exact durations for some examples, so
+#' sim$TE[sim$EXTANT] = 0
+#' # this is necessary since the default is to have -0.01 for extant species
 #' 
 #' # preservation function
 #' r <- function(t) {
@@ -63,9 +67,13 @@
 #' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation was short lived
-#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 #'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
+#' 
+#' # we will need to get exact durations for some examples, so
+#' sim$TE[sim$EXTANT] = 0
+#' # this is necessary since the default is to have -0.01 for extant species
 #' 
 #' # we can create the sampling rate here from a few vectors
 #' 
@@ -105,9 +113,13 @@
 #' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' 
 #' # in case first simulation was short-lived
-#' while ((sim$TS[1] - sim$TE[1]) < 10) {
+#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 #'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
 #' }
+#' 
+#' # we will need to get exact durations for some examples, so
+#' sim$TE[sim$EXTANT] = 0
+#' # this is necessary since the default is to have -0.01 for extant species
 #' 
 #' # preservation function
 #' r <- function(t) {
@@ -136,57 +148,61 @@
 #' ###
 #' # finally we could generate sampling dependent on temperature
 #' 
-#' if (requireNamespace("RPANDA", quietly = TRUE)) {
-#'   # simulate a group
+#' # simulate a group
+#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' 
+#' # in case first simulation was short-lived
+#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 #'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
-#'   
-#'   # in case first simulation was short-lived
-#'   while ((sim$TS[1] - sim$TE[1]) < 10) {
-#'     sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
-#'   }
-#'   
-#'   # preservation function dependent on temperature
-#'   r_t <- function(t, env) {
-#'     return(0.25*env)
-#'   }
-#'   
-#'   # get the temperature data
-#'   data(InfTemp, package = "RPANDA")
-#'   
-#'   # final preservation
-#'   r <- make.rate(r_t, envF = InfTemp)
-#'   
-#'   # visualizing the plot from past to present
-#'   plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
-#'        xlab = "Mya", ylab = "preservation rate",
-#'        xlim = c(10, sim$TE[1]))
-#'   
-#'   # sample
-#'   occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
-#'   
-#'   # check histogram
-#'   hist(occs,
-#'        xlim = c(10, sim$TE[1]),
-#'        xlab = "Mya")
-#'   lines(t, rev(r(t)))
 #' }
+#' 
+#' # we will need to get exact durations for some examples, so
+#' sim$TE[sim$EXTANT] = 0
+#' # this is necessary since the default is to have -0.01 for extant species
+#' 
+#' # preservation function dependent on temperature
+#' r_t <- function(t, env) {
+#'   return(0.25*env)
+#' }
+#' 
+#' # get the temperature data
+#' data(temp)
+#' 
+#' # final preservation
+#' r <- make.rate(r_t, envF = temp)
+#' 
+#' # visualizing the plot from past to present
+#' plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
+#'      xlab = "Mya", ylab = "preservation rate",
+#'      xlim = c(10, ifelse(is.na(sim$TE[1]), 0, sim$TE[1])))
+#' 
+#' # sample
+#' occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
+#' 
+#' # check histogram
+#' hist(occs,
+#'      xlim = c(10, ifelse(is.na(sim$TE[1]), 0, sim$TE[1])),
+#'      xlab = "Mya")
+#' lines(t, rev(r(t)))
 #' 
 #' @name sample.species
 #' @rdname sample.species
 #' @export
 
 sample.species <- function(sim, rr, tMax, S) {
-  # invert times since simulation goes from 0 to tMax
-  TE <- tMax - sim$TE
-  TS <- tMax - sim$TS
+  # get speciation and extinction times
+  TE <- sim$TE
+  TS <- sim$TS
   
-  # make them sensible
-  TE <- ifelse(TE > tMax, tMax, TE)
-  TS <- ifelse(TS < 0, 0, TS)
-
+  # make TE sensible
+  TE[sim$EXTANT] <- 0
+  
+  # invert them since simulation goes from 0 to tMax
+  TE <- tMax - TE
+  TS <- tMax - TS
+  
   # start when the species was born, end when it died
-  
-  Now <- TS[S]
+  now <- TS[S]
   End <- TE[S]
 
   # make rr a function if it isn't
@@ -199,18 +215,18 @@ sample.species <- function(sim, rr, tMax, S) {
   sampled <- c()
 
   # while we have not reached the time of extinction
-  while (Now < End) {
+  while (now < End) {
     # take the waiting time for sampling, using rexp.var()
-    WaitTimeR <- ifelse(rr(Now) > 0, rexp.var(1, rr, Now, tMax), Inf)
+    WaitTimeR <- ifelse(rr(now) > 0, rexp.var(1, rr, now, tMax), Inf)
 
     # advance in time
-    Now <- Now + WaitTimeR
+    now <- now + WaitTimeR
 
     # if sampling comes after extinction, we don't include this occurrence
-    if (Now > End) break
+    if (now > End) break
 
     # append to the vector
-    sampled <- c(sampled, Now)
+    sampled <- c(sampled, now)
   }
 
   # finally, we invert time so that it goes from tMax to 0

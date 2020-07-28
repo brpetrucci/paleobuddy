@@ -39,7 +39,11 @@ origin. Needed to ensure \code{fShifts} runs the correct way.}
 variable (e.g. CO2, temperature, available niches, etc) with time. The first 
 column of this \code{data.frame} must be time, and the second column must be 
 the values of the variable. The function will return an error if supplying 
-\code{envF} without \code{ff} being a function of two variables.}
+\code{envF} without \code{ff} being a function of two variables.
+
+Acknowledgements: The strategy to transform a function of \code{t} and 
+\code{env} into a function of \code{t} only using \code{envF} was adapted from
+RPANDA (see below).}
 
 \item{fShifts}{A vector indicating the time placement of rate shifts in a step 
 function. The first element must be the first time point for the simulation. 
@@ -194,60 +198,55 @@ plot(t, r(t),type = 'l')
 
 # finally let us see what we can do with environmental variables
 
-# RPANDA supplies us with some really useful environmental dataframes
-# to use as an example, let us try temperature
-if (requireNamespace("RPANDA", quietly = TRUE)) {
-  # get the temperature data
-  data(InfTemp, package = "RPANDA")
-  
-  # diversification
-  ff <- function(t, env) {
-    return(0.002*env)
-  }
-  
-  # visualize the rate
-  r <- make.rate(ff, envF = InfTemp)
-  plot(t, r(t), type = 'l')
-  
-  # get diversity and plot it
-  div <- var.rate.div(ff, t, envF = InfTemp)
-  plot(t, div, type = 'l')
-  
-  ###
-  # we can also have a function that depends on both time AND temperature
-  
-  # diversification
-  ff <- function(t, env) {
-    return(0.02 * env - 0.001 * t)
-  }
-  
-  # visualize the rate
-  r <- make.rate(ff, envF = InfTemp)
-  plot(t, r(t), type = 'l')
-  
-  \dontrun{
-    # get diversity and plot it
-    div <- var.rate.div(ff, t, envF = InfTemp)
-    plot(t, div, type = 'l')
-} 
-  ###
-  # as mentioned above, we could also use ifelse() to construct a step function
-  # that is modulated by temperature
-  
-  # diversification
-  ff <- function(t, env) {
-    return(ifelse(t < 2, 0.1 + 0.01*env,
-            ifelse(t < 5, 0.2 - 0.005*env,
-             ifelse(t < 8, 0.1 + 0.005*env, 0.08))))
-  }
-  
-  # visualize the rate
-  r <- make.rate(ff, envF = InfTemp)
-  plot(t, r(t), type = 'l')
-\dontrun{
-    div <- var.rate.div(ff, t, envF = InfTemp)
-    plot(t, div, type = 'l')
+# get the temperature data
+data(temp)
+
+# diversification
+ff <- function(t, env) {
+  return(0.002*env)
 }
+
+# visualize the rate
+r <- make.rate(ff, envF = temp)
+plot(t, r(t), type = 'l')
+
+# get diversity and plot it
+div <- var.rate.div(ff, t, envF = temp)
+plot(t, div, type = 'l')
+
+###
+# we can also have a function that depends on both time AND temperature
+
+# diversification
+ff <- function(t, env) {
+  return(0.02 * env - 0.001 * t)
 }
+
+# visualize the rate
+r <- make.rate(ff, envF = temp)
+plot(t, r(t), type = 'l')
+
+# get diversity and plot it
+div <- var.rate.div(ff, t, envF = temp)
+plot(t, div, type = 'l')
+  
+###
+# as mentioned above, we could also use ifelse() to construct a step function
+# that is modulated by temperature
+
+# diversification
+ff <- function(t, env) {
+  return(ifelse(t < 2, 0.1 + 0.01*env,
+          ifelse(t < 5, 0.2 - 0.005*env,
+           ifelse(t < 8, 0.1 + 0.005*env, 0.08))))
+}
+
+# visualize the rate
+r <- make.rate(ff, envF = temp)
+plot(t, r(t), type = 'l')
+
+# get diversity and plot it
+div <- var.rate.div(ff, t, envF = temp)
+plot(t, div, type = 'l')
 
 }

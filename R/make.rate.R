@@ -29,6 +29,10 @@
 #' column of this \code{data.frame} must be time, and the second column must be 
 #' the values of the variable. The function will return an error if supplying 
 #' \code{envF} without \code{ff} being a function of two variables.
+#' 
+#' Acknowledgements: The strategy to transform a function of \code{t} and 
+#' \code{env} into a function of \code{t} only using \code{envF} was adapted from
+#' RPANDA (see below).
 #'
 #' @param fShifts A vector indicating the time placement of rate shifts in a step 
 #' function. The first element must be the first time point for the simulation. 
@@ -42,6 +46,11 @@
 #' then be used as a rate in the other \code{paleobuddy} functions. 
 #'
 #' @author Bruno do Rosario Petrucci
+#' 
+#' @references 
+#' 
+#' Morlon H. et al (2016) RPANDA: an R package for macroevolutionary analyses on 
+#' phylogenetic trees. \emph{Methods in Ecology and Evolution} 7: 589-597.
 #'
 #' @examples
 #' 
@@ -135,54 +144,50 @@
 #' ###
 #' # finally let us see what we can do with environmental variables
 #' 
-#' # RPANDA supplies us with some really useful environmental dataframes
-#' # to use as an example, let us try temperature
-#' if (requireNamespace("RPANDA", quietly = TRUE)) {
-#'   # temperature data
-#'   data(InfTemp, package = "RPANDA")
-#'   
-#'   # function
-#'   ff <- function(t, env) {
-#'     return(0.05*env)
-#'   }
-#'   
-#'   # make the rate
-#'   r <- make.rate(ff, envF = InfTemp)
-#'   
-#'   # plot it
-#'   plot(t, r(t), type = 'l')
-#'   
-#'   ###
-#'   # we can also have a function that depends on both time AND temperature
-#'   
-#'   # function
-#'   ff <- function(t, env) {
-#'     return(0.001*exp(0.1*t) + 0.05*env)
-#'   }
-#'   
-#'   # make a rate
-#'   r <- make.rate(ff, envF = InfTemp)
-#'   
-#'   # plot it
-#'   plot(t, r(t), type = 'l')
-#'   
-#'   ###
-#'   # as mentioned above, we could also use ifelse() to construct a step function
-#'   # that is modulated by temperature
-#'   
-#'   # function
-#'   ff <- function(t, env) {
-#'     return(ifelse(t < 10, 0.1 + 0.01*env,
-#'                   ifelse(t < 30, 0.2 - 0.005*env,
-#'                          ifelse(t <= 50, 0.1 + 0.005*env, 0))))
-#'   }
-#'   
-#'   # rate
-#'   r <- make.rate(ff, envF = InfTemp)
-#'   
-#'   # plot it
-#'   plot(t, r(t), type = 'l')
+#' # temperature data
+#' data(temp)
+#' 
+#' # function
+#' ff <- function(t, env) {
+#'   return(0.05*env)
 #' }
+#' 
+#' # make the rate
+#' r <- make.rate(ff, envF = temp)
+#' 
+#' # plot it
+#' plot(t, r(t), type = 'l')
+#' 
+#' ###
+#' # we can also have a function that depends on both time AND temperature
+#' 
+#' # function
+#' ff <- function(t, env) {
+#'   return(0.001*exp(0.1*t) + 0.05*env)
+#' }
+#' 
+#' # make a rate
+#' r <- make.rate(ff, envF = temp)
+#' 
+#' # plot it
+#' plot(t, r(t), type = 'l')
+#' 
+#' ###
+#' # as mentioned above, we could also use ifelse() to construct a step function
+#' # that is modulated by temperature
+#' 
+#' # function
+#' ff <- function(t, env) {
+#'   return(ifelse(t < 10, 0.1 + 0.01*env,
+#'                 ifelse(t < 30, 0.2 - 0.005*env,
+#'                        ifelse(t <= 50, 0.1 + 0.005*env, 0))))
+#' }
+#' 
+#' # rate
+#' r <- make.rate(ff, envF = temp)
+#' 
+#' # plot it
+#' plot(t, r(t), type = 'l')
 #'
 #' @name make.rate
 #' @rdname make.rate

@@ -6,7 +6,3 @@ r:
 - release
 warnings_are_errors: true
 sudo: required
-
-before_install:
-- sudo apt-get install libmagick++-dev
-- sudo apt-get install libmpfr-dev

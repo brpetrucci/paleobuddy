@@ -250,7 +250,7 @@ We have already shown speciation and extinction rates can be any function of tim
 
 ```{r}
 # set a seed
-set.seed(4)
+set.seed(2)
 
 # parameters to set things up
 n0 <- 1
@@ -258,23 +258,22 @@ tMax <- 20
 
 # speciation can be dependent on an environmental variable as well as time
 pp <- function(t, env) {
-  0.01 * t + 0.1*exp(0.1*env)
+  0.01 * t + 0.01*exp(0.01*env)
 }
 
-# let us generate some fake environmental data - you can pretend this is 
-# percentage of max temperature or something
-Env <- data.frame(1:20, runif(20))
-# the package RPANDA supplies some useful environmental data frames - see ?bd.sim and ?bd.sim general for
-# examples with real data
+# let us use the package's temperature data
+data(temp)
+# this could also be data(co2), the other environmental data frame supplied by
+# paleobuddy
 
 # we can make extinction be age-dependent by creating a shape parameter
 qq <- 10
-qShape <- 2
+qShape <- 0.5
 # this will make it so species durations are distributed as a Weibull with scale 10 and shape 2
 
 # run the simulation
 # we pass the shape and environmental parameters
-sim <- bd.sim(n0, pp, qq, tMax, qShape = qShape, envPP = Env)
+sim <- bd.sim(n0, pp, qq, tMax, qShape = qShape, envPP = temp)
 # note that pShape and envQQ also exist
 # the defaults for all of these customization options is NULL
 
@@ -304,7 +303,7 @@ q <- function(t, env) {
 }
 
 # pass it to make.rate with environmental data
-qq <- make.rate(q, envF = Env)
+qq <- make.rate(q, envF = temp)
 plot(t, qq(t), type = 'l', main = "Environmental step function extinction rate",
      xlab = "Time (My)", ylab = "Rate")
 ```
@@ -328,7 +327,7 @@ q <- function(t, env) {
 qShape <- 2
 
 # run the simulation
-sim <- bd.sim(n0, pList, q, tMax, pShape = 0.5, qShape = 2, envQQ = Env, pShifts = pShifts)
+sim <- bd.sim(n0, pList, q, tMax, pShape = 0.5, qShape = 2, envQQ = temp, pShifts = pShifts)
 ```
 
 We set this to not run because it takes a long time - both because of the high speciation and because the method of creating a step function rate with `shifts` and `lists` takes a long time to integrate. It is however a good illustration of the power of `paleobuddy`s flexibility. 
@@ -387,12 +386,17 @@ set.seed(1)
 # generate a quick simulation
 sim <- bd.sim(n0, pp = 0.1, qq = 0.05, tMax = 20)
 
+# we will need to use sim$TE, so let us make the extant species' time 0
+sim$TE[sim$EXTANT] <- 0
+
 # another seed
 set.seed(1)
 
 # sample - high sampling rate so we can visualize the age-dependency
-samp <- sample.clade(sim = sim, rr = 30, tMax = 20, bins = bins, 
+samp <- sample.clade(sim = sim, rr = 30, tMax = 20, 
                      returnTrue = FALSE, dFun = dPERT, dFunMax = dPERTmax)
+# if no bin is supplied and returnTrue = FALSE, it uses seq(tMax, 0, -0.1)
+# as a high resolution default
 
 # extract species identity
 ids <- unique(samp$Species)

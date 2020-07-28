@@ -111,7 +111,7 @@
 #' \item{\code{TE}}{List of extinction times, with \code{-0.01} as the time of
 #' extinction for extant species.}
 #'
-#' \item{\code{TS}}{List of speciation times, with \code{tMax+0.01} as the time of
+#' \item{\code{TS}}{List of speciation times, with \code{tMax} as the time of
 #' speciation for species that started the simulation.}
 #'
 #' \item{\code{PAR}}{List of parents. Species that started the simulation have
@@ -283,100 +283,97 @@
 #' 
 #' ###
 #' # finally, we can also have a rate dependent on an environmental variable,
-#' # like temperature data in RPANDA
+#' # like temperature data
 #' 
-#' if (requireNamespace("RPANDA", quietly = TRUE)) {
-#'   
-#'   # get temperature data from RPANDA
-#'   data(InfTemp, package = "RPANDA")
-#'   
-#'   # initial number of species
-#'   n0 <- 1
-#'   
-#'   # maximum simulation time
-#'   tMax <- 40
-#'   
-#'   # speciation - a scale
-#'   p <- 10
-#'   
-#'   # note the scale for the age-dependency can be a time-varying function
-#'   
-#'   # speciation shape
-#'   pShape <- 2
-#'   
-#'   # extinction, dependent on temperature exponentially
-#'   q <- function(t, env) {
-#'     return(0.2*exp(0.01*env))
-#'   }
-#'   
-#'   # need a variable to tell bd.sim the extinction is environmentally dependent
-#'   envQQ <- InfTemp
-#'   
-#'   # by passing q and envQQ to bd.sim, internally bd.sim will make q into a 
-#'   # function dependent only on time, using make.rate
-#'   qq <- make.rate(q, envF = envQQ)
-#'   
-#'   # take a look at how the rate itself will be
-#'   plot(seq(0, tMax, 0.1), qq(seq(0, tMax, 0.1)), 
-#'        main = "Extinction rate varying with temperature", xlab = "Time (My)",
-#'        ylab = "Rate", type = )
-#'   
-#'   # run the simulation
-#'   sim <- bd.sim(n0, p, q, tMax, pShape = pShape, envQQ = envQQ,
-#'                 nFinal = c(2, Inf))
-#'   
-#'   # we can plot the phylogeny to take a look
-#'   if (requireNamespace("ape", quietly = TRUE)) {
-#'     phy <- make.phylo(sim)
-#'     ape::plot.phylo(phy)
-#'   }
-#'   
-#'   ###
-#'   # one can mix and match all of these scenarios as they wish - age-dependency
-#'   # and constant rates, age-dependent and temperature-dependent rates, etc. The
-#'   # only combination that is not allowed is a vector rate and environmental
-#'   # data, but one can get around that as follows
-#'   
-#'   # initial number of species
-#'   n0 <- 1
+#' # get temperature data 
+#' data(temp)
 #' 
-#'   # speciation - a step function of temperature built using ifelse()
-#'   p <- function(t, env) {
-#'     ifelse(t < 20, 2*env,
-#'            ifelse(t < 30, env/2, 2*env/3))
-#'   }
+#' # initial number of species
+#' n0 <- 1
 #' 
-#'   # speciation shape
-#'   pShape <- 2
+#' # maximum simulation time
+#' tMax <- 40
 #' 
-#'   # environment variable to use - temperature
-#'   envPP <- InfTemp
-#'   
-#'   # this is kind of a complicated scale, let us take a look
-#'   
-#'   # make it a function of time
-#'   pp <- make.rate(p, envF = envPP)
-#'   
-#'   # plot it
-#'   plot(seq(0, tMax, 0.1), pp(seq(0, tMax, 0.1)), 
-#'        main = "Speciation scale varying with temperature", xlab = "Time (My)",
-#'        ylab = "Scale", type = 'l')
-#'   
-#'   # extinction - high so this does not take too long to run
-#'   q <- 0.3
-#'   
-#'   # maximum simulation time
-#'   tMax <- 40
-#'   
-#'   # run the simulation
-#'   sim <- bd.sim(n0, p, q, tMax, pShape = pShape, envPP = envPP,
-#'                nFinal = c(2, Inf))
-#'   
-#'   # we can plot the phylogeny to take a look
-#'   if (requireNamespace("ape", quietly = TRUE)) {
-#'     phy <- make.phylo(sim)
-#'     ape::plot.phylo(phy)
-#'   }
+#' # speciation - a scale
+#' p <- 10
+#' 
+#' # note the scale for the age-dependency can be a time-varying function
+#' 
+#' # speciation shape
+#' pShape <- 2
+#' 
+#' # extinction, dependent on temperature exponentially
+#' q <- function(t, env) {
+#'   return(0.1*exp(0.01*env))
+#' }
+#' 
+#' # need a variable to tell bd.sim the extinction is environmentally dependent
+#' envQQ <- temp
+#' 
+#' # by passing q and envQQ to bd.sim, internally bd.sim will make q into a
+#' # function dependent only on time, using make.rate
+#' qq <- make.rate(q, envF = envQQ)
+#' 
+#' # take a look at how the rate itself will be
+#' plot(seq(0, tMax, 0.1), qq(seq(0, tMax, 0.1)),
+#'      main = "Extinction rate varying with temperature", xlab = "Time (My)",
+#'      ylab = "Rate", type = 'l')
+#' 
+#' # run the simulation
+#' sim <- bd.sim(n0, p, q, tMax, pShape = pShape, envQQ = envQQ,
+#'               nFinal = c(2, Inf))
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- make.phylo(sim)
+#'   ape::plot.phylo(phy)
+#' }
+#' 
+#' ###
+#' # one can mix and match all of these scenarios as they wish - age-dependency
+#' # and constant rates, age-dependent and temperature-dependent rates, etc. The
+#' # only combination that is not allowed is a vector rate and environmental
+#' # data, but one can get around that as follows
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # speciation - a step function of temperature built using ifelse()
+#' p <- function(t, env) {
+#'   ifelse(t < 20, env,
+#'          ifelse(t < 30, env / 4, env / 3))
+#' }
+#' 
+#' # speciation shape
+#' pShape <- 2
+#' 
+#' # environment variable to use - temperature
+#' envPP <- temp
+#' 
+#' # this is kind of a complicated scale, let us take a look
+#' 
+#' # make it a function of time
+#' pp <- make.rate(p, envF = envPP)
+#' 
+#' # plot it
+#' plot(seq(0, tMax, 0.1), pp(seq(0, tMax, 0.1)),
+#'      main = "Speciation scale varying with temperature", xlab = "Time (My)",
+#'      ylab = "Scale", type = 'l')
+#' 
+#' # extinction - high so this does not take too long to run
+#' q <- 0.2
+#' 
+#' # maximum simulation time
+#' tMax <- 40
+#' 
+#' # run the simulation
+#' sim <- bd.sim(n0, p, q, tMax, pShape = pShape, envPP = envPP,
+#'               nFinal = c(2, Inf))
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- make.phylo(sim)
+#'   ape::plot.phylo(phy)
 #' }
 #' 
 #' # note nFinal has to be sensible

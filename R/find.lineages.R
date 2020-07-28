@@ -36,6 +36,8 @@
 #' 
 #' # for each clade
 #' for (i in 1:length(clades)) {
+#'   # change NA to 0 on the clade's TE
+#'   clades[[i]]$TE[clades[[i]]$EXTANT] = 0
 #'   
 #'   # if there is only one lineage in the clade
 #'   if (length(clades[[i]]$TE) < 2) {
@@ -84,6 +86,8 @@
 #' 
 #' # for each clade
 #' for (i in 1:length(clades)) {
+#'   # change NA to 0 on the clade's TE
+#'   clades[[i]]$TE[clades[[i]]$EXTANT] = 0
 #'   
 #'   # if there is only one lineage in the clade
 #'   if (length(clades[[i]]$TE) < 2) {
@@ -124,7 +128,7 @@
 #' # including one clade
 #' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.08, tMax = 10, nFinal = c(5, Inf))
 #' 
-#' par(mfrow = c(1,2))
+#' par(mfrow = c(1, 2))
 #' 
 #' # plotting sim and find.lineages(sim) - should be equal
 #' if (requireNamespace("ape", quietly = TRUE)) {

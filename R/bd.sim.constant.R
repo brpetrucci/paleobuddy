@@ -167,7 +167,7 @@ bd.sim.constant <- function(n0, pp, qq, tMax,
     
     # initialize the vectors to hold times of speciation and extinction, parents
     # and status (extant or not)
-    TS <- rep(-0.01, n0)
+    TS <- rep(0, n0)
     TE <- rep(NA, n0)
     parent <- rep(NA, n0)
     isExtant <- rep(TRUE, n0)
@@ -177,9 +177,8 @@ bd.sim.constant <- function(n0, pp, qq, tMax,
   
     # while we have more species in a vector than we have analyzed,
     while (length(TE) >= sCount) {
-      # TS starts at -0.01 to show it was alive at the beginning, but to count
-      # time we need to start at 0
-      tNow <- ifelse(TS[sCount] < 0, 0, TS[sCount])
+      # start at the time of speciation of sCount
+      tNow <- TS[sCount]
   
       # draw waiting times with rexp()
       waitTimeS <- ifelse(pp > 0, rexp(1, pp), Inf)
@@ -207,9 +206,8 @@ bd.sim.constant <- function(n0, pp, qq, tMax,
       # reached the time of the species extinction
       tNow <- tExp
   
-      # record the extinction - if tExp >= tMax, it didn't go extinct
-      TE[sCount] <- ifelse(tNow < tMax | trueExt, tNow, tMax + 0.01)
-      isExtant[sCount] <- ifelse(TE[sCount] > tMax, TRUE, FALSE)
+      # record the extinction - if TE[sCount] is NA, it is extant
+      isExtant[sCount] <- ifelse(is.na(TE[sCount]), TRUE, FALSE)
   
       # next species
       sCount <- sCount + 1
