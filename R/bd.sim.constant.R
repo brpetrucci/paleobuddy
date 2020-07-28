@@ -207,6 +207,7 @@ bd.sim.constant <- function(n0, pp, qq, tMax,
       tNow <- tExp
   
       # record the extinction - if TE[sCount] is NA, it is extant
+      TE[sCount] <- ifelse(tNow >= tMax | trueExt, NA, tNow)
       isExtant[sCount] <- ifelse(is.na(TE[sCount]), TRUE, FALSE)
   
       # next species
