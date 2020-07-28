@@ -67,17 +67,21 @@
 #' @export
 
 make.phylo <- function(sim) {
-
   # simulations with just one species do not have a phylogeny
   if (length(sim$TE) < 2) {
     message("There is no phylogeny for a simulation with only one lineage")
     return(NA)
   }
 
+  # simulations with more than one starting species have multiple phylogenies
   if (sum(is.na(sim$PAR)) > 1) {
     message("Multiple starting species. Use function findClades()")
     return(NA)
   }
+  
+  # make TE and TS sensible
+  sim$TE <- ifelse(sim$TE < 0, 0, sim$TE)
+  sim$TS <- ifelse(sim$TS > tMax, tMax, sim$TS)
 
   all.dir.daughter <- function(lin, x) {
     # all.dir.daughters returns the name of each direct daughter species

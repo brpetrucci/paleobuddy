@@ -255,8 +255,6 @@
 
 rexp.var <- function(n, lambda, now = 0, tMax = Inf, shape = NULL, 
                    TS = 0, fast = FALSE) {
-  print(now)
-  print(TS)
   # some error checking
   if (tMax == Inf & fast) {
     stop("Need a valid tMax for fast computation")

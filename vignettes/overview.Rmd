@@ -155,8 +155,8 @@ rr <- 1
 # run the sampling simulation only for the first 15 species for brevity's sake
 # returnTrue = FALSE makes it so the occurrences are binned (i.e. an occurrence
 # at time 42.34 is between 42.4 and 42.3)
-samp <- suppressMessages(sample.clade(S = 1:15, sim = sim, rr = rr, 
-                                      tMax = tMax, returnTrue = FALSE))
+samp <- suppressMessages(sample.clade(sim = sim, rr = rr, 
+                                      tMax = tMax, S = 1:15, returnTrue = FALSE))
 # suppressing messages - the message is to inform the user how many species
 # left no fossils. In this case, it was 0
 

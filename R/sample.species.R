@@ -179,14 +179,15 @@ sample.species <- function(sim, rr, tMax, S) {
   # invert times since simulation goes from 0 to tMax
   TE <- tMax - sim$TE
   TS <- tMax - sim$TS
+  
+  # make them sensible
+  TE <- ifelse(TE > tMax, tMax, TE)
+  TS <- ifelse(TS < 0, 0, TS)
 
   # start when the species was born, end when it died
   
-  # TS for initial species is -0.01, make it 0
-  Now<-ifelse(TS[S] < 0, 0, TS[S])
-  
-  # TE for extant species is tMax + 0.01, make it tMax
-  End<-ifelse(TE[S] > tMax, tMax, TE[S])
+  Now <- TS[S]
+  End <- TE[S]
 
   # make rr a function if it isn't
   if (is.numeric(rr)) {

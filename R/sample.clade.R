@@ -466,6 +466,10 @@ sample.clade <- function(sim, rr, tMax, S = NULL, envRR = NULL, rShifts = NULL,
   if (is.null(bins) & !returnTrue) {
     bins <- seq(tMax, 0, -0.1)
   }
+  
+  # make TE and TS sensible
+  sim$TE <- ifelse(sim$TE < 0, 0, sim$TE)
+  sim$TS <- ifelse(sim$TS > tMax, tMax, sim$TS)
 
   # adjusting bins
   bins <- sort(bins, decreasing = TRUE)
