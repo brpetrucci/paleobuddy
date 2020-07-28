@@ -429,8 +429,8 @@ sample.adpp <- function(sim, rr, dFun, S = NULL, dFunMax = NULL, ...) {
   # get the speciation and extinction times vectors, constraining them between 
   # 0 and tMax
   TE <- ifelse(sim$TE < 0, 0, sim$TE)
-  TS <- ifelse(sim$TS > tMax, tMax, sim$TS)
-
+  TS <- ifelse(is.na(sim$PAR), sim$TS - 0.01, sim$TS)
+  
   # setting things and checking inputs
   printMessage <- TRUE
   
