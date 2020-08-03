@@ -1,7 +1,7 @@
 #' Cenozoic temperature data
 #' 
 #' Temperature data during the Cenozoic. Modified from the \code{InfTemp} data
-#' set in \href{https://github.com/hmorlon/PANDAPANDA[m}{RPANDA}, originally inferred 
+#' set in \href{https://github.com/hmorlon/PANDA}{RPANDA}, originally inferred 
 #' from delta O18 measurements.
 #' 
 #' @usage 
@@ -19,7 +19,7 @@
 #'   temperature for each time \code{t} given the resolution of the data set.}
 #' }
 #' 
-#' @source \url{https://github.com/hmorlon/PANDAPANDA[m}
+#' @source \url{https://github.com/hmorlon/PANDA}
 #' 
 #' @references 
 #' 
@@ -39,7 +39,7 @@
 #' Jurassic CO2 data
 #' 
 #' CO2 data during the Jurassic. Modified from the \code{co2} set in 
-#' \href{https://github.com/hmorlon/PANDAPANDA[m}{RPANDA}, originally taken from Mayhew 
+#' \href{https://github.com/hmorlon/PANDA}{RPANDA}, originally taken from Mayhew 
 #' et al (2008, 2012). 
 #' 
 #' @usage 
@@ -56,7 +56,7 @@
 #'   CO2 mass at \code{t} over the present.}
 #' }
 #' 
-#' @source \url{https://github.com/hmorlon/PANDAPANDA[m}
+#' @source \url{https://github.com/hmorlon/PANDAPANDA[m}
 #' 
 #' @references 
 #' 
