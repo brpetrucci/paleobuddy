@@ -17,14 +17,14 @@ A data frame with 17632 rows and 2 variables:
 }
 }
 \source{
-\url{https://github.com/hmorlon/RPANDA}
+\url{https://github.com/hmorlon/PANDAPANDA[m}
 }
 \usage{
 data(temp)
 }
 \description{
 Temperature data during the Cenozoic. Modified from the \code{InfTemp} data
-set in \href{https://github.com/hmorlon/RPANDA}{RPANDA}, originally inferred 
+set in \href{https://github.com/hmorlon/PANDAPANDA[m}{RPANDA}, originally inferred 
 from delta O18 measurements.
 }
 \references{

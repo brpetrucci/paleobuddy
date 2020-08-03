@@ -16,14 +16,14 @@ A data frame with 53 rows and 2 variables:
 }
 }
 \source{
-\url{https://github.com/hmorlon/RPANDA}
+\url{https://github.com/hmorlon/PANDAPANDA[m}
 }
 \usage{
 data(co2)
 }
 \description{
 CO2 data during the Jurassic. Modified from the \code{co2} set in 
-\href{https://github.com/hmorlon/RPANDA}{RPANDA}, originally taken from Mayhew 
+\href{https://github.com/hmorlon/PANDAPANDA[m}{RPANDA}, originally taken from Mayhew 
 et al (2008, 2012).
 }
 \references{
