@@ -78,7 +78,7 @@ while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 
 # we will need to get exact durations for some examples, so
 sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have -0.01 for extant species
+# this is necessary since the default is to have NA for extant species
 
 # here we will use the PERT function. It is described in:
 # Silvestro et al 2014
@@ -147,7 +147,7 @@ while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 
 # we will need to get exact durations for some examples, so
 sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have -0.01 for extant species
+# this is necessary since the default is to have NA for extant species
 
 # preservation function in respect to age
 # occurrences are uniformly distributed
@@ -189,7 +189,7 @@ while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 
 # we will need to get exact durations for some examples, so
 sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have -0.01 for extant species
+# this is necessary since the default is to have NA for extant species
 
 # here we will use the triangular distribution. We have some empirical evidence
 # that taxa occurrences might present triangular shape
@@ -279,7 +279,7 @@ while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 
 # we will need to get exact durations for some examples, so
 sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have -0.01 for extant species
+# this is necessary since the default is to have NA for extant species
 
 # preservation function, with the "mde" of the triangle being exactly at the
 # last quarter of the duration of EACH lineage
@@ -362,7 +362,7 @@ while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 
 # we will need to get exact durations for some examples, so
 sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have -0.01 for extant species
+# this is necessary since the default is to have NA for extant species
 
 # preservation function in respect to age, with the "mode" of the triangle
 # being exactly at the last quarter of the duration of EACH lineage.

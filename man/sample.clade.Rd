@@ -43,7 +43,9 @@ Species not included in \code{S} will not be sampled by the function.}
 \item{envRR}{A matrix containing time points and values of an environmental
 variable, like temperature, for each time point. This will be used to create
 a sampling rate, so \code{rr} must be a function of time and said variable
-if \code{envRR} is not \code{NULL}.}
+if \code{envRR} is not \code{NULL}. Note \code{paleobuddy} has two 
+environmental data frames, \code{temp} and \code{co2}. See \code{RPANDA} for
+more examples.}
 
 \item{rShifts}{Vector of rate shifts. First element must be the starting
 time for the simulation (\code{0} or \code{tMax}). It must have the same length 
@@ -134,7 +136,7 @@ while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 
 # we will need to get exact durations for some examples, so
 sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have -0.01 for extant species
+# this is necessary since the default is to have NA for extant species
 
 # sampling rate
 r <- 2
@@ -179,7 +181,7 @@ while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 
 # we will need to get exact durations for some examples, so
 sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have -0.01 for extant species
+# this is necessary since the default is to have NA for extant species
 
 # sampling rate
 r <- function(t) {
@@ -226,7 +228,7 @@ while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 
 # we will need to get exact durations for some examples, so
 sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have -0.01 for extant species
+# this is necessary since the default is to have NA for extant species
 
 # we will use the less efficient method of creating a step function
 # one could instead use ifelse()
@@ -284,7 +286,7 @@ while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 
 # we will need to get exact durations for some examples, so
 sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have -0.01 for extant species
+# this is necessary since the default is to have NA for extant species
 
 # make temperature the environmental dependency of r
 envR <- temp
@@ -343,7 +345,7 @@ while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 
 # we will need to get exact durations for some examples, so
 sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have -0.01 for extant species
+# this is necessary since the default is to have NA for extant species
 
 # here we will use the PERT function. It is described in:
 # Silvestro et al 2014
@@ -435,7 +437,7 @@ while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
 
 # we will need to get exact durations for some examples, so
 sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have -0.01 for extant species
+# this is necessary since the default is to have NA for extant species
 
 # preservation function in respect to age, with the "mode" of the triangle
 # being exactly at the last quarter of the duration of EACH lineage.

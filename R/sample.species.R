@@ -1,11 +1,11 @@
 #' Constant and time-dependent rate species sampling
 #' 
 #' Generates a vector of occurrence times for a species in a simulation using a
-#' a Poisson process. Allows for the Poisson rate to be (1) a constant, (2) a 
-#' function of time, (3) a function of time and an environmental variable, or (4)
-#' a vector of numbers. For sampling of more than one species and/or taking into 
+#' a Poisson process. Allows for the Poisson rate to be (1) a constant or (2) a 
+#' function of time. For sampling of more than one species and/or taking into 
 #' account species age instead of absolute time, see \code{sample.clade} and 
-#' \code{sample.adpp}.
+#' \code{sample.adpp}. \code{sample.clade} also allows for more flexibility
+#' options, see \code{make.rate}.
 #' Note that while the Poisson process occurs in forward time, we return (both in
 #' birth-death functions and here) results in backwards time, so that time is
 #' inverted using \code{tMax} both at the beginning and end of 
@@ -14,6 +14,12 @@
 #' @param S The species number to be sampled. Since \code{sample.species} will be 
 #' called by a wrapper using \code{lapply}, it is through \code{S} that we apply
 #' this function.
+#' 
+#' @param rr Sampling rate (per species per million years) over time. It can be
+#' a \code{numeric} describing a constant rate or a \code{function(t)} describing
+#' the variation in sampling over time. For more flexibility on sampling, see
+#' \code{make.rate} for creating more complex rates. Note that \code{rr} should
+#' always be greater than or equal to zero.
 #'
 #' @inheritParams sample.clade
 #'
@@ -36,7 +42,7 @@
 #' 
 #' # we will need to get exact durations for some examples, so
 #' sim$TE[sim$EXTANT] = 0
-#' # this is necessary since the default is to have -0.01 for extant species
+#' # this is necessary since the default is to have NA for extant species
 #' 
 #' # preservation function
 #' r <- function(t) {
@@ -73,7 +79,7 @@
 #' 
 #' # we will need to get exact durations for some examples, so
 #' sim$TE[sim$EXTANT] = 0
-#' # this is necessary since the default is to have -0.01 for extant species
+#' # this is necessary since the default is to have NA for extant species
 #' 
 #' # we can create the sampling rate here from a few vectors
 #' 
@@ -119,7 +125,7 @@
 #' 
 #' # we will need to get exact durations for some examples, so
 #' sim$TE[sim$EXTANT] = 0
-#' # this is necessary since the default is to have -0.01 for extant species
+#' # this is necessary since the default is to have NA for extant species
 #' 
 #' # preservation function
 #' r <- function(t) {
@@ -158,7 +164,7 @@
 #' 
 #' # we will need to get exact durations for some examples, so
 #' sim$TE[sim$EXTANT] = 0
-#' # this is necessary since the default is to have -0.01 for extant species
+#' # this is necessary since the default is to have NA for extant species
 #' 
 #' # preservation function dependent on temperature
 #' r_t <- function(t, env) {
