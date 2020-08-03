@@ -36,17 +36,17 @@
 #' @return A list of vectors, as follows
 #'
 #' \describe{
-#' \item{\code{TE}}{List of extinction times, with \code{-0.01} as the time of
+#' \item{\code{TE}}{List of extinction times, with \code{0} as the time of
 #' extinction for extant species.}
 #'
-#' \item{\code{TS}}{List of speciation times, with \code{tMax} as the time of
+#' \item{\code{TS}}{List of speciation times, with \code{NA} as the time of
 #' speciation for species that started the simulation.}
 #'
 #' \item{\code{PAR}}{List of parents. Species that started the simulation have
 #' \code{NA}, while species that were generated during the simulation have their
 #' parent's number. Species are numbered as they are born.}
 #'
-#' \item{\code{EXTANT}}{List of booleans representing whether each species is
+#' \item{\code{EXTANT}}{List of logicals representing whether each species is
 #' extant.}}
 #'
 #' @author Bruno do Rosario Petrucci.
@@ -296,7 +296,7 @@ bd.sim.general <- function(n0, pp, qq, tMax,
   # if shape is not null, make scale a function to facilitate checking
   if (!is.null(pShape)) {
     message("since pShape is not null, pp will be a Weibull scale and therefore
-            correspond to 1/rate. See ?bd.sim for more information")
+            correspond to 1/rate. See ?bd.sim or ?bd.sim.general for more information")
     
     if (is.numeric(pp)) {
       p <- pp
@@ -306,7 +306,7 @@ bd.sim.general <- function(n0, pp, qq, tMax,
   
   if (!is.null(qShape)) {
     message("since qShape is not null, qq will be a Weibull scale and therefore
-            correspond to 1/rate. See ?bd.sim for more information")
+            correspond to 1/rate. See ?bd.sim or ?bd.sim.general for more information")
     
     if (is.numeric(qq)) {
       q <- qq

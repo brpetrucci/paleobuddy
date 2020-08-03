@@ -35,12 +35,11 @@ species that would be generated after \code{tMax} is not born.}
 \item{nFinal}{A \code{vector} of length \code{2}, indicating an interval of 
 acceptable number of species at the end of the simulation. Default value is 
 \code{c(0, Inf)}, so that any number of species (including zero, the extinction
-of the whole clade) is accepted. If different from default value, 
-\code{bd.sim.constant} or \code{bd.sim.general} will run repeatedly until the 
-number of total species reaches a number in the interval \code{nFinal}. Please 
-notice that \code{extOnly} can modify the meaning of this parameter. If 
-\code{extOnly = TRUE}, the function will run repeatedly until the number of 
-\emph{extant} species at the end of the simulation lies within the 
+of the whole clade) is accepted. If different from default value, the process
+will run until the number of total species reaches a number in the interval
+\code{nFinal}. Please note that \code{extOnly} can modify the meaning of this 
+parameter. If \code{extOnly = TRUE}, the function will run repeatedly until the
+number of \emph{extant} species at the end of the simulation lies within the 
 \code{nFinal} interval. Note that using values other than the default for 
 \code{nFinal} might condition simulation results.}
 
@@ -50,35 +49,36 @@ simulation. If \code{TRUE}, the function will run repeatedly until the number
 of \emph{extant} species at the end of the simulation lies within the 
 \code{nFinal} interval. If \code{FALSE} (as default), it will run until the 
 \emph{total} number of species generated lies within that interval.
-The function returns \code{NA} if it runs for more than \code{100000} 
+
+
+Note: The function returns \code{NA} if it runs for more than \code{100000}
 iterations without fulfilling the requirements of \code{nFinal} and 
 \code{extOnly}.}
 
 \item{trueExt}{A \code{logical} used for \code{bd.sim.general}, indicating 
 whether it should return true or truncated extinction times. When \code{TRUE}, 
 time of extinction of extant species will be the true time, otherwise it will
-be truncated to \code{tMax + 0.01} if a species is alive at the end of the
-simulation.}
+be \code{NA} if a species is alive at the end of the simulation.}
 }
 \value{
 A list of vectors, as follows
 
 \describe{
-\item{\code{TE}}{List of extinction times, with \code{-0.01} as the time of
+\item{\code{TE}}{List of extinction times, with \code{0} as the time of
 extinction for extant species.}
 
-\item{\code{TS}}{List of speciation times, with \code{tMax+0.01} as the time of
+\item{\code{TS}}{List of speciation times, with \code{NA} as the time of
 speciation for species that started the simulation.}
 
 \item{\code{PAR}}{List of parents. Species that started the simulation have
 \code{NA}, while species that were generated during the simulation have their
 parent's number. Species are numbered as they are born.}
 
-\item{\code{EXTANT}}{List of booleans representing whether each species is
+\item{\code{EXTANT}}{List of logicals representing whether each species is
 extant.}}
 }
 \description{
-Simulates a species birth-death process with general rates for any number of
+Simulates a species birth-death process with constant rates for any number of
 starting species. Allows for constraining results on the number of species at 
 the end of the simulation, either total or extant. Returns an object containing 
 vectors of speciation times, extinction times, parents (= species' mother 

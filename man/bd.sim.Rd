@@ -37,7 +37,11 @@ an environmental variable (please see \code{envPP} for details) or a
 rate shift times times (please see \code{pShifts}). Note that \code{pp} should
 should always be greater than or equal to zero.}
 
-\item{qq}{Similar to \code{pp}, but for the extinction rate.}
+\item{qq}{Similar to \code{pp}, but for the extinction rate.
+
+Note: rates should be considered as running from \code{0} to \code{tMax}, as
+the simulation runs in that direction even though the function inverts times
+before returning in the end.}
 
 \item{tMax}{Ending time of simulation, in million years after the clade origin. 
 Any species still living after \code{tMax} is considered extant, and any 
@@ -51,44 +55,45 @@ species's age (positive age-dependency). Default is \code{NULL}, equivalent to
 an age-independent process. For \code{pShape != NULL} (including when equal to 
 one), \code{pp} will be considered a scale (= 1/rate), and \code{rexp.var} will
 draw a Weibull distribution instead of an exponential. This means 
-Weibull(rate, 1) = Exponential(1/rate). Notice even when \code{pShape != NULL}, 
-\code{pp} may still be time-dependent. 
+Weibull(rate, 1) = Exponential(1/rate). Note that even when 
+\code{pShape != NULL}, \code{pp} may still be time-dependent.}
+
+\item{qShape}{Similar to \code{pShape}, but for the extinction rate.
 
 Note: Time-varying shape is implemented, so one could have \code{pShape} or 
 \code{qShape} be a function of time. It is not thoroughly tested, however, 
 so it may be prudent to wait for a future release where this feature is well
 established.}
 
-\item{qShape}{Similar to \code{qShape}, but for the extinction rate.}
-
 \item{envPP}{A \code{data.frame} representing the variation of an environmental
 variable (e.g. CO2, temperature, available niches, etc) with time. The first 
 column of this \code{data.frame} must be time, and the second column must be 
 the values of the variable. This will be internally passed to the 
 \code{make.rate} function, to create a speciation rate variation in time 
-following the interaction between the environmental variable and the function.}
+following the interaction between the environmental variable and the function.
+Note \code{paleobuddy} has two environmental data frames, \code{temp} and
+\code{co2}. One can check \code{RPANDA} for more examples.}
 
 \item{envQQ}{Similar to \code{envPP}, but for the extinction rate.}
 
 \item{pShifts}{Vector of rate shifts. First element must be the starting
 time for the simulation (\code{0} or \code{tMax}). It must have the same length
 as \code{pp}. \code{c(0, x, tMax)} is equivalent to \code{c(tMax, tMax - x, 0)}
-for the purposes of \code{make.rate}.
+for the purposes of \code{make.rate}.}
+
+\item{qShifts}{Similar to \code{qShifts}, but for the extinction rate.
 
 Note that using this  method for step-function rates is currently slower than 
 using \code{ifelse}.}
 
-\item{qShifts}{Similar to \code{qShifts}, but for the extinction rate.}
-
 \item{nFinal}{A \code{vector} of length \code{2}, indicating an interval of 
 acceptable number of species at the end of the simulation. Default value is 
 \code{c(0, Inf)}, so that any number of species (including zero, the extinction
-of the whole clade) is accepted. If different from default value, 
-\code{bd.sim.constant} or \code{bd.sim.general} will run repeatedly until the 
-number of total species reaches a number in the interval \code{nFinal}. Please 
-notice that \code{extOnly} can modify the meaning of this parameter. If 
-\code{extOnly = TRUE}, the function will run repeatedly until the number of 
-\emph{extant} species at the end of the simulation lies within the 
+of the whole clade) is accepted. If different from default value, the process
+will run until the number of total species reaches a number in the interval
+\code{nFinal}. Please note that \code{extOnly} can modify the meaning of this 
+parameter. If \code{extOnly = TRUE}, the function will run repeatedly until the
+number of \emph{extant} species at the end of the simulation lies within the 
 \code{nFinal} interval. Note that using values other than the default for 
 \code{nFinal} might condition simulation results.}
 
@@ -98,25 +103,26 @@ simulation. If \code{TRUE}, the function will run repeatedly until the number
 of \emph{extant} species at the end of the simulation lies within the 
 \code{nFinal} interval. If \code{FALSE} (as default), it will run until the 
 \emph{total} number of species generated lies within that interval.
-The function returns \code{NA} if it runs for more than \code{100000} 
+
+
+Note: The function returns \code{NA} if it runs for more than \code{100000}
 iterations without fulfilling the requirements of \code{nFinal} and 
 \code{extOnly}.}
 
 \item{trueExt}{A \code{logical} used for \code{bd.sim.general}, indicating 
 whether it should return true or truncated extinction times. When \code{TRUE}, 
 time of extinction of extant species will be the true time, otherwise it will
-be truncated to \code{tMax + 0.01} if a species is alive at the end of the
-simulation.}
+be \code{NA} if a species is alive at the end of the simulation.}
 }
 \value{
 The return list of either \code{bd.sim.constant} or
 \code{bd.sim.general}, which have the same elements, as follows
 
 \describe{
-\item{\code{TE}}{List of extinction times, with \code{-0.01} as the time of
+\item{\code{TE}}{List of extinction times, with \code{0} as the time of
 extinction for extant species.}
 
-\item{\code{TS}}{List of speciation times, with \code{tMax} as the time of
+\item{\code{TS}}{List of speciation times, with \code{NA} as the time of
 speciation for species that started the simulation.}
 
 \item{\code{PAR}}{List of parents. Species that started the simulation have
@@ -237,7 +243,7 @@ q <- function(t) {
 
 # run the simulation
 sim <- bd.sim(n0, p, q, tMax, nFinal = c(2, Inf))
-# we could instead have used q made with make.rate
+# we could instead have used qList and qShifts
 # that is, however, much slower
 
 # we can plot the phylogeny to take a look

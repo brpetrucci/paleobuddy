@@ -1,6 +1,6 @@
 #' Constant rate Birth-Death simulation
 #' 
-#' Simulates a species birth-death process with general rates for any number of
+#' Simulates a species birth-death process with constant rates for any number of
 #' starting species. Allows for constraining results on the number of species at 
 #' the end of the simulation, either total or extant. Returns an object containing 
 #' vectors of speciation times, extinction times, parents (= species' mother 
@@ -25,17 +25,17 @@
 #' @return A list of vectors, as follows
 #'
 #' \describe{
-#' \item{\code{TE}}{List of extinction times, with \code{-0.01} as the time of
+#' \item{\code{TE}}{List of extinction times, with \code{0} as the time of
 #' extinction for extant species.}
 #'
-#' \item{\code{TS}}{List of speciation times, with \code{tMax+0.01} as the time of
+#' \item{\code{TS}}{List of speciation times, with \code{NA} as the time of
 #' speciation for species that started the simulation.}
 #'
 #' \item{\code{PAR}}{List of parents. Species that started the simulation have
 #' \code{NA}, while species that were generated during the simulation have their
 #' parent's number. Species are numbered as they are born.}
 #'
-#' \item{\code{EXTANT}}{List of booleans representing whether each species is
+#' \item{\code{EXTANT}}{List of logicals representing whether each species is
 #' extant.}}
 #'
 #' @author Bruno do Rosario Petrucci.
