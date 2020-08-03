@@ -19,7 +19,7 @@ A data frame with 53 rows and 2 variables:
 \url{https://github.com/hmorlon/RPANDA}
 }
 \usage{
-co2
+data(co2)
 }
 \description{
 CO2 data during the Jurassic. Modified from the \code{co2} set in 

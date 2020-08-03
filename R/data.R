@@ -1,8 +1,12 @@
 #' Cenozoic temperature data
 #' 
 #' Temperature data during the Cenozoic. Modified from the \code{InfTemp} data
-#' set in [RPANDA](https://github.com/hmorlon/RPANDA), originally inferred from
-#' delta O18 measurements.
+#' set in \href{https://github.com/hmorlon/RPANDA}{RPANDA}, originally inferred 
+#' from delta O18 measurements.
+#' 
+#' @usage 
+#' 
+#' data(temp)
 #' 
 #' @format A data frame with 17632 rows and 2 variables:
 #' \describe{
@@ -35,8 +39,12 @@
 #' Jurassic CO2 data
 #' 
 #' CO2 data during the Jurassic. Modified from the \code{co2} set in 
-#' [RPANDA](https://github.com/hmorlon/RPANDA), originally taken from Mayhew et al 
-#' (2008, 2012). 
+#' \href{https://github.com/hmorlon/RPANDA}{RPANDA}, originally taken from Mayhew 
+#' et al (2008, 2012). 
+#' 
+#' @usage 
+#' 
+#' data(co2)
 #' 
 #' @format A data frame with 53 rows and 2 variables:
 #' \describe{

@@ -20,12 +20,12 @@ A data frame with 17632 rows and 2 variables:
 \url{https://github.com/hmorlon/RPANDA}
 }
 \usage{
-temp
+data(temp)
 }
 \description{
 Temperature data during the Cenozoic. Modified from the \code{InfTemp} data
-set in [RPANDA](https://github.com/hmorlon/RPANDA), originally inferred from
-delta O18 measurements.
+set in \href{https://github.com/hmorlon/RPANDA}{RPANDA}, originally inferred 
+from delta O18 measurements.
 }
 \references{
 Morlon H. et al (2016) RPANDA: an R package for macroevolutionary analyses on 
