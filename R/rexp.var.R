@@ -14,11 +14,11 @@
 #' @param lambda The rate parameter for the exponential distribution. If
 #' \code{shape} is not \code{NULL}, \code{lambda} is a scale for a Weibull
 #' distribution. In both cases we allow for any time-varying function. Note
-#' \code{lambda} can be constant, so that it
+#' \code{lambda} can be constant.
 #'
 #' @param now The current time. Needed if one wants to consider only the interval
 #' between the current time and the maximum time for the time-varying rate.
-#' Notice this does means the waiting time is \code{>= now}, so we also subtract
+#' Note this does means the waiting time is \code{>= now}, so we also subtract
 #' \code{now} from the result before returning. The default is \code{0}.
 #'
 #' @param tMax The simulation ending time. If the waiting time would be too
@@ -58,7 +58,7 @@
 #'
 #' @examples
 #'
-###
+#' ###
 #' # let us start by checking a simple exponential variable
 #' 
 #' # rate
@@ -235,14 +235,14 @@
 #' # shape
 #' shape <- 3
 #' 
-#' # current time
-#' now <- 0
+#' # current time - remember lambda will only be considered starting from time now
+#' now <- 2.5
 #' 
 #' # maximum time to check
 #' tMax <- 40
 #' 
 #' # speciation time
-#' TS <- 0
+#' TS <- 1.2
 #' 
 #' # find the vector of waiting times - it doesn't need to be just one
 #' t <- rexp.var(n = 2, lambda, now, tMax,
