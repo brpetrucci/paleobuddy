@@ -7,7 +7,7 @@
 find.lineages(sim, S = NULL)
 }
 \arguments{
-\item{sim}{a simulation containing lists for the speciation times, extinction
+\item{sim}{A simulation containing lists for the speciation times, extinction
 times, parent identities and status (extant or extinct).}
 
 \item{S}{A vector of species in \code{sim}. If not supplied, \code{S} will be
@@ -21,12 +21,12 @@ the clades descended from species in \code{S}. For each clade, an extra vector
 return with the order of species in the original simulation.
 }
 \description{
-Finds and separates a \code{sim} object into \code{sim} objects each with a 
-mother species and its descendants. Returns by default the list of \code{sim}
-objects descended from each species with an \code{NA} parent in the original
-input. Allows for the user to input a vector of species to be the mother of 
-each resulting member of the returning list instead. Returns for each clade a 
-vector with the original identity of member species as well.
+Separates a \code{sim} object into \code{sim} objects each with a mother
+species and its descendants. Returns by default the list of \code{sim} objects
+descended from each species with an \code{NA} parent in the original input.
+Allows for the user to input a vector of species to be the mother of each
+resulting member of the returning list instead. Returns for each clade a vector
+with the original identity of member species as well.
 }
 \examples{
 

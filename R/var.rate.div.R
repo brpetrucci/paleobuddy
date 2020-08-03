@@ -13,8 +13,7 @@
 #' @param t A time vector over which to consider the distribution.
 #'
 #' @param n0 The initial number of species is by default 1, but one can change to
-#' any positive number. We allow for negative initial values as well, but of 
-#' course that is not biologically sound.
+#' any nonnegative number.
 #'
 #' Note: \code{var.rate.div} will find the expected number of daughters given a
 #' rate \code{ff} and an initial number of parents \code{n0}, so in a
@@ -137,13 +136,9 @@
 #' r <- make.rate(ff, tMax = 10, fShifts = fShifts)
 #' plot(t, r(t),type = 'l')
 #' 
-#' # we set the longest running examples to not run in a package check, but a user
-#' # interested in the usability of the function may feel free to run them
-#' \dontrun{
-#'   # get the diversity and plot it
-#'   div <- var.rate.div(ff, t, tMax = 10, fShifts = fShifts)
-#'   plot(t, div, type = 'l')
-#' }
+#' # get the diversity and plot it
+#' div <- var.rate.div(ff, t, tMax = 10, fShifts = fShifts)
+#' plot(t, div, type = 'l')
 #' 
 #' # note the delay in running var.rate.div using this method. integrating a step
 #' # function created using the methods in make.rate() is slow, as explained in
@@ -213,6 +208,16 @@
 
 var.rate.div <- function(ff, t, n0 = 1, tMax = NULL, 
                          envF = NULL, fShifts = NULL) {
+  # check that n0 is nonnegative
+  if (n0 < 0) {
+    stop("initial number of species n0 must be nonnegative")
+  }
+  
+  # check that t is a numeric vector
+  if (!is.numeric(t)) {
+    stop("t must be a numeric vector")
+  }
+  
   # get the corresponding rate
   f <- make.rate(ff, tMax = tMax, envF = envF, fShifts = fShifts)
 

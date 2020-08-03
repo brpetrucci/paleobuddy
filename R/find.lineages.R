@@ -1,11 +1,11 @@
 #' Separate a paleobuddy simulation into monophyletic clades
 #'
-#' Finds and separates a \code{sim} object into \code{sim} objects each with a 
-#' mother species and its descendants. Returns by default the list of \code{sim}
-#' objects descended from each species with an \code{NA} parent in the original
-#' input. Allows for the user to input a vector of species to be the mother of 
-#' each resulting member of the returning list instead. Returns for each clade a 
-#' vector with the original identity of member species as well.
+#' Separates a \code{sim} object into \code{sim} objects each with a mother
+#' species and its descendants. Returns by default the list of \code{sim} objects
+#' descended from each species with an \code{NA} parent in the original input.
+#' Allows for the user to input a vector of species to be the mother of each
+#' resulting member of the returning list instead. Returns for each clade a vector
+#' with the original identity of member species as well.
 #'
 #' @inheritParams make.phylo
 #'

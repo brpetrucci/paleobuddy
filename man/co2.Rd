@@ -23,8 +23,8 @@ data(co2)
 }
 \description{
 CO2 data during the Jurassic. Modified from the \code{co2} set in 
-[RPANDA](https://github.com/hmorlon/RPANDA), originally taken from Mayhew et al 
-(2008, 2012).
+\href{https://github.com/hmorlon/RPANDA}{RPANDA}, originally taken from Mayhew 
+et al (2008, 2012).
 }
 \references{
 Morlon H. et al (2016) RPANDA: an R package for macroevolutionary analyses on 

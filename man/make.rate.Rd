@@ -11,14 +11,17 @@ make.rate(ff, tMax = NULL, envF = NULL, fShifts = NULL)
 It can be a
 
 \describe{
-\item{\code{A number}}{For constant birth-death rates.}
+\item{A number}{For constant birth-death rates.}
 
-\item{\code{A function of time}}{For rates that vary with time. Note that this
-can be any function of time, but one should not supply a function that
-depends on more than one variable without an accompanying \code{envF} -
-that will result in an error.}
+\item{A function of time}{For rates that vary with time. Note that this can be
+any function of time.} 
 
-\item{\code{A numeric vector}}{To create step function rates. Note this must be
+\item{A function of time and an environmental variable}{For rates varying with
+time and an environmental variable, such as temperature. Note that supplying a
+function on more than one variable without an accompanying \code{envF} will
+result in an error.}
+
+\item{A numeric vector}{To create step function rates. Note this must be
  accompanied by a corresponding vector of shifts \code{fShifts}.}}}
 
 \item{tMax}{Ending time of simulation, in million years after the clade's 
@@ -28,7 +31,9 @@ origin. Needed to ensure \code{fShifts} runs the correct way.}
 variable (e.g. CO2, temperature, available niches, etc) with time. The first 
 column of this \code{data.frame} must be time, and the second column must be 
 the values of the variable. The function will return an error if supplying 
-\code{envF} without \code{ff} being a function of two variables.
+\code{envF} without \code{ff} being a function of two variables. Note 
+\code{paleobuddy} has two environmental data frames, \code{temp} and 
+\code{co2}. One can check \code{RPANDA} for more examples.
 
 Acknowledgements: The strategy to transform a function of \code{t} and 
 \code{env} into a function of \code{t} only using \code{envF} was adapted from

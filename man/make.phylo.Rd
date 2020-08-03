@@ -7,7 +7,7 @@
 make.phylo(sim)
 }
 \arguments{
-\item{sim}{a simulation containing lists for the speciation times, extinction
+\item{sim}{A simulation containing lists for the speciation times, extinction
 times, parent identities and status (extant or extinct).}
 }
 \value{
@@ -25,11 +25,12 @@ extinction times, parent and status information, usually returned by
 on the phylogeny, following a "Hennigian" (sensu Ezard et al 2011) format. 
 Returns \code{NA} and sends a warning if the simulation has only one lineage or
 if more than one species has \code{NA} as parent (i.e. there is no single 
-common ancestor in the simulation). In this last case, please use 
+common ancestor in the simulation). In the latter case, please use 
 \code{find.lineages} first.
 }
 \examples{
 
+###
 # generating a phylogeny using constant rates
 sim <- bd.sim(n0 = 1, pp = 0.2, qq = 0.05, tMax = 10, 
              nFinal = c(2, Inf), extOnly = TRUE)
@@ -46,6 +47,7 @@ if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(ape::drop.fossil(phy))
 }
 
+###
 # this works for sim generated with any of the scenarios in bd.sim, of course
 sim <- bd.sim(n0 = 1, pp = function(t) 0.05 + 0.01*t, 
              qq = function(t) 0.03 + 0.015*t, tMax = 10, 
