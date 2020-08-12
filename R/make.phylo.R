@@ -247,6 +247,12 @@ make.phylo <- function(sim) {
     edge = edge,
     edge.length = edgeLength,
     Nnode = nNode)
+  phy <- list(tip.label = paste0("t", 1:length(sim$TE)), 
+              edge = edge, 
+              edge.length = edgeLength, 
+              Nnode = nNode, 
+              root.edge = sim$TS[1] - sim$TS[2])
+  
   class(phy) <- "phylo"
 
   return(phy)
