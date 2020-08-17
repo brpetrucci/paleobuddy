@@ -41,7 +41,7 @@
 #' }
 #' 
 #' # we will need to get exact durations for some examples, so
-#' sim$TE[sim$EXTANT] = 0
+#' sim$TE[sim$EXTANT] <- 0
 #' # this is necessary since the default is to have NA for extant species
 #' 
 #' # preservation function
@@ -78,7 +78,7 @@
 #' }
 #' 
 #' # we will need to get exact durations for some examples, so
-#' sim$TE[sim$EXTANT] = 0
+#' sim$TE[sim$EXTANT] <- 0
 #' # this is necessary since the default is to have NA for extant species
 #' 
 #' # we can create the sampling rate here from a few vectors
@@ -124,7 +124,7 @@
 #' }
 #' 
 #' # we will need to get exact durations for some examples, so
-#' sim$TE[sim$EXTANT] = 0
+#' sim$TE[sim$EXTANT] <- 0
 #' # this is necessary since the default is to have NA for extant species
 #' 
 #' # preservation function
@@ -163,7 +163,7 @@
 #' }
 #' 
 #' # we will need to get exact durations for some examples, so
-#' sim$TE[sim$EXTANT] = 0
+#' sim$TE[sim$EXTANT] <- 0
 #' # this is necessary since the default is to have NA for extant species
 #' 
 #' # preservation function dependent on temperature
