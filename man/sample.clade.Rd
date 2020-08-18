@@ -13,13 +13,12 @@ sample.clade(
   rShifts = NULL,
   returnTrue = TRUE,
   bins = NULL,
-  dFun = NULL,
-  dFunMax = NULL,
+  adFun = NULL,
   ...
 )
 }
 \arguments{
-\item{sim}{A \code{sim} object, usually an output of \code{bd.sim}.}
+\item{sim}{A \code{sim} object, usually the output of \code{bd.sim}.}
 
 \item{rr}{Sampling rate (per species per million years) over time. It can be 
 a \code{numeric} describing a constant rate, a \code{function(t)} describing 
@@ -68,10 +67,11 @@ supplied and \code{returnTrue == FALSE}, the default is
 
 \item{bins}{A vector of time intervals corresponding to geological time ranges.}
 
-\item{dFun}{A density function representing the age-dependent
-preservation model. It must be a density function, and consequently integrate
-to 1 (though this condition is not verified by the function). Additionally, the
-function must have the following properties:
+\item{adFun}{A density function representing the age-dependent preservation
+model. It must be a density function, and consequently integrate to 1 (though
+this condition is not verified by the function). If not provided, a uniform 
+distribution will be used. The function must also have the following 
+properties:
 
 \itemize{
 
@@ -90,14 +90,7 @@ The argument sp is used to pass species-specific parameters (see examples),
 allowing for \code{dFun} to be species-inhomogeneous.
 }}
 
-\item{dFunMax}{A function that calculates the maximum (density) value of
-\code{dFun} using its arguments, excluding \code{t}. It can also be a number 
-representing the maximum density.
-
-Note: if it not provided, it will be approximated numerically, leading to
-longer running times.}
-
-\item{...}{Additional parameters related to \code{dFun} and \code{dFunMax}.}
+\item{...}{Additional parameters related to \code{adFun}}
 }
 \value{
 A \code{data.frame} containing species names/numbers, whether each 
@@ -114,12 +107,10 @@ number over a species duration (in which case average rate must be constant).
 Allows for further flexibility in (non-age dependent) rates by a shift times
 vector and environmental matrix parameters. Optionally takes a vector of time
 bins representing geologic periods, so that if the user wishes occurrence 
-times can be presented as a range instead of true points. Finally, allows for
-an optional argument - the maximum of the age-dependent distribution - that can
-make the simulation faster, and for extra arguments the age-dependent 
-preservation function may take. See \code{sample.species} - absolute 
-time-dependent sampling - and \code{sample.adpp} - age-dependent sampling - for
-more information.
+times can be presented as a range instead of true points. See 
+\code{sample.species} - absolute time-dependent sampling - and 
+\code{sample.general} - time and/or age-dependent sampling - for more 
+information.
 }
 \examples{
 
@@ -332,7 +323,7 @@ for (i in 1:length(ids)) {
 }
 
 # we will now do some tests with age-dependent rates. For more details,
-# check sample.adpp.
+# check sample.general.
 
 ###
 # simulate a group
@@ -385,18 +376,13 @@ dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
   return(res)
 }
 
-# function to calculate max of the PERT
-dPERTmax <- function(s, e, sp) {
-  return(((s - e) / 2) + e)
-}
-
 # the resolution of the fossil dataset:
 bins <- seq(from = 10, to = 0,
             by = -0.1)
 # note that we will provide a very high resolution to test the function
 
 dt <- sample.clade(sim, rr = 3, tMax = 10, bins = bins,
-                   dFun = dPERT, dFunMax = dPERTmax, returnTrue = FALSE)
+                   adFun = dPERT, returnTrue = FALSE)
 
 # extract species identity
 ids <- unique(dt$Species)
@@ -474,11 +460,6 @@ dTRImod2<-function(t, s, e, sp) {
   #for more details in this function, see example 3 and 4
 }
 
-# maximum function
-dTRImaxmod2 <- function(s, e, sp) {
-  return(2 / (s - e))
-}
-
 # a random point inside each lineage's duration
 par <- runif (n = length(sim$TE), min = sim$TE, max = sim$TS)
 
@@ -491,7 +472,7 @@ bins <- seq(from = 10, to = 0,
 # note that we will provide a very high resolution to test the function
 
 dt <- sample.clade(sim, rr = 4, tMax = 10, bins = bins,
-                   dFun = dTRImod2, dFunMax = dTRImaxmod2, returnTrue = FALSE)
+                   adFun = dTRImod2, returnTrue = FALSE)
 
 # extract species identity
 ids <- unique(dt$Species)

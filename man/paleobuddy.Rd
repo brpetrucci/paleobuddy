@@ -31,7 +31,7 @@ duration. We supply the function \code{find.lineages} to allow for birth-death
 simulations that start with multiple species by separating those in
 monophyletic clades so that one can generate fossil records and phylogenies
 (see below) for clades with a specific mother species. See 
-\code{?sample.clade}, \code{?sample}, \code{?sample.adpp} and
+\code{?sample.clade}, \code{?sample}, \code{?sample.general} and
 \code{?find.lineages} for more information.
 }
 

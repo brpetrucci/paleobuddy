@@ -9,16 +9,14 @@
 #' Allows for further flexibility in (non-age dependent) rates by a shift times
 #' vector and environmental matrix parameters. Optionally takes a vector of time
 #' bins representing geologic periods, so that if the user wishes occurrence 
-#' times can be presented as a range instead of true points. Finally, allows for
-#' an optional argument - the maximum of the age-dependent distribution - that can
-#' make the simulation faster, and for extra arguments the age-dependent 
-#' preservation function may take. See \code{sample.species} - absolute 
-#' time-dependent sampling - and \code{sample.adpp} - age-dependent sampling - for
-#' more information.
+#' times can be presented as a range instead of true points. See 
+#' \code{sample.species} - absolute time-dependent sampling - and 
+#' \code{sample.general} - time and/or age-dependent sampling - for more 
+#' information.
 #'
 #' @param bins A vector of time intervals corresponding to geological time ranges.
 #' 
-#' @inheritParams sample.adpp
+#' @inheritParams sample.general
 #'
 #' @param rr Sampling rate (per species per million years) over time. It can be 
 #' a \code{numeric} describing a constant rate, a \code{function(t)} describing 
@@ -28,13 +26,7 @@
 #' \code{vector} containing rates that correspond to each rate between sampling
 #' rate shift times times (please see \code{rShifts}). Note that \code{rr} should
 #' should always be greater than or equal to zero.
-#'
-#' @param tMax The maximum simulation time, used by \code{rexp.var}. A sampling
-#' time greater than \code{tMax} would mean the occurrence is sampled after the
-#' present, so for consistency we require this argument. This is also required
-#' to ensure time follows the correct direction both in the Poisson process and
-#' in the return.
-#'  
+#' 
 #' @param envRR A matrix containing time points and values of an environmental
 #' variable, like temperature, for each time point. This will be used to create
 #' a sampling rate, so \code{rr} must be a function of time and said variable
@@ -278,7 +270,7 @@
 #' }
 #' 
 #' # we will now do some tests with age-dependent rates. For more details,
-#' # check sample.adpp.
+#' # check sample.general.
 #' 
 #' ###
 #' # simulate a group
@@ -331,18 +323,13 @@
 #'   return(res)
 #' }
 #' 
-#' # function to calculate max of the PERT
-#' dPERTmax <- function(s, e, sp) {
-#'   return(((s - e) / 2) + e)
-#' }
-#' 
 #' # the resolution of the fossil dataset:
 #' bins <- seq(from = 10, to = 0,
 #'             by = -0.1)
 #' # note that we will provide a very high resolution to test the function
 #' 
 #' dt <- sample.clade(sim, rr = 3, tMax = 10, bins = bins,
-#'                    dFun = dPERT, dFunMax = dPERTmax, returnTrue = FALSE)
+#'                    adFun = dPERT, returnTrue = FALSE)
 #' 
 #' # extract species identity
 #' ids <- unique(dt$Species)
@@ -420,11 +407,6 @@
 #'   #for more details in this function, see example 3 and 4
 #' }
 #' 
-#' # maximum function
-#' dTRImaxmod2 <- function(s, e, sp) {
-#'   return(2 / (s - e))
-#' }
-#' 
 #' # a random point inside each lineage's duration
 #' par <- runif (n = length(sim$TE), min = sim$TE, max = sim$TS)
 #' 
@@ -437,7 +419,7 @@
 #' # note that we will provide a very high resolution to test the function
 #' 
 #' dt <- sample.clade(sim, rr = 4, tMax = 10, bins = bins,
-#'                    dFun = dTRImod2, dFunMax = dTRImaxmod2, returnTrue = FALSE)
+#'                    adFun = dTRImod2, returnTrue = FALSE)
 #' 
 #' # extract species identity
 #' ids <- unique(dt$Species)
@@ -470,14 +452,14 @@
 
 sample.clade <- function(sim, rr, tMax, S = NULL, envRR = NULL, rShifts = NULL,
                          returnTrue = TRUE, bins = NULL, 
-                         dFun = NULL, dFunMax = NULL, ...) {
+                         adFun = NULL, ...) {
   # make S all species if it is NULL
   if (is.null(S)) {
     S = 1:length(sim$TE)
   }
 
   # check if it is age-dependent
-  if (is.null(dFun)) {
+  if (is.null(adFun)) {
     # if so, make rate a function
     rr <- make.rate(rr, tMax, envRR, rShifts)
   } else {
@@ -502,7 +484,7 @@ sample.clade <- function(sim, rr, tMax, S = NULL, envRR = NULL, rShifts = NULL,
   
   # independent of age (i.e. occurrences uniformly distributed through the 
   # lineage's age)
-  if (is.null(dFun)) { 
+  if (is.null(adFun)) { 
     # find occurrences times
     pointEstimates <- lapply(S, sample.species, sim = sim, rr = rr, 
                              tMax = tMax)
@@ -515,11 +497,11 @@ sample.clade <- function(sim, rr, tMax, S = NULL, envRR = NULL, rShifts = NULL,
   } 
   
   #dependent of age (i.e. occurrences distributed through the lineage's age 
-  # according to dFun)
+  # according to adFun)
   else { 
     # find occurrence times
-    pointEstimates <- sample.adpp(S, sim = sim, rr = rr, 
-                                 dFun = dFun, dFunMax = dFunMax, ...)
+    pointEstimates <- sample.general(sim = sim, rr = rr, tMax = tMax, S = S,
+                                 adFun = adFun, ...)
   }
 
   # wrapping data

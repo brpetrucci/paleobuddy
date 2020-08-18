@@ -3,8 +3,8 @@
 #' Generates a vector of occurrence times for a species in a simulation using a
 #' a Poisson process. Allows for the Poisson rate to be (1) a constant or (2) a 
 #' function of time. For sampling of more than one species and/or taking into 
-#' account species age instead of absolute time, see \code{sample.clade} and 
-#' \code{sample.adpp}. \code{sample.clade} also allows for more flexibility
+#' account species age in addition to absolute time, see \code{sample.clade} and
+#' \code{sample.general}. \code{sample.clade} also allows for more flexibility
 #' options, see \code{make.rate}.
 #' Note that while the Poisson process occurs in forward time, we return (both in
 #' birth-death functions and here) results in backwards time, so that time is
