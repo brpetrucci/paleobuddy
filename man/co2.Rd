@@ -16,7 +16,7 @@ A data frame with 53 rows and 2 variables:
 }
 }
 \source{
-\url{https://github.com/hmorlon/PANDAPANDA[m}
+\url{https://github.com/hmorlon/PANDA}
 }
 \usage{
 data(co2)

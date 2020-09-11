@@ -56,7 +56,7 @@
 #'   CO2 mass at \code{t} over the present.}
 #' }
 #' 
-#' @source \url{https://github.com/hmorlon/PANDAPANDA[m}
+#' @source \url{https://github.com/hmorlon/PANDA}
 #' 
 #' @references 
 #' 
