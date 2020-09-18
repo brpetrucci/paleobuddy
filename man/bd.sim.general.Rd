@@ -6,11 +6,11 @@
 \usage{
 bd.sim.general(
   n0,
-  pp,
-  qq,
+  lambda,
+  mu,
   tMax,
-  pShape = NULL,
-  qShape = NULL,
+  lShape = NULL,
+  mShape = NULL,
   nFinal = c(0, Inf),
   extOnly = FALSE,
   trueExt = FALSE
@@ -19,16 +19,16 @@ bd.sim.general(
 \arguments{
 \item{n0}{Initial number of species. Usually 1, in which case the simulation 
 will describe the full diversification of a monophyletic lineage. Notice that 
-when \code{pp} is less than or equal to \code{qq},  many simulations will go 
+when \code{lambda} is less than or equal to \code{mu},  many simulations will go 
 extinct before speciating even once. One way of generating simulations in this 
 case is to increase \code{n0}. The user should notice this will simulate the 
 diversification of a paraphyletic group.}
 
-\item{pp}{Function to hold the speciation rate over time. It will either be
+\item{lambda}{Function to hold the speciation rate over time. It will either be
 interpreted as an exponential rate, or a Weibull scale if 
-\code{pShape != NULL}.}
+\code{lShape != NULL}.}
 
-\item{qq}{Similar to above, but for the extinction rate.
+\item{mu}{Similar to above, but for the extinction rate.
 
 Note: this function is meant to be called by \code{bd.sim}, so it neither
 allows for as much flexibility, nor calls \code{make.rate}. If the user wishes
@@ -39,21 +39,21 @@ can generate the rate with \code{make.rate} and supply it to the function.}
 Any species still living after \code{tMax} is considered extant, and any 
 species that would be generated after \code{tMax} is not born.}
 
-\item{pShape}{Shape of the age-dependency in speciation rate. This will be 
+\item{lShape}{Shape of the age-dependency in speciation rate. This will be 
 equal to the shape parameter in a Weibull distribution: when smaller than one, 
 speciation rate will decrease along each species' age (negative 
 age-dependency). When larger than one, speciation rate will increase along each
 species's age (positive age-dependency). Default is \code{NULL}, equivalent to 
-an age-independent process. For \code{pShape != NULL} (including when equal to 
-one), \code{pp} will be considered a scale (= 1/rate), and \code{rexp.var} will
+an age-independent process. For \code{lShape != NULL} (including when equal to 
+one), \code{lambda} will be considered a scale (= 1/rate), and \code{rexp.var} will
 draw a Weibull distribution instead of an exponential. This means 
 Weibull(rate, 1) = Exponential(1/rate). Note that even when 
-\code{pShape != NULL}, \code{pp} may still be time-dependent.}
+\code{lShape != NULL}, \code{lambda} may still be time-dependent.}
 
-\item{qShape}{Similar to \code{pShape}, but for the extinction rate.
+\item{mShape}{Similar to \code{lShape}, but for the extinction rate.
 
-Note: Time-varying shape is implemented, so one could have \code{pShape} or 
-\code{qShape} be a function of time. It is not thoroughly tested, however, 
+Note: Time-varying shape is implemented, so one could have \code{lShape} or 
+\code{mShape} be a function of time. It is not thoroughly tested, however, 
 so it may be prudent to wait for a future release where this feature is well
 established.}
 
@@ -137,13 +137,13 @@ n0 <- 1
 tMax <- 40
 
 # speciation
-p <- 0.11
+lambda <- 0.11
 
 # extinction
-q <- 0.08
+mu <- 0.08
 
 # run the simulation
-sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
+sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -162,15 +162,15 @@ n0 <- 1
 tMax <- 40
 
 # speciation
-p <- function(t) {
+lambda <- function(t) {
   return(0.03 + 0.005*t)
 }
 
 # extinction
-q <- 0.05
+mu <- 0.05
 
 # run the simulation
-sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
+sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -188,33 +188,33 @@ n0 <- 1
 tMax <- 40
 
 # speciation rate
-p <- function(t) {
+lambda <- function(t) {
   return(0.03 + 0.005*t)
 }
 
 # vector of extinction rates
-qList <- c(0.06, 0.09, 0.11)
+mList <- c(0.06, 0.09, 0.11)
 
-# vector of shift times. Note qShifts could be c(40, 20, 10) for
+# vector of shift times. Note mShifts could be c(40, 20, 10) for
 # identical results
-qShifts <- c(0, 15, 25)
+mShifts <- c(0, 15, 25)
 
 # let us take a look at how make.rate will make it a step function
-q <- make.rate(qList, tMax = tMax, fShifts = qShifts)
+mu <- make.rate(mList, tMax = tMax, rateShifts = mShifts)
 
 # and plot it
-plot(seq(0, tMax, 0.1), q(seq(0, tMax, 0.1)), type = 'l',
+plot(seq(0, tMax, 0.1), mu(seq(0, tMax, 0.1)), type = 'l',
      main = "Extintion rate as a step function", xlab = "Time (My)",
      ylab = "Rate (species/My)")
 
 # a different way to define the same extinction function
-q <- function(t) {
+mu <- function(t) {
   ifelse(t < 15, 0.06,
          ifelse(t < 25, 0.09, 0.11))
 }
 
 # run the simulation
-sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
+sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 # we could instead have used q made with make.rate
 # that is, however, much slower
 
@@ -232,16 +232,17 @@ n0 <- 1
 tMax <- 40
 
 # speciation
-p <- 0.1
+lambda <- 0.1
 
 # extinction - a Weibull scale
-q <- 10
+mu <- 10
 
 # extinction shape
-qShape <- 1
+mShape <- 1
 
 # run simulations
-sim <- bd.sim.general(n0, p, q, tMax, qShape = qShape, nFinal = c(2, Inf))
+sim <- bd.sim.general(n0, lambda, mu, tMax, mShape = mShape, 
+                      nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -257,18 +258,19 @@ n0 <- 1
 tMax <- 40
 
 # speciation
-p <- 0.15
+lambda <- 0.15
 
 # extinction - a Weibull scale
-q <- function(t) {
+mu <- function(t) {
   return(8 + 0.05*t)
 }
 
 # extinction shape
-qShape <- 1
+mShape <- 1
 
 # run simulations
-sim <- bd.sim.general(n0, p, q, tMax, qShape = qShape, nFinal = c(2, Inf))
+sim <- bd.sim.general(n0, lambda, mu, tMax, mShape = mShape, 
+                      nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -290,16 +292,16 @@ p_t <- function(t, temp) {
 }
 
 # extinction
-q <- 0.075
+mu <- 0.075
 
 # get the temperature data
 data(temp)
 
 # speciation
-p <- make.rate(p_t, envF = temp)
+lambda <- make.rate(p_t, envRate = temp)
 
 # run simulations
-sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
+sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -311,7 +313,8 @@ if (requireNamespace("ape", quietly = TRUE)) {
 \dontrun{
 # this would return a warning, since it is virtually impossible to get 100
 # species at a process with diversification rate -0.09 starting at n0 = 1
-sim <- bd.sim.general(1, pp = 0.01, qq = 1, tMax = 100, nFinal = c(100, Inf))
+sim <- bd.sim.general(1, lambda = 0.01, mu = 1, tMax = 100, 
+                      nFinal = c(100, Inf))
 }
 
 }

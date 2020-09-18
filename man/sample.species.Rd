@@ -4,15 +4,15 @@
 \alias{sample.species}
 \title{Constant and time-dependent rate species sampling}
 \usage{
-sample.species(sim, rr, tMax, S)
+sample.species(sim, rho, tMax, S)
 }
 \arguments{
 \item{sim}{A \code{sim} object, usually the output of \code{bd.sim}.}
 
-\item{rr}{Sampling rate (per species per million years) over time. It can be
+\item{rho}{Sampling rate (per species per million years) over time. It can be
 a \code{numeric} describing a constant rate or a \code{function(t)} describing
 the variation in sampling over time. For more flexibility on sampling, see
-\code{make.rate} for creating more complex rates. Note that \code{rr} should
+\code{make.rate} for creating more complex rates. Note that \code{rho} should
 always be greater than or equal to zero.}
 
 \item{tMax}{The maximum simulation time, used by \code{rexp.var}. A sampling
@@ -46,11 +46,11 @@ inverted using \code{tMax} both at the beginning and end of
 # let us start with a linear increase in preservation rate
 
 # simulate a group
-sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # in case first simulation was short-lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 }
 
 # we will need to get exact durations for some examples, so
@@ -58,7 +58,7 @@ sim$TE[sim$EXTANT] <- 0
 # this is necessary since the default is to have NA for extant species
 
 # preservation function
-r <- function(t) {
+rho <- function(t) {
   return(1 + 0.25*t)
 }
 
@@ -66,28 +66,28 @@ r <- function(t) {
 t <- seq(0, 10, by = 0.1)
 
 # visualizing from the past to the present
-plot(x = t, y = rev(r(t)), main="Simulated preservation", type = "l",
+plot(x = t, y = rev(rho(t)), main="Simulated preservation", type = "l",
      xlab = "Mya", ylab = "preservation rate",
      xlim = c(10, sim$TE[1]))
 
 # sample
-occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
+occs <- sample.species(sim = sim, rho = rho, tMax = 10, S = 1)
 
 # check histogram
 hist(occs,
      xlim = c(10, sim$TE[1]),
      xlab = "Mya")
-lines(t, rev(r(t)))
+lines(t, rev(rho(t)))
 
 ###
 # now let us try a step function
 
 # simulate a group
-sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # in case first simulation was short lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 }
 
 # we will need to get exact durations for some examples, so
@@ -104,7 +104,7 @@ rList <- c(1, 3, 0.5)
 rShifts <- c(0, 4, 8)
 
 # create the rate to visualize it
-r <- make.rate(rList, tMax = 10, fShifts = rShifts)
+r <- make.rate(rList, tMax = 10, rateShifts = rShifts)
 
 # time
 t <- seq(0, 10, by = 0.1)
@@ -115,7 +115,7 @@ plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
      xlim = c(10, sim$TE[1]))
 
 # sample
-occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
+occs <- sample.species(sim = sim, rho = r, tMax = 10, S = 1)
 
 # check histogram
 hist(occs,
@@ -129,11 +129,11 @@ abline(v = 10 - rShifts, col = "red")
 # we can create a step function in a different way as well
 
 # simulate a group
-sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # in case first simulation was short-lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 }
 
 # we will need to get exact durations for some examples, so
@@ -141,7 +141,7 @@ sim$TE[sim$EXTANT] <- 0
 # this is necessary since the default is to have NA for extant species
 
 # preservation function
-r <- function(t) {
+rho <- function(t) {
   ifelse(t < 4, 1,
          ifelse(t < 8, 3, 0.5))
 }
@@ -151,12 +151,12 @@ r <- function(t) {
 t <- seq(0, 10, by = 0.1)
 
 # visualizing the plot from past to present
-plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
+plot(x = t, y = rev(rho(t)), main = "Simulated preservation", type = "l",
      xlab = "Mya", ylab = "preservation rate",
      xlim = c(10, sim$TE[1]))
 
 # sample
-occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
+occs <- sample.species(sim = sim, rho = rho, tMax = 10, S = 1)
 
 # check histogram
 hist(occs,
@@ -168,11 +168,11 @@ abline(v = 10 - rShifts, col = "red")
 # finally we could generate sampling dependent on temperature
 
 # simulate a group
-sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # in case first simulation was short-lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 }
 
 # we will need to get exact durations for some examples, so
@@ -188,7 +188,7 @@ r_t <- function(t, env) {
 data(temp)
 
 # final preservation
-r <- make.rate(r_t, envF = temp)
+rho <- make.rate(r_t, envRate = temp)
 
 # visualizing the plot from past to present
 plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
@@ -196,13 +196,13 @@ plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
      xlim = c(10, ifelse(is.na(sim$TE[1]), 0, sim$TE[1])))
 
 # sample
-occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
+occs <- sample.species(sim = sim, rho = rho, tMax = 10, S = 1)
 
 # check histogram
 hist(occs,
      xlim = c(10, ifelse(is.na(sim$TE[1]), 0, sim$TE[1])),
      xlab = "Mya")
-lines(t, rev(r(t)))
+lines(t, rev(rho(t)))
 
 }
 \author{

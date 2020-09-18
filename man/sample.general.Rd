@@ -4,15 +4,15 @@
 \alias{sample.general}
 \title{Time-dependent and age-dependent rate species sampling}
 \usage{
-sample.general(sim, rr, tMax, S = NULL, adFun = NULL, ...)
+sample.general(sim, rho, tMax, S = NULL, adFun = NULL, ...)
 }
 \arguments{
 \item{sim}{A \code{sim} object, usually the output of \code{bd.sim}.}
 
-\item{rr}{Sampling rate (per species per million years) over time. It can be
+\item{rho}{Sampling rate (per species per million years) over time. It can be
 a \code{numeric} describing a constant rate or a \code{function(t)} describing
 the variation in sampling over time. For more flexibility on sampling, see
-\code{make.rate} to create more complex rates. Note that \code{rr} should
+\code{make.rate} to create more complex rates. Note that \code{rho} should
 always be greater than or equal to zero.}
 
 \item{tMax}{The maximum simulation time, used by \code{rexp.var}. A sampling
@@ -67,7 +67,7 @@ of \code{sample.species}, which is used in this function.
 \examples{
 
 # sampling rate
-rr <- function(t) {
+rho <- function(t) {
   return(0.5 + 1*t) 
 }
 
@@ -77,11 +77,11 @@ tMax <- 10
 # we can start with a hat-shaped increase through the duration of a species
 
 # simulate a group
-sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = tMax)
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = tMax)
 
 # in case first simulation is short-lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = tMax)
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = tMax)
 }
 
 # fixing the extinction times
@@ -127,7 +127,7 @@ dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
 
 
 # find occurrences
-occs <- sample.general(sim, rr, tMax = tMax, S = 1:length(sim$TE), adFun = dPERT)
+occs <- sample.general(sim, rho, tMax = tMax, S = 1:length(sim$TE), adFun = dPERT)
 
 # check histogram
 hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
@@ -139,15 +139,16 @@ hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
 tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
 lines(x = tt, y = dPERT(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
 
-#getting expected values:
-Pres_time_adpp=function(t, s, e, sp) {
-  rrmod=function(t){#correction of scale
-    return(rr(tMax-t))
+# getting expected values from age + time dependence
+Pres_time_adpp <- function(t, s, e, sp) {
+  # correction of scale
+  rhoMod <- function(t){
+    return(rho(tMax - t) )
   } 
-  return(rrmod(t)*dPERT(t = t, s = s, e = e, sp = sp))
+  return(rhoMod(t)*dPERT(t = t, s = s, e = e, sp = sp))
 }
 
-Pres_time_adppNorm=function(t, s, e, sp) {
+Pres_time_adppNorm <- function(t, s, e, sp) {
   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp)/integrate(
     Pres_time_adpp, lower = e, upper = s, e=e, s=s, sp=sp)$value)
 }
@@ -161,7 +162,7 @@ lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
 # the function works)
 
 # sampling rate
-rr <- function(t) {
+rho <- function(t) {
   return(0.5 + 1*t) 
 }
 
@@ -169,11 +170,11 @@ rr <- function(t) {
 tMax <- 10
 
 # simulate a group
-sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # in case first simulation is short-lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 }
 
 # fixing the extinction times
@@ -195,7 +196,7 @@ custom.uniform <- function(t, s, e, sp) {
 }
 
 # find occurrences
-occs <- sample.general(sim, rr, tMax = tMax, S = 1:length(sim$TE),
+occs <- sample.general(sim, rho, tMax = tMax, S = 1:length(sim$TE),
                        adFun = custom.uniform)
 
 # check histogram
@@ -208,15 +209,16 @@ hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
 tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
 lines(x = tt, y = custom.uniform(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
 
-#getting expected values:
-Pres_time_adpp=function(t, s, e, sp) {
-  rrmod=function(t){#correction of scale
-    return(rr(tMax-t))
+# getting expected values from age + time dependence
+Pres_time_adpp <- function(t, s, e, sp) {
+# correction of scale
+  rhoMod <- function(t){
+    return(rho(tMax - t))
   } 
-  return(rrmod(t)*custom.uniform(t = t, s = s, e = e, sp = sp))
+  return(rhoMod(t)*custom.uniform(t = t, s = s, e = e, sp = sp))
 }
 
-Pres_time_adppNorm=function(t, s, e, sp) {
+Pres_time_adppNorm <- function(t, s, e, sp) {
   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp)/integrate(
     Pres_time_adpp, lower = e, upper = s, e=e, s=s, sp=sp)$value)
 }
@@ -228,7 +230,7 @@ lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
 # parameters than TS and TE
 
 # sampling rate
-rr <- function(t) {
+rho <- function(t) {
   return(0.5 + 1*t) 
 }
 
@@ -236,11 +238,11 @@ rr <- function(t) {
 tMax <- 10
 
 # simulate a group
-sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.2, tMax = 10, nFinal = c(0,1))
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.2, tMax = 10, nFinal = c(0,1))
 
 # in case first simulation is short-lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10, nFinal = c(0,1))
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10, nFinal = c(0,1))
 }
 
 # fixing the extinction times
@@ -296,7 +298,7 @@ dTRI <- function(t, s, e, sp, md) {
 
 
 # note we are providing the mode for the triangular sampling as an argument
-occs <- sample.general(sim = sim, rr = rr, adFun = dTRI, 
+occs <- sample.general(sim = sim, rho = rho, adFun = dTRI, 
                        tMax = tMax, S = 1, md = 8)
 
 # please note in the original parametrization, the "md" parameter (mode) is in
@@ -318,16 +320,16 @@ hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
 tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
 lines(x = tt, y = dTRI(tt, s = sim$TS[1], e = sim$TE[1], sp = 1, md = 8))
 
-# getting expected values from age + time dependences:
-#getting expected values:
-Pres_time_adpp=function(t, s, e, sp, ...) {
-  rrmod=function(t){#correction of scale
-    return(rr(tMax-t))
+# getting expected values from age + time dependence
+Pres_time_adpp <- function(t, s, e, sp, ...) {
+  # correction of scale
+  rhoMod <- function(t) {
+    return(rho(tMax - t))
   } 
-  return(rrmod(t)*dTRI(t = t, s = s, e = e, sp = sp, ...))
+  return(rhoMod(t)*dTRI(t = t, s = s, e = e, sp = sp, ...))
 }
 
-Pres_time_adppNorm=function(t, s, e, sp, ...) {
+Pres_time_adppNorm <- function(t, s, e, sp, ...) {
   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...)/integrate(
     Pres_time_adpp, lower = e, upper = s, e=e, s=s, sp=sp, ...)$value)
 }
@@ -341,7 +343,7 @@ lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1, m
 # the relative age of each lineage
 
 # sampling rate
-rr <- function(t) {
+rho <- function(t) {
   return(0.5 + 1*t) 
 }
 
@@ -349,11 +351,11 @@ rr <- function(t) {
 tMax <- 10
 
 # simulate a group
-sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # in case first simulation is short-lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 }
 
 # fixing the extinction times
@@ -404,7 +406,7 @@ dTRImod1 <- function(t, s, e, sp) {
 
 
 # note we are providing the mode for the triangular sampling as an argument
-occs <- sample.general(sim = sim, rr = rr, adFun = dTRImod1, tMax = tMax,
+occs <- sample.general(sim = sim, rho = rho, adFun = dTRImod1, tMax = tMax,
                        S = 1:length(sim$TE))
 
 # please note in this case, function dTRImod1 fixes "md" at the last quarter
@@ -420,16 +422,16 @@ hist(unlist(occs[[1]]), probability = TRUE, main="Black = no time dependence
 tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
 lines(x = tt, y = dTRImod1(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
 
-# getting expected values from age + time dependences:
-#getting expected values:
-Pres_time_adpp=function(t, s, e, sp, ...) {
-  rrmod=function(t){#correction of scale
-    return(rr(tMax-t))
+# getting expected values from age + time dependence
+Pres_time_adpp <- function(t, s, e, sp, ...) {
+  # correction of scale
+  rhoMod <- function(t){
+    return(rho(tMax - t))
   } 
-  return(rrmod(t)*dTRImod1(t = t, s = s, e = e, sp = sp, ...))
+  return(rhoMod(t)*dTRImod1(t = t, s = s, e = e, sp = sp, ...))
 }
 
-Pres_time_adppNorm=function(t, s, e, sp, ...) {
+Pres_time_adppNorm <- function(t, s, e, sp, ...) {
   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...)/integrate(
     Pres_time_adpp, lower = e, upper = s, e=e, s=s, 
     sp=sp, ...)$value)
@@ -444,7 +446,7 @@ lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
 # but wants to keep track of those parameters after the sampling is over
 
 # sampling rate
-rr <- function(t) {
+rho <- function(t) {
   return(0.5 + 1*t) 
 }
 
@@ -452,11 +454,11 @@ rr <- function(t) {
 tMax <- 10
 
 # simulate a group
-sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # in case first simulation is short-lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 }
 
 # fixing the extinction times
@@ -508,7 +510,7 @@ dTRImod2 <- function(t, s, e, sp) {
 }
 
 # note we are providing the mode for the triangular sampling as an argument
-occs <- sample.general(sim = sim, rr = rr, adFun = dTRImod2, tMax = tMax,
+occs <- sample.general(sim = sim, rho = rho, adFun = dTRImod2, tMax = tMax,
                        S = 1:length(sim$TE))
 
 # please note in this case, function dTRImod1 fixes "md" at the last quarter
@@ -525,15 +527,15 @@ tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
 lines(x = tt, y = dTRImod2(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
 
 # getting expected values from age + time dependences:
-#getting expected values:
-Pres_time_adpp=function(t, s, e, sp, ...) {
-  rrmod=function(t){#correction of scale
-    return(rr(tMax-t))
+Pres_time_adpp <- function(t, s, e, sp, ...) {
+  # correction of scale
+  rhoMod <- function(t) {
+    return(rho(tMax - t))
   } 
-  return(rrmod(t)*dTRImod2(t = t, s = s, e = e, sp = sp, ...))
+  return(rhoMod(t)*dTRImod2(t = t, s = s, e = e, sp = sp, ...))
 }
 
-Pres_time_adppNorm=function(t, s, e, sp, ...) {
+Pres_time_adppNorm <- function(t, s, e, sp, ...) {
   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...)/integrate(
     Pres_time_adpp, lower = e, upper = s, e=e, s=s, 
     sp=sp, ...)$value)

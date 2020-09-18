@@ -19,21 +19,21 @@
 #'
 #' @param n0 Initial number of species. Usually 1, in which case the simulation 
 #' will describe the full diversification of a monophyletic lineage. Notice that 
-#' when \code{pp} is less than or equal to \code{qq},  many simulations will go 
+#' when \code{lambda} is less than or equal to \code{mu},  many simulations will go 
 #' extinct before speciating even once. One way of generating simulations in this 
 #' case is to increase \code{n0}. The user should notice this will simulate the 
 #' diversification of a paraphyletic group.
 #'
-#' @param pp Speciation rate (per species per million years) over time. It can be 
+#' @param lambda Speciation rate (per species per million years) over time. It can be 
 #' a \code{numeric} describing a constant rate, a \code{function(t)} describing 
 #' the variation in speciation over time \code{t}, a \code{function(t, env)} 
 #' describing the variation in speciation over time following both time AND 
-#' an environmental variable (please see \code{envPP} for details) or a 
+#' an environmental variable (please see \code{envL} for details) or a 
 #' \code{vector} containing rates that correspond to each rate between speciation
-#' rate shift times times (please see \code{pShifts}). Note that \code{pp} should
+#' rate shift times times (please see \code{lShifts}). Note that \code{lambda} should
 #' should always be greater than or equal to zero.
 #'
-#' @param qq Similar to \code{pp}, but for the extinction rate.
+#' @param mu Similar to \code{lambda}, but for the extinction rate.
 #' 
 #' Note: rates should be considered as running from \code{0} to \code{tMax}, as
 #' the simulation runs in that direction even though the function inverts times
@@ -43,25 +43,25 @@
 #' Any species still living after \code{tMax} is considered extant, and any 
 #' species that would be generated after \code{tMax} is not born.
 #'
-#' @param pShape Shape of the age-dependency in speciation rate. This will be 
+#' @param lShape Shape of the age-dependency in speciation rate. This will be 
 #' equal to the shape parameter in a Weibull distribution: when smaller than one, 
 #' speciation rate will decrease along each species' age (negative 
 #' age-dependency). When larger than one, speciation rate will increase along each
 #' species's age (positive age-dependency). Default is \code{NULL}, equivalent to 
-#' an age-independent process. For \code{pShape != NULL} (including when equal to 
-#' one), \code{pp} will be considered a scale (= 1/rate), and \code{rexp.var} will
+#' an age-independent process. For \code{lShape != NULL} (including when equal to 
+#' one), \code{lambda} will be considered a scale (= 1/rate), and \code{rexp.var} will
 #' draw a Weibull distribution instead of an exponential. This means 
 #' Weibull(rate, 1) = Exponential(1/rate). Note that even when 
-#' \code{pShape != NULL}, \code{pp} may still be time-dependent. 
+#' \code{lShape != NULL}, \code{lambda} may still be time-dependent. 
 #'
-#' @param qShape Similar to \code{pShape}, but for the extinction rate.
+#' @param mShape Similar to \code{lShape}, but for the extinction rate.
 #' 
-#' Note: Time-varying shape is implemented, so one could have \code{pShape} or 
-#' \code{qShape} be a function of time. It is not thoroughly tested, however, 
+#' Note: Time-varying shape is implemented, so one could have \code{lShape} or 
+#' \code{mShape} be a function of time. It is not thoroughly tested, however, 
 #' so it may be prudent to wait for a future release where this feature is well
 #' established.
 #' 
-#' @param envPP A \code{data.frame} representing the variation of an environmental
+#' @param envL A \code{data.frame} representing the variation of an environmental
 #' variable (e.g. CO2, temperature, available niches, etc) with time. The first 
 #' column of this \code{data.frame} must be time, and the second column must be 
 #' the values of the variable. This will be internally passed to the 
@@ -70,14 +70,14 @@
 #' Note \code{paleobuddy} has two environmental data frames, \code{temp} and
 #' \code{co2}. One can check \code{RPANDA} for more examples.
 #'
-#' @param envQQ Similar to \code{envPP}, but for the extinction rate.
+#' @param envM Similar to \code{envL}, but for the extinction rate.
 #'
-#' @param pShifts Vector of rate shifts. First element must be the starting
+#' @param lShifts Vector of rate shifts. First element must be the starting
 #' time for the simulation (\code{0} or \code{tMax}). It must have the same length
-#' as \code{pp}. \code{c(0, x, tMax)} is equivalent to \code{c(tMax, tMax - x, 0)}
-#' for the purposes of \code{make.rate}.
+#' as \code{lambda}. \code{c(0, x, tMax)} is equivalent to 
+#' \code{c(tMax, tMax - x, 0)}for the purposes of \code{make.rate}.
 #' 
-#' @param qShifts Similar to \code{qShifts}, but for the extinction rate.
+#' @param mShifts Similar to \code{mShifts}, but for the extinction rate.
 #' 
 #' Note that using this  method for step-function rates is currently slower than 
 #' using \code{ifelse}.
@@ -144,13 +144,13 @@
 #' tMax <- 40
 #' 
 #' # speciation
-#' p <- 0.11
+#' lambda <- 0.11
 #' 
 #' # extinction
-#' q <- 0.08
+#' mu <- 0.08
 #' 
 #' # run the simulation, making sure we have more than 1 species in the end
-#' sim <- bd.sim(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -168,15 +168,15 @@
 #' tMax <- 40
 #' 
 #' # speciation rate
-#' p <- function(t) {
+#' lambda <- function(t) {
 #'   return(0.03 + 0.005*t)
 #' }
 #' 
 #' # extinction rate
-#' q <- 0.08
+#' mu <- 0.08
 #' 
 #' # run the simulation, making sure we have more than 1 species in the end
-#' sim <- bd.sim(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -188,16 +188,17 @@
 #' # what if we want q to be a step function?
 #' 
 #' # vector of extinction rates
-#' qList <- c(0.09, 0.08, 0.1)
+#' mList <- c(0.09, 0.08, 0.1)
 #' 
-#' # vector of shift times. Note qShifts could be c(40, 20, 5) for identical results
-#' qShifts <- c(0, 20, 35)
+#' # vector of shift times. Note mShifts could be c(40, 20, 5) for identical 
+#' # results
+#' mShifts <- c(0, 20, 35)
 #' 
 #' # let us take a look at how make.rate will make it a step function
-#' q <- make.rate(qList, tMax = tMax, fShifts = qShifts)
+#' mu <- make.rate(mList, tMax = tMax, rateShifts = mShifts)
 #' 
 #' # and plot it
-#' plot(seq(0, tMax, 0.1), q(seq(0, tMax, 0.1)), type = 'l',
+#' plot(seq(0, tMax, 0.1), mu(seq(0, tMax, 0.1)), type = 'l',
 #'      main = "Extintion rate as a step function", xlab = "Time (My)",
 #'      ylab = "Rate (species/My)")
 #' 
@@ -210,19 +211,19 @@
 #' n0 <- 1
 #' 
 #' # speciation
-#' p <- function(t) {
+#' lambda <- function(t) {
 #'   return(0.02 + 0.005*t)
 #' }
 #' 
 #' # a different way to define the same extinction function
-#' q <- function(t) {
-#'   ifelse(t < 20, 0.09, 
+#' mu <- function(t) {
+#'   ifelse(t < 20, 0.09,
 #'          ifelse(t < 35, 0.08, 0.1))
 #' }
 #' 
 #' # run the simulation
-#' sim <- bd.sim(n0, p, q, tMax, nFinal = c(2, Inf))
-#' # we could instead have used qList and qShifts
+#' sim <- bd.sim(n0, lambda, mu, tMax, nFinal = c(2, Inf))
+#' # we could instead have used mList and mShifts
 #' # that is, however, much slower
 #' 
 #' # we can plot the phylogeny to take a look
@@ -241,16 +242,16 @@
 #' tMax <- 40
 #' 
 #' # speciation - here note it is a Weibull scale
-#' p <- 10
+#' lambda <- 10
 #' 
 #' # speciation shape
-#' pShape <- 2
+#' lShape <- 2
 #' 
 #' # extinction
-#' q <- 0.08
+#' mu <- 0.08
 #' 
 #' # run the simulation
-#' sim <- bd.sim(n0, p, q, tMax, pShape = pShape, nFinal = c(2, Inf))
+#' sim <- bd.sim(n0, lambda, mu, tMax, lShape = lShape, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -258,7 +259,7 @@
 #'   ape::plot.phylo(phy)
 #' }
 #' 
-#' ### 
+#' ###
 #' # scale can be a time-varying function as well
 #' 
 #' # initial number of species
@@ -268,18 +269,18 @@
 #' tMax <- 40
 #' 
 #' # speciation - here note it is a Weibull scale
-#' p <- function(t) {
+#' lambda <- function(t) {
 #'   return(2 + 0.25*t)
 #' }
 #' 
 #' # speciation shape
-#' pShape <- 2
+#' lShape <- 2
 #' 
 #' # extinction
-#' q <- 0.2
+#' mu <- 0.2
 #' 
 #' # run the simulation
-#' sim <- bd.sim(n0, p, q, tMax, pShape = pShape, nFinal = c(2, Inf))
+#' sim <- bd.sim(n0, lambda, mu, tMax, lShape = lShape, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -291,7 +292,7 @@
 #' # finally, we can also have a rate dependent on an environmental variable,
 #' # like temperature data
 #' 
-#' # get temperature data 
+#' # get temperature data
 #' data(temp)
 #' 
 #' # initial number of species
@@ -301,32 +302,32 @@
 #' tMax <- 40
 #' 
 #' # speciation - a scale
-#' p <- 10
+#' lambda <- 10
 #' 
 #' # note the scale for the age-dependency can be a time-varying function
 #' 
 #' # speciation shape
-#' pShape <- 2
+#' lShape <- 2
 #' 
 #' # extinction, dependent on temperature exponentially
-#' q <- function(t, env) {
+#' mu <- function(t, env) {
 #'   return(0.1*exp(0.01*env))
 #' }
 #' 
 #' # need a variable to tell bd.sim the extinction is environmentally dependent
-#' envQQ <- temp
+#' envM <- temp
 #' 
-#' # by passing q and envQQ to bd.sim, internally bd.sim will make q into a
+#' # by passing q and envM to bd.sim, internally bd.sim will make q into a
 #' # function dependent only on time, using make.rate
-#' qq <- make.rate(q, envF = envQQ)
+#' m <- make.rate(mu, envRate = envM)
 #' 
 #' # take a look at how the rate itself will be
-#' plot(seq(0, tMax, 0.1), qq(seq(0, tMax, 0.1)),
+#' plot(seq(0, tMax, 0.1), m(seq(0, tMax, 0.1)),
 #'      main = "Extinction rate varying with temperature", xlab = "Time (My)",
 #'      ylab = "Rate", type = 'l')
 #' 
 #' # run the simulation
-#' sim <- bd.sim(n0, p, q, tMax, pShape = pShape, envQQ = envQQ,
+#' sim <- bd.sim(n0, lambda, mu, tMax, lShape = lShape, envM = envM,
 #'               nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
@@ -345,35 +346,35 @@
 #' n0 <- 1
 #' 
 #' # speciation - a step function of temperature built using ifelse()
-#' p <- function(t, env) {
+#' lambda <- function(t, env) {
 #'   ifelse(t < 20, env,
 #'          ifelse(t < 30, env / 4, env / 3))
 #' }
 #' 
 #' # speciation shape
-#' pShape <- 2
+#' lShape <- 2
 #' 
 #' # environment variable to use - temperature
-#' envPP <- temp
+#' envL <- temp
 #' 
 #' # this is kind of a complicated scale, let us take a look
 #' 
 #' # make it a function of time
-#' pp <- make.rate(p, envF = envPP)
+#' l <- make.rate(lambda, envRate = envL)
 #' 
 #' # plot it
-#' plot(seq(0, tMax, 0.1), pp(seq(0, tMax, 0.1)),
+#' plot(seq(0, tMax, 0.1), l(seq(0, tMax, 0.1)),
 #'      main = "Speciation scale varying with temperature", xlab = "Time (My)",
 #'      ylab = "Scale", type = 'l')
 #' 
 #' # extinction - high so this does not take too long to run
-#' q <- 0.2
+#' mu <- 0.2
 #' 
 #' # maximum simulation time
 #' tMax <- 40
 #' 
 #' # run the simulation
-#' sim <- bd.sim(n0, p, q, tMax, pShape = pShape, envPP = envPP,
+#' sim <- bd.sim(n0, lambda, mu, tMax, lShape = lShape, envL = envL,
 #'               nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
@@ -386,41 +387,41 @@
 #' \dontrun{
 #' # this would return a warning, since it is virtually impossible to get 100
 #' # species at a process with diversification rate -0.09 starting at n0 = 1
-#' sim <- bd.sim(1, pp = 0.01, qq = 1, tMax = 100, nFinal = c(100, Inf))
+#' sim <- bd.sim(1, lambda = 0.01, mu = 1, tMax = 100, nFinal = c(100, Inf))
 #' }
 #' 
 #' @name bd.sim
 #' @rdname bd.sim
 #' @export
 
-bd.sim <- function(n0, pp, qq, tMax, 
-                  pShape = NULL, qShape = NULL, 
-                  envPP = NULL, envQQ = NULL, 
-                  pShifts = NULL, qShifts = NULL, 
+bd.sim <- function(n0, lambda, mu, tMax, 
+                  lShape = NULL, mShape = NULL, 
+                  envL = NULL, envM = NULL, 
+                  lShifts = NULL, mShifts = NULL, 
                   nFinal = c(0, Inf), extOnly = FALSE,
                   trueExt = FALSE) {
   
-  # if we have ONLY numbers for pp and qq, it is constant
-  if ((is.numeric(pp) & length(pp) == 1) &
-      (is.numeric(qq) & length(qq) == 1) &
-       (is.null(c(pShape, qShape, envPP, envQQ, pShifts, qShifts)))) {
-    p <- pp
-    q <- qq
+  # if we have ONLY numbers for lambda and mu, it is constant
+  if ((is.numeric(lambda) & length(lambda) == 1) &
+      (is.numeric(mu) & length(mu) == 1) &
+       (is.null(c(lShape, mShape, envL, envM, lShifts, mShifts)))) {
+    l <- lambda
+    m <- mu
     
     # call bd.sim.constant
-    return(bd.sim.constant(n0, p, q, tMax, nFinal, extOnly))
+    return(bd.sim.constant(n0, l, m, tMax, nFinal, extOnly))
   }
 
   # else it is not constant
-  # note even if pp or qq is constant this may call bd.sim.general, since we
+  # note even if lambda or mu is constant this may call bd.sim.general, since we
   # might have a shape parameter
   else {
     # use make.rate to create the rates we want
-    p <- make.rate(pp, tMax, envPP, pShifts)
-    q <- make.rate(qq, tMax, envQQ, qShifts)
+    l <- make.rate(lambda, tMax, envL, lShifts)
+    m <- make.rate(mu, tMax, envM, mShifts)
 
     # call bd.sim.general
-    return(bd.sim.general(n0, p, q, tMax, pShape, qShape, 
+    return(bd.sim.general(n0, l, m, tMax, lShape, mShape, 
                           nFinal, extOnly, trueExt))
   }
 }

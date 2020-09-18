@@ -43,7 +43,8 @@ function as the \code{stemLength} value.}
 }
 \value{
 A \code{sim} object organized in the same format as the output of 
-\code{bd.sim}. Items in the object follow their tip assignment in the phylogeny.
+\code{bd.sim}. Items in the object follow their tip assignment in the 
+phylogeny.
 }
 \description{
 Generates a \code{sim} object using a \code{phylo} object and some additional 
@@ -72,8 +73,8 @@ evidently a non-trivial task for empirical phylogenies. As there are many
 ways to assign impossible combinations of motherthood, the function does not
 return any specific error message if the provided motherhood does not map to
 possible lineages given the phylogeny. Instead, simulations conducted by the 
-author  showed the function tends to crash when an "impossible" motherhood is 
-assigned, but is  not guaranteed that this will happen because of the enormous
+author showed the function tends to crash when an "impossible" motherhood is 
+assigned, but is not guaranteed that this will happen because of the enormous
 universe of "impossible" ways to assign motherhood. However, if the function 
 crashes when all lineages have reasonable motherhood, users are invited to 
 contact the author.
@@ -106,7 +107,7 @@ phylogeny.
 
 # simulate the clade
 tmax <- 10
-sim <- bd.sim(1, pp = 0.3, qq = 0.1, tMax = tmax, nFinal = c(10, Inf))
+sim <- bd.sim(1, lambda = 0.3, mu = 0.1, tMax = tmax, nFinal = c(10, Inf))
 
 # convert birth-death into phylo
 phy <- make.phylo(sim)
@@ -123,7 +124,7 @@ all.equal(sim, res)
 
 # simulate the clade
 tmax <- 10
-sim <- bd.sim(1, pp = 0.2, qq = 0, tMax = tmax, nFinal = c(10, Inf))
+sim <- bd.sim(1, lambda = 0.2, mu = 0, tMax = tmax, nFinal = c(10, Inf))
 
 # convert birth-death into phylo
 phy <- make.phylo(sim)
@@ -134,7 +135,7 @@ res <- phylo.to.sim(phy = phy, extant = sim$EXTANT, mothers = sim$PAR,
                 stemAge = tmax, stemLength = (tmax-sim$TS[2]), 
                 dateFromPresent = TRUE)
 
-#testing if simulation and converted object are the same
+# testing if simulation and converted object are the same
 all.equal(sim, res)
 
 }

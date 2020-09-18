@@ -16,11 +16,11 @@
 #' 
 #' @inheritParams bd.sim 
 #' 
-#' @param pp Speciation rate. Must be constant.
+#' @param lambda Speciation rate. Must be constant.
 #'
-#' @param qq Extinction rate, similar to above.
+#' @param mu Extinction rate, similar to above.
 #' 
-#' Note: \code{pp} and \code{qq} must always be greater than 0
+#' Note: \code{lambda} and \code{mu} must always be greater than 0
 #'
 #' @return A list of vectors, as follows
 #'
@@ -54,13 +54,13 @@
 #' tMax <- 40
 #' 
 #' # speciation
-#' p <- 0.1
+#' lambda <- 0.1
 #' 
 #' # extinction
-#' q <- 0
+#' mu <- 0
 #' 
 #' # run the simulation
-#' sim <- bd.sim.constant(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim.constant(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -78,13 +78,13 @@
 #' tMax <- 40
 #' 
 #' # speciation
-#' p <- 0.1
+#' lambda <- 0.1
 #' 
 #' # extinction
-#' q <- 0.04
+#' mu <- 0.04
 #' 
 #' # run the simulation
-#' sim <- bd.sim.constant(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim.constant(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -103,13 +103,13 @@
 #' tMax <- 40
 #' 
 #' # speciation
-#' p <- 0
+#' lambda <- 0
 #' 
 #' # extinction
-#' q <- 0.02
+#' mu <- 0.02
 #' 
 #' # run the simulation
-#' sim <- bd.sim.constant(n0, p, q, tMax)
+#' sim <- bd.sim.constant(n0, lambda, mu, tMax)
 #' 
 #' # of course in this case there are no phylogenies to plot
 #' 
@@ -117,7 +117,8 @@
 #' \dontrun{
 #' # this would return a warning, since it is virtually impossible to get 100
 #' # species at a process with diversification rate -0.09 starting at n0 = 1
-#' sim <- bd.sim.constant(1, pp = 0.01, qq = 1, tMax = 100, nFinal = c(100, Inf))
+#' sim <- bd.sim.constant(1, lambda = 0.01, mu = 1, tMax = 100, 
+#'                       nFinal = c(100, Inf))
 #' }
 #' 
 #' @name bd.sim.constant
@@ -125,17 +126,17 @@
 #' @export
 
 
-bd.sim.constant <- function(n0, pp, qq, tMax, 
+bd.sim.constant <- function(n0, lambda, mu, tMax, 
                             nFinal = c(0, Inf), extOnly = FALSE,
                             trueExt = FALSE) {
   # check that the rates are constant
-  if (!(is.numeric(pp) & length(pp) == 1 &
-        is.numeric(qq) * length(qq) == 1)) {
+  if (!(is.numeric(lambda) & length(lambda) == 1 &
+        is.numeric(mu) * length(mu) == 1)) {
     stop("bd.sim.constant requires constant rates")
   }
   
   # check that the rates are non-negative
-  if (pp < 0 || qq < 0) {
+  if (lambda < 0 || mu < 0) {
     stop("rates cannot be negative")
   }
   
@@ -181,8 +182,8 @@ bd.sim.constant <- function(n0, pp, qq, tMax,
       tNow <- TS[sCount]
   
       # draw waiting times with rexp()
-      waitTimeS <- ifelse(pp > 0, rexp(1, pp), Inf)
-      waitTimeE <- ifelse(qq > 0, rexp(1, qq), Inf)
+      waitTimeS <- ifelse(lambda > 0, rexp(1, lambda), Inf)
+      waitTimeE <- ifelse(mu > 0, rexp(1, mu), Inf)
   
       # if the time of extinction is after the end of the simulation, make it tMax
       tExp <- tNow + waitTimeE
@@ -200,7 +201,7 @@ bd.sim.constant <- function(n0, pp, qq, tMax,
   
         # take a new waiting time - if now + waitTimeS is still less than when
         # the species goes extinct, repeat
-        waitTimeS <- ifelse(pp > 0, rexp(1, pp), Inf)
+        waitTimeS <- ifelse(lambda > 0, rexp(1, lambda), Inf)
       }
   
       # reached the time of the species extinction

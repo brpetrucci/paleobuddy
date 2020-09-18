@@ -66,24 +66,24 @@
 #' @examples 
 #'
 #' # speciation rate
-#' p <- function(t) {
+#' lambda <- function(t) {
 #'   0.1 + 0.04*t
 #' }
 #' 
 #' # extinction rate
-#' q <- 0.08
+#' mu <- 0.08
 #' 
 #' # these are pretty simple scenarios, of course
 #' # check the examples in ?bd.sim for a more comprehensive review
 #' 
 #' # diversification
 #' d <- function(t) {
-#'   p(t) - q
+#'   lambda(t) - mu
 #' }
 #' 
 #' # calculate how many species we expect over 10 million years
 #' # note we are starting with 3 species
-#' div <- var.rate.div(ff = d, n0 = 3, t = seq(0, 10, 0.1))
+#' div <- var.rate.div(rate = d, n0 = 3, t = seq(0, 10, 0.1))
 #' 
 #' # plot it
 #' plot(seq(0, 10, 0.1), div, type = 'l', main = "Expected diversity",
@@ -93,14 +93,14 @@
 #' 
 #' # around 28 species by the end, seems pretty good
 #' # run the simulation
-#' sim <- bd.sim(n0 = 3, pp = p, qq = q, tMax = 10, nFinal = c(20, Inf))
+#' sim <- bd.sim(n0 = 3, lambda = lambda, mu = mu, tMax = 10, nFinal = c(20, Inf))
 #' # nFinal controls the final number of species
 #' # here we are telling bd.sim to throw away simulations with less than 20
 #' 
 #' set.seed(1)
 #' 
 #' # from sim, we can create fossil records for each species
-#' samp <- sample.clade(sim = sim, rr = 0.75, tMax = 10,
+#' samp <- sample.clade(sim = sim, rho = 0.75, tMax = 10,
 #'                      bins = seq(10, 0, -1))
 #' # note 15 out of the 29 species did not leave a fossil - we can in this way
 #' # simulate the incompleteness of the fossil record

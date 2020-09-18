@@ -34,16 +34,16 @@ n0 <- 1
 
 # speciation rate - approx. 1 speciation event every 4my
 # we are trying to create a big phylogeny so phytools can function better
-pp <- 0.25
+lambda <- 0.25
 
 # extinction rate - approx. 1 extinction event every 10my
-qq <- 0.15
+mu <- 0.15
 
 # maximum simulation time - species that die after this are considered extant
 tMax <- 50
 
 # run the simulation
-sim <- bd.sim(n0, pp, qq, tMax)
+sim <- bd.sim(n0, lambda, mu, tMax)
 
 # take a look at the way the result is organized
 sim
@@ -92,7 +92,7 @@ set.seed(2)
 
 # create simulation
 # note nFinal and extOnly, defining we want 200 ormore extant species at the end
-sim <- bd.sim(n0, pp, qq, tMax, nFinal = c(200, Inf), extOnly = TRUE)
+sim <- bd.sim(n0, lambda, mu, tMax, nFinal = c(200, Inf), extOnly = TRUE)
 
 # check the number of extant species
 sum(sim$EXTANT)
@@ -122,12 +122,12 @@ set.seed(5)
 n0 <- 1
 
 # speciation rate - it can be any function of time!
-pp <- function(t) {
+lambda <- function(t) {
   0.1 + 0.001*t
 }
 
 # extinction rate - also can be any function of time
-qq <- function(t) {
+mu <- function(t) {
   0.03 * exp(-0.01*t)
 }
 
@@ -135,7 +135,7 @@ qq <- function(t) {
 tMax <- 50
 
 # run the simulation
-sim <- bd.sim(n0, pp, qq, tMax)
+sim <- bd.sim(n0, lambda, mu, tMax)
 
 # check the resulting clade out
 ape::plot.phylo(make.phylo(sim), show.tip.label = FALSE)
@@ -150,12 +150,12 @@ set.seed(1)
 # set the sampling rate
 # using a simple case - there will be on average T occurrences per species,
 # where T is the species duration
-rr <- 1
+rho <- 1
 
 # run the sampling simulation only for the first 15 species for brevity's sake
 # returnTrue = FALSE makes it so the occurrences are binned (i.e. an occurrence
 # at time 42.34 is between 42.4 and 42.3)
-samp <- suppressMessages(sample.clade(sim = sim, rr = rr, 
+samp <- suppressMessages(sample.clade(sim = sim, rho = rho, 
                                       tMax = tMax, S = 1:15, returnTrue = FALSE))
 # suppressing messages - the message is to inform the user how many species
 # left no fossils. In this case, it was 0
@@ -257,7 +257,7 @@ n0 <- 1
 tMax <- 20
 
 # speciation can be dependent on an environmental variable as well as time
-pp <- function(t, env) {
+lambda <- function(t, env) {
   0.01 * t + 0.01*exp(0.01*env)
 }
 
@@ -267,14 +267,14 @@ data(temp)
 # paleobuddy
 
 # we can make extinction be age-dependent by creating a shape parameter
-qq <- 10
-qShape <- 0.5
+mu <- 10
+mShape <- 0.5
 # this will make it so species durations are distributed as a Weibull with scale 10 and shape 2
 
 # run the simulation
 # we pass the shape and environmental parameters
-sim <- bd.sim(n0, pp, qq, tMax, qShape = qShape, envPP = temp)
-# note that pShape and envQQ also exist
+sim <- bd.sim(n0, lambda, mu, tMax, mShape = mShape, envL = temp)
+# note that lShape and envM also exist
 # the defaults for all of these customization options is NULL
 
 # check out the phylogeny
@@ -285,17 +285,17 @@ So as to avoid repetition, we will not run simulations for the next possibilitie
 
 ```{r}
 # speciation may be a step function, presented as a rates vector and a shift times vector
-pList <- c(0.1, 0.2, 0.05)
-pShifts <- c(0, 10, 15)
-# pShifts could also be c(tMax, tMax - 10, tMax - 15) for identical results
+lList <- c(0.1, 0.2, 0.05)
+lShifts <- c(0, 10, 15)
+# lShifts could also be c(tMax, tMax - 10, tMax - 15) for identical results
 
 # make.rate is the function bd.sim calls to create a rate, but we will use it here to see how it looks
-pp <- make.rate(pList, tMax = 20, fShifts = pShifts)
+lambda <- make.rate(lList, tMax = 20, rateShifts = lShifts)
 t <- seq(0, 20, 0.1)
-plot(t, pp(t), type = 'l', main = "Step function speciation rate",
+plot(t, lambda(t), type = 'l', main = "Step function speciation rate",
      xlab = "Time (My)", ylab = "Rate")
 
-# it is not possible to combine the pp(t, env) and pList methods listed above
+# it is not possible to combine the lambda(t, env) and lList methods listed above
 # but we can create a step function dependent on environmental data with ifelse
 q <- function(t, env) {
   ifelse(t < 10, env,
@@ -303,8 +303,8 @@ q <- function(t, env) {
 }
 
 # pass it to make.rate with environmental data
-qq <- make.rate(q, envF = temp)
-plot(t, qq(t), type = 'l', main = "Environmental step function extinction rate",
+mu <- make.rate(q, envRate = temp)
+plot(t, mu(t), type = 'l', main = "Environmental step function extinction rate",
      xlab = "Time (My)", ylab = "Rate")
 ```
 
@@ -315,19 +315,19 @@ Note all these customization options could serve for a weibull scale as well, if
 set.seed(1)
 
 # age-dependent speciation with a step function
-pList <- c(10, 5, 12)
-pShifts <- c(0, 10, 15)
-pShape <- 0.5
+lList <- c(10, 5, 12)
+lShifts <- c(0, 10, 15)
+lShape <- 0.5
 
 # age-dependent extinction with a step function of an environmental variable
 q <- function(t, env) {
   ifelse(t < 10, 20*env,
          ifelse(t < 15, 10*env, 13*env / 2))
 }
-qShape <- 2
+mShape <- 2
 
 # run the simulation
-sim <- bd.sim(n0, pList, q, tMax, pShape = 0.5, qShape = 2, envQQ = temp, pShifts = pShifts)
+sim <- bd.sim(n0, lList, q, tMax, lShape = 0.5, mShape = mShape, envM = temp, lShifts = lShifts)
 ```
 
 We set this to not run because it takes a long time - both because of the high speciation and because the method of creating a step function rate with `shifts` and `lists` takes a long time to integrate. It is however a good illustration of the power of `paleobuddy`s flexibility. 
@@ -379,7 +379,7 @@ dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
 set.seed(1)
 
 # generate a quick simulation
-sim <- bd.sim(n0, pp = 0.1, qq = 0.05, tMax = 20)
+sim <- bd.sim(n0, lambda = 0.1, mu = 0.05, tMax = 20)
 
 # we will need to use sim$TE, so let us make the extant species' time 0
 sim$TE[sim$EXTANT] <- 0
@@ -388,7 +388,7 @@ sim$TE[sim$EXTANT] <- 0
 set.seed(1)
 
 # sample - high sampling rate so we can visualize the age-dependency
-samp <- sample.clade(sim = sim, rr = 30, tMax = 20, 
+samp <- sample.clade(sim = sim, rho = 30, tMax = 20, 
                      returnTrue = FALSE, adFun = dPERT)
 # if no bin is supplied and returnTrue = FALSE, it uses seq(tMax, 0, -0.1)
 # as a high resolution default
@@ -416,7 +416,7 @@ for (i in 1:length(ids)) {
 }
 ```
 
-For more details and examples of age-dependent models, check out `?sample.general` and `?sample.clade`. When a `adFun` argument is supplied for age dependency, the average sampling rate `rr` must be a constant. We omit examples of non-age-dependent sampling rate options since they are just the same options as birth-death rates, excluding shape parameters.
+For more details and examples of age-dependent models, check out `?sample.general` and `?sample.clade`. When a `adFun` argument is supplied for age dependency, the average sampling rate `rho` must be a constant. We omit examples of non-age-dependent sampling rate options since they are just the same options as birth-death rates, excluding shape parameters.
 
 ## Conclusion
 
@@ -437,7 +437,7 @@ For completion, we present a final list of the functions of the package
 set.seed(1)
 
 # simple simulation, starting with more than one species
-sim <- bd.sim(n0 = 2, pp = 0.1, qq = 0, tMax = 20, nFinal = c(20, Inf))
+sim <- bd.sim(n0 = 2, lambda = 0.1, mu = 0, tMax = 20, nFinal = c(20, Inf))
 
 # separate the lineages
 clades <- find.lineages(sim)

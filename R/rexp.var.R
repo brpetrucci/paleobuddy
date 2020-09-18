@@ -2,7 +2,7 @@
 #' 
 #' Generates a waiting time following an exponential or Weibull distribution with
 #' constant or varying rates. Allows for an optional shape parameter, in which 
-#' case \code{lambda} will be taken as a Weibull scale. Allows for information on
+#' case \code{rate} will be taken as a Weibull scale. Allows for information on
 #' the current time, to consider only rates starting from then, and the speciation
 #' time, optionally, in case shape is provided, as the process is age-dependent.
 #' Allows for customization on the possibility of throwing away waiting times
@@ -11,10 +11,10 @@
 #' @param n The number of waiting times to return. Usually 1, but we allow for
 #' a higher \code{n} to be consistent with the \code{rexp} function.
 #' 
-#' @param lambda The rate parameter for the exponential distribution. If
-#' \code{shape} is not \code{NULL}, \code{lambda} is a scale for a Weibull
+#' @param rate The rate parameter for the exponential distribution. If
+#' \code{shape} is not \code{NULL}, \code{rate} is a scale for a Weibull
 #' distribution. In both cases we allow for any time-varying function. Note
-#' \code{lambda} can be constant.
+#' \code{rate} can be constant.
 #'
 #' @param now The current time. Needed if one wants to consider only the interval
 #' between the current time and the maximum time for the time-varying rate.
@@ -62,7 +62,7 @@
 #' # let us start by checking a simple exponential variable
 #' 
 #' # rate
-#' lambda <- 0.1
+#' rate <- 0.1
 #' 
 #' # current time
 #' now <- 0
@@ -71,14 +71,14 @@
 #' tMax <- 40
 #' 
 #' # get waiting time
-#' t <- rexp.var(n = 1, lambda, now, tMax)
+#' t <- rexp.var(n = 1, rate, now, tMax)
 #' t
 #' 
 #' ###
 #' # another simple exponential
 #' 
 #' # rate
-#' lambda <- 0.5
+#' rate <- 0.5
 #' 
 #' # current time
 #' now <- 0
@@ -87,14 +87,14 @@
 #' tMax <- 40
 #' 
 #' # find the waiting time
-#' t <- rexp.var(n = 1, lambda, now, tMax)
+#' t <- rexp.var(n = 1, rate, now, tMax)
 #' t
 #' 
 #' ###
 #' # now let us try a linear function for the rate
 #' 
 #' # rate
-#' lambda <- function(t) {
+#' rate <- function(t) {
 #'   return(0.01*t + 0.1)
 #' }
 #' 
@@ -105,14 +105,14 @@
 #' tMax <- 40
 #' 
 #' # find the waiting time
-#' t <- rexp.var(n = 1, lambda, now, tMax)
+#' t <- rexp.var(n = 1, rate, now, tMax)
 #' t
 #' 
 #' ###
-#' # what if lambda is exponential?
+#' # what if rate is exponential?
 #' 
 #' # rate
-#' lambda <- function(t) {
+#' rate <- function(t) {
 #'   return(0.01 * exp(0.1*t) + 0.02)
 #' }
 #' 
@@ -123,14 +123,14 @@
 #' tMax <- 40
 #' 
 #' # find the waiting time
-#' t <- rexp.var(n = 1, lambda, now, tMax)
+#' t <- rexp.var(n = 1, rate, now, tMax)
 #' t
 #' 
 #' ###
 #' # rexp.var also works for a weibull
 #' 
 #' # scale
-#' lambda <- 2
+#' rate <- 2
 #' 
 #' # shape
 #' shape <- 1
@@ -145,7 +145,7 @@
 #' TS <- 0
 #' 
 #' # find the vector of waiting time
-#' t <- rexp.var(n = 1, lambda, now, tMax,
+#' t <- rexp.var(n = 1, rate, now, tMax,
 #'               shape = shape, TS = TS)
 #' t
 #' 
@@ -153,7 +153,7 @@
 #' # when shape = 1, the Weibull is an exponential, we could do better
 #' 
 #' # scale
-#' lambda <- 10
+#' rate <- 10
 #' 
 #' # shape
 #' shape <- 2
@@ -168,7 +168,7 @@
 #' TS <- 0
 #' 
 #' # find the vector of waiting times - it doesn't need to be just one
-#' t <- rexp.var(n = 5, lambda, now, tMax,
+#' t <- rexp.var(n = 5, rate, now, tMax,
 #'               shape = shape, TS = TS)
 #' t
 #' 
@@ -176,7 +176,7 @@
 #' # shape can be less than one, of course
 #' 
 #' # scale
-#' lambda <- 10
+#' rate <- 10
 #' 
 #' # shape
 #' shape <- 0.5
@@ -193,17 +193,17 @@
 #' TS <- 2.5
 #' 
 #' # find the vector of waiting times
-#' t <- rexp.var(n = 3, lambda, now, tMax,
+#' t <- rexp.var(n = 3, rate, now, tMax,
 #'               shape = shape, TS = TS)
 #' t
 #' 
 #' ###
-#' # both lambda and shape can be time varying for a Weibull, but since we have
-#' # only been able to test time-varying lambda effectively, we do not recommend
+#' # both rate and shape can be time varying for a Weibull, but since we have
+#' # only been able to test time-varying rate effectively, we do not recommend
 #' # using shape as a function
 #' 
 #' # scale
-#' lambda <- function(t) {
+#' rate <- function(t) {
 #'   return(0.25*t + 5)
 #' }
 #' 
@@ -220,22 +220,22 @@
 #' TS <- 0
 #' 
 #' # find the vector of waiting times - it doesn't need to be just one
-#' t <- rexp.var(n = 5, lambda, now, tMax,
+#' t <- rexp.var(n = 5, rate, now, tMax,
 #'               shape = shape, TS = TS)
 #' t
 #' 
 #' ###
-#' # lambda can be any function of time, remember
+#' # rate can be any function of time, remember
 #' 
 #' # scale
-#' lambda <- function(t) {
+#' rate <- function(t) {
 #'   return(0.2*exp(0.1*t) + 5)
 #' }
 #' 
 #' # shape
 #' shape <- 3
 #' 
-#' # current time - remember lambda will only be considered starting from time now
+#' # current time - remember rate will only be considered starting from time now
 #' now <- 2.5
 #' 
 #' # maximum time to check
@@ -245,7 +245,7 @@
 #' TS <- 1.2
 #' 
 #' # find the vector of waiting times - it doesn't need to be just one
-#' t <- rexp.var(n = 2, lambda, now, tMax,
+#' t <- rexp.var(n = 2, rate, now, tMax,
 #'               shape = shape, TS = TS)
 #' t
 #'
@@ -253,7 +253,7 @@
 #' @rdname rexp.var
 #' @export
 
-rexp.var <- function(n, lambda, now = 0, tMax = Inf, shape = NULL, 
+rexp.var <- function(n, rate, now = 0, tMax = Inf, shape = NULL, 
                    TS = 0, fast = FALSE) {
   # some error checking
   if (tMax == Inf & fast) {
@@ -270,10 +270,10 @@ rexp.var <- function(n, lambda, now = 0, tMax = Inf, shape = NULL,
   # default is not age dependent, will change this later
   AD <- FALSE
 
-  # make lambda a function if it is a constant
-  if (is.numeric(lambda)) {
-    l <- lambda
-    lambda <- Vectorize(function(t) l)
+  # make rate a function if it is a constant
+  if (is.numeric(rate)) {
+    r <- rate
+    rate <- Vectorize(function(t) r)
   }
   
   # same for shape
@@ -298,7 +298,7 @@ rexp.var <- function(n, lambda, now = 0, tMax = Inf, shape = NULL,
 
       # calculate the probability that the event will happen at all
       total <- 1 - exp(-(integrate(
-        Vectorize(function(x) 1/lambda(x + TS)), lower = spnow, 
+        Vectorize(function(x) 1/rate(x + TS)), lower = spnow, 
         upper = upper - TS, subdivisions = 2000)$value) ^ shape(upper))
 
       # if the probability is lower than p, the event will not happen
@@ -313,7 +313,7 @@ rexp.var <- function(n, lambda, now = 0, tMax = Inf, shape = NULL,
         # distributed as a weibull
         f <- Vectorize(function(t) 
           {
-          1 - p - exp(-(integrate(Vectorize(function(x) 1/lambda(x + TS)), 
+          1 - p - exp(-(integrate(Vectorize(function(x) 1/rate(x + TS)), 
                                   lower = spnow, upper = t, 
                                   subdivisions = 2000)$value) ^ shape(t))})
 
@@ -321,14 +321,14 @@ rexp.var <- function(n, lambda, now = 0, tMax = Inf, shape = NULL,
         vars[i] <- suppressWarnings(uniroot(f, c(spnow, upper), 
                                             extendInt="yes"))$root - spnow
         
-        # if lambda is really high and the integral goes to +-infinity (computationally
+        # if rate is really high and the integral goes to +-infinity (computationally
         # speaking), uniroot substitutes it for a really high/low value instead. Since
         # this does not change our results, we accept it and simply suppress the warning
       }
     }
     else {
       # calculate the probability that the event will happen at all
-      total <- 1 - exp(-integrate(Vectorize(function(x) lambda(x)), 
+      total <- 1 - exp(-integrate(Vectorize(function(x) rate(x)), 
                                   lower = now, upper = upper, 
                                   subdivisions = 2000)$value)
       
@@ -340,10 +340,10 @@ rexp.var <- function(n, lambda, now = 0, tMax = Inf, shape = NULL,
       else {
         # if f(t) = 0, t is exponentially distributed
         f <- Vectorize(function(t) {
-          1 - p - exp(-integrate(Vectorize(function(x) lambda(x)), lower = now, 
+          1 - p - exp(-integrate(Vectorize(function(x) rate(x)), lower = now, 
                                  upper = t, subdivisions = 2000)$value)})
 
-        # if lambda is really high and the integral goes to +-infinity (computationally
+        # if rate is really high and the integral goes to +-infinity (computationally
         # speaking), uniroot substitutes it for a really high/low value instead. Since
         # this does not change our results, we accept it and simply suppress the warning
         vars[i] <- suppressWarnings(uniroot(f, c(now, upper), 

@@ -50,10 +50,10 @@ binnedSamp
 # let us try with a real simulated species fossil record
 
 # run the simulation
-sim <- bd.sim(1, pp = 0.1, qq = 0.05, tMax = 15)
+sim <- bd.sim(1, lambda = 0.1, mu = 0.05, tMax = 15)
 
 # sample it
-sampled <- sample.species(sim = sim, rr = 1, tMax = 15, S = 1)
+sampled <- sample.species(sim = sim, rho = 1, tMax = 15, S = 1)
 
 # bins vector
 bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
@@ -66,12 +66,12 @@ binnedsample
 # just one more
 
 # run the simulation
-sim <- bd.sim(1, pp = function(t) {
+sim <- bd.sim(1, lambda = function(t) {
   return(0.05 + 0.005*t)
-}, qq = 0.05, tMax = 20)
+}, mu = 0.05, tMax = 20)
 
 # sample it
-sampled <- sample.species(sim = sim, rr = 1, tMax = 20, S = 1)
+sampled <- sample.species(sim = sim, rho = 1, tMax = 20, S = 1)
 
 # bins vector
 bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)

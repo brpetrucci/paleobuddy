@@ -4,10 +4,10 @@
 \alias{var.rate.div}
 \title{Expected diversity for general exponential rates}
 \usage{
-var.rate.div(ff, t, n0 = 1, tMax = NULL, envF = NULL, fShifts = NULL)
+var.rate.div(rate, t, n0 = 1, tMax = NULL, envRate = NULL, rateShifts = NULL)
 }
 \arguments{
-\item{ff}{The baseline function with which to make the rate.
+\item{rate}{The baseline function with which to make the rate.
 It can be a
 
 \describe{
@@ -18,11 +18,11 @@ any function of time.}
 
 \item{A function of time and an environmental variable}{For rates varying with
 time and an environmental variable, such as temperature. Note that supplying a
-function on more than one variable without an accompanying \code{envF} will
+function on more than one variable without an accompanying \code{envRate} will
 result in an error.}
 
 \item{A numeric vector}{To create step function rates. Note this must be
- accompanied by a corresponding vector of shifts \code{fShifts}.}}}
+ accompanied by a corresponding vector of shifts \code{rateShifts}.}}}
 
 \item{t}{A time vector over which to consider the distribution.}
 
@@ -30,32 +30,33 @@ result in an error.}
 any nonnegative number.
 
 Note: \code{var.rate.div} will find the expected number of daughters given a
-rate \code{ff} and an initial number of parents \code{n0}, so in a
-biological context \code{ff} is diversification rate, not speciation (unless
+rate \code{rate} and an initial number of parents \code{n0}, so in a
+biological context \code{rate} is diversification rate, not speciation (unless
 extinction is \code{0}).}
 
 \item{tMax}{Ending time of simulation, in million years after the clade's 
-origin. Needed to ensure \code{fShifts} runs the correct way.}
+origin. Needed to ensure \code{rateShifts} runs the correct way.}
 
-\item{envF}{A \code{data.frame} representing the variation of an environmental 
-variable (e.g. CO2, temperature, available niches, etc) with time. The first 
-column of this \code{data.frame} must be time, and the second column must be 
-the values of the variable. The function will return an error if supplying 
-\code{envF} without \code{ff} being a function of two variables. Note 
-\code{paleobuddy} has two environmental data frames, \code{temp} and 
+\item{envRate}{A \code{data.frame} representing the variation of an 
+environmental variable (e.g. CO2, temperature, available niches, etc) with 
+time. The first column of this \code{data.frame} must be time, and the second 
+column must be the values of the variable. The function will return an error if
+supplying \code{envRate} without \code{rate} being a function of two variables.
+Note \code{paleobuddy} has two environmental data frames, \code{temp} and 
 \code{co2}. One can check \code{RPANDA} for more examples.
 
 Acknowledgements: The strategy to transform a function of \code{t} and 
-\code{env} into a function of \code{t} only using \code{envF} was adapted from
-RPANDA (see below).}
+\code{env} into a function of \code{t} only using \code{envRate} was adapted 
+from RPANDA (see below).}
 
-\item{fShifts}{A vector indicating the time placement of rate shifts in a step 
-function. The first element must be the first time point for the simulation. 
-This may be \code{0} or \code{tMax}. Since functions in paleobuddy run from 
-\code{0} to \code{tMax}, if \code{fShifts} runs from past to present 
-(\code{fShifts[2] < fShifts[1]}), we take \code{tMax - fShifts} as the shifts 
-vector. Note that supplying \code{fShifts} when \code{ff} is not a numeric 
-vector of the same length will result in an error.}
+\item{rateShifts}{A vector indicating the time placement of rate shifts in a 
+step function. The first element must be the first time point for the 
+simulation. This may be \code{0} or \code{tMax}. Since functions in paleobuddy 
+run from \code{0} to \code{tMax}, if \code{rateShifts} runs from past to 
+present (\code{rateShifts[2] < rateShifts[1]}), we take 
+\code{tMax - rateShifts} as the shifts vector. Note that supplying 
+\code{rateShifts} when \code{rate} is not a numeric vector of the same length 
+will result in an error.}
 }
 \value{
 A vector of the expected number of species per time point supplied
@@ -77,7 +78,7 @@ t <- seq(0, 50, 0.1)
 
 ###
 # we can start simple: create a constant rate
-ff <- 0.1
+rate <- 0.1
 
 # set this up so we see rates next to diversity
 par(mfrow = c(1,2))
@@ -87,25 +88,25 @@ r <- make.rate(0.5)
 plot(t, rep(r, length(t)), type = 'l')
 
 # get the diversity and plot it
-div <- var.rate.div(ff, t)
+div <- var.rate.div(rate, t)
 plot(t, div, type = 'l')
 
 ###
 # something a bit more complex: a linear rate
-ff <- function(t) {
+rate <- function(t) {
   return(0.01*t)
 }
 
 # visualize the rate
-r <- make.rate(ff)
+r <- make.rate(rate)
 plot(t, r(t), type = 'l')
 
 # get the diversity and plot it
-div <- var.rate.div(ff, t = t)
+div <- var.rate.div(rate, t = t)
 plot(t, div, type = 'l')
 
 ###
-# remember: ff is diversity!
+# remember: rate is diversity!
 
 # we can create speciation...
 pp <- function(t) {
@@ -117,38 +118,38 @@ qq <- function(t) {
   return(0.01*t)
 }
 
-# ...and code ff as diversification
-ff <- function(t) {
+# ...and code rate as diversification
+rate <- function(t) {
   return(pp(t) - qq(t))
 }
 
 # visualize the rate
-r <- make.rate(ff)
+r <- make.rate(rate)
 plot(t, r(t), type = 'l')
 
 # get diversity and plot it
-div <- var.rate.div(ff, t, n0 = 2)
+div <- var.rate.div(rate, t, n0 = 2)
 plot(t, div, type = 'l')
 
 ###
-# remember: ff can be any time-varying function!
+# remember: rate can be any time-varying function!
 
 # such as a sine
-ff <- function(t) {
+rate <- function(t) {
   return(sin(t)*0.5)
 }
 
 # visualize the rate
-r <- make.rate(ff)
+r <- make.rate(rate)
 plot(t, r(t), type = 'l')
 
 # we can have any number of starting species
-div <- var.rate.div(ff, t, n0 = 2)
+div <- var.rate.div(rate, t, n0 = 2)
 plot(t, div, type = 'l')
 
 ###
 # we can use ifelse() to make a step function like this
-ff <- function(t) {
+rate <- function(t) {
   return(ifelse(t < 2, 0.1,
           ifelse(t < 3, 0.3,
            ifelse(t < 5, -0.2, 0.05))))
@@ -158,11 +159,11 @@ ff <- function(t) {
 t <- seq(0, 10, 0.1)
 
 # visualize the rate
-r <- make.rate(ff)
+r <- make.rate(rate)
 plot(t, r(t), type = 'l')
 
 # get the diversity and plot it
-div <- var.rate.div(ff, t)
+div <- var.rate.div(rate, t)
 plot(t, div, type = 'l')
 
 # important note: this method of creating a step function might be annoying,
@@ -174,17 +175,17 @@ plot(t, div, type = 'l')
 # ...which we can do as follows
 
 # rates vector
-ff <- c(0.1, 0.3, -0.2, 0.05)
+rate <- c(0.1, 0.3, -0.2, 0.05)
 
 # rate shifts vector
-fShifts <- c(0, 2, 3, 5)
+rateShifts <- c(0, 2, 3, 5)
 
 # visualize the rate
-r <- make.rate(ff, tMax = 10, fShifts = fShifts)
+r <- make.rate(rate, tMax = 10, rateShifts = rateShifts)
 plot(t, r(t),type = 'l')
 
 # get the diversity and plot it
-div <- var.rate.div(ff, t, tMax = 10, fShifts = fShifts)
+div <- var.rate.div(rate, t, tMax = 10, rateShifts = rateShifts)
 plot(t, div, type = 'l')
 
 # note the delay in running var.rate.div using this method. integrating a step
@@ -202,32 +203,32 @@ plot(t, div, type = 'l')
 data(temp)
 
 # diversification
-ff <- function(t, env) {
+rate <- function(t, env) {
   return(0.002*env)
 }
 
 # visualize the rate
-r <- make.rate(ff, envF = temp)
+r <- make.rate(rate, envRate = temp)
 plot(t, r(t), type = 'l')
 
 # get diversity and plot it
-div <- var.rate.div(ff, t, envF = temp)
+div <- var.rate.div(rate, t, envRate = temp)
 plot(t, div, type = 'l')
 
 ###
 # we can also have a function that depends on both time AND temperature
 
 # diversification
-ff <- function(t, env) {
+rate <- function(t, env) {
   return(0.02 * env - 0.001 * t)
 }
 
 # visualize the rate
-r <- make.rate(ff, envF = temp)
+r <- make.rate(rate, envRate = temp)
 plot(t, r(t), type = 'l')
 
 # get diversity and plot it
-div <- var.rate.div(ff, t, envF = temp)
+div <- var.rate.div(rate, t, envRate = temp)
 plot(t, div, type = 'l')
   
 ###
@@ -235,18 +236,18 @@ plot(t, div, type = 'l')
 # that is modulated by temperature
 
 # diversification
-ff <- function(t, env) {
+rate <- function(t, env) {
   return(ifelse(t < 2, 0.1 + 0.01*env,
           ifelse(t < 5, 0.2 - 0.005*env,
            ifelse(t < 8, 0.1 + 0.005*env, 0.08))))
 }
 
 # visualize the rate
-r <- make.rate(ff, envF = temp)
+r <- make.rate(rate, envRate = temp)
 plot(t, r(t), type = 'l')
 
 # get diversity and plot it
-div <- var.rate.div(ff, t, envF = temp)
+div <- var.rate.div(rate, t, envRate = temp)
 plot(t, div, type = 'l')
 
 }

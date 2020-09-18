@@ -15,10 +15,10 @@
 #' called by a wrapper using \code{lapply}, it is through \code{S} that we apply
 #' this function.
 #' 
-#' @param rr Sampling rate (per species per million years) over time. It can be
+#' @param rho Sampling rate (per species per million years) over time. It can be
 #' a \code{numeric} describing a constant rate or a \code{function(t)} describing
 #' the variation in sampling over time. For more flexibility on sampling, see
-#' \code{make.rate} for creating more complex rates. Note that \code{rr} should
+#' \code{make.rate} for creating more complex rates. Note that \code{rho} should
 #' always be greater than or equal to zero.
 #'
 #' @inheritParams sample.clade
@@ -33,11 +33,11 @@
 #' # let us start with a linear increase in preservation rate
 #' 
 #' # simulate a group
-#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 #' 
 #' # in case first simulation was short-lived
 #' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 #' }
 #' 
 #' # we will need to get exact durations for some examples, so
@@ -45,7 +45,7 @@
 #' # this is necessary since the default is to have NA for extant species
 #' 
 #' # preservation function
-#' r <- function(t) {
+#' rho <- function(t) {
 #'   return(1 + 0.25*t)
 #' }
 #' 
@@ -53,28 +53,28 @@
 #' t <- seq(0, 10, by = 0.1)
 #' 
 #' # visualizing from the past to the present
-#' plot(x = t, y = rev(r(t)), main="Simulated preservation", type = "l",
+#' plot(x = t, y = rev(rho(t)), main="Simulated preservation", type = "l",
 #'      xlab = "Mya", ylab = "preservation rate",
 #'      xlim = c(10, sim$TE[1]))
 #' 
 #' # sample
-#' occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
+#' occs <- sample.species(sim = sim, rho = rho, tMax = 10, S = 1)
 #' 
 #' # check histogram
 #' hist(occs,
 #'      xlim = c(10, sim$TE[1]),
 #'      xlab = "Mya")
-#' lines(t, rev(r(t)))
+#' lines(t, rev(rho(t)))
 #' 
 #' ###
 #' # now let us try a step function
 #' 
 #' # simulate a group
-#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 #' 
 #' # in case first simulation was short lived
 #' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 #' }
 #' 
 #' # we will need to get exact durations for some examples, so
@@ -91,7 +91,7 @@
 #' rShifts <- c(0, 4, 8)
 #' 
 #' # create the rate to visualize it
-#' r <- make.rate(rList, tMax = 10, fShifts = rShifts)
+#' r <- make.rate(rList, tMax = 10, rateShifts = rShifts)
 #' 
 #' # time
 #' t <- seq(0, 10, by = 0.1)
@@ -102,7 +102,7 @@
 #'      xlim = c(10, sim$TE[1]))
 #' 
 #' # sample
-#' occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
+#' occs <- sample.species(sim = sim, rho = r, tMax = 10, S = 1)
 #' 
 #' # check histogram
 #' hist(occs,
@@ -116,11 +116,11 @@
 #' # we can create a step function in a different way as well
 #' 
 #' # simulate a group
-#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 #' 
 #' # in case first simulation was short-lived
 #' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 #' }
 #' 
 #' # we will need to get exact durations for some examples, so
@@ -128,7 +128,7 @@
 #' # this is necessary since the default is to have NA for extant species
 #' 
 #' # preservation function
-#' r <- function(t) {
+#' rho <- function(t) {
 #'   ifelse(t < 4, 1,
 #'          ifelse(t < 8, 3, 0.5))
 #' }
@@ -138,12 +138,12 @@
 #' t <- seq(0, 10, by = 0.1)
 #' 
 #' # visualizing the plot from past to present
-#' plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
+#' plot(x = t, y = rev(rho(t)), main = "Simulated preservation", type = "l",
 #'      xlab = "Mya", ylab = "preservation rate",
 #'      xlim = c(10, sim$TE[1]))
 #' 
 #' # sample
-#' occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
+#' occs <- sample.species(sim = sim, rho = rho, tMax = 10, S = 1)
 #' 
 #' # check histogram
 #' hist(occs,
@@ -155,11 +155,11 @@
 #' # finally we could generate sampling dependent on temperature
 #' 
 #' # simulate a group
-#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 #' 
 #' # in case first simulation was short-lived
 #' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-#'   sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+#'   sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 #' }
 #' 
 #' # we will need to get exact durations for some examples, so
@@ -175,7 +175,7 @@
 #' data(temp)
 #' 
 #' # final preservation
-#' r <- make.rate(r_t, envF = temp)
+#' rho <- make.rate(r_t, envRate = temp)
 #' 
 #' # visualizing the plot from past to present
 #' plot(x = t, y = rev(r(t)), main = "Simulated preservation", type = "l",
@@ -183,19 +183,19 @@
 #'      xlim = c(10, ifelse(is.na(sim$TE[1]), 0, sim$TE[1])))
 #' 
 #' # sample
-#' occs <- sample.species(sim = sim, rr = r, tMax = 10, S = 1)
+#' occs <- sample.species(sim = sim, rho = rho, tMax = 10, S = 1)
 #' 
 #' # check histogram
 #' hist(occs,
 #'      xlim = c(10, ifelse(is.na(sim$TE[1]), 0, sim$TE[1])),
 #'      xlab = "Mya")
-#' lines(t, rev(r(t)))
+#' lines(t, rev(rho(t)))
 #' 
 #' @name sample.species
 #' @rdname sample.species
 #' @export
 
-sample.species <- function(sim, rr, tMax, S) {
+sample.species <- function(sim, rho, tMax, S) {
   # get speciation and extinction times
   TE <- sim$TE
   TS <- sim$TS
@@ -211,10 +211,10 @@ sample.species <- function(sim, rr, tMax, S) {
   now <- TS[S]
   End <- TE[S]
 
-  # make rr a function if it isn't
-  if (is.numeric(rr)) {
-    r <- rr
-    rr <- Vectorize(function(t) r)
+  # make rho a function if it isn't
+  if (is.numeric(rho)) {
+    r <- rho
+    rho <- Vectorize(function(t) r)
   }
   
   # initialize vector
@@ -223,7 +223,7 @@ sample.species <- function(sim, rr, tMax, S) {
   # while we have not reached the time of extinction
   while (now < End) {
     # take the waiting time for sampling, using rexp.var()
-    WaitTimeR <- ifelse(rr(now) > 0, rexp.var(1, rr, now, tMax), Inf)
+    WaitTimeR <- ifelse(rho(now) > 0, rexp.var(1, rho, now, tMax), Inf)
 
     # advance in time
     now <- now + WaitTimeR

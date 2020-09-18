@@ -16,8 +16,8 @@
 #' any nonnegative number.
 #'
 #' Note: \code{var.rate.div} will find the expected number of daughters given a
-#' rate \code{ff} and an initial number of parents \code{n0}, so in a
-#' biological context \code{ff} is diversification rate, not speciation (unless
+#' rate \code{rate} and an initial number of parents \code{n0}, so in a
+#' biological context \code{rate} is diversification rate, not speciation (unless
 #' extinction is \code{0}).
 #'
 #' @return A vector of the expected number of species per time point supplied
@@ -30,7 +30,7 @@
 #' 
 #' ###
 #' # we can start simple: create a constant rate
-#' ff <- 0.1
+#' rate <- 0.1
 #' 
 #' # set this up so we see rates next to diversity
 #' par(mfrow = c(1,2))
@@ -40,25 +40,25 @@
 #' plot(t, rep(r, length(t)), type = 'l')
 #' 
 #' # get the diversity and plot it
-#' div <- var.rate.div(ff, t)
+#' div <- var.rate.div(rate, t)
 #' plot(t, div, type = 'l')
 #' 
 #' ###
 #' # something a bit more complex: a linear rate
-#' ff <- function(t) {
+#' rate <- function(t) {
 #'   return(0.01*t)
 #' }
 #' 
 #' # visualize the rate
-#' r <- make.rate(ff)
+#' r <- make.rate(rate)
 #' plot(t, r(t), type = 'l')
 #' 
 #' # get the diversity and plot it
-#' div <- var.rate.div(ff, t = t)
+#' div <- var.rate.div(rate, t = t)
 #' plot(t, div, type = 'l')
 #' 
 #' ###
-#' # remember: ff is diversity!
+#' # remember: rate is diversity!
 #' 
 #' # we can create speciation...
 #' pp <- function(t) {
@@ -70,38 +70,38 @@
 #'   return(0.01*t)
 #' }
 #' 
-#' # ...and code ff as diversification
-#' ff <- function(t) {
+#' # ...and code rate as diversification
+#' rate <- function(t) {
 #'   return(pp(t) - qq(t))
 #' }
 #' 
 #' # visualize the rate
-#' r <- make.rate(ff)
+#' r <- make.rate(rate)
 #' plot(t, r(t), type = 'l')
 #' 
 #' # get diversity and plot it
-#' div <- var.rate.div(ff, t, n0 = 2)
+#' div <- var.rate.div(rate, t, n0 = 2)
 #' plot(t, div, type = 'l')
 #' 
 #' ###
-#' # remember: ff can be any time-varying function!
+#' # remember: rate can be any time-varying function!
 #' 
 #' # such as a sine
-#' ff <- function(t) {
+#' rate <- function(t) {
 #'   return(sin(t)*0.5)
 #' }
 #' 
 #' # visualize the rate
-#' r <- make.rate(ff)
+#' r <- make.rate(rate)
 #' plot(t, r(t), type = 'l')
 #' 
 #' # we can have any number of starting species
-#' div <- var.rate.div(ff, t, n0 = 2)
+#' div <- var.rate.div(rate, t, n0 = 2)
 #' plot(t, div, type = 'l')
 #' 
 #' ###
 #' # we can use ifelse() to make a step function like this
-#' ff <- function(t) {
+#' rate <- function(t) {
 #'   return(ifelse(t < 2, 0.1,
 #'           ifelse(t < 3, 0.3,
 #'            ifelse(t < 5, -0.2, 0.05))))
@@ -111,11 +111,11 @@
 #' t <- seq(0, 10, 0.1)
 #' 
 #' # visualize the rate
-#' r <- make.rate(ff)
+#' r <- make.rate(rate)
 #' plot(t, r(t), type = 'l')
 #' 
 #' # get the diversity and plot it
-#' div <- var.rate.div(ff, t)
+#' div <- var.rate.div(rate, t)
 #' plot(t, div, type = 'l')
 #' 
 #' # important note: this method of creating a step function might be annoying,
@@ -127,17 +127,17 @@
 #' # ...which we can do as follows
 #' 
 #' # rates vector
-#' ff <- c(0.1, 0.3, -0.2, 0.05)
+#' rate <- c(0.1, 0.3, -0.2, 0.05)
 #' 
 #' # rate shifts vector
-#' fShifts <- c(0, 2, 3, 5)
+#' rateShifts <- c(0, 2, 3, 5)
 #' 
 #' # visualize the rate
-#' r <- make.rate(ff, tMax = 10, fShifts = fShifts)
+#' r <- make.rate(rate, tMax = 10, rateShifts = rateShifts)
 #' plot(t, r(t),type = 'l')
 #' 
 #' # get the diversity and plot it
-#' div <- var.rate.div(ff, t, tMax = 10, fShifts = fShifts)
+#' div <- var.rate.div(rate, t, tMax = 10, rateShifts = rateShifts)
 #' plot(t, div, type = 'l')
 #' 
 #' # note the delay in running var.rate.div using this method. integrating a step
@@ -155,32 +155,32 @@
 #' data(temp)
 #' 
 #' # diversification
-#' ff <- function(t, env) {
+#' rate <- function(t, env) {
 #'   return(0.002*env)
 #' }
 #' 
 #' # visualize the rate
-#' r <- make.rate(ff, envF = temp)
+#' r <- make.rate(rate, envRate = temp)
 #' plot(t, r(t), type = 'l')
 #' 
 #' # get diversity and plot it
-#' div <- var.rate.div(ff, t, envF = temp)
+#' div <- var.rate.div(rate, t, envRate = temp)
 #' plot(t, div, type = 'l')
 #' 
 #' ###
 #' # we can also have a function that depends on both time AND temperature
 #' 
 #' # diversification
-#' ff <- function(t, env) {
+#' rate <- function(t, env) {
 #'   return(0.02 * env - 0.001 * t)
 #' }
 #' 
 #' # visualize the rate
-#' r <- make.rate(ff, envF = temp)
+#' r <- make.rate(rate, envRate = temp)
 #' plot(t, r(t), type = 'l')
 #' 
 #' # get diversity and plot it
-#' div <- var.rate.div(ff, t, envF = temp)
+#' div <- var.rate.div(rate, t, envRate = temp)
 #' plot(t, div, type = 'l')
 #'   
 #' ###
@@ -188,26 +188,26 @@
 #' # that is modulated by temperature
 #' 
 #' # diversification
-#' ff <- function(t, env) {
+#' rate <- function(t, env) {
 #'   return(ifelse(t < 2, 0.1 + 0.01*env,
 #'           ifelse(t < 5, 0.2 - 0.005*env,
 #'            ifelse(t < 8, 0.1 + 0.005*env, 0.08))))
 #' }
 #' 
 #' # visualize the rate
-#' r <- make.rate(ff, envF = temp)
+#' r <- make.rate(rate, envRate = temp)
 #' plot(t, r(t), type = 'l')
 #' 
 #' # get diversity and plot it
-#' div <- var.rate.div(ff, t, envF = temp)
+#' div <- var.rate.div(rate, t, envRate = temp)
 #' plot(t, div, type = 'l')
 #' 
 #' @name var.rate.div
 #' @rdname var.rate.div
 #' @export
 
-var.rate.div <- function(ff, t, n0 = 1, tMax = NULL, 
-                         envF = NULL, fShifts = NULL) {
+var.rate.div <- function(rate, t, n0 = 1, tMax = NULL, 
+                         envRate = NULL, rateShifts = NULL) {
   # check that n0 is nonnegative
   if (n0 < 0) {
     stop("initial number of species n0 must be nonnegative")
@@ -219,12 +219,12 @@ var.rate.div <- function(ff, t, n0 = 1, tMax = NULL,
   }
   
   # get the corresponding rate
-  f <- make.rate(ff, tMax = tMax, envF = envF, fShifts = fShifts)
+  r <- make.rate(rate, tMax = tMax, envRate = envRate, rateShifts = rateShifts)
 
-  if (!is.numeric(f)) {
+  if (!is.numeric(r)) {
     # integrate the rate for each t
     integral <- lapply(t, function(x) {
-      integrate(Vectorize(f), 0, x, subdivisions = 2000)$value
+      integrate(Vectorize(r), 0, x, subdivisions = 2000)$value
       })
 
     # make the integral numerical so we can plot
@@ -235,7 +235,7 @@ var.rate.div <- function(ff, t, n0 = 1, tMax = NULL,
   }
 
   else {
-    integral <- f*t
+    integral <- r*t
   }
 
   return(n0*exp(integral))

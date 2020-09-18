@@ -6,10 +6,10 @@
 \usage{
 sample.clade(
   sim,
-  rr,
+  rho,
   tMax,
   S = NULL,
-  envRR = NULL,
+  envR = NULL,
   rShifts = NULL,
   returnTrue = TRUE,
   bins = NULL,
@@ -20,11 +20,11 @@ sample.clade(
 \arguments{
 \item{sim}{A \code{sim} object, usually the output of \code{bd.sim}.}
 
-\item{rr}{Sampling rate (per species per million years) over time. It can be 
+\item{rho}{Sampling rate (per species per million years) over time. It can be 
 a \code{numeric} describing a constant rate, a \code{function(t)} describing 
 the variation in sampling over time \code{t}, a \code{function(t, env)} 
 describing the variation in sampling over time following both time AND 
-an environmental variable (please see \code{envRR} for details) or a 
+an environmental variable (please see \code{envR} for details) or a 
 \code{vector} containing rates that correspond to each rate between sampling
 rate shift times times (please see \code{rShifts}). Note that \code{rr} should
 should always be greater than or equal to zero.}
@@ -39,16 +39,16 @@ in the return.}
 the species if the user wishes. The default is all species in \code{sim}. 
 Species not included in \code{S} will not be sampled by the function.}
 
-\item{envRR}{A matrix containing time points and values of an environmental
+\item{envR}{A matrix containing time points and values of an environmental
 variable, like temperature, for each time point. This will be used to create
-a sampling rate, so \code{rr} must be a function of time and said variable
-if \code{envRR} is not \code{NULL}. Note \code{paleobuddy} has two 
+a sampling rate, so \code{rho} must be a function of time and said variable
+if \code{envR} is not \code{NULL}. Note \code{paleobuddy} has two 
 environmental data frames, \code{temp} and \code{co2}. See \code{RPANDA} for
 more examples.}
 
 \item{rShifts}{Vector of rate shifts. First element must be the starting
 time for the simulation (\code{0} or \code{tMax}). It must have the same length 
-as \code{pp}. \code{c(0, x, tMax)} is equivalent to \code{c(tMax, tMax - x, 0)}
+as \code{lambda}. \code{c(0, x, tMax)} is equivalent to \code{c(tMax, tMax - x, 0)}
 for the purposes of \code{make.rate}.
 
 Note: using this method for step-function rates is currently slower than using
@@ -118,11 +118,11 @@ information.
 # we can start with a constant case
 
 # simulate a group
-sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # in case first simulation is short-lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 }
 
 # we will need to get exact durations for some examples, so
@@ -130,7 +130,7 @@ sim$TE[sim$EXTANT] <- 0
 # this is necessary since the default is to have NA for extant species
 
 # sampling rate
-r <- 2
+rho <- 2
 
 # the resolution of the fossil dataset:
 bins <- seq(from = 10, to = 0,
@@ -138,7 +138,7 @@ bins <- seq(from = 10, to = 0,
 # note that we will provide a very high resolution to test the function
 
 # find the occurrence data frame
-dt <- sample.clade(sim, r, tMax = 10, bins = bins, returnTrue = FALSE)
+dt <- sample.clade(sim, rho, tMax = 10, bins = bins, returnTrue = FALSE)
 
 # extract species identity
 ids <- unique(dt$Species)
@@ -163,11 +163,11 @@ for (i in 1:length(ids)) {
 # sampling can be any function of time in the non-age dependent case, of course
 
 # simulate a group
-sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # in case first simulation is short-lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 }
 
 # we will need to get exact durations for some examples, so
@@ -175,7 +175,7 @@ sim$TE[sim$EXTANT] <- 0
 # this is necessary since the default is to have NA for extant species
 
 # sampling rate
-r <- function(t) {
+rho <- function(t) {
   return(3 - 0.15*t)
 }
 
@@ -185,7 +185,7 @@ bins <- seq(from = 10, to = 0,
 # note that we will provide a very high resolution to test the function
 
 # find the occurrence data frame
-dt <- sample.clade(sim, r, tMax = 10, bins = bins, returnTrue = FALSE)
+dt <- sample.clade(sim, rho, tMax = 10, bins = bins, returnTrue = FALSE)
 
 # extract species identity
 ids <- unique(dt$Species)
@@ -210,11 +210,11 @@ for (i in 1:length(ids)) {
 # now we can try a step function rate
 
 # simulate a group
-sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # in case first simulation is short-lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 }
 
 # we will need to get exact durations for some examples, so
@@ -231,7 +231,7 @@ rList <- c(1, 2, 0.5)
 rShifts <- c(0, 4, 8)
 
 # make it a function so we can plot it
-r <- make.rate(rList, 10, fShifts=rShifts)
+rho <- make.rate(rList, 10, rateShifts=rShifts)
 
 # the resolution of the fossil dataset:
 bins <- seq(from = 10, to = 0,
@@ -268,11 +268,11 @@ for (i in 1:length(ids)) {
 data(temp)
 
 # simulate a group
-sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # in case first simulation is short-lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 }
 
 # we will need to get exact durations for some examples, so
@@ -283,15 +283,15 @@ sim$TE[sim$EXTANT] <- 0
 envR <- temp
 
 # we can then make sampling dependent on the temperature
-r <- function(t, env) {
+rho <- function(t, env) {
   return(0.5*env)
 }
 
 # make it a function so we can plot it
-rr <- make.rate(r, envF = envR)
+r <- make.rate(rho, envRate = envR)
 
 # let us check that r is high enough to see a pattern
-plot(1:10, rr(1:10), type = 'l', main = "Sampling rate",
+plot(1:10, r(1:10), type = 'l', main = "Sampling rate",
      xlab = "My", ylab = "r")
 
 # the resolution of the fossil dataset:
@@ -300,7 +300,7 @@ bins <- seq(from = 10, to = 0,
 # note that we will provide a very high resolution to test the function
 
 # find the occurrence data frame
-dt <- sample.clade(sim, r, tMax = 10, envRR = envR,
+dt <- sample.clade(sim, rho, tMax = 10, envR = envR,
                    bins = bins, returnTrue = FALSE)
 
 # extract species identity
@@ -327,11 +327,11 @@ for (i in 1:length(ids)) {
 
 ###
 # simulate a group
-sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # in case first simulation is short-lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 }
 
 # we will need to get exact durations for some examples, so
@@ -381,7 +381,7 @@ bins <- seq(from = 10, to = 0,
             by = -0.1)
 # note that we will provide a very high resolution to test the function
 
-dt <- sample.clade(sim, rr = 3, tMax = 10, bins = bins,
+dt <- sample.clade(sim, rho = 3, tMax = 10, bins = bins,
                    adFun = dPERT, returnTrue = FALSE)
 
 # extract species identity
@@ -414,11 +414,11 @@ for (i in 1:length(ids)) {
 # parameters
 
 # simulate a group
-sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # in case first simulation is short-lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.1, tMax = 10)
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 }
 
 # we will need to get exact durations for some examples, so
@@ -471,7 +471,7 @@ bins <- seq(from = 10, to = 0,
             by = -0.1)
 # note that we will provide a very high resolution to test the function
 
-dt <- sample.clade(sim, rr = 4, tMax = 10, bins = bins,
+dt <- sample.clade(sim, rho = 4, tMax = 10, bins = bins,
                    adFun = dTRImod2, returnTrue = FALSE)
 
 # extract species identity

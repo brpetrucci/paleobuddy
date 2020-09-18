@@ -6,8 +6,8 @@
 \usage{
 bd.sim.constant(
   n0,
-  pp,
-  qq,
+  lambda,
+  mu,
   tMax,
   nFinal = c(0, Inf),
   extOnly = FALSE,
@@ -17,16 +17,16 @@ bd.sim.constant(
 \arguments{
 \item{n0}{Initial number of species. Usually 1, in which case the simulation 
 will describe the full diversification of a monophyletic lineage. Notice that 
-when \code{pp} is less than or equal to \code{qq},  many simulations will go 
+when \code{lambda} is less than or equal to \code{mu},  many simulations will go 
 extinct before speciating even once. One way of generating simulations in this 
 case is to increase \code{n0}. The user should notice this will simulate the 
 diversification of a paraphyletic group.}
 
-\item{pp}{Speciation rate. Must be constant.}
+\item{lambda}{Speciation rate. Must be constant.}
 
-\item{qq}{Extinction rate, similar to above.
+\item{mu}{Extinction rate, similar to above.
 
-Note: \code{pp} and \code{qq} must always be greater than 0}
+Note: \code{lambda} and \code{mu} must always be greater than 0}
 
 \item{tMax}{Ending time of simulation, in million years after the clade origin. 
 Any species still living after \code{tMax} is considered extant, and any 
@@ -106,13 +106,13 @@ n0 <- 1
 tMax <- 40
 
 # speciation
-p <- 0.1
+lambda <- 0.1
 
 # extinction
-q <- 0
+mu <- 0
 
 # run the simulation
-sim <- bd.sim.constant(n0, p, q, tMax, nFinal = c(2, Inf))
+sim <- bd.sim.constant(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -130,13 +130,13 @@ n0 <- 1
 tMax <- 40
 
 # speciation
-p <- 0.1
+lambda <- 0.1
 
 # extinction
-q <- 0.04
+mu <- 0.04
 
 # run the simulation
-sim <- bd.sim.constant(n0, p, q, tMax, nFinal = c(2, Inf))
+sim <- bd.sim.constant(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -155,13 +155,13 @@ n0 <- 100
 tMax <- 40
 
 # speciation
-p <- 0
+lambda <- 0
 
 # extinction
-q <- 0.02
+mu <- 0.02
 
 # run the simulation
-sim <- bd.sim.constant(n0, p, q, tMax)
+sim <- bd.sim.constant(n0, lambda, mu, tMax)
 
 # of course in this case there are no phylogenies to plot
 
@@ -169,7 +169,8 @@ sim <- bd.sim.constant(n0, p, q, tMax)
 \dontrun{
 # this would return a warning, since it is virtually impossible to get 100
 # species at a process with diversification rate -0.09 starting at n0 = 1
-sim <- bd.sim.constant(1, pp = 0.01, qq = 1, tMax = 100, nFinal = c(100, Inf))
+sim <- bd.sim.constant(1, lambda = 0.01, mu = 1, tMax = 100, 
+                      nFinal = c(100, Inf))
 }
 
 }

@@ -26,7 +26,7 @@
 #' 
 #' ###
 #' # first, let us try a simulation with 3 clades,
-#' sim <- bd.sim(n0 = 3, pp = 0.1, qq = 0.1, tMax = 10, nFinal = c(20, Inf))
+#' sim <- bd.sim(n0 = 3, lambda = 0.1, mu = 0.1, tMax = 10, nFinal = c(20, Inf))
 #' 
 #' # using the functions
 #' clades <- find.lineages(sim)
@@ -48,7 +48,7 @@
 #'   # if it is a proper phylogeny
 #'   else {
 #'     if (requireNamespace("ape", quietly = TRUE)) {
-#'       p <- ape::plot.phylo(
+#'       plot <- ape::plot.phylo(
 #'         make.phylo(clades[[i]]),
 #'         main = "red: extinction events \n blue: speciation events");
 #'       ape::axisPhylo()
@@ -60,7 +60,7 @@
 #'       lines(x = c(
 #'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j],
 #'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j]),
-#'         y = c(p$y.lim[1], p$y.lim[2]), lwd = 2, col = "blue")
+#'         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "blue")
 #'     }
 #'     
 #'     # checking extinction times:
@@ -69,14 +69,14 @@
 #'       lines(x = c(
 #'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j],
 #'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j]),
-#'         y = c(p$y.lim[1], p$y.lim[2]), lwd = 2, col = "red")
+#'         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "red")
 #'     }
 #'   }
 #' }
 #' 
 #' ###
 #' # it works with any number of clades, of course
-#' sim <- bd.sim(n0 = 5, pp = 0.1, qq = 0.08, tMax = 10, nFinal = c(20, Inf))
+#' sim <- bd.sim(n0 = 5, lambda = 0.1, mu = 0.08, tMax = 10, nFinal = c(20, Inf))
 #' 
 #' # using the functions
 #' clades <- find.lineages(sim)
@@ -98,7 +98,7 @@
 #'   # if it is a proper phylogeny
 #'   else {
 #'     if (requireNamespace("ape", quietly = TRUE)) {
-#'       p <- ape::plot.phylo(
+#'       plot <- ape::plot.phylo(
 #'         make.phylo(clades[[i]]),
 #'         main = "red: extinction events \n blue: speciation events");
 #'       ape::axisPhylo()
@@ -110,7 +110,7 @@
 #'       lines(x = c(
 #'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j],
 #'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j]),
-#'         y = c(p$y.lim[1], p$y.lim[2]), lwd = 2, col = "blue")
+#'         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "blue")
 #'     }
 #'     
 #'     # checking extinction times:
@@ -119,14 +119,14 @@
 #'       lines(x = c(
 #'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j],
 #'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j]),
-#'         y = c(p$y.lim[1], p$y.lim[2]), lwd = 2, col = "red")
+#'         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "red")
 #'     }
 #'   }
 #' }
 #' 
 #' ###
 #' # including one clade
-#' sim <- bd.sim(n0 = 1, pp = 0.1, qq = 0.08, tMax = 10, nFinal = c(5, Inf))
+#' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.08, tMax = 10, nFinal = c(5, Inf))
 #' 
 #' par(mfrow = c(1, 2))
 #' 
@@ -134,7 +134,8 @@
 #' if (requireNamespace("ape", quietly = TRUE)) {
 #'   ape::plot.phylo(make.phylo(sim), main="original")
 #'   ape::axisPhylo()
-#'   ape::plot.phylo(make.phylo(find.lineages(sim)[[1]]), main="after find.lineages()")
+#'   ape::plot.phylo(make.phylo(find.lineages(sim)[[1]]), 
+#'                   main="after find.lineages()")
 #'   ape::axisPhylo()
 #' }
 #'
@@ -154,7 +155,8 @@
 #'   ape::plot.phylo(make.phylo(sim), main="original")
 #'   
 #'   # this should look the same
-#'   ape::plot.phylo(make.phylo(find.lineages(sim)[[1]]), main="after find.lineages()")
+#'   ape::plot.phylo(make.phylo(find.lineages(sim)[[1]]), 
+#'                  main="after find.lineages()")
 #'   
 #'   # and these should be part of the previous phylogenies
 #'   ape::plot.phylo(make.phylo(find.lineages(sim, c(2, 3))$clade_2),

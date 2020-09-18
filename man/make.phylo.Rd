@@ -32,7 +32,7 @@ common ancestor in the simulation). In the latter case, please use
 
 ###
 # generating a phylogeny using constant rates
-sim <- bd.sim(n0 = 1, pp = 0.2, qq = 0.05, tMax = 10, 
+sim <- bd.sim(n0 = 1, lambda = 0.2, mu = 0.05, tMax = 10, 
              nFinal = c(2, Inf), extOnly = TRUE)
 
 # make the phylogeny
@@ -49,8 +49,8 @@ if (requireNamespace("ape", quietly = TRUE)) {
 
 ###
 # this works for sim generated with any of the scenarios in bd.sim, of course
-sim <- bd.sim(n0 = 1, pp = function(t) 0.05 + 0.01*t, 
-             qq = function(t) 0.03 + 0.015*t, tMax = 10, 
+sim <- bd.sim(n0 = 1, lambda = function(t) 0.05 + 0.01*t, 
+             mu = function(t) 0.03 + 0.015*t, tMax = 10, 
              nFinal = c(2, Inf), extOnly = TRUE)
 
 # make the phylogeny

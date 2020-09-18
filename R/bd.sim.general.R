@@ -22,11 +22,11 @@
 #'
 #' @inheritParams bd.sim
 #' 
-#' @param pp Function to hold the speciation rate over time. It will either be
+#' @param lambda Function to hold the speciation rate over time. It will either be
 #' interpreted as an exponential rate, or a Weibull scale if 
-#' \code{pShape != NULL}.
+#' \code{lShape != NULL}.
 #'
-#' @param qq Similar to above, but for the extinction rate.
+#' @param mu Similar to above, but for the extinction rate.
 #' 
 #' Note: this function is meant to be called by \code{bd.sim}, so it neither
 #' allows for as much flexibility, nor calls \code{make.rate}. If the user wishes
@@ -65,13 +65,13 @@
 #' tMax <- 40
 #' 
 #' # speciation
-#' p <- 0.11
+#' lambda <- 0.11
 #' 
 #' # extinction
-#' q <- 0.08
+#' mu <- 0.08
 #' 
 #' # run the simulation
-#' sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -90,15 +90,15 @@
 #' tMax <- 40
 #' 
 #' # speciation
-#' p <- function(t) {
+#' lambda <- function(t) {
 #'   return(0.03 + 0.005*t)
 #' }
 #' 
 #' # extinction
-#' q <- 0.05
+#' mu <- 0.05
 #' 
 #' # run the simulation
-#' sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -116,33 +116,33 @@
 #' tMax <- 40
 #' 
 #' # speciation rate
-#' p <- function(t) {
+#' lambda <- function(t) {
 #'   return(0.03 + 0.005*t)
 #' }
 #' 
 #' # vector of extinction rates
-#' qList <- c(0.06, 0.09, 0.11)
+#' mList <- c(0.06, 0.09, 0.11)
 #' 
-#' # vector of shift times. Note qShifts could be c(40, 20, 10) for
+#' # vector of shift times. Note mShifts could be c(40, 20, 10) for
 #' # identical results
-#' qShifts <- c(0, 15, 25)
+#' mShifts <- c(0, 15, 25)
 #' 
 #' # let us take a look at how make.rate will make it a step function
-#' q <- make.rate(qList, tMax = tMax, fShifts = qShifts)
+#' mu <- make.rate(mList, tMax = tMax, rateShifts = mShifts)
 #' 
 #' # and plot it
-#' plot(seq(0, tMax, 0.1), q(seq(0, tMax, 0.1)), type = 'l',
+#' plot(seq(0, tMax, 0.1), mu(seq(0, tMax, 0.1)), type = 'l',
 #'      main = "Extintion rate as a step function", xlab = "Time (My)",
 #'      ylab = "Rate (species/My)")
 #' 
 #' # a different way to define the same extinction function
-#' q <- function(t) {
+#' mu <- function(t) {
 #'   ifelse(t < 15, 0.06,
 #'          ifelse(t < 25, 0.09, 0.11))
 #' }
 #' 
 #' # run the simulation
-#' sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 #' # we could instead have used q made with make.rate
 #' # that is, however, much slower
 #' 
@@ -160,16 +160,17 @@
 #' tMax <- 40
 #' 
 #' # speciation
-#' p <- 0.1
+#' lambda <- 0.1
 #' 
 #' # extinction - a Weibull scale
-#' q <- 10
+#' mu <- 10
 #' 
 #' # extinction shape
-#' qShape <- 1
+#' mShape <- 1
 #' 
 #' # run simulations
-#' sim <- bd.sim.general(n0, p, q, tMax, qShape = qShape, nFinal = c(2, Inf))
+#' sim <- bd.sim.general(n0, lambda, mu, tMax, mShape = mShape, 
+#'                       nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -185,18 +186,19 @@
 #' tMax <- 40
 #' 
 #' # speciation
-#' p <- 0.15
+#' lambda <- 0.15
 #' 
 #' # extinction - a Weibull scale
-#' q <- function(t) {
+#' mu <- function(t) {
 #'   return(8 + 0.05*t)
 #' }
 #' 
 #' # extinction shape
-#' qShape <- 1
+#' mShape <- 1
 #' 
 #' # run simulations
-#' sim <- bd.sim.general(n0, p, q, tMax, qShape = qShape, nFinal = c(2, Inf))
+#' sim <- bd.sim.general(n0, lambda, mu, tMax, mShape = mShape, 
+#'                       nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -218,16 +220,16 @@
 #' }
 #' 
 #' # extinction
-#' q <- 0.075
+#' mu <- 0.075
 #' 
 #' # get the temperature data
 #' data(temp)
 #' 
 #' # speciation
-#' p <- make.rate(p_t, envF = temp)
+#' lambda <- make.rate(p_t, envRate = temp)
 #' 
 #' # run simulations
-#' sim <- bd.sim.general(n0, p, q, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -239,7 +241,8 @@
 #' \dontrun{
 #' # this would return a warning, since it is virtually impossible to get 100
 #' # species at a process with diversification rate -0.09 starting at n0 = 1
-#' sim <- bd.sim.general(1, pp = 0.01, qq = 1, tMax = 100, nFinal = c(100, Inf))
+#' sim <- bd.sim.general(1, lambda = 0.01, mu = 1, tMax = 100, 
+#'                       nFinal = c(100, Inf))
 #' }
 #'
 #' @name bd.sim.general
@@ -247,31 +250,31 @@
 #' @export
 #' 
 
-bd.sim.general <- function(n0, pp, qq, tMax, 
-                         pShape = NULL, qShape = NULL,
+bd.sim.general <- function(n0, lambda, mu, tMax, 
+                         lShape = NULL, mShape = NULL,
                          nFinal = c(0, Inf), extOnly = FALSE,
                          trueExt = FALSE) {
   # error check - rate cannot be negative
-  if ((is.numeric(pp))) {
-    if (pp < 0) {
+  if ((is.numeric(lambda))) {
+    if (lambda < 0) {
       stop("speciation rate cannot be negative")
     }
   }
   
   else {
-    if (sum(pp(seq(0, tMax, 0.1)) < 0) > 0) {
+    if (sum(lambda(seq(0, tMax, 0.1)) < 0) > 0) {
       stop("speciation rate cannot be negative")
     }
   }
   
-  if ((is.numeric(qq))) {
-    if (qq < 0) {
+  if ((is.numeric(mu))) {
+    if (mu < 0) {
       stop("extinction rate cannot be negative")
     }
   }
   
   else {
-    if (sum(qq(seq(0, tMax, 0.1)) < 0) > 0) {
+    if (sum(mu(seq(0, tMax, 0.1)) < 0) > 0) {
       stop("extinction rate cannot be negative")
     }
   }
@@ -294,23 +297,23 @@ bd.sim.general <- function(n0, pp, qq, tMax,
   counter <- 1
   
   # if shape is not null, make scale a function to facilitate checking
-  if (!is.null(pShape)) {
-    message("since pShape is not null, pp will be a Weibull scale and therefore
-            correspond to 1/rate. See ?bd.sim or ?bd.sim.general for more information")
+  if (!is.null(lShape)) {
+    message("since lShape is not null, lambda will be a Weibull scale and
+            therefore correspond to 1/rate. See ?bd.sim or ?bd.sim.general")
     
-    if (is.numeric(pp)) {
-      p <- pp
-      pp <- Vectorize(function(t) p)
+    if (is.numeric(lambda)) {
+      l <- lambda
+      lambda <- Vectorize(function(t) l)
     }
   }
   
-  if (!is.null(qShape)) {
-    message("since qShape is not null, qq will be a Weibull scale and therefore
-            correspond to 1/rate. See ?bd.sim or ?bd.sim.general for more information")
+  if (!is.null(mShape)) {
+    message("since mShape is not null, mu will be a Weibull scale and therefore
+            correspond to 1/rate. See ?bd.sim or ?bd.sim.general")
     
-    if (is.numeric(qq)) {
-      q <- qq
-      qq <- Vectorize(function(t) q)
+    if (is.numeric(mu)) {
+      m <- mu
+      mu <- Vectorize(function(t) m)
     }
   }
   
@@ -329,17 +332,17 @@ bd.sim.general <- function(n0, pp, qq, tMax,
       # start at the time of speciation of sCount
       tNow <- TS[sCount]
 
-      # find the waiting time using rexp.var if pp is not constant
+      # find the waiting time using rexp.var if lambda is not constant
       # note we need to pass NULL for TS if the corresponding shape is NULL
       waitTimeS <- ifelse(
-        is.numeric(pp), ifelse(pp > 0, rexp(1, pp), Inf),
-        ifelse(pp(tNow) > 0, 
-               rexp.var(1, pp, tNow, tMax, pShape, TS[sCount], 
+        is.numeric(lambda), ifelse(lambda > 0, rexp(1, lambda), Inf),
+        ifelse(lambda(tNow) > 0, 
+               rexp.var(1, lambda, tNow, tMax, lShape, TS[sCount], 
                         fast = !trueExt), Inf))
       waitTimeE <- ifelse(
-        is.numeric(qq), ifelse(qq > 0, rexp(1, qq), Inf),
-        ifelse(qq(tNow) > 0,
-               rexp.var(1, qq, tNow, tMax, qShape, TS[sCount], 
+        is.numeric(mu), ifelse(mu > 0, rexp(1, mu), Inf),
+        ifelse(mu(tNow) > 0,
+               rexp.var(1, mu, tNow, tMax, mShape, TS[sCount], 
                         fast = !trueExt), Inf))
   
       tExp <- tNow + waitTimeE
@@ -358,9 +361,9 @@ bd.sim.general <- function(n0, pp, qq, tMax,
   
         # get a new speciation waiting time, and include it in the vector
         waitTimeS <- ifelse(
-          is.numeric(pp), ifelse(pp > 0, rexp(1, pp), Inf),
-          ifelse(pp(tNow) > 0, 
-                 rexp.var(1, pp, tNow, tMax, pShape, TS[sCount], 
+          is.numeric(lambda), ifelse(lambda > 0, rexp(1, lambda), Inf),
+          ifelse(lambda(tNow) > 0, 
+                 rexp.var(1, lambda, tNow, tMax, lShape, TS[sCount], 
                           fast = !trueExt), Inf))
       }
   

@@ -4,16 +4,16 @@
 \alias{rexp.var}
 \title{General rate exponential and Weibull waiting times}
 \usage{
-rexp.var(n, lambda, now = 0, tMax = Inf, shape = NULL, TS = 0, fast = FALSE)
+rexp.var(n, rate, now = 0, tMax = Inf, shape = NULL, TS = 0, fast = FALSE)
 }
 \arguments{
 \item{n}{The number of waiting times to return. Usually 1, but we allow for
 a higher \code{n} to be consistent with the \code{rexp} function.}
 
-\item{lambda}{The rate parameter for the exponential distribution. If
-\code{shape} is not \code{NULL}, \code{lambda} is a scale for a Weibull
+\item{rate}{The rate parameter for the exponential distribution. If
+\code{shape} is not \code{NULL}, \code{rate} is a scale for a Weibull
 distribution. In both cases we allow for any time-varying function. Note
-\code{lambda} can be constant.}
+\code{rate} can be constant.}
 
 \item{now}{The current time. Needed if one wants to consider only the interval
 between the current time and the maximum time for the time-varying rate.
@@ -55,7 +55,7 @@ with the given parameters.
 \description{
 Generates a waiting time following an exponential or Weibull distribution with
 constant or varying rates. Allows for an optional shape parameter, in which 
-case \code{lambda} will be taken as a Weibull scale. Allows for information on
+case \code{rate} will be taken as a Weibull scale. Allows for information on
 the current time, to consider only rates starting from then, and the speciation
 time, optionally, in case shape is provided, as the process is age-dependent.
 Allows for customization on the possibility of throwing away waiting times
@@ -67,7 +67,7 @@ higher than \code{tMax}, and therefore takes that time as a parameter.
 # let us start by checking a simple exponential variable
 
 # rate
-lambda <- 0.1
+rate <- 0.1
 
 # current time
 now <- 0
@@ -76,14 +76,14 @@ now <- 0
 tMax <- 40
 
 # get waiting time
-t <- rexp.var(n = 1, lambda, now, tMax)
+t <- rexp.var(n = 1, rate, now, tMax)
 t
 
 ###
 # another simple exponential
 
 # rate
-lambda <- 0.5
+rate <- 0.5
 
 # current time
 now <- 0
@@ -92,14 +92,14 @@ now <- 0
 tMax <- 40
 
 # find the waiting time
-t <- rexp.var(n = 1, lambda, now, tMax)
+t <- rexp.var(n = 1, rate, now, tMax)
 t
 
 ###
 # now let us try a linear function for the rate
 
 # rate
-lambda <- function(t) {
+rate <- function(t) {
   return(0.01*t + 0.1)
 }
 
@@ -110,14 +110,14 @@ now <- 0
 tMax <- 40
 
 # find the waiting time
-t <- rexp.var(n = 1, lambda, now, tMax)
+t <- rexp.var(n = 1, rate, now, tMax)
 t
 
 ###
-# what if lambda is exponential?
+# what if rate is exponential?
 
 # rate
-lambda <- function(t) {
+rate <- function(t) {
   return(0.01 * exp(0.1*t) + 0.02)
 }
 
@@ -128,14 +128,14 @@ now <- 0
 tMax <- 40
 
 # find the waiting time
-t <- rexp.var(n = 1, lambda, now, tMax)
+t <- rexp.var(n = 1, rate, now, tMax)
 t
 
 ###
 # rexp.var also works for a weibull
 
 # scale
-lambda <- 2
+rate <- 2
 
 # shape
 shape <- 1
@@ -150,7 +150,7 @@ tMax <- 40
 TS <- 0
 
 # find the vector of waiting time
-t <- rexp.var(n = 1, lambda, now, tMax,
+t <- rexp.var(n = 1, rate, now, tMax,
               shape = shape, TS = TS)
 t
 
@@ -158,7 +158,7 @@ t
 # when shape = 1, the Weibull is an exponential, we could do better
 
 # scale
-lambda <- 10
+rate <- 10
 
 # shape
 shape <- 2
@@ -173,7 +173,7 @@ tMax <- 40
 TS <- 0
 
 # find the vector of waiting times - it doesn't need to be just one
-t <- rexp.var(n = 5, lambda, now, tMax,
+t <- rexp.var(n = 5, rate, now, tMax,
               shape = shape, TS = TS)
 t
 
@@ -181,7 +181,7 @@ t
 # shape can be less than one, of course
 
 # scale
-lambda <- 10
+rate <- 10
 
 # shape
 shape <- 0.5
@@ -198,17 +198,17 @@ tMax <- 40
 TS <- 2.5
 
 # find the vector of waiting times
-t <- rexp.var(n = 3, lambda, now, tMax,
+t <- rexp.var(n = 3, rate, now, tMax,
               shape = shape, TS = TS)
 t
 
 ###
-# both lambda and shape can be time varying for a Weibull, but since we have
-# only been able to test time-varying lambda effectively, we do not recommend
+# both rate and shape can be time varying for a Weibull, but since we have
+# only been able to test time-varying rate effectively, we do not recommend
 # using shape as a function
 
 # scale
-lambda <- function(t) {
+rate <- function(t) {
   return(0.25*t + 5)
 }
 
@@ -225,22 +225,22 @@ tMax <- 40
 TS <- 0
 
 # find the vector of waiting times - it doesn't need to be just one
-t <- rexp.var(n = 5, lambda, now, tMax,
+t <- rexp.var(n = 5, rate, now, tMax,
               shape = shape, TS = TS)
 t
 
 ###
-# lambda can be any function of time, remember
+# rate can be any function of time, remember
 
 # scale
-lambda <- function(t) {
+rate <- function(t) {
   return(0.2*exp(0.1*t) + 5)
 }
 
 # shape
 shape <- 3
 
-# current time - remember lambda will only be considered starting from time now
+# current time - remember rate will only be considered starting from time now
 now <- 2.5
 
 # maximum time to check
@@ -250,7 +250,7 @@ tMax <- 40
 TS <- 1.2
 
 # find the vector of waiting times - it doesn't need to be just one
-t <- rexp.var(n = 2, lambda, now, tMax,
+t <- rexp.var(n = 2, rate, now, tMax,
               shape = shape, TS = TS)
 t
 

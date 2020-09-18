@@ -43,7 +43,8 @@
 #' function as the \code{stemLength} value.
 #' 
 #' @return A \code{sim} object organized in the same format as the output of 
-#' \code{bd.sim}. Items in the object follow their tip assignment in the phylogeny.
+#' \code{bd.sim}. Items in the object follow their tip assignment in the 
+#' phylogeny.
 #' 
 #' @details 
 #' 
@@ -57,8 +58,8 @@
 #' ways to assign impossible combinations of motherthood, the function does not
 #' return any specific error message if the provided motherhood does not map to
 #' possible lineages given the phylogeny. Instead, simulations conducted by the 
-#' author  showed the function tends to crash when an "impossible" motherhood is 
-#' assigned, but is  not guaranteed that this will happen because of the enormous
+#' author showed the function tends to crash when an "impossible" motherhood is 
+#' assigned, but is not guaranteed that this will happen because of the enormous
 #' universe of "impossible" ways to assign motherhood. However, if the function 
 #' crashes when all lineages have reasonable motherhood, users are invited to 
 #' contact the author.
@@ -99,7 +100,7 @@
 #' 
 #' # simulate the clade
 #' tmax <- 10
-#' sim <- bd.sim(1, pp = 0.3, qq = 0.1, tMax = tmax, nFinal = c(10, Inf))
+#' sim <- bd.sim(1, lambda = 0.3, mu = 0.1, tMax = tmax, nFinal = c(10, Inf))
 #' 
 #' # convert birth-death into phylo
 #' phy <- make.phylo(sim)
@@ -116,7 +117,7 @@
 #' 
 #' # simulate the clade
 #' tmax <- 10
-#' sim <- bd.sim(1, pp = 0.2, qq = 0, tMax = tmax, nFinal = c(10, Inf))
+#' sim <- bd.sim(1, lambda = 0.2, mu = 0, tMax = tmax, nFinal = c(10, Inf))
 #' 
 #' # convert birth-death into phylo
 #' phy <- make.phylo(sim)
@@ -127,7 +128,7 @@
 #'                 stemAge = tmax, stemLength = (tmax-sim$TS[2]), 
 #'                 dateFromPresent = TRUE)
 #' 
-#' #testing if simulation and converted object are the same
+#' # testing if simulation and converted object are the same
 #' all.equal(sim, res)
 #' 
 #' @name phylo.to.sim
@@ -136,7 +137,7 @@
 #' 
 
 phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
-                    stemAge = NULL, stemLength = NULL){
+                         stemAge = NULL, stemLength = NULL){
   
   # checking inputs
   if (is.null(stemLength)) {
@@ -182,42 +183,56 @@ phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
   # declaring functions
   
   # dating functions
+  #dates from furthest to closest to the present
   date.nodes.forward <- function(phy, stemAge, stemLength) {
     dating <- vector()
+    
+    #dates first node (first birth of sim):
     dating[which(phy$edge[, 1] == min(phy$edge[, 1]))] <- stemAge - stemLength
     
-    # focal node
+    # choose a focal node (the closest to StemAge without dating)
     fnode <- min(phy$edge[, 1]) + 1 
     
-    while (fnode <= max(phy$edge)) {
-      ids <- which(phy$edge[, 1] == fnode)
+    # while dating is not finished
+    while (fnode <= max(phy$edge)) { 
+      # find where the nodes connects
+      ids <- which(phy$edge[, 1] == fnode) 
+      
+      # dates it
       dating[ids] <- dating[which(phy$edge[, 2] == fnode)] - 
         phy$edge.length[which(phy$edge[, 2] == fnode)]
-      fnode <- fnode + 1
+      
+      # changes fnode to posterior node
+      fnode <- fnode + 1 
     }
     
+    # wrapping it all together
     res <- unique(cbind(phy$edge[, 1], dating))
     colnames(res) <- c("node", "dating")
     res <- as.data.frame(res)
     return(res)
   }
   
+  
+  # dates from to present to the past
   date.nodes.rewind <- function(phy, extant) {
-    if (sum(extant) == 0) {
+    # error if function not apply
+    if (sum(extant) == 0) { 
       stop("\n No extant lineages. \"dateFromPresent\" is impossible")
     }
     
     dating <- vector()
     
-    # dating extant
+    # dating extant (0 - [each extant edge length])
     dating[phy$edge[, 2] %in% which(extant)] <- 
       phy$edge.length[phy$edge[, 2] %in% which(extant)] 
     
+    # gets which is missing  dating
     tab <- table(phy$edge[!(is.na(dating)), 1])
     
     ids <- as.numeric(names(tab[tab == 1]))
     
-    # dating the sister nodes of an extant
+    # dating the extinct sisters of an extant
     for (i in 1:length(ids)) {
       dating[which(phy$edge[, 1] == ids[i] & is.na(dating))] <- 
         dating[which(phy$edge[, 1] == ids[i] & !(is.na(dating)))]
@@ -225,13 +240,18 @@ phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
     
     aux <- min(phy$edge[, 1])
     
-    # dating in the direction of the root
+    # dating nodes in the insides of the phylo, from superficial to deep nodes
     while ((sum(is.na(dating[phy$edge[, 1] == min(phy$edge[, 1])]))) > 0) { 
+      # gets a nono-dated node
       aux <- min(phy$edge[!(is.na(dating)), 1])
+      
+      # dates node
       new_date <- unique(dating[phy$edge[,1] == aux]) + 
         phy$edge.length[which(phy$edge[, 2] == aux)]
       aux <- phy$edge[which(phy$edge[, 2] == aux), 1]
-      dating[which(phy$edge[, 1] == aux)] <- new_date
+      
+      # assign dating
+      dating[which(phy$edge[, 1] == aux)] <- new_date 
     }
     
     # dating from root to tips
@@ -245,6 +265,7 @@ phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
       dating[which(phy$edge[, 1] == aux)] <- new_date
     }
     
+    # wrapping it all together
     res <- unique(cbind(phy$edge[, 1], dating))
     colnames(res) <- c("node", "dating")
     res <- as.data.frame(res)
@@ -253,36 +274,42 @@ phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
   
   # coalescence function
   
-  # coalesces lin until first node in phy
+  # "coalesces" lineage until first node in phy
   # returns list of nodes until that event
   coal.lin <- function(lin, phy) { 
-    
-    if (is.na(lin)) {
-      return(NA)
+    # if lienage has no mother
+    if (is.na(lin)) { 
+      return(NA) 
     }
     
     lin.coal <- lin
     leng.aft <- 1
     stop <- FALSE
     
+    # coalescing branches until ancestor
     while (!(stop)) {
+      
+      # append lins between mother and phy
       lin.coal <- c(lin.coal, 
                     phy$edge[(phy$edge[, 2] == lin.coal[length(lin.coal)]), 1])
       len.bef <- length(lin.coal)
       
-      if (len.bef == leng.aft) {
+      # if not coalescing anymore
+      if (len.bef == leng.aft) { 
+        # stop while
         stop <- TRUE
       }
       
-      else {
-        leng.aft <- len.bef
+      # updating leng for testing next time
+      else { 
+        leng.aft <- len.bef 
       }
       
     }
     return(lin.coal)
   }
   
-  # dating
+  # choose dating method given inputs
   if (dateFromPresent) {
     dated_nodes <- date.nodes.rewind(phy, extant)
   }
@@ -321,11 +348,13 @@ phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
                                         dau.coal[length(dau.coal)]]
     }
     
+    # if it is extant, it has no TE
     if (res$EXTANT[i]) {
-     res$TE[i] <- NA
+      res$TE[i] <- NA
     }
     
     else {
+      # if extinct, calculates TE summing edgelength w/ dated node
       res$TE[i] <-  dated_nodes$dating[dated_nodes$node == dau.coal[2]] -
         phy$edge.length[which(apply(phy$edge, 1, function(x) all.equal(
           x, sort(dau.coal[1:2], decreasing = TRUE))) == "TRUE")]
