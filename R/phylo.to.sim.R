@@ -137,7 +137,7 @@
 #' 
 
 phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
-                         stemAge = NULL, stemLength = NULL){
+                         stemAge = NULL, stemLength = NULL) {
   
   # checking inputs
   if (is.null(stemLength)) {
