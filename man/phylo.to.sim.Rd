@@ -23,7 +23,7 @@ First species' mother should be \code{NA}.}
 \item{extant}{Logical vetor indicating which lineages are extant and extinct.}
 
 \item{dateFromPresent}{Logical vector indicating if TS/TE events should be 
-dated from present to root (\code{TRUE}, default value) of from root to 
+dated from present-to-root (\code{TRUE}, default value) of from root-to- 
 present. Please see "dating" section in "details", below. It is internally set 
 to \code{FALSE} and prints a message in the prompt if there are no extant
 species in the \code{extant} vector.}
@@ -49,15 +49,15 @@ phylogeny.
 \description{
 Generates a \code{sim} object using a \code{phylo} object and some additional 
 information (depending on other inputs). It is the inverse of the 
-\code{make.phylo} function. Input is (1) a phylogeny, following a "Hennigian" 
-(sensu Ezard et al 2011) format, (2) information on the "mother lineage" of 
-each tip in the phylogeny (see "mothers" section in "details", below), (3) the 
-status ("extant" or "extinct") of each lineage, (4) the stem age (or age of
-origination of the clade), and (5) the "stem length" (or time interval 
-between the stem age and the appearance of the first "daughter"). The user can
-also choose if the event dating should be done from root to tips or from tips 
-to root (this choice is important - see "dating" section in "details" below. 
-The function returns a \code{sim} object (which contains speciation and
+\code{make.phylo} function. Input is (1) a phylogeny, following a "evolutionary
+Hennigian" (sensu Ezard et al 2011) format, (2) information on the "mother 
+lineage" of each tip in the phylogeny (see "mothers" section in "details" 
+below), (3) the status ("extant" or "extinct") of each lineage, (4) the stem 
+age (or age of origination of the clade), and (5) the "stem length" (or time 
+interval between the stem age and the appearance of the first "daughter"). The 
+user can also choose if the event dating should be done from root to tips or 
+from tips-to-root (this choice is important - see "dating" section in "details"
+below. The function returns a \code{sim} object (which contains speciation and
 extinction times, parent, and status information). The function does not accept
 more than one species having \code{NA} as parent (which is interpreted as if 
 there were no single common ancestor in the phylogeny).
@@ -90,12 +90,12 @@ phylogeny is extant, or (2) some time in the past, which is the \code{stemAge}
 parameter. Those two possible dating methods are used by setting 
 \code{dateFromPresent} to \code{TRUE} or \code{FALSE}, respectively (see 
 \code{dateFromPresent} above). If users do not have a reasonable value for 
-\code{stemAge}, they are encouraged to use present to root dating 
+\code{stemAge}, they are encouraged to use present-to-root dating 
 (\code{dateFromPresent = TRUE}), as deviations in the value of 
 \code{stemLength} will only affect the speciation time of the first lineage of
 the clade. When \code{dateFromPresent} is set to \code{FALSE}, eventual errors 
-in \code{stemAge} or \code{stemLength} will bias the dating of all nodes in the
-phylogeny.
+in \code{stemAge} or \code{stemLength} will bias the absolute (but not the
+relative) dating of all nodes in the phylogeny.
 }
 \examples{
 

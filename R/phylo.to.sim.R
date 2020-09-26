@@ -2,15 +2,15 @@
 #'
 #' Generates a \code{sim} object using a \code{phylo} object and some additional 
 #' information (depending on other inputs). It is the inverse of the 
-#' \code{make.phylo} function. Input is (1) a phylogeny, following a "evolutionary Hennigian" 
-#' (sensu Ezard et al 2011) format, (2) information on the "mother lineage" of 
-#' each tip in the phylogeny (see "mothers" section in "details", below), (3) the 
-#' status ("extant" or "extinct") of each lineage, (4) the stem age (or age of
-#' origination of the clade), and (5) the "stem length" (or time interval 
-#' between the stem age and the appearance of the first "daughter"). The user can
-#' also choose if the event dating should be done from root to tips or from tips- 
-#' to-root (this choice is important - see "dating" section in "details" below. 
-#' The function returns a \code{sim} object (which contains speciation and
+#' \code{make.phylo} function. Input is (1) a phylogeny, following a "evolutionary
+#' Hennigian" (sensu Ezard et al 2011) format, (2) information on the "mother 
+#' lineage" of each tip in the phylogeny (see "mothers" section in "details" 
+#' below), (3) the status ("extant" or "extinct") of each lineage, (4) the stem 
+#' age (or age of origination of the clade), and (5) the "stem length" (or time 
+#' interval between the stem age and the appearance of the first "daughter"). The 
+#' user can also choose if the event dating should be done from root to tips or 
+#' from tips-to-root (this choice is important - see "dating" section in "details"
+#' below. The function returns a \code{sim} object (which contains speciation and
 #' extinction times, parent, and status information). The function does not accept
 #' more than one species having \code{NA} as parent (which is interpreted as if 
 #' there were no single common ancestor in the phylogeny). 
