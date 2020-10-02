@@ -128,10 +128,10 @@ number of species at the end of the simulation, either total or extant. The
 function can also take an optional shape argument to generate age-dependence on
 speciation and/or extinction, assuming a Weibull distribution as a model of 
 age-dependence. Returns an object containing vectors of speciation times, 
-extinction times, parents (= species' mother species) and status at the end of 
-the simulation (extant or not) for each species in the simulation. 
-It may return true extinction times or simply information on whether species 
-lived after the maximum simulation time. 
+extinction times, parents (species' mother species) and status (extant or not) 
+at the end of the simulation for each species in the simulation. It may return
+true extinction times or simply information on whether species lived after the 
+maximum simulation time. 
 Please note while time runs from \code{0} to \code{tMax} in the simulation, it 
 returns speciation/extinction times as \code{tMax} (origin of the group) to 
 \code{0} (the "present" and end of simulation), so as to conform to other

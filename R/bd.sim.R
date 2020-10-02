@@ -8,10 +8,10 @@
 #' function can also take an optional shape argument to generate age-dependence on
 #' speciation and/or extinction, assuming a Weibull distribution as a model of 
 #' age-dependence. Returns an object containing vectors of speciation times, 
-#' extinction times, parents (= species' mother species) and status at the end of 
-#' the simulation (extant or not) for each species in the simulation. 
-#' It may return true extinction times or simply information on whether species 
-#' lived after the maximum simulation time. 
+#' extinction times, parents (species' mother species) and status (extant or not) 
+#' at the end of the simulation for each species in the simulation. It may return
+#' true extinction times or simply information on whether species lived after the 
+#' maximum simulation time. 
 #' Please note while time runs from \code{0} to \code{tMax} in the simulation, it 
 #' returns speciation/extinction times as \code{tMax} (origin of the group) to 
 #' \code{0} (the "present" and end of simulation), so as to conform to other
@@ -401,7 +401,7 @@ bd.sim <- function(n0, lambda, mu, tMax,
 
   # else it is not constant
   # note even if lambda or mu is constant this may call bd.sim.general, since we
-  # might have a shape parameter
+  # might have a shape parameter or the other rate might not be constant
   else {
     # use make.rate to create the rates we want
     l <- make.rate(lambda, tMax, envL, lShifts)

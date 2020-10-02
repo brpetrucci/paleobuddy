@@ -26,7 +26,8 @@ diversification of a paraphyletic group.}
 
 \item{lambda}{Function to hold the speciation rate over time. It will either be
 interpreted as an exponential rate, or a Weibull scale if 
-\code{lShape != NULL}.}
+\code{lShape != NULL}. Can be constant, to allow for mixing of constant and
+non-constant rates.}
 
 \item{mu}{Similar to above, but for the extinction rate.
 
@@ -98,10 +99,10 @@ number of species at the end of the simulation, either total or extant. The
 function can also take an optional shape argument to generate age-dependence on
 speciation and/or extinction, assuming a Weibull distribution as a model of 
 age-dependence. Returns an object containing vectors of speciation times, 
-extinction times, parents (= species' mother species) and status at the end of 
-the simulation (extant or not) for each species in the simulation. 
-It may return true extinction times or simply information on whether species 
-lived after the maximum simulation time. For constant rate simulations, see
+extinction times, parents (species' mother species) and status (extant or not)
+at the end of the simulation for each species in the simulation. It may return 
+true extinction times or simply information on whether species lived after the 
+maximum simulation time. For constant rate simulations, see 
 \code{bd.sim.constant}. For a function that unites all scenarios, see 
 \code{bd.sim}. \code{bd.sim} also allows for extra inputs, creating a
 time-dependent only rate internally through \code{make.rate}. For similar

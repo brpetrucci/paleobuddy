@@ -7,10 +7,10 @@
 #' function can also take an optional shape argument to generate age-dependence on
 #' speciation and/or extinction, assuming a Weibull distribution as a model of 
 #' age-dependence. Returns an object containing vectors of speciation times, 
-#' extinction times, parents (= species' mother species) and status at the end of 
-#' the simulation (extant or not) for each species in the simulation. 
-#' It may return true extinction times or simply information on whether species 
-#' lived after the maximum simulation time. For constant rate simulations, see
+#' extinction times, parents (species' mother species) and status (extant or not)
+#' at the end of the simulation for each species in the simulation. It may return 
+#' true extinction times or simply information on whether species lived after the 
+#' maximum simulation time. For constant rate simulations, see 
 #' \code{bd.sim.constant}. For a function that unites all scenarios, see 
 #' \code{bd.sim}. \code{bd.sim} also allows for extra inputs, creating a
 #' time-dependent only rate internally through \code{make.rate}. For similar
@@ -24,7 +24,8 @@
 #' 
 #' @param lambda Function to hold the speciation rate over time. It will either be
 #' interpreted as an exponential rate, or a Weibull scale if 
-#' \code{lShape != NULL}.
+#' \code{lShape != NULL}. Can be constant, to allow for mixing of constant and
+#' non-constant rates.
 #'
 #' @param mu Similar to above, but for the extinction rate.
 #' 
@@ -306,7 +307,8 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
   }
   
   while (len < nFinal[1] | len > nFinal[2]) {
-    # create vectors to hold times of speciation, extinction, parents and status
+    # create vectors to hold times of speciation, extinction, 
+    # parents and status
     TS <- rep(0, n0)
     TE <- rep(NA, n0)
     parent <- rep(NA, n0)
@@ -321,7 +323,6 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
       tNow <- TS[sCount]
 
       # find the waiting time using rexp.var if lambda is not constant
-      # note we need to pass NULL for TS if the corresponding shape is NULL
       waitTimeS <- ifelse(
         is.numeric(lambda), ifelse(lambda > 0, rexp(1, lambda), Inf),
         ifelse(lambda(tNow) > 0, 
@@ -335,7 +336,8 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
   
       tExp <- tNow + waitTimeE
   
-      # while there are fast enough speciations before the species goes extinct,
+      # while there are fast enough speciations before the species 
+      # goes extinct,
       while ((tNow + waitTimeS) <= min(tExp, tMax)) {
   
         # advance to the time of speciation
