@@ -1,9 +1,12 @@
 #' General rate species sampling
 #' 
-#' Generates a \code{data.frame} containing either true occurrence times or time 
-#' ranges for each of the desired species using a Poisson process. Allows for the 
+#' Generates occurrence times or time ranges (as most empirical fossil 
+#' occurrences) for each of the desired species using a Poisson process. 
+#' Allows for the 
 #' Poisson rate to be (1) a constant, (2) a function of time, (3) a function of 
-#' time and an environmental variable, or (4) a vector of numbers. Also allows 
+#' time and an environmental variable, (4) a vector of numbers (ates in a step 
+#' function), (5) age-dependent preservation or (6) a mix of age-dependent and
+#' time-dependent preservation. Also allows 
 #' as an optional parameter a distribution representing the expected occurrence 
 #' number over a species duration. Allows for further flexibility in rates by a 
 #' shift times vector and environmental matrix parameters. Optionally takes a 
@@ -47,9 +50,9 @@
 #' \code{bins}.
 #' 
 #' If \code{returnTrue} is false, \code{sample.clade} returns the occurrence
-#' times as ranges. In this way, we simulate the granularity in real world fossil
-#' records. If \code{returnTrue} is true, this is ignored. If \code{bins} is not
-#' supplied and \code{returnTrue == FALSE}, the default is 
+#' times as ranges. In this way, we simulate the granularity presented by
+#' empirical fossil records. If \code{returnTrue} is true, this is ignored.
+#' If \code{bins} is not supplied and \code{returnTrue == FALSE}, the default is 
 #' \code{seq(tMax, 0, 0.1)}.
 #'
 #' @return A \code{data.frame} containing species names/numbers, whether each 
