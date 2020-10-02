@@ -18,10 +18,10 @@ bd.sim.general(
 }
 \arguments{
 \item{n0}{Initial number of species. Usually 1, in which case the simulation 
-will describe the full diversification of a monophyletic lineage. Notice that 
-when \code{lambda} is less than or equal to \code{mu},  many simulations will go 
-extinct before speciating even once. One way of generating simulations in this 
-case is to increase \code{n0}. The user should notice this will simulate the 
+will describe the full diversification of a monophyletic lineage. Note that
+when \code{lambda} is less than or equal to \code{mu},  many simulations will
+go extinct before speciating even once. One way of generating large sample
+sizes in this case is to increase \code{n0}, which will simulate the
 diversification of a paraphyletic group.}
 
 \item{lambda}{Function to hold the speciation rate over time. It will either be

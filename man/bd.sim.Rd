@@ -22,19 +22,19 @@ bd.sim(
 }
 \arguments{
 \item{n0}{Initial number of species. Usually 1, in which case the simulation 
-will describe the full diversification of a monophyletic lineage. Notice that 
-when \code{lambda} is less than or equal to \code{mu},  many simulations will go 
-extinct before speciating even once. One way of generating simulations in this 
-case is to increase \code{n0}. The user should notice this will simulate the 
+will describe the full diversification of a monophyletic lineage. Note that
+when \code{lambda} is less than or equal to \code{mu},  many simulations will
+go extinct before speciating even once. One way of generating large sample
+sizes in this case is to increase \code{n0}, which will simulate the
 diversification of a paraphyletic group.}
 
-\item{lambda}{Speciation rate (per species per million years) over time. It can be 
-a \code{numeric} describing a constant rate, a \code{function(t)} describing 
+\item{lambda}{Speciation rate (per species per million years) over time. It can
+be a \code{numeric} describing a constant rate, a \code{function(t)} describing 
 the variation in speciation over time \code{t}, a \code{function(t, env)} 
 describing the variation in speciation over time following both time AND 
 an environmental variable (please see \code{envL} for details) or a 
 \code{vector} containing rates that correspond to each rate between speciation
-rate shift times times (please see \code{lShifts}). Note that \code{lambda} should
+rate shift times times (please see \code{lShifts}). Note that \code{lambda}
 should always be greater than or equal to zero.}
 
 \item{mu}{Similar to \code{lambda}, but for the extinction rate.

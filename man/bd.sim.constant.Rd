@@ -16,10 +16,10 @@ bd.sim.constant(
 }
 \arguments{
 \item{n0}{Initial number of species. Usually 1, in which case the simulation 
-will describe the full diversification of a monophyletic lineage. Notice that 
-when \code{lambda} is less than or equal to \code{mu},  many simulations will go 
-extinct before speciating even once. One way of generating simulations in this 
-case is to increase \code{n0}. The user should notice this will simulate the 
+will describe the full diversification of a monophyletic lineage. Note that
+when \code{lambda} is less than or equal to \code{mu},  many simulations will
+go extinct before speciating even once. One way of generating large sample
+sizes in this case is to increase \code{n0}, which will simulate the
 diversification of a paraphyletic group.}
 
 \item{lambda}{Speciation rate. Must be constant.}
@@ -69,8 +69,8 @@ parent, and status information for each species in the simulation. See
 Simulates a species birth-death process with constant rates for any number of
 starting species. Allows for constraining results on the number of species at 
 the end of the simulation, either total or extant. Returns an object containing 
-vectors of speciation times, extinction times, parents (= species' mother 
-species) and status at the end of the simulation (extant or not) for each 
+vectors of speciation times, extinction times, parents (species' mother 
+species) and status (extant or not) at the end of the simulation for each 
 species in the simulation. It may return true extinction times or simply 
 information on whether species lived after the maximum simulation time. For 
 time-varying and age-dependent simulations, see \code{bd.sim.general}. For a 

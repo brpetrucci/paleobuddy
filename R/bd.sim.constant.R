@@ -3,8 +3,8 @@
 #' Simulates a species birth-death process with constant rates for any number of
 #' starting species. Allows for constraining results on the number of species at 
 #' the end of the simulation, either total or extant. Returns an object containing 
-#' vectors of speciation times, extinction times, parents (= species' mother 
-#' species) and status at the end of the simulation (extant or not) for each 
+#' vectors of speciation times, extinction times, parents (species' mother 
+#' species) and status (extant or not) at the end of the simulation for each 
 #' species in the simulation. It may return true extinction times or simply 
 #' information on whether species lived after the maximum simulation time. For 
 #' time-varying and age-dependent simulations, see \code{bd.sim.general}. For a 
@@ -173,10 +173,10 @@ bd.sim.constant <- function(n0, lambda, mu, tMax,
       waitTimeS <- ifelse(lambda > 0, rexp(1, lambda), Inf)
       waitTimeE <- ifelse(mu > 0, rexp(1, mu), Inf)
   
-      # if the time of extinction is after the end of the simulation, make it tMax
+      # calculate when extinction will happen
       tExp <- tNow + waitTimeE
   
-      # while there are fast enough speciations before the species goes extinct,
+      # while there are fast enough speciations before the species goes extinct
       while ((tNow + waitTimeS) <= min(tExp, tMax)) {
         # update time
         tNow <- tNow + waitTimeS
