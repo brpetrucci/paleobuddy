@@ -9,7 +9,9 @@
 #' time, so that time is inverted using \code{tMax} both at the beginning and end
 #' of \code{sample.species}, which is used in this function.
 #'
-#' @param sim A \code{sim} object, usually the output of \code{bd.sim}.
+#' @param sim A \code{sim} object, containing extinction times, speciation times,
+#' parent, and status information for each species in the simulation. See 
+#' \code{?sim}.
 #' 
 #' @param rho Sampling rate (per species per million years) over time. It can be
 #' a \code{numeric} describing a constant rate or a \code{function(t)} describing
@@ -544,6 +546,11 @@
 
 sample.general <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
   # checking input
+  # check that sim is a valid sim object
+  if (!is.sim(sim)) {
+    stop("Invalid argument, must be a sim object. See ?sim")
+  }
+  
   # if rho is constant, make it a function
   if (is.numeric(rho)) {
     r <- rho

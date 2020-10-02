@@ -42,9 +42,8 @@ in this parameter if \code{phy} have a \code{$root.edge}, which is taken by the
 function as the \code{stemLength} value.}
 }
 \value{
-A \code{sim} object organized in the same format as the output of 
-\code{bd.sim}. Items in the object follow their tip assignment in the 
-phylogeny.
+A \code{sim} object. For details, see \code{?sim}. Items in the object 
+follow their tip assignment in the phylogeny.
 }
 \description{
 Generates a \code{sim} object using a \code{phylo} object and some additional 

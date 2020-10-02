@@ -33,21 +33,9 @@
 #' to use \code{bd.sim.general} with environmental or step-function rates, they
 #' can generate the rate with \code{make.rate} and supply it to the function.
 #'
-#' @return A list of vectors, as follows
-#'
-#' \describe{
-#' \item{\code{TE}}{List of extinction times, with \code{0} as the time of
-#' extinction for extant species.}
-#'
-#' \item{\code{TS}}{List of speciation times, with \code{NA} as the time of
-#' speciation for species that started the simulation.}
-#'
-#' \item{\code{PAR}}{List of parents. Species that started the simulation have
-#' \code{NA}, while species that were generated during the simulation have their
-#' parent's number. Species are numbered as they are born.}
-#'
-#' \item{\code{EXTANT}}{List of logicals representing whether each species is
-#' extant.}}
+#' @return A \code{sim} object, containing extinction times, speciation times,
+#' parent, and status information for each species in the simulation. See 
+#' \code{?sim}.
 #'
 #' @author Bruno do Rosario Petrucci.
 #'
@@ -395,5 +383,9 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
     }
   }
   
-  return(list(TE = TE, TS = TS, PAR = parent, EXTANT = isExtant))
+  # create the return
+  sim <- list(TE = TE, TS = TS, PAR = parent, EXTANT = isExtant)
+  class(sim) <- "sim"
+  
+  return(sim)
 }

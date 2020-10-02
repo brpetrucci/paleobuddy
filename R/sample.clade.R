@@ -453,6 +453,11 @@
 sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
                          returnTrue = TRUE, bins = NULL, 
                          adFun = NULL, ...) {
+  # check that sim is a valid sim object
+  if (!is.sim(sim)) {
+    stop("Invalid argument, must be a sim object. See ?sim")
+  }
+  
   # make S all species if it is NULL
   if (is.null(S)) {
     S <- 1:length(sim$TE)
@@ -463,7 +468,7 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
     # if so, make rate a function
     rho <- make.rate(rho, tMax, envR, rShifts)
   } else {
-    if (!is.numeric(rho) | length(rho)>1) {
+    if (!is.numeric(rho) | length(rho) > 1) {
       stop("age-dependent sampling cannot be used with time-varing 
            preservation rates")
     }

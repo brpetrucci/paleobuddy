@@ -38,7 +38,7 @@
 #' for (i in 1:length(clades)) {
 #'   
 #'   # if there is only one lineage in the clade
-#'   if (length(clades[[i]]$TE) < 2) {
+#'   if (length(clades[[i]]$sim$TE) < 2) {
 #'     # placeholder plot
 #'     plot(NA, xlim = c(-1, 1), ylim = c(-1, 1))
 #'     text("simulation with \n just one lineage", x = 0, y = 0.5, cex = 2)
@@ -47,17 +47,17 @@
 #'   else {
 #'     if (requireNamespace("ape", quietly = TRUE)) {
 #'       plot <- ape::plot.phylo(
-#'         make.phylo(clades[[i]]),
+#'         make.phylo(clades[[i]]$sim),
 #'         main = "red: extinction events \n blue: speciation events");
 #'       ape::axisPhylo()
 #'     }
 #'     
 #'     # checking speciation times:
-#'     for (j in 2:length(clades[[i]]$TS)) {
+#'     for (j in 2:length(clades[[i]]$sim$TS)) {
 #'       # the subtraction is just to adjust the wt with the plot scale
 #'       lines(x = c(
-#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j],
-#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j]),
+#'         sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TS[j],
+#'         sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TS[j]),
 #'         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "blue")
 #'     }
 #'     
@@ -65,8 +65,8 @@
 #'     for (j in 1:length(sim$TE)) {
 #'       # the subtraction is just to adjust the wt with the plot scale
 #'       lines(x = c(
-#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j],
-#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j]),
+#'         sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TE[j],
+#'         sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TE[j]),
 #'         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "red")
 #'     }
 #'   }
@@ -85,10 +85,10 @@
 #' # for each clade
 #' for (i in 1:length(clades)) {
 #'   # change NA to 0 on the clade's TE
-#'   clades[[i]]$TE[clades[[i]]$EXTANT] <- 0
+#'   clades[[i]]$sim$TE[clades[[i]]$sim$EXTANT] <- 0
 #'   
 #'   # if there is only one lineage in the clade
-#'   if (length(clades[[i]]$TE) < 2) {
+#'   if (length(clades[[i]]$sim$TE) < 2) {
 #'     # placeholder plot
 #'     plot(NA, xlim = c(-1, 1), ylim = c(-1, 1))
 #'     text("simulation with \n just one lineage", x = 0, y = 0.5, cex = 2)
@@ -97,17 +97,17 @@
 #'   else {
 #'     if (requireNamespace("ape", quietly = TRUE)) {
 #'       plot <- ape::plot.phylo(
-#'         make.phylo(clades[[i]]),
+#'         make.phylo(clades[[i]]$sim),
 #'         main = "red: extinction events \n blue: speciation events");
 #'       ape::axisPhylo()
 #'     }
 #'     
 #'     # checking speciation times:
-#'     for (j in 2:length(clades[[i]]$TS)) {
+#'     for (j in 2:length(clades[[i]]$sim$TS)) {
 #'       # the subtraction is just to adjust the wt with the plot scale
 #'       lines(x = c(
-#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j],
-#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j]),
+#'         sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TS[j],
+#'         sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TS[j]),
 #'         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "blue")
 #'     }
 #'     
@@ -115,8 +115,8 @@
 #'     for (j in 1:length(sim$TE)) {
 #'       # the subtraction is just to adjust the wt with the plot scale
 #'       lines(x = c(
-#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j],
-#'         sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j]),
+#'         sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TE[j],
+#'         sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TE[j]),
 #'         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "red")
 #'     }
 #'   }
@@ -132,7 +132,7 @@
 #' if (requireNamespace("ape", quietly = TRUE)) {
 #'   ape::plot.phylo(make.phylo(sim), main="original")
 #'   ape::axisPhylo()
-#'   ape::plot.phylo(make.phylo(find.lineages(sim)[[1]]), 
+#'   ape::plot.phylo(make.phylo(find.lineages(sim)[[1]]$sim), 
 #'                   main="after find.lineages()")
 #'   ape::axisPhylo()
 #' }
@@ -153,13 +153,13 @@
 #'   ape::plot.phylo(make.phylo(sim), main="original")
 #'   
 #'   # this should look the same
-#'   ape::plot.phylo(make.phylo(find.lineages(sim)[[1]]), 
+#'   ape::plot.phylo(make.phylo(find.lineages(sim)[[1]]$sim), 
 #'                  main="after find.lineages()")
 #'   
 #'   # and these should be part of the previous phylogenies
-#'   ape::plot.phylo(make.phylo(find.lineages(sim, c(2, 3))$clade_2),
+#'   ape::plot.phylo(make.phylo(find.lineages(sim, c(2, 3))$clade_2$sim),
 #'                   main = "Clade_2")
-#'   ape::plot.phylo(make.phylo(find.lineages(sim, c(2, 3))$clade_3),
+#'   ape::plot.phylo(make.phylo(find.lineages(sim, c(2, 3))$clade_3$sim),
 #'                   main = "Clade_3")
 #' }
 #' 
@@ -168,6 +168,11 @@
 #' @export
 
 find.lineages <- function(sim, S = NULL) {
+  # check that sim is a valid sim object
+  if (!is.sim(sim)) {
+    stop("Invalid argument, must be a sim object. See ?sim")
+  }
+  
   # if S is null, the user wants to find the lineages with the simulation's
   # starting species as parents
   if (is.null(S)) {
@@ -194,6 +199,11 @@ find.lineages <- function(sim, S = NULL) {
 # does the exact same, but for one species
 
 find.lineage <- function(sim, s) {
+  # check that sim is a valid sim object
+  if (!is.sim(sim)) {
+    stop("Invalid argument, must be a sim object. See ?sim")
+  }
+  
   # if s is not on the simulation, we have a problem
   if (s > length(sim$TE)) {
     stop("This species is not on the simulation")
@@ -237,9 +247,10 @@ find.lineage <- function(sim, s) {
   }
 
   # append it to a sim
+  sim1 <- list(TE = TE, TS = TS, PAR = PAR, EXTANT = EXTANT)
+  class(sim1) <- "sim"
+
   # note the inclusion of lin - this way, a user can tell which species in sim1
   # corresponded to which species in sim
-  sim1 <- list(TE = TE, TS = TS, PAR = PAR, EXTANT = EXTANT, LIN = lin)
-
-  return(sim1)
+  return(list(sim = sim1, LIN = lin))
 }

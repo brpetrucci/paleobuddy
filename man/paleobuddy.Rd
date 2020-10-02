@@ -18,6 +18,9 @@ besides age-dependent rates with the use of a shape parameter. Extinction and
 speciation rates can be supplied independently, so that one can combine any
 types of scenarios for birth and death rates. See \code{?bd.sim},
 \code{?bd.sim.constant} and \code{?bd.sim.general} for more information.
+
+All birth-death simulation functions return a \code{sim} object, which has some
+generic methods etc. of its own. See \code{?sim} for more information.
 }
 
 \section{Fossil record simulation}{

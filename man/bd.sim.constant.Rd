@@ -61,21 +61,9 @@ time of extinction of extant species will be the true time, otherwise it will
 be \code{NA} if a species is alive at the end of the simulation.}
 }
 \value{
-A list of vectors, as follows
-
-\describe{
-\item{\code{TE}}{List of extinction times, with \code{0} as the time of
-extinction for extant species.}
-
-\item{\code{TS}}{List of speciation times, with \code{NA} as the time of
-speciation for species that started the simulation.}
-
-\item{\code{PAR}}{List of parents. Species that started the simulation have
-\code{NA}, while species that were generated during the simulation have their
-parent's number. Species are numbered as they are born.}
-
-\item{\code{EXTANT}}{List of logicals representing whether each species is
-extant.}}
+A \code{sim} object, containing extinction times, speciation times,
+parent, and status information for each species in the simulation. See 
+\code{?sim}.
 }
 \description{
 Simulates a species birth-death process with constant rates for any number of

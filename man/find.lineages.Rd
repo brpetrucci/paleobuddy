@@ -7,8 +7,9 @@
 find.lineages(sim, S = NULL)
 }
 \arguments{
-\item{sim}{A simulation containing lists for the speciation times, extinction
-times, parent identities and status (extant or extinct).}
+\item{sim}{A \code{sim} object, containing extinction times, speciation times,
+parent, and status information for each species in the simulation. See 
+\code{?sim}.}
 
 \item{S}{A vector of species in \code{sim}. If not supplied, \code{S} will be
 the starting species in the simulation (i.e. those for which the parent is
@@ -46,7 +47,7 @@ par(mfrow = c(1,length(clades)))
 for (i in 1:length(clades)) {
   
   # if there is only one lineage in the clade
-  if (length(clades[[i]]$TE) < 2) {
+  if (length(clades[[i]]$sim$TE) < 2) {
     # placeholder plot
     plot(NA, xlim = c(-1, 1), ylim = c(-1, 1))
     text("simulation with \n just one lineage", x = 0, y = 0.5, cex = 2)
@@ -55,17 +56,17 @@ for (i in 1:length(clades)) {
   else {
     if (requireNamespace("ape", quietly = TRUE)) {
       plot <- ape::plot.phylo(
-        make.phylo(clades[[i]]),
+        make.phylo(clades[[i]]$sim),
         main = "red: extinction events \n blue: speciation events");
       ape::axisPhylo()
     }
     
     # checking speciation times:
-    for (j in 2:length(clades[[i]]$TS)) {
+    for (j in 2:length(clades[[i]]$sim$TS)) {
       # the subtraction is just to adjust the wt with the plot scale
       lines(x = c(
-        sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j],
-        sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j]),
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TS[j],
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TS[j]),
         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "blue")
     }
     
@@ -73,8 +74,8 @@ for (i in 1:length(clades)) {
     for (j in 1:length(sim$TE)) {
       # the subtraction is just to adjust the wt with the plot scale
       lines(x = c(
-        sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j],
-        sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j]),
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TE[j],
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TE[j]),
         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "red")
     }
   }
@@ -93,10 +94,10 @@ par(mfrow = c(1,length(clades)))
 # for each clade
 for (i in 1:length(clades)) {
   # change NA to 0 on the clade's TE
-  clades[[i]]$TE[clades[[i]]$EXTANT] <- 0
+  clades[[i]]$sim$TE[clades[[i]]$sim$EXTANT] <- 0
   
   # if there is only one lineage in the clade
-  if (length(clades[[i]]$TE) < 2) {
+  if (length(clades[[i]]$sim$TE) < 2) {
     # placeholder plot
     plot(NA, xlim = c(-1, 1), ylim = c(-1, 1))
     text("simulation with \n just one lineage", x = 0, y = 0.5, cex = 2)
@@ -105,17 +106,17 @@ for (i in 1:length(clades)) {
   else {
     if (requireNamespace("ape", quietly = TRUE)) {
       plot <- ape::plot.phylo(
-        make.phylo(clades[[i]]),
+        make.phylo(clades[[i]]$sim),
         main = "red: extinction events \n blue: speciation events");
       ape::axisPhylo()
     }
     
     # checking speciation times:
-    for (j in 2:length(clades[[i]]$TS)) {
+    for (j in 2:length(clades[[i]]$sim$TS)) {
       # the subtraction is just to adjust the wt with the plot scale
       lines(x = c(
-        sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j],
-        sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TS[j]),
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TS[j],
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TS[j]),
         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "blue")
     }
     
@@ -123,8 +124,8 @@ for (i in 1:length(clades)) {
     for (j in 1:length(sim$TE)) {
       # the subtraction is just to adjust the wt with the plot scale
       lines(x = c(
-        sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j],
-        sort(clades[[i]]$TS, decreasing = TRUE)[2] - clades[[i]]$TE[j]),
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TE[j],
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TE[j]),
         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "red")
     }
   }
@@ -140,7 +141,7 @@ par(mfrow = c(1, 2))
 if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(make.phylo(sim), main="original")
   ape::axisPhylo()
-  ape::plot.phylo(make.phylo(find.lineages(sim)[[1]]), 
+  ape::plot.phylo(make.phylo(find.lineages(sim)[[1]]$sim), 
                   main="after find.lineages()")
   ape::axisPhylo()
 }
@@ -161,13 +162,13 @@ if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(make.phylo(sim), main="original")
   
   # this should look the same
-  ape::plot.phylo(make.phylo(find.lineages(sim)[[1]]), 
+  ape::plot.phylo(make.phylo(find.lineages(sim)[[1]]$sim), 
                  main="after find.lineages()")
   
   # and these should be part of the previous phylogenies
-  ape::plot.phylo(make.phylo(find.lineages(sim, c(2, 3))$clade_2),
+  ape::plot.phylo(make.phylo(find.lineages(sim, c(2, 3))$clade_2$sim),
                   main = "Clade_2")
-  ape::plot.phylo(make.phylo(find.lineages(sim, c(2, 3))$clade_3),
+  ape::plot.phylo(make.phylo(find.lineages(sim, c(2, 3))$clade_3$sim),
                   main = "Clade_3")
 }
 

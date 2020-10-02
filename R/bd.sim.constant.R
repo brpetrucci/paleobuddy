@@ -22,21 +22,9 @@
 #' 
 #' Note: \code{lambda} and \code{mu} must always be greater than 0
 #'
-#' @return A list of vectors, as follows
-#'
-#' \describe{
-#' \item{\code{TE}}{List of extinction times, with \code{0} as the time of
-#' extinction for extant species.}
-#'
-#' \item{\code{TS}}{List of speciation times, with \code{NA} as the time of
-#' speciation for species that started the simulation.}
-#'
-#' \item{\code{PAR}}{List of parents. Species that started the simulation have
-#' \code{NA}, while species that were generated during the simulation have their
-#' parent's number. Species are numbered as they are born.}
-#'
-#' \item{\code{EXTANT}}{List of logicals representing whether each species is
-#' extant.}}
+#' @return A \code{sim} object, containing extinction times, speciation times,
+#' parent, and status information for each species in the simulation. See 
+#' \code{?sim}.
 #'
 #' @author Bruno do Rosario Petrucci.
 #'
@@ -227,6 +215,10 @@ bd.sim.constant <- function(n0, lambda, mu, tMax,
     # if we have ran for too long, stop
     counter <- counter + 1
   }
+  
+  # create the return
+  sim <- list(TE = TE, TS = TS, PAR = parent, EXTANT = isExtant)
+  class(sim) <- "sim"
 
-  return(list(TE = TE, TS = TS, PAR = parent, EXTANT = isExtant))
+  return(sim)
 }

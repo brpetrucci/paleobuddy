@@ -7,7 +7,9 @@
 sample.general(sim, rho, tMax, S = NULL, adFun = NULL, ...)
 }
 \arguments{
-\item{sim}{A \code{sim} object, usually the output of \code{bd.sim}.}
+\item{sim}{A \code{sim} object, containing extinction times, speciation times,
+parent, and status information for each species in the simulation. See 
+\code{?sim}.}
 
 \item{rho}{Sampling rate (per species per million years) over time. It can be
 a \code{numeric} describing a constant rate or a \code{function(t)} describing

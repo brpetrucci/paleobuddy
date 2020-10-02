@@ -49,10 +49,10 @@ sim <- bd.sim(n0, lambda, mu, tMax)
 sim
 ```
 
-The output of `bd.sim` is a list of named vectors that is organized as follows
+The output of `bd.sim` is a `sim` object, a class made up of named vectors that is organized as follows
 
-  * `TE` a list of extinction times. For an extant species, the extinction time is `-0.01`.
-  * `TS` a list of speciation times. For species alive at the beginning of the simulation, the speciation time is `tMax + 0.01`.
+  * `TE` a list of extinction times. For an extant species, the extinction time is `NA`.
+  * `TS` a list of speciation times. For species alive at the beginning of the simulation, the speciation time is `tMax`.
   * `PAR` a list of parents. The naming of species follows the order of `TE` and `TS`, i.e. if `PAR[i] == 1`, the species whose speciation time is `TS[1]` generated species `i`.
   * `EXTANT` a list of booleans indicating whether a species is alive at the end of the simulation or not. Note this could be extrapolated from the information in `TE`, but we present it for practicality's sake.
 
@@ -193,7 +193,7 @@ This data frame could be directly dropped in PyRate for rate estimations.
 We can also use `RMark` or other simpler methods to check estimations. Let us write a quick function applying Foote's Per Capita method.
 
 ```{r}
-per.capita <-function(faBins, laBins, bins) {
+per.capita <- function(faBins, laBins, bins) {
   # create vectors to hold species that were born before and die in interval i,
   # species who were born in i and die later,
   # and species who were born before and die later
@@ -445,15 +445,17 @@ clades <- find.lineages(sim)
 # plot each phylogeny
 
 # clade 1
-ape::plot.phylo(make.phylo(clades$clade_1), show.tip.label = FALSE)
+ape::plot.phylo(make.phylo(clades$clade_1$sim), show.tip.label = FALSE)
 
 # clade 2
-ape::plot.phylo(make.phylo(clades$clade_2), show.tip.label = FALSE)
+ape::plot.phylo(make.phylo(clades$clade_2$sim), show.tip.label = FALSE)
 ```
 
+* `phylo.to.sim` creates a `sim` object from a phylogeny following the APE `phylo` class format (Paradis et al 2004). Can be used to integrate paleobuddy with other packages that output phylogenies. Note that the user must supply some optional arguments to allow for this; most importantly the information of each species' mother, since this is ambiguous from a bifurcating phylogeny.
 * `make.rate` creates a function of time from the customization options presented above - vector of numbers and vector of shif times, function of time and environment and an environment matrix, etc. Used by `bd.sim` and `sample.clade` to detect when the given rates are constant, and create the rates to pass to the helper functions.
 * `var.rate.div` calculates the expected diversity from a variable rate birth-death process and a time period.
 * `binner` given occurrence times and time bins, returns the number of occurrences in each bin.
+* Finally, there are a number of generics and methods for the `sim` class, like `print.sim` and `plot.sim`. See `?sim` for a detailed list.
 
 While the package is robust and flexible, it is useful to spend a little time discussing the shortcomings and planned features.
 

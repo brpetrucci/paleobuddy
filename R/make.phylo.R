@@ -9,8 +9,9 @@
 #' common ancestor in the simulation). In the latter case, please use 
 #' \code{find.lineages} first. 
 #'
-#' @param sim A simulation containing lists for the speciation times, extinction
-#' times, parent identities and status (extant or extinct).
+#' @param sim A \code{sim} object, containing extinction times, speciation times,
+#' parent, and status information for each species in the simulation. See 
+#' \code{?sim}.
 #'
 #' @return A \code{phylo} object from the APE package. Tip labels are numbered
 #' following the order of species in the \code{sim} object.
@@ -69,6 +70,11 @@
 #' @export
 
 make.phylo <- function(sim) {
+  # check that sim is a valid sim object
+  if (!is.sim(sim)) {
+    stop("Invalid argument, must be a sim object. See ?sim")
+  }
+  
   # simulations with just one species do not have a phylogeny
   if (length(sim$TE) < 2) {
     message("There is no phylogeny for a simulation with only one lineage")

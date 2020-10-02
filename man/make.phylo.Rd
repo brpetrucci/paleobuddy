@@ -7,8 +7,9 @@
 make.phylo(sim)
 }
 \arguments{
-\item{sim}{A simulation containing lists for the speciation times, extinction
-times, parent identities and status (extant or extinct).}
+\item{sim}{A \code{sim} object, containing extinction times, speciation times,
+parent, and status information for each species in the simulation. See 
+\code{?sim}.}
 }
 \value{
 A \code{phylo} object from the APE package. Tip labels are numbered

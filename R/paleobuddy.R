@@ -13,6 +13,9 @@
 #' types of scenarios for birth and death rates. See \code{?bd.sim},
 #' \code{?bd.sim.constant} and \code{?bd.sim.general} for more information.
 #' 
+#' All birth-death simulation functions return a \code{sim} object, which has some
+#' generic methods etc. of its own. See \code{?sim} for more information.
+#' 
 #' @section Fossil record simulation:
 #' The package provides users with a similarly diverse array of scenarios for 
 #' preservation rates in generating fossil records from birth-death simulations.

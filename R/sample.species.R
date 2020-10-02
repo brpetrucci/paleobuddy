@@ -196,6 +196,11 @@
 #' @export
 
 sample.species <- function(sim, rho, tMax, S) {
+  # check that sim is a valid sim object
+  if (!is.sim(sim)) {
+    stop("Invalid argument, must be a sim object. See ?sim")
+  }
+  
   # get speciation and extinction times
   TE <- sim$TE
   TS <- sim$TS

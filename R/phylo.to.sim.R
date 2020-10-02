@@ -42,9 +42,8 @@
 #' in this parameter if \code{phy} have a \code{$root.edge}, which is taken by the
 #' function as the \code{stemLength} value.
 #' 
-#' @return A \code{sim} object organized in the same format as the output of 
-#' \code{bd.sim}. Items in the object follow their tip assignment in the 
-#' phylogeny.
+#' @return A \code{sim} object. For details, see \code{?sim}. Items in the object 
+#' follow their tip assignment in the phylogeny.
 #' 
 #' @details 
 #' 
@@ -364,6 +363,14 @@ phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
   # one simple transformation if all lineages are extant:
   if (class(res$TE) == "logical") {
     res$TE <- as.numeric(res$TE)
+  }
+  
+  # set res as a sim object
+  class(res) <- "sim"
+  
+  # make sure it is valid
+  if (!is.sim(res)) {
+    stop("Result is not a valid sim object")
   }
   
   return(res)
