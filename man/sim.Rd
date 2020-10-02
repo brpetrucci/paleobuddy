@@ -11,13 +11,21 @@
 \usage{
 is.sim(sim)
 
-\method{print}{sim}(sim)
+\method{print}{sim}(x, ...)
 
-\method{summary}{sim}(sim)
+\method{summary}{sim}(object, ...)
 
-plot.sim(sim)
+\method{plot}{sim}(x, ...)
 
 sim.counts(sim, t)
+}
+\arguments{
+\item{sim, x, object}{Object of class "sim"}
+
+\item{...}{Further arguments inherited from generics.}
+
+\item{t}{Time t (in Mya). Used for counting and/or plotting births, deaths
+and species number.}
 }
 \description{
 The \code{sim} class is a frequent return and input argument for functions in

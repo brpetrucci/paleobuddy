@@ -126,8 +126,8 @@ clades <- find.lineages(sim = sim)
 
 # get a phylogeny for whichever one has a lot of species
 for (c in clades) {
-  if (length(c$TE) > 10) {
-    phy <- make.phylo(c)
+  if (length(c$sim$TE) > 10) {
+    phy <- make.phylo(c$sim)
     break
   }
 }

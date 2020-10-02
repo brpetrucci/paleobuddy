@@ -5,11 +5,10 @@
 #' Poisson rate to be (1) a constant, (2) a function of time, (3) a function of 
 #' time and an environmental variable, or (4) a vector of numbers. Also allows 
 #' as an optional parameter a distribution representing the expected occurrence 
-#' number over a species duration (in which case average rate must be constant). 
-#' Allows for further flexibility in (non-age dependent) rates by a shift times
-#' vector and environmental matrix parameters. Optionally takes a vector of time
-#' bins representing geologic periods, so that if the user wishes occurrence 
-#' times can be presented as a range instead of true points. See 
+#' number over a species duration. Allows for further flexibility in rates by a 
+#' shift times vector and environmental matrix parameters. Optionally takes a 
+#' vector of time bins representing geologic periods, so that if the user wishes 
+#' occurrence times can be presented as a range instead of true points. See 
 #' \code{sample.species} - absolute time-dependent sampling - and 
 #' \code{sample.general} - time and/or age-dependent sampling - for more 
 #' information.

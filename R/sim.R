@@ -18,8 +18,19 @@
 #' extant.}}
 #' 
 #' Here we declare useful generics and methods for \code{sim} objects.
+#' 
+#' @param sim,x,object Object of class "sim"
+#' 
+#' @param t Time t (in Mya). Used for counting and/or plotting births, deaths
+#' and species number.
+#' 
+#' @param ... Further arguments inherited from generics.
 #'
 #' @name sim
+#' 
+#' @importFrom graphics plot par
+#' @importFrom utils head
+#' 
 NULL
 #> NULL
 
@@ -33,6 +44,7 @@ NULL
 #' irrelevant.
 #' 
 #' @export
+#' 
 
 is.sim <- function(sim) {
   # checks that the class is sim
@@ -55,12 +67,16 @@ is.sim <- function(sim) {
   siz <- (length(unique(c(length(sim[[1]]), length(sim[[2]]), length(sim[[3]]),
                     length(sim[[4]])))) == 1)
   
-  # checks that there are three double vectors and one logical
+  # checks that there are three double vectors and one logical, or two of each
+  # when there is only one species
   types <- unlist(lapply(1:4, function(x) typeof(sim[[x]])))
   
-  # if there are NA-only vectors, they will be counted as logical
-  typ <- (sum(types == "double") == 3 && sum(types == "logical") == 1)
-  typ<- TRUE
+  #
+  typ <- (sum(types == "double") == 3 && sum(types == "logical") == 1) ||
+    (sum(types == "double") == 2 && sum(types == "logical") == 2 &&
+       length(sim[[1]]) == 1)
+  
+
   # check that, if typ is false, it is because there are NA-only 
   return(siz && typ)
 }
@@ -73,8 +89,12 @@ is.sim <- function(sim) {
 #' simulations with 10+ species.
 #' 
 #' @export
+#' 
 
-print.sim <- function(sim) {
+print.sim <- function(x, ...) {
+  # change name just for clarity of the object
+  sim <- x
+  
   # first check that it is a valid sim
   if (!is.sim(sim)) {
     stop("Invalid sim object, see ?sim")
@@ -91,16 +111,16 @@ print.sim <- function(sim) {
   
   # and then some details
   cat("\nExtinction times (NA means extant)\n")
-  print(head(sim$TE))
+  print(utils::head(sim$TE))
   
   cat("\n\nSpeciation times \n")
-  print(head(sim$TS))
+  print(utils::head(sim$TS))
   
   cat("\n\nSpecies parents (NA for initial)\n")
-  print(head(sim$PAR))
+  print(utils::head(sim$PAR))
   
   cat("\n\nSpecies status (extinct or extant)\n")
-  print(head(status))
+  print(utils::head(status))
   
   # to see the whole vector
   cat("\n\nFor more details on vector y, try sim$y, with y one of\n")
@@ -114,14 +134,17 @@ print.sim <- function(sim) {
 #' @export
 #'
 
-summary.sim <- function(sim) {
+summary.sim <- function(object, ...) {
+  # change name just for clarity of the object
+  sim <- object
+  
   # check that it is a valid sim object
   if (!is.sim(sim)) {
     stop("Invalid sim object, see ?sim")
   }
   
   # state the name and nature of the object
-  cat("\nBirth-death simulation object: ", deparse(substitute(sim)))
+  cat("\nBirth-death simulation object: ", deparse(substitute(object)))
   
   # some quick numbers
   cat("\n\n  Total number of species: ", length(sim$TE))
@@ -168,7 +191,10 @@ summary.sim <- function(sim) {
 #' @export
 #' 
 
-plot.sim <- function(sim) {
+plot.sim <- function(x, ...) {
+  # change name just for clarity of the object
+  sim <- x
+  
   # check that it is a valid sim object
   if (!is.sim(sim)) {
     stop("Invalid sim object, see ?sim")
@@ -208,6 +234,7 @@ plot.sim <- function(sim) {
 #' sim at time t.
 #' 
 #' @export
+#' 
 
 sim.counts <- function(sim, t) {
   # check that it is a valid sim object
