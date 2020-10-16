@@ -27,7 +27,8 @@ diversification of a paraphyletic group.}
 \item{lambda}{Function to hold the speciation rate over time. It will either be
 interpreted as an exponential rate, or a Weibull scale if 
 \code{lShape != NULL}. Can be constant, to allow for mixing of constant and
-non-constant rates.}
+non-constant rates. One can use constructs such as \code{ifelse()} to create
+rates whose underlying model change over time (see the last examples).}
 
 \item{mu}{Similar to above, but for the extinction rate.
 
@@ -56,7 +57,11 @@ Weibull(rate, 1) = Exponential(1/rate). Note that even when
 Note: Time-varying shape is implemented, so one could have \code{lShape} or 
 \code{mShape} be a function of time. It is not thoroughly tested, however, 
 so it may be prudent to wait for a future release where this feature is well
-established.}
+established.
+
+Note: Shape must be greater than 0. We arbitrarily chose 0.01 as the minimum
+accepted value, so if shape is under 0.01 for any reasonable time in the 
+simulation, returns an error.}
 
 \item{nFinal}{A \code{vector} of length \code{2}, indicating an interval of 
 acceptable number of species at the end of the simulation. Default value is 
@@ -75,7 +80,6 @@ simulation. If \code{TRUE}, the function will run repeatedly until the number
 of \emph{extant} species at the end of the simulation lies within the 
 \code{nFinal} interval. If \code{FALSE} (as default), it will run until the 
 \emph{total} number of species generated lies within that interval.
-
 
 Note: The function returns \code{NA} if it runs for more than \code{100000}
 iterations without fulfilling the requirements of \code{nFinal} and 
@@ -276,7 +280,7 @@ n0 <- 1
 tMax <- 40
 
 # temperature-dependent speciation
-p_t <- function(t, temp) {
+l_t <- function(t, temp) {
  return(0.025*exp(0.1*temp))
 }
 
@@ -287,7 +291,7 @@ mu <- 0.075
 data(temp)
 
 # speciation
-lambda <- make.rate(p_t, envRate = temp)
+lambda <- make.rate(l_t, envRate = temp)
 
 # run simulations
 sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
@@ -298,6 +302,111 @@ if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(phy)
 }
 
+# after presenting the possible models, we can consider how to
+# create mixed models, where the dependency changes over time
+
+###
+# consider speciation that becomes environment dependent
+# in the middle of the simulation
+
+# initial number of species
+n0 <- 1
+
+# maximum simulation time
+tMax <- 40
+
+# time and temperature-dependent speciation
+l_t <- function(t, temp) {
+  return(
+    ifelse(t < 20, 0.1 - 0.005*t,
+           0.05 + 0.1*exp(0.02*temp))
+  )
+}
+
+# extinction
+mu <- 0.1
+
+# get the temperature data
+data(temp)
+
+# speciation
+lambda <- make.rate(l_t, envRate = temp)
+
+# run simulations
+sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
+
+# we can plot the phylogeny to take a look
+if (requireNamespace("ape", quietly = TRUE)) {
+  phy <- make.phylo(sim)
+  ape::plot.phylo(phy)
+}
+
+###
+# we can also change the environmental variable
+# halfway into the simulation
+
+# initial number of species
+n0 <- 1
+
+# maximum simulation time
+tMax <- 40
+
+# speciation
+lambda <- 0.1
+
+# temperature-dependent extinction
+m_t1 <- function(t, temp) {
+  return(0.05 + 0.1*exp(0.02*temp))
+}
+
+# get the temperature data
+data(temp)
+
+# make first function
+mu1 <- make.rate(m_t1, envRate = temp) 
+
+# co2-dependent extinction
+m_t2 <- function(t, co2) {
+  return(0.02 + 0.14*exp(0.01*co2))
+}
+
+# get the co2 data
+data(co2)
+
+# make second function
+mu2 <- make.rate(m_t2, envRate = co2)
+
+# final extinction function
+mu <- function(t) {
+  ifelse(t < 20, mu1(t), mu2(t))
+}
+
+# run simulations
+sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
+
+# we can plot the phylogeny to take a look
+if (requireNamespace("ape", quietly = TRUE)) {
+  phy <- make.phylo(sim)
+  ape::plot.phylo(phy)
+}
+
+# note one can also use this mu1 mu2 workflow to create a rate
+# dependent on more than one environmental variable, by decoupling
+# the dependence of each in a different function and putting those
+# together
+
+# finally, note one could create an extinction rate that turns age-dependent
+# in the middle, by making shape time-dependent
+shape <- function(t) {
+  return(
+    ifelse(t < 30, 1, 2)
+  )
+}
+
+# but note that this uses time-dependent shape, which as we note above is not
+# yet thoroughly tested
+
+###
 # note nFinal has to be sensible
 \dontrun{
 # this would return a warning, since it is virtually impossible to get 100

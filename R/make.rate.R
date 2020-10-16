@@ -307,13 +307,13 @@ make.rate <- function(rate, tMax = NULL, envRate = NULL, rateShifts = NULL) {
     spline_result <- smooth.spline(envRate[, 1], envRate[, 2], df = df)
 
     # use predict to find the rate at all times
-    envRateunc <- function(t) {
+    envFunc <- function(t) {
       predict(spline_result, t)$y
     }
 
     # make it a function of time only
     r <- function(t) {
-      return(rate(t, envRateunc(t)))
+      return(rate(t, envFunc(t)))
     }
   }
 

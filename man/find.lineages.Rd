@@ -18,16 +18,17 @@ the starting species in the simulation (i.e. those for which the parent is
 \value{
 A \code{list} object with (named) \code{sim} objects corresponding to 
 the clades descended from species in \code{S}. For each clade, an extra vector 
-\code{sim$LIN} is included so the user can identify the order of species in the
+\code{LIN} is included so the user can identify the order of species in the
 return with the order of species in the original simulation.
 }
 \description{
 Separates a \code{sim} object into \code{sim} objects each with a mother
 species and its descendants. Returns by default the list of \code{sim} objects
-descended from each species with an \code{NA} parent in the original input.
-Allows for the user to input a vector of species to be the mother of each
-resulting member of the returning list instead. Returns for each clade a vector
-with the original identity of member species as well.
+descended from each species with an \code{NA} parent in the original input 
+(meaning species alive at the beginning of the simulation). Allows for the user
+to input a vector of species to be the mother of each resulting member of the 
+returning list instead. Returns for each clade a vector with the original 
+identity of member species as well.
 }
 \examples{
 

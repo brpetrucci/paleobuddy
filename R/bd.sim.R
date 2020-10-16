@@ -55,11 +55,15 @@
 #' \code{lShape != NULL}, \code{lambda} may still be time-dependent. 
 #'
 #' @param mShape Similar to \code{lShape}, but for the extinction rate.
-#' 
+#'
 #' Note: Time-varying shape is implemented, so one could have \code{lShape} or 
 #' \code{mShape} be a function of time. It is not thoroughly tested, however, 
 #' so it may be prudent to wait for a future release where this feature is well
 #' established.
+#' 
+#' Note: Shape must be greater than 0. We arbitrarily chose 0.01 as the minimum
+#' accepted value, so if shape is under 0.01 for any reasonable time in the 
+#' simulation, returns an error.
 #' 
 #' @param envL A \code{data.frame} representing the variation of an environmental
 #' variable (e.g. CO2, temperature, available niches, etc) with time. The first 
@@ -99,7 +103,6 @@
 #' of \emph{extant} species at the end of the simulation lies within the 
 #' \code{nFinal} interval. If \code{FALSE} (as default), it will run until the 
 #' \emph{total} number of species generated lies within that interval.
-#' 
 #' 
 #' Note: The function returns \code{NA} if it runs for more than \code{100000}
 #' iterations without fulfilling the requirements of \code{nFinal} and 
@@ -370,6 +373,105 @@
 #'   ape::plot.phylo(phy)
 #' }
 #' 
+###
+#' # consider speciation that becomes environment dependent
+#' # in the middle of the simulation
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 40
+#' 
+#' # time and temperature-dependent speciation
+#' lambda <- function(t, temp) {
+#'   return(
+#'     ifelse(t < 20, 0.1 - 0.005*t,
+#'            0.05 + 0.1*exp(0.02*temp))
+#'   )
+#' }
+#' 
+#' # extinction
+#' mu <- 0.1
+#' 
+#' # get the temperature data
+#' data(temp)
+#' 
+#' # run simulations
+#' sim <- bd.sim(n0, lambda, mu, tMax, envL = temp, nFinal = c(2, Inf))
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- make.phylo(sim)
+#'   ape::plot.phylo(phy)
+#' }
+#' 
+#' ###
+#' # we can also change the environmental variable
+#' # halfway into the simulation
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 40
+#' 
+#' # speciation
+#' lambda <- 0.1
+#' 
+#' # temperature-dependent extinction
+#' m_t1 <- function(t, temp) {
+#'   return(0.05 + 0.1*exp(0.02*temp))
+#' }
+#' 
+#' # get the temperature data
+#' data(temp)
+#' 
+#' # make first function
+#' mu1 <- make.rate(m_t1, envRate = temp)
+#' 
+#' # co2-dependent extinction
+#' m_t2 <- function(t, co2) {
+#'   return(0.02 + 0.14*exp(0.01*co2))
+#' }
+#' 
+#' # get the co2 data
+#' data(co2)
+#' 
+#' # make second function
+#' mu2 <- make.rate(m_t2, envRate = co2)
+#' 
+#' # final extinction function
+#' mu <- function(t) {
+#'   ifelse(t < 20, mu1(t), mu2(t))
+#' }
+#' 
+#' # run simulations
+#' sim <- bd.sim(n0, lambda, mu, tMax, nFinal = c(2, Inf))
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- make.phylo(sim)
+#'   ape::plot.phylo(phy)
+#' }
+#' 
+#' # note one can also use this mu1 mu2 workflow to create a rate
+#' # dependent on more than one environmental variable, by decoupling
+#' # the dependence of each in a different function and putting those
+#' # together
+#' 
+#' # finally, note one could create an extinction rate that turns age-dependent
+#' # in the middle, by making shape time-dependent
+#' shape <- function(t) {
+#'   return(
+#'     ifelse(t < 30, 1, 2)
+#'   )
+#' }
+#' 
+#' # but note that this uses time-dependent shape, which as we note above is not
+#' # yet thoroughly tested
+#' 
+#' ###
 #' # note nFinal has to be sensible
 #' \dontrun{
 #' # this would return a warning, since it is virtually impossible to get 100

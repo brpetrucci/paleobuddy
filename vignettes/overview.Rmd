@@ -76,10 +76,7 @@ From here, we could use this phylogeny to run `phytools` and get an estimate of 
 ```{r eval=FALSE}
 # find the fit
 fit <- phytools::fit.bd(ape::drop.fossil(phy))
-
-# get the birth and death rate
-b <- fit$b
-d <- fit$d
+fit
 ```
 
 We set this to not run so that we do not need to add phytools as an Import in the package, but the results were approximately `b = 0.21` and `d = 0.22`. As we can see, `phytools` overestimated extinction and underestimated speciation, something common since there are two independent processes going on, births and deaths. A phylogeny with more species could lead to more accurate results, and of course if we were conducting a thorough test of `phytools` we would generate hundreds or thousands of phylogenies.
@@ -88,10 +85,10 @@ For illustration, we create a simulation with more than 1000 tips, with 547 exta
 
 ```{r}
 # set a seed
-set.seed(2)
+set.seed(3)
 
 # create simulation
-# note nFinal and extOnly, defining we want 200 ormore extant species at the end
+# note nFinal and extOnly, defining we want 200 or more extant species at the end
 sim <- bd.sim(n0, lambda, mu, tMax, nFinal = c(200, Inf), extOnly = TRUE)
 
 # check the number of extant species
@@ -103,9 +100,10 @@ We can then run this through `phytools` as before
 ```{r eval=FALSE}
 # find the fit
 fit <- phytools::fit.bd(ape::drop.fossil(make.phylo(sim)))
+fit
 ```
 
-This yields a warning, because of the gigantic phylogeny, but also yields `b = 0.25` and `d = 0.12`. Pretty great fits, especially when considering how challenging it is to estimate extinction rates with a molecular phylogeny, and the fact we conditioned the results when we asked `bd.sim` to only give us a simulation with 200 or more extant species.
+This yields a warning, because of the gigantic phylogeny, but also yields `b = 0.28` and `d = 0.18`. Pretty great fits, especially when considering how challenging it is to estimate extinction rates with a molecular phylogeny, and the fact we conditioned the results when we asked `bd.sim` to only give us a simulation with 200 or more extant species.
 
 ## Linear speciation and extinction: a use case with PyRate and Foote's Per Capita
 

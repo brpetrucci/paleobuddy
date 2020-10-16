@@ -101,6 +101,7 @@
 #' 
 #' # of course in this case there are no phylogenies to plot
 #' 
+#' ###
 #' # note nFinal has to be sensible
 #' \dontrun{
 #' # this would return a warning, since it is virtually impossible to get 100

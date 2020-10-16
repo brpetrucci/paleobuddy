@@ -307,7 +307,6 @@ rexp.var <- function(n, rate, now = 0, tMax = Inf, shape = NULL,
       }
 
       else {
-
         # create a function to hold the CDF of the distribution minus the
         # uniform variable - if we find t where this is 0, this t is
         # distributed as a weibull

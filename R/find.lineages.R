@@ -2,10 +2,11 @@
 #'
 #' Separates a \code{sim} object into \code{sim} objects each with a mother
 #' species and its descendants. Returns by default the list of \code{sim} objects
-#' descended from each species with an \code{NA} parent in the original input.
-#' Allows for the user to input a vector of species to be the mother of each
-#' resulting member of the returning list instead. Returns for each clade a vector
-#' with the original identity of member species as well.
+#' descended from each species with an \code{NA} parent in the original input 
+#' (meaning species alive at the beginning of the simulation). Allows for the user
+#' to input a vector of species to be the mother of each resulting member of the 
+#' returning list instead. Returns for each clade a vector with the original 
+#' identity of member species as well.
 #'
 #' @inheritParams make.phylo
 #'
@@ -17,7 +18,7 @@
 #'
 #' @return A \code{list} object with (named) \code{sim} objects corresponding to 
 #' the clades descended from species in \code{S}. For each clade, an extra vector 
-#' \code{sim$LIN} is included so the user can identify the order of species in the
+#' \code{LIN} is included so the user can identify the order of species in the
 #' return with the order of species in the original simulation.
 #'
 #' @examples
@@ -176,7 +177,7 @@ find.lineages <- function(sim, S = NULL) {
   # if S is null, the user wants to find the lineages with the simulation's
   # starting species as parents
   if (is.null(S)) {
-    # by convention, species without parents in the output of the BD functions
+    # by convention, species without parents in the output of the bd functions
     # have parents set to NA
     S = which(is.na(sim$PAR))
   }
@@ -206,7 +207,7 @@ find.lineage <- function(sim, s) {
   
   # if s is not on the simulation, we have a problem
   if (s > length(sim$TE)) {
-    stop("This species is not on the simulation")
+    stop("this species is not on the simulation")
   }
 
   # lineage starts with a species
@@ -232,12 +233,12 @@ find.lineage <- function(sim, s) {
 
   # PAR here still follows the identifications on the original sim, so we need
   # to rename the species
-  if (length(PAR)>1) {
+  if (length(PAR) > 1) {
     # if the first species is not already unparented, it will be now
     PAR[1] = NA
 
     # first species of the clade (the one that generated the second) is 1
-    PAR[PAR==PAR[2]] = 1
+    PAR[PAR == PAR[2]] = 1
 
     # every other species follows the order in lin, to preserve the order
     # of TE and TS

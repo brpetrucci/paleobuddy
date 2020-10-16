@@ -50,7 +50,6 @@ of \emph{extant} species at the end of the simulation lies within the
 \code{nFinal} interval. If \code{FALSE} (as default), it will run until the 
 \emph{total} number of species generated lies within that interval.
 
-
 Note: The function returns \code{NA} if it runs for more than \code{100000}
 iterations without fulfilling the requirements of \code{nFinal} and 
 \code{extOnly}.}
@@ -153,6 +152,7 @@ sim <- bd.sim.constant(n0, lambda, mu, tMax)
 
 # of course in this case there are no phylogenies to plot
 
+###
 # note nFinal has to be sensible
 \dontrun{
 # this would return a warning, since it is virtually impossible to get 100
