@@ -3,10 +3,10 @@
 #' Generates a phylogeny from a \code{sim} object containing speciation and 
 #' extinction times, parent and status information, usually returned by 
 #' \code{bd.sim} or similar. Returns a \code{phylo} object containing information 
-#' on the phylogeny, following a "Hennigian" (sensu Ezard et al 2011) format. 
-#' Returns \code{NA} and sends a warning if the simulation has only one lineage or
-#' if more than one species has \code{NA} as parent (i.e. there is no single 
-#' common ancestor in the simulation). In the latter case, please use 
+#' on the phylogeny, following an "evolutionary Hennigian" (sensu Ezard et al 
+#' 2011) format. Returns \code{NA} and sends a warning if the simulation has only
+#' one lineage or if more than one species has \code{NA} as parent (i.e. there is 
+#' no single common ancestor in the simulation). In the latter case, please use 
 #' \code{find.lineages} first. 
 #'
 #' @param sim A \code{sim} object, containing extinction times, speciation times,
