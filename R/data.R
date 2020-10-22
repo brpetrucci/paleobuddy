@@ -13,7 +13,8 @@
 #'   \item{t}{A numeric vector representing time since the beginning of the data 
 #'   frame age, approximately 67 million years ago, in million years. We set this
 #'   from past to present as opposed to present to past since birth-death 
-#'   functions in \code{paleobuddy} consider time going in said direction.}
+#'   functions in \code{paleobuddy} consider time going in the former direction.}
+#'   
 #'   \item{temperature}{A numeric vector representing temperature in degrees 
 #'   celsius corresponding to time \code{t}. Note there might be more than one 
 #'   temperature for each time \code{t} given the resolution of the data set.}
@@ -51,7 +52,8 @@
 #'   \item{t}{A numeric vector representing time since the beginning of the data 
 #'   frame age, 520 million years ago, in million years. We set this from past to 
 #'   present as opposed to present to past since birth-death functions in 
-#'   \code{paleobuddy} consider time going in said direction.}
+#'   \code{paleobuddy} consider time going in the former direction.}
+#'   
 #'   \item{co2}{A numeric vector representing CO2 concentration as the ratio of
 #'   CO2 mass at \code{t} over the present.}
 #' }
