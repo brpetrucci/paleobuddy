@@ -42,10 +42,12 @@ sim <- bd.sim(n0 = 3, lambda = 0.1, mu = 0.1, tMax = 10, nFinal = c(20, Inf))
 clades <- find.lineages(sim)
 
 # set up for plotting side by syde
-par(mfrow = c(1,length(clades)))
+par(mfrow = c(1, length(clades)))
 
 # for each clade
 for (i in 1:length(clades)) {
+  # change NA to 0 on the clade's TE
+  clades[[i]]$sim$TE[clades[[i]]$sim$EXTANT] <- 0
   
   # if there is only one lineage in the clade
   if (length(clades[[i]]$sim$TE) < 2) {
@@ -53,6 +55,7 @@ for (i in 1:length(clades)) {
     plot(NA, xlim = c(-1, 1), ylim = c(-1, 1))
     text("simulation with \n just one lineage", x = 0, y = 0.5, cex = 2)
   }
+  
   # if it is a proper phylogeny
   else {
     if (requireNamespace("ape", quietly = TRUE)) {
@@ -62,12 +65,14 @@ for (i in 1:length(clades)) {
       ape::axisPhylo()
     }
     
-    # checking speciation times:
+    # checking speciation times
     for (j in 2:length(clades[[i]]$sim$TS)) {
       # the subtraction is just to adjust the wt with the plot scale
       lines(x = c(
-        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TS[j],
-        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TS[j]),
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - 
+           clades[[i]]$sim$TS[j],
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - 
+           clades[[i]]$sim$TS[j]),
         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "blue")
     }
     
@@ -75,8 +80,10 @@ for (i in 1:length(clades)) {
     for (j in 1:length(sim$TE)) {
       # the subtraction is just to adjust the wt with the plot scale
       lines(x = c(
-        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TE[j],
-        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TE[j]),
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - 
+           clades[[i]]$sim$TE[j],
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - 
+           clades[[i]]$sim$TE[j]),
         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "red")
     }
   }
@@ -90,7 +97,7 @@ sim <- bd.sim(n0 = 5, lambda = 0.1, mu = 0.08, tMax = 10, nFinal = c(20, Inf))
 clades <- find.lineages(sim)
 
 # set up for plotting side by syde
-par(mfrow = c(1,length(clades)))
+par(mfrow = c(1, length(clades)))
 
 # for each clade
 for (i in 1:length(clades)) {
@@ -103,6 +110,7 @@ for (i in 1:length(clades)) {
     plot(NA, xlim = c(-1, 1), ylim = c(-1, 1))
     text("simulation with \n just one lineage", x = 0, y = 0.5, cex = 2)
   }
+  
   # if it is a proper phylogeny
   else {
     if (requireNamespace("ape", quietly = TRUE)) {
@@ -116,8 +124,10 @@ for (i in 1:length(clades)) {
     for (j in 2:length(clades[[i]]$sim$TS)) {
       # the subtraction is just to adjust the wt with the plot scale
       lines(x = c(
-        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TS[j],
-        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TS[j]),
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - 
+           clades[[i]]$sim$TS[j],
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - 
+           clades[[i]]$sim$TS[j]),
         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "blue")
     }
     
@@ -125,8 +135,10 @@ for (i in 1:length(clades)) {
     for (j in 1:length(sim$TE)) {
       # the subtraction is just to adjust the wt with the plot scale
       lines(x = c(
-        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TE[j],
-        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - clades[[i]]$sim$TE[j]),
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - 
+           clades[[i]]$sim$TE[j],
+        sort(clades[[i]]$sim$TS, decreasing = TRUE)[2] - 
+           clades[[i]]$sim$TE[j]),
         y = c(plot$y.lim[1], plot$y.lim[2]), lwd = 2, col = "red")
     }
   }
@@ -155,7 +167,7 @@ sim <- bd.sim(1, 0.1, 0.05, 40, nFinal = c(5, Inf))
 # making sure we have a couple of clades to explore
 while ((length(which(sim$PAR == 1)) < 3) | (length(which(sim$PAR == 2)) < 3) |
        (length(which(sim$PAR == 3)) < 3)) {
-  sim <- bd.sim(1, 0.2, 0.1, 10)
+  sim <- bd.sim(1, 0.1, 0.05, 40, nFinal = c(5, Inf))
 }
 
 if (requireNamespace("ape", quietly = TRUE)) {
