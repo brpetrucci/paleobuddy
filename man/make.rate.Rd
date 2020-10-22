@@ -37,7 +37,7 @@ Note \code{paleobuddy} has two environmental data frames, \code{temp} and
 
 Acknowledgements: The strategy to transform a function of \code{t} and 
 \code{env} into a function of \code{t} only using \code{envRate} was adapted 
-from RPANDA (see below).}
+from RPANDA.}
 
 \item{rateShifts}{A vector indicating the time placement of rate shifts in a 
 step function. The first element must be the first time point for the 
@@ -63,7 +63,7 @@ rate.
 \examples{
 
 # first we need a time vector to use on plots
-t <- seq(0, 50, 0.1)
+time <- seq(0, 50, 0.1)
 
 # make.rate will leave some types of functions unaltered, like the following
 
@@ -72,7 +72,7 @@ t <- seq(0, 50, 0.1)
 r <- make.rate(0.5)
 
 # plot it
-plot(t, rep(r, length(t)), type = 'l')
+plot(time, rep(r, length(time)), type = 'l')
 
 ###
 # something a bit more complex: a linear rate
@@ -86,7 +86,7 @@ rate <- function(t) {
 r <- make.rate(rate)
 
 # plot it
-plot(t, r(t), type = 'l')
+plot(time, r(time), type = 'l')
 
 ###
 # remember: this can be any time-varying function!
@@ -100,7 +100,7 @@ rate <- function(t) {
 r <- make.rate(rate)
 
 # plot it
-plot(t, r(t), type = 'l')
+plot(time, r(time), type = 'l')
 
 ###
 # we can use ifelse() to make a step function like this
@@ -116,7 +116,7 @@ rate <- function(t) {
 r <- make.rate(rate)
 
 # plot it
-plot(t, r(t), type = 'l')
+plot(time, r(time), type = 'l')
 
 # important note: this method of creating a step function might be annoying,
 # but when running thousands of simulations it will provide a much faster
@@ -141,7 +141,7 @@ rateShifts <- c(0, 10, 20, 35)
 r <- make.rate(rate, tMax = 50, rateShifts = rateShifts)
 
 # plot it
-plot(t, r(t),type = 'l')
+plot(time, r(time),type = 'l')
 
 # as mentioned above, while this works well it will be a pain to integrate.
 # Furthermore, it is impractical to supply a rate and a shifts vector and
@@ -164,7 +164,7 @@ rate <- function(t, env) {
 r <- make.rate(rate, envRate = temp)
 
 # plot it
-plot(t, r(t), type = 'l')
+plot(time, r(time), type = 'l')
 
 ###
 # we can also have a function that depends on both time AND temperature
@@ -178,7 +178,7 @@ rate <- function(t, env) {
 r <- make.rate(rate, envRate = temp)
 
 # plot it
-plot(t, r(t), type = 'l')
+plot(time, r(time), type = 'l')
 
 ###
 # as mentioned above, we could also use ifelse() to construct a step function
@@ -195,7 +195,7 @@ rate <- function(t, env) {
 r <- make.rate(rate, envRate = temp)
 
 # plot it
-plot(t, r(t), type = 'l')
+plot(time, r(time), type = 'l')
 
 }
 \references{

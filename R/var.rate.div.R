@@ -26,7 +26,7 @@
 #' @examples
 #'
 #' # let us first create a vector of times to use in these examples.
-#' t <- seq(0, 50, 0.1)
+#' time <- seq(0, 50, 0.1)
 #' 
 #' ###
 #' # we can start simple: create a constant rate
@@ -37,25 +37,25 @@
 #' 
 #' # see how the rate looks
 #' r <- make.rate(0.5)
-#' plot(t, rep(r, length(t)), type = 'l')
+#' plot(time, rep(r, length(time)), type = 'l')
 #' 
 #' # get the diversity and plot it
-#' div <- var.rate.div(rate, t)
-#' plot(t, div, type = 'l')
+#' div <- var.rate.div(rate, time)
+#' plot(time, div, type = 'l')
 #' 
 #' ###
 #' # something a bit more complex: a linear rate
 #' rate <- function(t) {
-#'   return(0.01*t)
+#'   return(0.1 - 0.005*t)
 #' }
 #' 
 #' # visualize the rate
 #' r <- make.rate(rate)
-#' plot(t, r(t), type = 'l')
+#' plot(time, r(time), type = 'l')
 #' 
 #' # get the diversity and plot it
-#' div <- var.rate.div(rate, t = t)
-#' plot(t, div, type = 'l')
+#' div <- var.rate.div(rate, t = time)
+#' plot(time, div, type = 'l')
 #' 
 #' ###
 #' # remember: rate is diversity!
@@ -77,11 +77,11 @@
 #' 
 #' # visualize the rate
 #' r <- make.rate(rate)
-#' plot(t, r(t), type = 'l')
+#' plot(time, r(time), type = 'l')
 #' 
 #' # get diversity and plot it
-#' div <- var.rate.div(rate, t, n0 = 2)
-#' plot(t, div, type = 'l')
+#' div <- var.rate.div(rate, time, n0 = 2)
+#' plot(time, div, type = 'l')
 #' 
 #' ###
 #' # remember: rate can be any time-varying function!
@@ -93,11 +93,11 @@
 #' 
 #' # visualize the rate
 #' r <- make.rate(rate)
-#' plot(t, r(t), type = 'l')
+#' plot(time, r(time), type = 'l')
 #' 
 #' # we can have any number of starting species
-#' div <- var.rate.div(rate, t, n0 = 2)
-#' plot(t, div, type = 'l')
+#' div <- var.rate.div(rate, time, n0 = 2)
+#' plot(time, div, type = 'l')
 #' 
 #' ###
 #' # we can use ifelse() to make a step function like this
@@ -108,15 +108,15 @@
 #' }
 #' 
 #' # change t so things are faster
-#' t <- seq(0, 10, 0.1)
+#' time <- seq(0, 10, 0.1)
 #' 
 #' # visualize the rate
 #' r <- make.rate(rate)
-#' plot(t, r(t), type = 'l')
+#' plot(time, r(time), type = 'l')
 #' 
 #' # get the diversity and plot it
-#' div <- var.rate.div(rate, t)
-#' plot(t, div, type = 'l')
+#' div <- var.rate.div(rate, time)
+#' plot(time, div, type = 'l')
 #' 
 #' # important note: this method of creating a step function might be annoying,
 #' # but when running thousands of simulations it will provide a much faster
@@ -134,13 +134,15 @@
 #' 
 #' # visualize the rate
 #' r <- make.rate(rate, tMax = 10, rateShifts = rateShifts)
-#' plot(t, r(t),type = 'l')
-#' 
+#' plot(time, r(time),type = 'l')
+#'  
+#' \dontrun{
 #' # get the diversity and plot it
-#' div <- var.rate.div(rate, t, tMax = 10, rateShifts = rateShifts)
-#' plot(t, div, type = 'l')
+#' div <- var.rate.div(rate, time, tMax = 10, rateShifts = rateShifts)
+#' plot(time, div, type = 'l')
+#' }
 #' 
-#' # note the delay in running var.rate.div using this method. integrating a step
+#' # we set it to not run due to the time this method takes. integrating a step
 #' # function created using the methods in make.rate() is slow, as explained in
 #' # the make.rate documentation)
 #' 
@@ -161,11 +163,12 @@
 #' 
 #' # visualize the rate
 #' r <- make.rate(rate, envRate = temp)
-#' plot(t, r(t), type = 'l')
+#' plot(time, r(time), type = 'l')
+#' 
 #' 
 #' # get diversity and plot it
-#' div <- var.rate.div(rate, t, envRate = temp)
-#' plot(t, div, type = 'l')
+#' div <- var.rate.div(rate, time, envRate = temp)
+#' plot(time, div, type = 'l')
 #' 
 #' ###
 #' # we can also have a function that depends on both time AND temperature
@@ -177,11 +180,11 @@
 #' 
 #' # visualize the rate
 #' r <- make.rate(rate, envRate = temp)
-#' plot(t, r(t), type = 'l')
+#' plot(time, r(time), type = 'l')
 #' 
 #' # get diversity and plot it
-#' div <- var.rate.div(rate, t, envRate = temp)
-#' plot(t, div, type = 'l')
+#' div <- var.rate.div(rate, time, envRate = temp)
+#' plot(time, div, type = 'l')
 #'   
 #' ###
 #' # as mentioned above, we could also use ifelse() to construct a step function
@@ -196,11 +199,16 @@
 #' 
 #' # visualize the rate
 #' r <- make.rate(rate, envRate = temp)
-#' plot(t, r(t), type = 'l')
+#' plot(time, r(time), type = 'l')
 #' 
+#' \dontrun{
 #' # get diversity and plot it
-#' div <- var.rate.div(rate, t, envRate = temp)
-#' plot(t, div, type = 'l')
+#' div <- var.rate.div(rate, time, envRate = temp)
+#' plot(time, div, type = 'l')
+#' }
+#' 
+#' # takes a bit long so we set it to not run, but the user
+#' # should feel free to explore this and other scenarios
 #' 
 #' @name var.rate.div
 #' @rdname var.rate.div

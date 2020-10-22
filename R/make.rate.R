@@ -37,7 +37,7 @@
 #' 
 #' Acknowledgements: The strategy to transform a function of \code{t} and 
 #' \code{env} into a function of \code{t} only using \code{envRate} was adapted 
-#' from RPANDA (see below).
+#' from RPANDA.
 #'
 #' @param rateShifts A vector indicating the time placement of rate shifts in a 
 #' step function. The first element must be the first time point for the 
@@ -61,7 +61,7 @@
 #' @examples
 #' 
 #' # first we need a time vector to use on plots
-#' t <- seq(0, 50, 0.1)
+#' time <- seq(0, 50, 0.1)
 #' 
 #' # make.rate will leave some types of functions unaltered, like the following
 #' 
@@ -70,7 +70,7 @@
 #' r <- make.rate(0.5)
 #' 
 #' # plot it
-#' plot(t, rep(r, length(t)), type = 'l')
+#' plot(time, rep(r, length(time)), type = 'l')
 #' 
 #' ###
 #' # something a bit more complex: a linear rate
@@ -84,7 +84,7 @@
 #' r <- make.rate(rate)
 #' 
 #' # plot it
-#' plot(t, r(t), type = 'l')
+#' plot(time, r(time), type = 'l')
 #' 
 #' ###
 #' # remember: this can be any time-varying function!
@@ -98,7 +98,7 @@
 #' r <- make.rate(rate)
 #' 
 #' # plot it
-#' plot(t, r(t), type = 'l')
+#' plot(time, r(time), type = 'l')
 #' 
 #' ###
 #' # we can use ifelse() to make a step function like this
@@ -114,7 +114,7 @@
 #' r <- make.rate(rate)
 #' 
 #' # plot it
-#' plot(t, r(t), type = 'l')
+#' plot(time, r(time), type = 'l')
 #' 
 #' # important note: this method of creating a step function might be annoying,
 #' # but when running thousands of simulations it will provide a much faster
@@ -139,7 +139,7 @@
 #' r <- make.rate(rate, tMax = 50, rateShifts = rateShifts)
 #' 
 #' # plot it
-#' plot(t, r(t),type = 'l')
+#' plot(time, r(time),type = 'l')
 #' 
 #' # as mentioned above, while this works well it will be a pain to integrate.
 #' # Furthermore, it is impractical to supply a rate and a shifts vector and
@@ -162,7 +162,7 @@
 #' r <- make.rate(rate, envRate = temp)
 #' 
 #' # plot it
-#' plot(t, r(t), type = 'l')
+#' plot(time, r(time), type = 'l')
 #' 
 #' ###
 #' # we can also have a function that depends on both time AND temperature
@@ -176,7 +176,7 @@
 #' r <- make.rate(rate, envRate = temp)
 #' 
 #' # plot it
-#' plot(t, r(t), type = 'l')
+#' plot(time, r(time), type = 'l')
 #' 
 #' ###
 #' # as mentioned above, we could also use ifelse() to construct a step function
@@ -193,7 +193,7 @@
 #' r <- make.rate(rate, envRate = temp)
 #' 
 #' # plot it
-#' plot(t, r(t), type = 'l')
+#' plot(time, r(time), type = 'l')
 #'
 #' @name make.rate
 #' @rdname make.rate
@@ -201,7 +201,7 @@
 
 make.rate <- function(rate, tMax = NULL, envRate = NULL, rateShifts = NULL) {
   # use this to check for length and how many arguments
-  nargs = ifelse(is.numeric(rate), length(rate), length(formals(rate)))
+  nargs <- ifelse(is.numeric(rate), length(rate), length(formals(rate)))
 
   # let us first check for some errors
   
@@ -210,7 +210,7 @@ make.rate <- function(rate, tMax = NULL, envRate = NULL, rateShifts = NULL) {
     # if rate is constant, we should not see any envRate or rateShifts
     if (nargs == 1) {
       if (!is.null(envRate) || !is.null(rateShifts)) {
-        stop("constant rate with environmental variable or shifts")
+        stop("Constant rate with environmental variable or shifts")
       } 
       
       # if it is just the number, return it
@@ -219,58 +219,59 @@ make.rate <- function(rate, tMax = NULL, envRate = NULL, rateShifts = NULL) {
       }
     }
 
-    # if length(rate) > 1 we have a rates vector, so we must have a shifts vector
+    # if length(rate) > 1 we have a rates vector, so we 
+    # must have a shifts vector
     else if (is.null(rateShifts)) {
-      stop("rate vector supplied without a shift vector")
+      stop("Rate vector supplied without a shift vector")
     }
 
     # if they are not the same size, we have a problem
     else if (length(rate) != length(rateShifts)) {
-      stop("rate vector and shifts vector must have the same length")
+      stop("Rate vector and shifts vector must have the same length")
     }
 
     # if we have a rates vector and shifts vector, should not have envRate
     else if (!is.null(envRate)) {
-      stop("rates and shifts supplied with environmental variable;
+      stop("Rates and shifts supplied with environmental variable;
            use ifelse()")
     }
   }
 
   # if we have a rates vector, we need a shifts vector
   else if (!is.null(rateShifts)) {
-    stop("shifts vector supplied without a rates vector")
+    stop("Shifts vector supplied without a rates vector")
   }
 
   # some sanity checks on the number of arguments
   else if (nargs > 1 || (nargs == 0 && !is.numeric(rate))) {
     # rate should not have more than two arguments or less than 1
     if (nargs > 2 || nargs == 0) {
-      stop("function can only depend on time and environmental var")
+      stop("Function can only depend on time and an environmental variable")
     }
 
     # if it has two, we must also have a non-null envRate
     else if (nargs == 2) {
       if (is.null(envRate)) {
-        stop("environmental function supplied with no environmental variable")
+        stop("Environmental function supplied with no environmental variable")
       }
       
       # and envRate needs to have two columns
       if (ncol(envRate) != 2) {
-        stop("environmental variable must be a dataframe with two columns")
+        stop("Environmental variable must be a dataframe with two columns")
       }
     }
   }
 
   # need a function of environmental var if we have said var
   else if (nargs == 1 && !is.null(envRate)) {
-    stop("environmental variable supplied with one argument function")
+    stop("Environmental variable supplied with one argument function")
   }
 
   # check if there are shifts - i.e. if the rate is a step function
   if (!is.null(rateShifts)) {
     # check that we have tMax in case we want to invert time
     if (is.null(tMax)) {
-      stop("need tMax for creating step functions")
+      stop("Need tMax for creating step functions")
     }
 
     fList <- rate
@@ -317,7 +318,7 @@ make.rate <- function(rate, tMax = NULL, envRate = NULL, rateShifts = NULL) {
     }
   }
 
-  # otherwise it is either constant or a function of time, so return itself
+  # otherwise it is a normal function of time, so return itself
   else {
     r <- rate
   }
