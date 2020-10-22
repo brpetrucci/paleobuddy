@@ -161,7 +161,7 @@
 #' # extinction shape
 #' mShape <- 1
 #' 
-#' # run simulations
+#' # run simulation
 #' sim <- bd.sim.general(n0, lambda, mu, tMax, mShape = mShape, 
 #'                       nFinal = c(2, Inf))
 #' 
@@ -189,7 +189,7 @@
 #' # extinction shape
 #' mShape <- 1
 #' 
-#' # run simulations
+#' # run simulation
 #' sim <- bd.sim.general(n0, lambda, mu, tMax, mShape = mShape, 
 #'                       nFinal = c(2, Inf))
 #' 
@@ -221,7 +221,7 @@
 #' # speciation
 #' lambda <- make.rate(l_t, envRate = temp)
 #' 
-#' # run simulations
+#' # run simulation
 #' sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
@@ -260,7 +260,7 @@
 #' # speciation
 #' lambda <- make.rate(l_t, envRate = temp)
 #' 
-#' # run simulations
+#' # run simulation
 #' sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
@@ -309,7 +309,7 @@
 #'   ifelse(t < 20, mu1(t), mu2(t))
 #' }
 #' 
-#' # run simulations
+#' # run simulation
 #' sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look

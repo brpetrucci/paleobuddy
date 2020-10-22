@@ -204,6 +204,7 @@ if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(phy)
 }
 
+###
 # what if we want q to be a step function?
 
 # vector of extinction rates
@@ -333,7 +334,7 @@ mu <- function(t, env) {
   return(0.1*exp(0.01*env))
 }
 
-# need a variable to tell bd.sim the extinction is environmentally dependent
+# need a data frame describing the temperature at different times
 envM <- temp
 
 # by passing q and envM to bd.sim, internally bd.sim will make q into a
@@ -402,6 +403,10 @@ if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(phy)
 }
 
+# after presenting the possible models, we can consider how to
+# create mixed models, where the dependency changes over time
+
+###
 # consider speciation that becomes environment dependent
 # in the middle of the simulation
 
@@ -425,7 +430,7 @@ mu <- 0.1
 # get the temperature data
 data(temp)
 
-# run simulations
+# run simulation
 sim <- bd.sim(n0, lambda, mu, tMax, envL = temp, nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
@@ -474,7 +479,7 @@ mu <- function(t) {
   ifelse(t < 20, mu1(t), mu2(t))
 }
 
-# run simulations
+# run simulation
 sim <- bd.sim(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 
 # we can plot the phylogeny to take a look
