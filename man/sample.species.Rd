@@ -99,7 +99,7 @@ sim$TE[sim$EXTANT] <- 0
 # we can create the sampling rate here from a few vectors
 
 # rates
-rList <-  c(1, 3, 0.5)
+rList <-  c(1, 3, 2)
 
 # rate shift times -  this could be c(10, 6, 2)
 # and would produce the same function

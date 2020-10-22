@@ -84,7 +84,7 @@
 #' # we can create the sampling rate here from a few vectors
 #' 
 #' # rates
-#' rList <-  c(1, 3, 0.5)
+#' rList <-  c(1, 3, 2)
 #' 
 #' # rate shift times -  this could be c(10, 6, 2)
 #' # and would produce the same function
@@ -333,7 +333,8 @@ sample.species <- function(sim, rho, tMax, S) {
     # take the waiting time for sampling, using rexp.var()
     WaitTimeR <- ifelse(is.numeric(rho), 
                         ifelse(rho > 0, rexp(1, rho), Inf),
-                        ifelse(rho(now) > 0, rexp.var(1, rho, now, tMax), Inf))
+                        ifelse(rho(now) > 0, rexp.var(1, rho, now, tMax,
+                                                      fast = TRUE), Inf))
 
     # advance in time
     now <- now + WaitTimeR

@@ -41,7 +41,9 @@
 #' vector \code{t} in geological time. 
 #'
 #' \item Be parametrized in absolute geological time (i.e. should be relative to
-#' absolute geological time, in Mya, \emph{not} the lineage's age).
+#' absolute geological time, in Mya, \emph{not} the lineage's age). Because of
+#' this, it is assumed to go from \code{tMax} to \code{0}, as opposed to most
+#' functions in the package.
 #'
 #' \item Should be limited between \code{s} (i.e. the lineage's
 #' speciation/origination in geological time) and \code{e} (i.e. the lineage's 
@@ -66,8 +68,6 @@
 #' # sampling rate
 #' rho <- 3
 #' 
-#' # add a hat-shaped increase through the duration of a species
-#' 
 #' # simulate a group
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 #' 
@@ -79,8 +79,10 @@
 #' # fixing the extinction times
 #' sim$TE[sim$EXTANT] <- 0
 #' 
-#' # here we will use the PERT function. It is described in:
-#' # Silvestro et al 2014
+#' # add a hat-shaped increase through the duration of a species
+#' 
+#' # here we will use the PERT function as described
+#' # in Silvestro et al 2014
 #' 
 #' # preservation function
 #' dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
@@ -122,11 +124,12 @@
 #' 
 #' # check histogram
 #' hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
-#'  Red = with time dependence", ylab="Density of fossil occurrences",
+#'  Red = with time dependence", ylab = "Density of fossil occurrences",
 #'      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
 #' 
 #' # expected curve - probably will not fit great because of low sample size
-#' # getting expected values form age-dependence alone
+#' 
+#' # getting expected values from age-dependence alone
 #' tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
 #' lines(x = tt, y = dPERT(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
 #' 
@@ -146,7 +149,7 @@
 #' }
 #' 
 #' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
-#'       col="red")
+#'       col = "red")
 #' 
 #' ###
 #' # now we can test age-independent but time-dependent sampling (this is the same
@@ -190,10 +193,11 @@
 #' 
 #' # check histogram
 #' hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
-#'  Red = with time dependence", ylab="Density of fossil occurrences",
+#'  Red = with time dependence", ylab = "Density of fossil occurrences",
 #'      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
 #' 
 #' # expected curve - probably will not fit great because of low sample size
+#' 
 #' # getting expected values form age-dependence alone
 #' tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
 #' lines(x = tt, y = custom.uniform(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
@@ -213,11 +217,11 @@
 #' # normalizing
 #' Pres_time_adppNorm <- function(t, s, e, sp) {
 #'   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp)/integrate(
-#'     Pres_time_adpp, lower = e, upper = s, e=e, s=s, sp=sp)$value)
+#'     Pres_time_adpp, lower = e, upper = s, e = e, s=s, sp = sp)$value)
 #' }
 #' 
 #' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
-#'       col="red")
+#'       col = "red")
 #' 
 #' ###
 #' # now, lets use a hat-shaped increase through the duration of a species with more
@@ -295,18 +299,13 @@
 #' # please note in the original parametrization, the "md" parameter (mode) is in
 #' # "absolute time", i.e. a specific number in the absolute timescale.
 #' 
-#' # This is not an "age-dependent" model in a strict sense. We show it here as
-#' # we will construct models related to age in the following examples.
-#' # This is also the reason we only plot the first lineage (note the "S"
-#' # parameter) in this specific example (many lineages might not be alive in
-#' # the "md" moment in time).
-#' 
 #' # check histogram
 #' hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
-#'  Red = with time dependence", ylab="Density of fossil occurrences",
+#'  Red = with time dependence", ylab = "Density of fossil occurrences",
 #'      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
 #' 
 #' # expected curves - probably will not fit great because of low sample size
+#' 
 #' # getting expected values form age-dependence alone
 #' tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
 #' lines(x = tt, y = dTRI(tt, s = sim$TS[1], e = sim$TE[1], sp = 1, md = 8))
@@ -326,15 +325,15 @@
 #' # normalizing
 #' Pres_time_adppNorm <- function(t, s, e, sp, ...) {
 #'   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...)/integrate(
-#'     Pres_time_adpp, lower = e, upper = s, e=e, s=s, sp=sp, ...)$value)
+#'     Pres_time_adpp, lower = e, upper = s, e = e, s=s, sp = sp, ...)$value)
 #' }
 #' 
-#' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1, md=8),
-#'       col="red")
+#' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], 
+#'                                      sp = 1, md=8), col = "red")
 #' 
 #' ###
 #' # we can also have a hat-shaped increase through the duration of a species
-#' # with more parameters than TS and TE, but with the parameters relate to
+#' # with more parameters than TS and TE, but with the parameters relating to
 #' # the relative age of each lineage
 #' 
 #' # sampling rate
@@ -371,7 +370,7 @@
 #'   
 #'   # please note that the same logic can be used to sample parameters
 #'   # internally in the function, running for instance:
-#'   # md<-runif (n = 1, min = e, max = s)
+#'   # md <- runif (n = 1, min = e, max = s)
 #'   
 #'   # check it is a valid md
 #'   if (md < e | md > s) {
@@ -404,8 +403,8 @@
 #' # of the duration of the lineage
 #' 
 #' # check histogram
-#' hist(unlist(occs[[1]]), probability = TRUE, main="Black = no time dependence
-#'  Red = with time dependence", ylab="Density of fossil occurrences",
+#' hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
+#'  Red = with time dependence", ylab = "Density of fossil occurrences",
 #'      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
 #' 
 #' # expected curve - probably will not fit great because of low sample size
@@ -430,7 +429,7 @@
 #' }
 #' 
 #' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
-#'       col="red")
+#'       col = "red")
 #' 
 #' ###
 #' # finally, a hat-shaped increase through the duration of a species with more
@@ -459,13 +458,13 @@
 #' # a random quantity
 #' par <- runif(n = length(sim$TE), min = sim$TE, max = sim$TS) 
 #' # its complement to the middle of the lineage's age. 
+#' par1 <- (((sim$TS - sim$TE)/2) + sim$TE) - par 
 #' # Note that the interaction between these two parameters creates a 
 #' # deterministic parameter, but inside the function one of them ("par") 
 #' # is a random parameter
-#' par1 <- (((sim$TS - sim$TE)/2) + sim$TE) - par 
 #' 
 #' # preservation function in respect to age, with the "mode" of the triangle
-#' # being exactly at the last quarter of the duration of EACH lineage.
+#' # being dependent on par and par1
 #' dTRImod2 <- function(t, s, e, sp) {
 #'   
 #'   # make sure it is a valid TRI
@@ -502,12 +501,9 @@
 #' occs <- sample.general(sim = sim, rho = rho, adFun = dTRImod2, tMax = 10,
 #'                        S = 1:length(sim$TE))
 #' 
-#' # please note in this case, function dTRImod2 fixes "md" at the last quarter
-#' # of the duration of the lineage
-#' 
 #' # check histogram
-#' hist(unlist(occs[[1]]), probability = TRUE, main="Black = no time dependence
-#'  Red = with time dependence", ylab="Density of fossil occurrences",
+#' hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
+#'  Red = with time dependence", ylab = "Density of fossil occurrences",
 #'      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
 #' 
 #' # expected curve - probably will not fit great because of low sample size
@@ -526,13 +522,13 @@
 #' 
 #' # normalizing
 #' Pres_time_adppNorm <- function(t, s, e, sp, ...) {
-#'   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...)/integrate(
+#'   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...) / integrate(
 #'     Pres_time_adpp, lower = e, upper = s, e = e, s = s, 
-#'     sp=sp, ...)$value)
+#'     sp = sp, ...)$value)
 #' }
 #' 
 #' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
-#'       col="red")
+#'       col = "red")
 #'
 #' # we can also have a mix of age-independent and age-dependent
 #' # models in the same simulation
@@ -588,7 +584,7 @@
 #' par1 <- (((sim$TS - sim$TE)/2) + sim$TE) - par
 #' 
 #' # preservation function in respect to age, with the "mode" of the triangle
-#' # being exactly at the last quarter of the duration of EACH lineage
+#' # being dependent on par and par1
 #' dTRImod2 <- function(t, s, e, sp) {
 #'   # make sure it is a valid TRI
 #'   if (e >= s) {
@@ -636,8 +632,8 @@
 #' # of the duration of the lineage
 #' 
 #' # check histogram
-#' hist(unlist(occs[[1]]), probability = TRUE, main="Black = no time dependence
-#'  Red = with time dependence", ylab="Density of fossil occurrences",
+#' hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
+#'  Red = with time dependence", ylab = "Density of fossil occurrences",
 #'      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
 #' 
 #' # expected curve - probably will not fit great because of low sample size
@@ -656,12 +652,12 @@
 #' 
 #' Pres_time_adppNorm <- function(t, s, e, sp, ...) {
 #'   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...)/integrate(
-#'     Pres_time_adpp, lower = e, upper = s, e=e, s=s,
-#'     sp=sp, ...)$value)
+#'     Pres_time_adpp, lower = e, upper = s, e = e, s=s,
+#'     sp = sp, ...)$value)
 #' }
 #' 
 #' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
-#'       col="red")
+#'       col = "red")
 #' 
 #' @name sample.general
 #' @rdname sample.general
@@ -716,7 +712,7 @@ sample.general <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
   # creating function with the intersection of the age-dependent and the 
   # time-varying poisson process
   
-  #"prior step" function (interaction between time-dependency and age-dependency):
+  # "prior step" function (interaction between time-dependency and age-dependency):
   Pres_time_adpp <- function(t, s, e, sp, ...) {
     # this correction is needed because "t" in rho means
     # "time since clade origin" and NOT absolute geologic time in Mya

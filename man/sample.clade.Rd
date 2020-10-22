@@ -76,7 +76,9 @@ properties:
 vector \code{t} in geological time. 
 
 \item Be parametrized in absolute geological time (i.e. should be relative to
-absolute geological time, in Mya, \emph{not} the lineage's age).
+absolute geological time, in Mya, \emph{not} the lineage's age). Because of
+this, it is assumed to go from \code{tMax} to \code{0}, as opposed to most
+functions in the package.
 
 \item Should be limited between \code{s} (i.e. the lineage's
 speciation/origination in geological time) and \code{e} (i.e. the lineage's 
