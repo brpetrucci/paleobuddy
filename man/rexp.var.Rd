@@ -26,15 +26,15 @@ high, we return \code{tMax + 0.01} to signify the event never happens, if
 \code{tMax} will be \code{Inf}, but if \code{FAST == TRUE} one must supply
 a finite value.}
 
-\item{shape}{Shape of the Weibull distribution. This will be when smaller than 
+\item{shape}{Shape of the Weibull distribution. This means when smaller than
 one, rate will decrease along species' age (negative age-dependency). When 
 larger than one, rate will increase along each species's age (positive 
-age-dependency). Default is \code{NULL}, equivalent to an exponential
-distribution. For \code{pShape != NULL} (including when equal to 
-one), \code{pp} will be considered a scale (= 1/rate), and \code{rexp.var} will
-draw a Weibull distribution instead of an exponential. This means 
-Weibull(rate, 1) = Exponential(1/rate). Notice even when \code{pShape != NULL}, 
-\code{pp} may still be time-dependent. 
+age-dependency). Default is \code{NULL}, so the function acts asan exponential
+distribution. For \code{shape != NULL} (including when equal to 
+one), \code{rate} will be considered a scale (= 1/rate), and \code{rexp.var} 
+will draw a Weibull distribution instead of an exponential. This means 
+Weibull(rate, 1) = Exponential(1/rate). Notice even when \code{Shape != NULL}, 
+\code{rate} may still be time-dependent. 
 
 Note: Time-varying shape is implemented, so one could have \code{shape} be a
 function of time. It is not thoroughly tested, however, so it may be prudent to
@@ -49,14 +49,14 @@ not be thrown away. This argument is needed so one can test the function
 without bias.}
 }
 \value{
-A vector of waiting times for the exponential or weibull distribution
-with the given parameters.
+A vector of waiting times fpllowing the exponential or Weibull 
+distribution with the given parameters.
 }
 \description{
 Generates a waiting time following an exponential or Weibull distribution with
 constant or varying rates. Allows for an optional shape parameter, in which 
 case \code{rate} will be taken as a Weibull scale. Allows for information on
-the current time, to consider only rates starting from then, and the speciation
+the current time to consider only times starting from then, and the speciation
 time, optionally, in case shape is provided, as the process is age-dependent.
 Allows for customization on the possibility of throwing away waiting times
 higher than \code{tMax}, and therefore takes that time as a parameter.
@@ -69,15 +69,11 @@ higher than \code{tMax}, and therefore takes that time as a parameter.
 # rate
 rate <- 0.1
 
-# current time
-now <- 0
-
-# maximum time to check
-tMax <- 40
-
 # get waiting time
-t <- rexp.var(n = 1, rate, now, tMax)
+t <- rexp.var(n = 1, rate)
 t
+
+# this is the same as t <- rexp(1, rate) of couse
 
 ###
 # another simple exponential
@@ -85,14 +81,8 @@ t
 # rate
 rate <- 0.5
 
-# current time
-now <- 0
-
-# maximum time to check
-tMax <- 40
-
 # find the waiting time
-t <- rexp.var(n = 1, rate, now, tMax)
+t <- rexp.var(n = 1, rate)
 t
 
 ###
@@ -103,14 +93,8 @@ rate <- function(t) {
   return(0.01*t + 0.1)
 }
 
-# current time
-now <- 0
-
-# maximum time to check
-tMax <- 40
-
 # find the waiting time
-t <- rexp.var(n = 1, rate, now, tMax)
+t <- rexp.var(n = 1, rate)
 t
 
 ###
@@ -121,14 +105,8 @@ rate <- function(t) {
   return(0.01 * exp(0.1*t) + 0.02)
 }
 
-# current time
-now <- 0
-
-# maximum time to check
-tMax <- 40
-
 # find the waiting time
-t <- rexp.var(n = 1, rate, now, tMax)
+t <- rexp.var(n = 1, rate)
 t
 
 ###
@@ -140,18 +118,11 @@ rate <- 2
 # shape
 shape <- 1
 
-# current time
-now <- 0
-
-# maximum time to check
-tMax <- 40
-
 # speciation time
 TS <- 0
 
 # find the vector of waiting time
-t <- rexp.var(n = 1, rate, now, tMax,
-              shape = shape, TS = TS)
+t <- rexp.var(n = 1, rate, shape = shape, TS = TS)
 t
 
 ###
@@ -163,18 +134,11 @@ rate <- 10
 # shape
 shape <- 2
 
-# current time
-now <- 0
-
-# maximum time to check
-tMax <- 40
-
 # speciation time
 TS <- 0
 
 # find the vector of waiting times - it doesn't need to be just one
-t <- rexp.var(n = 5, rate, now, tMax,
-              shape = shape, TS = TS)
+t <- rexp.var(n = 5, rate, shape = shape, TS = TS)
 t
 
 ###
@@ -186,10 +150,14 @@ rate <- 10
 # shape
 shape <- 0.5
 
-# current time
+# note we can supply now (default 0) and tMax (default 40)
+
+# now matters when we wish to consider only waiting times
+# after that time, important when using time-varying rates
 now <- 3
 
-# maximum time to check
+# tMax matters when fast = TRUE, so that higher times will be
+# thrown out and returned as tMax + 0.01
 tMax <- 40
 
 # speciation time - it will be greater than 0 frequently during a simulation,
@@ -199,8 +167,10 @@ TS <- 2.5
 
 # find the vector of waiting times
 t <- rexp.var(n = 3, rate, now, tMax,
-              shape = shape, TS = TS)
+              shape = shape, TS = TS, fast = TRUE)
 t
+
+# note how some results may be tMax + 0.01, since fast = TRUE
 
 ###
 # both rate and shape can be time varying for a Weibull, but since we have
@@ -226,7 +196,7 @@ TS <- 0
 
 # find the vector of waiting times - it doesn't need to be just one
 t <- rexp.var(n = 5, rate, now, tMax,
-              shape = shape, TS = TS)
+              shape = shape, TS = TS, fast = TRUE)
 t
 
 ###
@@ -242,9 +212,6 @@ shape <- 3
 
 # current time - remember rate will only be considered starting from time now
 now <- 2.5
-
-# maximum time to check
-tMax <- 40
 
 # speciation time
 TS <- 1.2
