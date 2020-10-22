@@ -217,7 +217,7 @@
 #' # normalizing
 #' Pres_time_adppNorm <- function(t, s, e, sp) {
 #'   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp)/integrate(
-#'     Pres_time_adpp, lower = e, upper = s, e = e, s=s, sp = sp)$value)
+#'     Pres_time_adpp, lower = e, upper = s, e = e, s = s, sp = sp)$value)
 #' }
 #' 
 #' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
@@ -325,7 +325,7 @@
 #' # normalizing
 #' Pres_time_adppNorm <- function(t, s, e, sp, ...) {
 #'   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...)/integrate(
-#'     Pres_time_adpp, lower = e, upper = s, e = e, s=s, sp = sp, ...)$value)
+#'     Pres_time_adpp, lower = e, upper = s, e = e, s = s, sp = sp, ...)$value)
 #' }
 #' 
 #' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], 
@@ -375,7 +375,7 @@
 #'   # check it is a valid md
 #'   if (md < e | md > s) {
 #'     message("There is no TRI with md outside [s, e] interval")
-#'     return(rep(NaN, times=length(t)))
+#'     return(rep(NaN, times = length(t)))
 #'   }
 #'   
 #'   # needed to vectorize function
@@ -652,7 +652,7 @@
 #' 
 #' Pres_time_adppNorm <- function(t, s, e, sp, ...) {
 #'   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...)/integrate(
-#'     Pres_time_adpp, lower = e, upper = s, e = e, s=s,
+#'     Pres_time_adpp, lower = e, upper = s, e = e, s = s,
 #'     sp = sp, ...)$value)
 #' }
 #' 
