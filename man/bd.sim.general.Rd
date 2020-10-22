@@ -61,7 +61,7 @@ established.
 
 Note: Shape must be greater than 0. We arbitrarily chose 0.01 as the minimum
 accepted value, so if shape is under 0.01 for any reasonable time in the 
-simulation, returns an error.}
+simulation, it returns an error.}
 
 \item{nFinal}{A \code{vector} of length \code{2}, indicating an interval of 
 acceptable number of species at the end of the simulation. Default value is 
@@ -102,11 +102,9 @@ constant, or (2) a function of time. Allows for constraining results on the
 number of species at the end of the simulation, either total or extant. The 
 function can also take an optional shape argument to generate age-dependence on
 speciation and/or extinction, assuming a Weibull distribution as a model of 
-age-dependence. Returns an object containing vectors of speciation times, 
-extinction times, parents (species' mother species) and status (extant or not)
-at the end of the simulation for each species in the simulation. It may return 
-true extinction times or simply information on whether species lived after the 
-maximum simulation time. For constant rate simulations, see 
+age-dependence. Returns a sim object (see ?sim). It may return true extinction 
+times or simply information on whether species lived after the maximum 
+simulation time, depending on input. For constant rate simulations, see 
 \code{bd.sim.constant}. For a function that unites all scenarios, see 
 \code{bd.sim}. \code{bd.sim} also allows for extra inputs, creating a
 time-dependent only rate internally through \code{make.rate}. For similar
@@ -118,7 +116,8 @@ packages in the literature.
 }
 \examples{
 
-# we can test a couple scenarios
+# we will showcase here some of the possible scenarios for diversification,
+# touching on all the kinds of rates
 
 ###
 # first, even though this is bd.sim.general, we can try constant rates
@@ -146,7 +145,6 @@ if (requireNamespace("ape", quietly = TRUE)) {
 
 ###
 # we can complicate things further with a linear function as a rate
-# bd.sim.general takes longer so we run examples for 1000 replicates instead
 
 # initial number of species
 n0 <- 1
@@ -188,7 +186,7 @@ lambda <- function(t) {
 # vector of extinction rates
 mList <- c(0.06, 0.09, 0.11)
 
-# vector of shift times. Note mShifts could be c(40, 20, 10) for
+# vector of shift times. Note mShifts could be c(40, 25, 15) for
 # identical results
 mShifts <- c(0, 15, 25)
 

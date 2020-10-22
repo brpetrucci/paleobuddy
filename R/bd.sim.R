@@ -63,7 +63,7 @@
 #' 
 #' Note: Shape must be greater than 0. We arbitrarily chose 0.01 as the minimum
 #' accepted value, so if shape is under 0.01 for any reasonable time in the 
-#' simulation, returns an error.
+#' simulation, it returns an error.
 #' 
 #' @param envL A \code{data.frame} representing the variation of an environmental
 #' variable (e.g. CO2, temperature, available niches, etc) with time. The first 

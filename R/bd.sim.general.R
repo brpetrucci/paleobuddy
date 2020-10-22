@@ -6,11 +6,9 @@
 #' number of species at the end of the simulation, either total or extant. The 
 #' function can also take an optional shape argument to generate age-dependence on
 #' speciation and/or extinction, assuming a Weibull distribution as a model of 
-#' age-dependence. Returns an object containing vectors of speciation times, 
-#' extinction times, parents (species' mother species) and status (extant or not)
-#' at the end of the simulation for each species in the simulation. It may return 
-#' true extinction times or simply information on whether species lived after the 
-#' maximum simulation time. For constant rate simulations, see 
+#' age-dependence. Returns a sim object (see ?sim). It may return true extinction 
+#' times or simply information on whether species lived after the maximum 
+#' simulation time, depending on input. For constant rate simulations, see 
 #' \code{bd.sim.constant}. For a function that unites all scenarios, see 
 #' \code{bd.sim}. \code{bd.sim} also allows for extra inputs, creating a
 #' time-dependent only rate internally through \code{make.rate}. For similar
@@ -43,7 +41,8 @@
 #'
 #' @examples
 #'
-#' # we can test a couple scenarios
+#' # we will showcase here some of the possible scenarios for diversification,
+#' # touching on all the kinds of rates
 #' 
 #' ###
 #' # first, even though this is bd.sim.general, we can try constant rates
@@ -71,7 +70,6 @@
 #' 
 #' ###
 #' # we can complicate things further with a linear function as a rate
-#' # bd.sim.general takes longer so we run examples for 1000 replicates instead
 #' 
 #' # initial number of species
 #' n0 <- 1
@@ -113,7 +111,7 @@
 #' # vector of extinction rates
 #' mList <- c(0.06, 0.09, 0.11)
 #' 
-#' # vector of shift times. Note mShifts could be c(40, 20, 10) for
+#' # vector of shift times. Note mShifts could be c(40, 25, 15) for
 #' # identical results
 #' mShifts <- c(0, 15, 25)
 #' 
@@ -492,9 +490,13 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
       # reached the time of extinction
       tNow <- tExp
   
-      # record the extinction - if tNow > tMax, it is extant
-      isExtant[sCount] <- ifelse(tNow > tMax, TRUE, FALSE)
-      TE[sCount] <- ifelse(tNow <= tMax | trueExt, tNow, NA)
+      # if trueExt is true or the species went extinct before tMax,
+      # record it. If both are false record it as NA
+      TE[sCount] <- ifelse(tNow < tMax | trueExt, tNow, NA)
+      
+      # record the extinction -
+      isExtant[sCount] <- ifelse(is.na(TE[sCount]) | TE[sCount] > tMax,
+                                 TRUE, FALSE)
   
       # next species
       sCount <- sCount + 1
