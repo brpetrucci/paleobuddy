@@ -70,8 +70,6 @@ is.sim <- function(sim) {
   # checks that there are three double vectors and one logical, or two of each
   # when there is only one species
   types <- unlist(lapply(1:4, function(x) typeof(sim[[x]])))
-  
-  #
   typ <- (sum(types == "double") == 3 && sum(types == "logical") == 1) ||
     (sum(types == "double") == 2 && sum(types == "logical") == 2 &&
        length(sim[[1]]) == 1)
@@ -109,7 +107,7 @@ print.sim <- function(x, ...) {
              " species and ", sum(sim$EXTANT), " extant species\n"))
   cat("\nDetails for some species:\n")
   
-  # and then some details
+  # and then some details for first five
   cat("\nExtinction times (NA means extant)\n")
   print(utils::head(sim$TE))
   
@@ -129,7 +127,9 @@ print.sim <- function(x, ...) {
 
 #' @rdname sim
 #' 
-#' @details \code{summary.sim} 
+#' @details \code{summary.sim} Quantitative details on the \code{sim} object. 
+#' Prints the number of species, number of extant species, summary of durations
+#' and speciation waiting times, in case there are more than one species.
 #' 
 #' @export
 #'
@@ -242,7 +242,8 @@ sim.counts <- function(sim, t) {
     stop("Invalid sim object, see ?sim")
   }
   
-  # make TE sensible
+  # make TE -Inf if extant (so that the number of extinctions
+  # does not artificially jump at the ending time of sim)
   sim$TE[sim$EXTANT] <- -Inf
   
   # calculates births at t

@@ -60,7 +60,9 @@ straightforward and informative sequence manner. We provide details only for
 the first few species, since otherwise this print could be overwhelming for 
 simulations with 10+ species.
 
-\code{summary.sim}
+\code{summary.sim} Quantitative details on the \code{sim} object. 
+Prints the number of species, number of extant species, summary of durations
+and speciation waiting times, in case there are more than one species.
 
 \code{plot.sim} Plots births, deaths, and diversity through time for
 the sim object.
