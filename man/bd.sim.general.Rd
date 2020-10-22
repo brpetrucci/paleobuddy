@@ -114,9 +114,9 @@ constant, or (2) a function of time. Allows for constraining results on the
 number of species at the end of the simulation, either total or extant. The 
 function can also take an optional shape argument to generate age-dependence on
 speciation and/or extinction, assuming a Weibull distribution as a model of 
-age-dependence. Returns a sim object (see ?sim). It may return true extinction 
-times or simply information on whether species lived after the maximum 
-simulation time, depending on input. For constant rate simulations, see 
+age-dependence. Returns a \code{sim} object (see \code{?sim}). It may return 
+true extinction times or simply information on whether species lived after the
+maximum simulation time, depending on input. For constant rate simulations, see
 \code{bd.sim.constant}. For a function that unites all scenarios, see 
 \code{bd.sim}. \code{bd.sim} also allows for extra inputs, creating a
 time-dependent only rate internally through \code{make.rate}. For similar

@@ -1,13 +1,12 @@
 #' Phylogeny generating
 #'
 #' Generates a phylogeny from a \code{sim} object containing speciation and 
-#' extinction times, parent and status information, usually returned by 
-#' \code{bd.sim} or similar. Returns a \code{phylo} object containing information 
-#' on the phylogeny, following an "evolutionary Hennigian" (sensu Ezard et al 
-#' 2011) format. Returns \code{NA} and sends a warning if the simulation has only
-#' one lineage or if more than one species has \code{NA} as parent (i.e. there is 
-#' no single common ancestor in the simulation). In the latter case, please use 
-#' \code{find.lineages} first. 
+#' extinction times, parent and status information (see \code{?sim}). Returns a
+#' \code{phylo} object containing information on the phylogeny, following an 
+#' "evolutionary Hennigian" (sensu Ezard et al 2011) format. Returns \code{NA} 
+#' and sends a warning if the simulation has only one lineage or if more than one
+#' species has \code{NA} as parent (i.e. there is no single common ancestor in the
+#'  simulation). In the latter case, please use \code{find.lineages} first. 
 #'
 #' @param sim A \code{sim} object, containing extinction times, speciation times,
 #' parent, and status information for each species in the simulation. See 
@@ -27,6 +26,9 @@
 #' Ezard, T. H., Pearson, P. N., Aze, T., & Purvis, A. (2012). The meaning of 
 #' birth and death (in macroevolutionary birth-death models). Biology letters, 
 #' 8(1), 139-142.
+#' 
+#' Paradis, E., Claude, J., Strimmer, & K. (2004). APE: Analyses of Phylogenetics
+#' and Evolution in R language. Bioinformatics, 20(2), 289-290.
 #'
 #' @examples
 #'
@@ -83,12 +85,12 @@ make.phylo <- function(sim) {
 
   # simulations with more than one starting species have multiple phylogenies
   if (sum(is.na(sim$PAR)) > 1) {
-    message("Multiple starting species. Use function findClades()")
+    message("Multiple starting species. Use function find.lineages")
     return(NA)
   }
   
   # make TE sensible
-  sim$TE[sim$EXTANT] = 0
+  sim$TE[sim$EXTANT] <- 0
 
   all.dir.daughter <- function(lin, x) {
     # all.dir.daughters returns the name of each direct daughter species
@@ -145,14 +147,15 @@ make.phylo <- function(sim) {
         } else {
           # if there is
           edge <- rbind(edge,
-                        matrix(nrow = 1, ncol = 2, data = c(prevNode, curNode)))
+                        matrix(nrow = 1, ncol = 2, 
+                               data = c(prevNode, curNode)))
         }
         
         # update birthsNode
         birthsNode[dau[1]] <- curNode
         
         # update jump
-        jump<-0
+        jump <- 0
 
       # if the current lineage is a non-monophyletic branch
       } else { 
@@ -186,15 +189,18 @@ make.phylo <- function(sim) {
 
       # append lineage to the edge matrix
       if (is.na(edge[nrow(edge), 2])) {
+        
         # if there is no edge there currently
         edge[nrow(edge), 2] <- i
-      } else {
+      } 
+      
+      else {
         # if there is
         edge <- rbind(edge, 
                     matrix(nrow = 1, ncol = 2, 
                            data = c(max(
                              edge[!(duplicated(edge[,1]) | 
-                                duplicated(edge[,1], fromLast=TRUE)), 1]), i)))
+                                duplicated(edge[,1], fromLast = TRUE)), 1]), i)))
       }
       
       # we put the lineage on the phylogeny
@@ -258,8 +264,9 @@ make.phylo <- function(sim) {
               edge.length = edgeLength, 
               Nnode = nNode, 
               root.edge = sim$TS[1] - sim$TS[2])
-  phy$root.time=sim$TS[2]
-  phy$node.label=seq(from=length(sim$TE)+1, to=length(sim$TE)+1+nNode)
+  phy$root.time <- sim$TS[2]
+  phy$node.label <- seq(from = length(sim$TE) + 1, 
+                        to = length(sim$TE) + 1 + nNode)
   
   class(phy) <- "phylo"
 

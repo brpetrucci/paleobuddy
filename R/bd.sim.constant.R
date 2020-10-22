@@ -2,12 +2,10 @@
 #' 
 #' Simulates a species birth-death process with constant rates for any number of
 #' starting species. Allows for constraining results on the number of species at 
-#' the end of the simulation, either total or extant. Returns an object containing 
-#' vectors of speciation times, extinction times, parents (species' mother 
-#' species) and status (extant or not) at the end of the simulation for each 
-#' species in the simulation. It may return true extinction times or simply 
-#' information on whether species lived after the maximum simulation time. For 
-#' time-varying and age-dependent simulations, see \code{bd.sim.general}. For a 
+#' the end of the simulation, either total or extant. Returns a \code{sim} object 
+#' (see \code{?sim}). It may return true extinction times or simply information on
+#' whether species lived after the maximum simulation time, depending on input. 
+#' For time-varying and age-dependent simulations, see \code{bd.sim.general}. For a
 #' function that unites both scenarios, see \code{bd.sim}.
 #' Please note while time runs from \code{0} to \code{tMax} in the simulation, it 
 #' returns speciation/extinction times as \code{tMax} (origin of the group) to 
