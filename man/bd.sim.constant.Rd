@@ -22,11 +22,10 @@ go extinct before speciating even once. One way of generating large sample
 sizes in this case is to increase \code{n0}, which will simulate the
 diversification of a paraphyletic group.}
 
-\item{lambda}{Speciation rate. Must be constant.}
+\item{lambda}{Speciation rate. Must be constant, and greater than or equal
+to zero.}
 
-\item{mu}{Extinction rate, similar to above.
-
-Note: \code{lambda} and \code{mu} must always be greater than 0}
+\item{mu}{Extinction rate, similar to above.}
 
 \item{tMax}{Ending time of simulation, in million years after the clade origin. 
 Any species still living after \code{tMax} is considered extant, and any 

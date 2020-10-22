@@ -24,9 +24,14 @@
 #' interpreted as an exponential rate, or a Weibull scale if 
 #' \code{lShape != NULL}. Can be constant, to allow for mixing of constant and
 #' non-constant rates. One can use constructs such as \code{ifelse()} to create
-#' rates whose underlying model change over time (see the last examples).
+#' rates whose underlying model change over time (see the last examples). Note
+#' that \code{lambda} should always be greater than or equal to zero.
 #'
 #' @param mu Similar to above, but for the extinction rate.
+#' 
+#' Note: rates should be considered as running from \code{0} to \code{tMax}, as
+#' the simulation runs in that direction even though the function inverts times
+#' before returning in the end.
 #' 
 #' Note: this function is meant to be called by \code{bd.sim}, so it neither
 #' allows for as much flexibility, nor calls \code{make.rate}. If the user wishes
@@ -456,13 +461,15 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
       waitTimeS <- ifelse(
         is.numeric(lambda), ifelse(lambda > 0, rexp(1, lambda), Inf),
         ifelse(lambda(tNow) > 0, 
-               rexp.var(1, lambda, tNow, tMax, lShape, TS[sCount], 
-                        fast = !trueExt), Inf))
+               rexp.var(1, lambda, tNow, tMax, lShape, TS[sCount],
+                        fast = TRUE), Inf))
       waitTimeE <- ifelse(
         is.numeric(mu), ifelse(mu > 0, rexp(1, mu), Inf),
         ifelse(mu(tNow) > 0,
-               rexp.var(1, mu, tNow, tMax, mShape, TS[sCount], 
+               rexp.var(1, mu, tNow, tMax, mShape, TS[sCount],
                         fast = !trueExt), Inf))
+      # fast is true since we do not record speciations after
+      # the extinction anyway
   
       tExp <- tNow + waitTimeE
   
@@ -483,8 +490,10 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
         waitTimeS <- ifelse(
           is.numeric(lambda), ifelse(lambda > 0, rexp(1, lambda), Inf),
           ifelse(lambda(tNow) > 0, 
-                 rexp.var(1, lambda, tNow, tMax, lShape, TS[sCount], 
-                          fast = !trueExt), Inf))
+                 rexp.var(1, lambda, tNow, tMax, lShape, TS[sCount],
+                          fast = TRUE), Inf))
+        # fast is true since we do not record speciations after
+        # the extinction anyway
       }
   
       # reached the time of extinction

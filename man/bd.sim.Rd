@@ -83,11 +83,11 @@ Note \code{paleobuddy} has two environmental data frames, \code{temp} and
 \item{lShifts}{Vector of rate shifts. First element must be the starting
 time for the simulation (\code{0} or \code{tMax}). It must have the same length
 as \code{lambda}. \code{c(0, x, tMax)} is equivalent to 
-\code{c(tMax, tMax - x, 0)}for the purposes of \code{make.rate}.}
+\code{c(tMax, tMax - x, 0)} for the purposes of \code{make.rate}.}
 
 \item{mShifts}{Similar to \code{mShifts}, but for the extinction rate.
 
-Note that using this  method for step-function rates is currently slower than 
+Note that using this method for step-function rates is currently slower than 
 using \code{ifelse}.}
 
 \item{nFinal}{A \code{vector} of length \code{2}, indicating an interval of 
@@ -115,7 +115,14 @@ iterations without fulfilling the requirements of \code{nFinal} and
 \item{trueExt}{A \code{logical} indicating whether the function should return
 true or truncated extinction times. When \code{TRUE}, time of extinction of 
 extant species will be the true time, otherwise it will be \code{NA} if a 
-species is alive at the end of the simulation.}
+species is alive at the end of the simulation.
+
+Note: This is interesting to use to test age-dependent extinction. 
+Age-dependent speciation would require all speciation times (including
+the ones after extinction) to be recorded, so we do not attempt to add an
+option to account for that. Since age-dependent extinction and speciation
+use the same underlying process, however, if one is tested to satisfacton
+the other should also be in expectations.}
 }
 \value{
 A \code{sim} object, containing extinction times, speciation times,
@@ -130,11 +137,12 @@ variable, or (4) a vector of numbers. Allows for constraining results on the
 number of species at the end of the simulation, either total or extant. The 
 function can also take an optional shape argument to generate age-dependence on
 speciation and/or extinction, assuming a Weibull distribution as a model of 
-age-dependence. Returns an object containing vectors of speciation times, 
-extinction times, parents (species' mother species) and status (extant or not) 
-at the end of the simulation for each species in the simulation. It may return
-true extinction times or simply information on whether species lived after the 
-maximum simulation time. 
+age-dependence. Returns a sim object (see ?sim). It may return true extinction 
+times or simply information on whether species lived after the maximum 
+simulation time, depending on input. \code{bd.sim} calls \code{bd.sim.constant}
+or \code{bd.sim.general} depending on the nature of the birth and death rates
+supplied. For more information on the code used for the birth-death process,
+see those corresponding functions.
 Please note while time runs from \code{0} to \code{tMax} in the simulation, it 
 returns speciation/extinction times as \code{tMax} (origin of the group) to 
 \code{0} (the "present" and end of simulation), so as to conform to other

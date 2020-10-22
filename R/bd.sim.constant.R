@@ -16,11 +16,15 @@
 #' 
 #' @inheritParams bd.sim 
 #' 
-#' @param lambda Speciation rate. Must be constant.
+#' @param lambda Speciation rate. Must be constant, and greater than or equal
+#' to zero.
 #'
 #' @param mu Extinction rate, similar to above.
 #' 
-#' Note: \code{lambda} and \code{mu} must always be greater than 0
+#' @param trueExt A \code{logical} indicating whether the function should return
+#' true or truncated extinction times. When \code{TRUE}, time of extinction of 
+#' extant species will be the true time, otherwise it will be \code{NA} if a 
+#' species is alive at the end of the simulation.
 #'
 #' @return A \code{sim} object, containing extinction times, speciation times,
 #' parent, and status information for each species in the simulation. See 

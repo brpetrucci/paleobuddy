@@ -270,23 +270,28 @@ rexp.var <- function(n, rate, now = 0, tMax = Inf, shape = NULL,
   # default is not age dependent, will change this later
   AD <- FALSE
 
-  # make rate a function if it is a constant
-  if (is.numeric(rate)) {
-    r <- rate
-    rate <- Vectorize(function(t) r)
+  # call rexp if it is a constant and shape is null
+  if (is.numeric(rate) & is.null(shape)) {
+    return(rexp(n, rate))
   }
   
-  # same for shape
+  # if shape is a constant, make it a function
   if (!is.null(shape)) {
     AD <- TRUE
     if (is.numeric(shape)) {
       s <- shape
       shape <- Vectorize(function(t) s)
     }
+    
+    # and the rate
+    if (is.numeric(rate)) {
+      r <- rate
+      rate <- Vectorize(function(t) r)
+    }
   }
 
-  # if tMax is Inf, need another upper for uniroot
-  upper <- ifelse(tMax == Inf, 10 * now + 10, tMax)
+  # if tMax is not supplied, need another upper for uniroot
+  upper <- ifelse(tMax == Inf, now + 100, tMax)
   
   for (i in 1:n) {
     # draw an uniform random variable from 0 to 1
@@ -307,6 +312,11 @@ rexp.var <- function(n, rate, now = 0, tMax = Inf, shape = NULL,
       }
 
       else {
+        # give upper a buffer in case it is too low for uniroot to find a root
+        if (total < p) {
+          upper <- 1.5 * upper
+        }
+
         # create a function to hold the CDF of the distribution minus the
         # uniform variable - if we find t where this is 0, this t is
         # distributed as a weibull
@@ -337,6 +347,11 @@ rexp.var <- function(n, rate, now = 0, tMax = Inf, shape = NULL,
       }
       
       else {
+        # give upper a buffer in case it is too low for uniroot to find a root
+        if (total < p) {
+          upper <- 1.5 * upper
+        }
+        
         # if f(t) = 0, t is exponentially distributed
         f <- Vectorize(function(t) {
           1 - p - exp(-integrate(Vectorize(function(x) rate(x)), lower = now, 

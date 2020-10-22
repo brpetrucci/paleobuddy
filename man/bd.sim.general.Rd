@@ -28,9 +28,14 @@ diversification of a paraphyletic group.}
 interpreted as an exponential rate, or a Weibull scale if 
 \code{lShape != NULL}. Can be constant, to allow for mixing of constant and
 non-constant rates. One can use constructs such as \code{ifelse()} to create
-rates whose underlying model change over time (see the last examples).}
+rates whose underlying model change over time (see the last examples). Note
+that \code{lambda} should always be greater than or equal to zero.}
 
 \item{mu}{Similar to above, but for the extinction rate.
+
+Note: rates should be considered as running from \code{0} to \code{tMax}, as
+the simulation runs in that direction even though the function inverts times
+before returning in the end.
 
 Note: this function is meant to be called by \code{bd.sim}, so it neither
 allows for as much flexibility, nor calls \code{make.rate}. If the user wishes
@@ -88,7 +93,14 @@ iterations without fulfilling the requirements of \code{nFinal} and
 \item{trueExt}{A \code{logical} indicating whether the function should return
 true or truncated extinction times. When \code{TRUE}, time of extinction of 
 extant species will be the true time, otherwise it will be \code{NA} if a 
-species is alive at the end of the simulation.}
+species is alive at the end of the simulation.
+
+Note: This is interesting to use to test age-dependent extinction. 
+Age-dependent speciation would require all speciation times (including
+the ones after extinction) to be recorded, so we do not attempt to add an
+option to account for that. Since age-dependent extinction and speciation
+use the same underlying process, however, if one is tested to satisfacton
+the other should also be in expectations.}
 }
 \value{
 A \code{sim} object, containing extinction times, speciation times,
