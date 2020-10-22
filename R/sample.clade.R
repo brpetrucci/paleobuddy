@@ -10,7 +10,7 @@
 #' environmental matrix parameters. Optionally takes a vector of time bins 
 #' representing geologic periods, so that if the user wishes occurrence times can 
 #' be presented as a range instead of true points. See \code{sample.species} - 
-#' absolute time-dependent sampling - and \code{sample.general} - time and/or 
+#' absolute time-dependent sampling only - and \code{sample.general} - time and/or 
 #' age-dependent sampling - for more information.
 #'
 #' @param bins A vector of time intervals corresponding to geological time ranges.
@@ -21,12 +21,12 @@
 #' a \code{numeric} describing a constant rate, a \code{function(t)} describing 
 #' the variation in sampling over time \code{t}, a \code{function(t, env)} 
 #' describing the variation in sampling over time following both time AND 
-#' an environmental variable (please see \code{envR} for details) or a 
+#' an environmental variable (please see \code{envR} for details), or a 
 #' \code{vector} containing rates that correspond to each rate between sampling
-#' rate shift times times (please see \code{rShifts}). Note that \code{rr} should
+#' rate shift times times (please see \code{rShifts}). Note that \code{rho} should
 #' should always be greater than or equal to zero.
 #' 
-#' @param envR A matrix containing time points and values of an environmental
+#' @param envR A data frame containing time points and values of an environmental
 #' variable, like temperature, for each time point. This will be used to create
 #' a sampling rate, so \code{rho} must be a function of time and said variable
 #' if \code{envR} is not \code{NULL}. Note \code{paleobuddy} has two 
@@ -101,7 +101,7 @@
 #' }
 #' 
 #' ###
-#' # sampling can be any function of time in the non-age dependent case, of course
+#' # sampling can be any function of time 
 #' 
 #' # simulate a group
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
@@ -229,11 +229,11 @@
 #' }
 #' 
 #' # make it a function so we can plot it
-#' r <- make.rate(rho, envRate = envR)
+#' rho <- make.rate(rho, envRate = envR)
 #' 
 #' # let us check that r is high enough to see a pattern
-#' plot(1:10, r(1:10), type = 'l', main = "Sampling rate",
-#'      xlab = "My", ylab = "r")
+#' plot(1:10, rho(1:10), type = 'l', main = "Sampling rate",
+#'      xlab = "My", ylab = "rho")
 #' 
 #' # the resolution of the fossil dataset:
 #' bins <- seq(from = 10, to = 0,
@@ -263,7 +263,7 @@
 #'        xlim = c(sim$TS[i], sim$TE[i]))
 #' }
 #' 
-#' # we will now do some tests with age-dependent rates. For more details,
+#' # we will now do some examples with age-dependent rates. For more details,
 #' # check sample.general.
 #' 
 #' ###
@@ -374,7 +374,7 @@
 #' par1 <- (((sim$TS - sim$TE) / 2) + sim$TE) - par
 #' 
 #' # preservation function in respect to age, with the "mode" of the triangle
-#' # being exactly at the last quarter of the duration of EACH lineage.
+#' # being dependent on par and par1
 #' dTRImod <- function(t, s, e, sp) {
 #'   
 #'   # make sure it is a valid TRI
@@ -433,8 +433,8 @@
 #'        xlab = "Time (My)", probability = TRUE)
 #'   
 #'   # expected curve
-#'   curve(dTRImod(x, e=sim$TE[sp], s=sim$TS[sp], sp = sp),from = sim$TE[sp],
-#'         to = sim$TS[sp], add=TRUE, col="red", n = 100)
+#'   curve(dTRImod(x, e = sim$TE[sp], s = sim$TS[sp], sp = sp),from = sim$TE[sp],
+#'         to = sim$TS[sp], add = TRUE, col="red", n = 100)
 #' }
 #' # we provide curves for comparison here, but remember the low sample sizes 
 #' # (and bins) may affect the quality of the fit
@@ -551,7 +551,7 @@
 #'   Pres_time_adppNorm <- function(t, s, e, sp, ...) {
 #'     return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...)/integrate(
 #'       Pres_time_adpp, lower = e, upper = s, e = e, s = s,
-#'       sp=sp, ...)$value)
+#'       sp = sp, ...)$value)
 #'   }
 #'   
 #'   lines(x = tt, 
@@ -618,7 +618,7 @@
 #' par1 <- (((sim$TS - sim$TE)/2) + sim$TE) - par
 #' 
 #' # preservation function in respect to age, with the "mode" of the triangle
-#' # being exactly at the last quarter of the duration of EACH lineage
+#' # being dependent on par and par1
 #' dTRImod <- function(t, s, e, sp) {
 #'   # make sure it is a valid TRI
 #'   if (e >= s) {
@@ -702,7 +702,7 @@
 #'   Pres_time_adppNorm <- function(t, s, e, sp, ...) {
 #'     return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...)/integrate(
 #'       Pres_time_adpp, lower = e, upper = s, e = e, s = s,
-#'       sp=sp, ...)$value)
+#'       sp = sp, ...)$value)
 #'   }
 #'   
 #'   lines(x = tt, 
@@ -761,7 +761,7 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
     message(paste0(length(zeroOccs), " species left no fossil"))
   } 
   
-  #dependent of age (i.e. occurrences distributed through the lineage's age 
+  # dependent of age (i.e. occurrences distributed through the lineage's age 
   # according to adFun)
   else { 
     # find occurrence times

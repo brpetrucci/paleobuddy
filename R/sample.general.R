@@ -158,7 +158,7 @@
 #' 
 #' # sampling rate
 #' rho <- function(t) {
-#'   return(2 + 0.1*t) 
+#'   return(1 + 0.5*t) 
 #' }
 #' 
 #' # simulate a group
@@ -229,7 +229,7 @@
 #' 
 #' # sampling rate
 #' rho <- function(t) {
-#'   return(2 + 0.1*t) 
+#'   return(1 + 0.5*t) 
 #' }
 #' 
 #' # simulate a group
@@ -329,7 +329,7 @@
 #' }
 #' 
 #' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], 
-#'                                      sp = 1, md=8), col = "red")
+#'                                      sp = 1, md = 8), col = "red")
 #' 
 #' ###
 #' # we can also have a hat-shaped increase through the duration of a species
@@ -338,7 +338,7 @@
 #' 
 #' # sampling rate
 #' rho <- function(t) {
-#'   return(2 + 0.1*t) 
+#'   return(1 + 0.5*t) 
 #' }
 #' 
 #' # simulate a group
@@ -408,6 +408,7 @@
 #'      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
 #' 
 #' # expected curve - probably will not fit great because of low sample size
+#' 
 #' # getting expected values form age-dependence alone
 #' tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
 #' lines(x = tt, y = dTRImod1(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
@@ -439,7 +440,7 @@
 #' 
 #' # sampling rate
 #' rho <- function(t) {
-#'   return(2 + 0.1*t) 
+#'   return(1 + 0.5*t) 
 #' }
 #' 
 #' # simulate a group
@@ -507,6 +508,7 @@
 #'      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
 #' 
 #' # expected curve - probably will not fit great because of low sample size
+#' 
 #' # getting expected values form age-dependence alone
 #' tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
 #' lines(x = tt, y = dTRImod2(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
@@ -539,7 +541,7 @@
 #' 
 #' # sampling rate
 #' rho <- function(t) {
-#'   return(5 + 0.1*t)
+#'   return(1 + 0.5*t)
 #' }
 #' # note one can also vary the model used for sampling rate
 #' # see ?sample.species for examples
@@ -637,6 +639,7 @@
 #'      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
 #' 
 #' # expected curve - probably will not fit great because of low sample size
+#' 
 #' # getting expected values form age-dependence alone
 #' tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
 #' lines(x = tt, y = dTriAndUniform(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
@@ -697,7 +700,6 @@ sample.general <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
   
   # if adFun is null, it is the same as sample.species
   if(is.null(adFun)){
-    
     message("Preservation will be Age-independent \n")
     
     # run sample.species
@@ -729,13 +731,14 @@ sample.general <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
                        e = e, sp = sp, ...)$value)
   }
   
-  # getting the number of occurrences following a time-varying poisson process:
-  
+  # getting the number of occurrences following a time-varying poisson process
   Noccs <- vector()
   Noccs[S] <- unlist(x = lapply(
     lapply(S, sample.species, sim = sim, rho = rho, tMax = tMax), FUN = length))
   
   occs <- list()
+  
+  # for each species to sample
   for (sp in S) {
     # getting the maximum of function for that specific species
     adFunMaxApprox <- optimize(Pres_time_adppNorm, interval = c(TE[sp],TS[sp]),
@@ -753,7 +756,8 @@ sample.general <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
         Pres_time_adppNorm(t = t, s = TS[sp], e = TE[sp], sp = sp, ...)
       
       test <- runif(n = 1, min = 0, max = Pres_time_adppNorm(t = adFunMaxApprox, 
-          s = TS[sp], e = TE[sp], sp = sp, ...)*1.05)<= Pres_time_adppNorm(t = t,
+          s = TS[sp], e = TE[sp], sp = sp, ...)*1.05) <= 
+        Pres_time_adppNorm(t = t,
             s = TS[sp], e = TE[sp], sp = sp, ...)
       
       if (test) {
