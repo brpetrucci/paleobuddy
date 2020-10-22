@@ -195,7 +195,7 @@ bd.sim.constant <- function(n0, lambda, mu, tMax,
       tNow <- tExp
   
       # record the extinction - if TE[sCount] is NA, it is extant
-      isExtant[sCount] <- ifelse(is.na(TE[sCount]), TRUE, FALSE)
+      isExtant[sCount] <- ifelse(is.na(TE[sCount]), FALSE, TRUE)
       
       # if trueExt is true or the species went extinct before tMax,
       # record it. If both are false record it as NA
