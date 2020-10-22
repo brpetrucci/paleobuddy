@@ -19,22 +19,25 @@ speciation rates can be supplied independently, so that one can combine any
 types of scenarios for birth and death rates. See \code{?bd.sim},
 \code{?bd.sim.constant} and \code{?bd.sim.general} for more information.
 
-All birth-death simulation functions return a \code{sim} object, which has some
-generic methods etc. of its own. See \code{?sim} for more information.
+All birth-death simulation functions return a \code{sim} object, which is a 
+list of vectors containing speciation times, extinction times, status
+(extant or extinct) and parent identity for each species of the simulation.
+We supply methods for summarizing and printing \code{sim} objects in a more
+informative manner. See \code{?sim} for more information.
 }
 
 \section{Fossil record simulation}{
 
 The package provides users with a similarly diverse array of scenarios for 
 preservation rates in generating fossil records from birth-death simulations.
-The function \code{sample.clade} accepts constant and time-varying rates. 
-Users might also supply a constant rate and an age-dependent preservation
-model describing the distribution of fossil occurrences over a species
-duration. We supply the function \code{find.lineages} to allow for birth-death
-simulations that start with multiple species by separating those in
-monophyletic clades so that one can generate fossil records and phylogenies
-(see below) for clades with a specific mother species. See 
-\code{?sample.clade}, \code{?sample}, \code{?sample.general} and
+The function \code{sample.clade} accepts constant, time-varying, and 
+environmentally dependent rates. Users might also supply a model describing the
+distribution of fossil occurrences over a species duration to simulate 
+age-dependent sampling. We supply the function \code{find.lineages} to allow 
+for birth-death simulations that start with multiple species. It separates
+those in monophyletic clades so that one can generate fossil records and 
+phylogenies (see below) for clades with a specific mother species. See 
+\code{?sample.clade}, \code{?sample.species}, \code{?sample.general} and
 \code{?find.lineages} for more information.
 }
 
@@ -113,11 +116,11 @@ set.seed(1)
 # from sim, we can create fossil records for each species
 samp <- sample.clade(sim = sim, rho = 0.75, tMax = 10,
                      bins = seq(10, 0, -1))
-# note 15 out of the 29 species did not leave a fossil - we can in this way
+# note 16 out of the 29 species did not leave a fossil - we can in this way
 # simulate the incompleteness of the fossil record
 
 # take a look at the resulting data frame
-samp
+head(samp)
 
 # we can separate it in three monophyletic clades
 clades <- find.lineages(sim = sim)
