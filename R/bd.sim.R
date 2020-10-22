@@ -108,10 +108,10 @@
 #' iterations without fulfilling the requirements of \code{nFinal} and 
 #' \code{extOnly}.
 #' 
-#' @param trueExt A \code{logical} used for \code{bd.sim.general}, indicating 
-#' whether it should return true or truncated extinction times. When \code{TRUE}, 
-#' time of extinction of extant species will be the true time, otherwise it will
-#' be \code{NA} if a species is alive at the end of the simulation.
+#' @param trueExt A \code{logical} indicating whether the function should return
+#' true or truncated extinction times. When \code{TRUE}, time of extinction of 
+#' extant species will be the true time, otherwise it will be \code{NA} if a 
+#' species is alive at the end of the simulation.
 #'
 #' @return A \code{sim} object, containing extinction times, speciation times,
 #' parent, and status information for each species in the simulation. See 

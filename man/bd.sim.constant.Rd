@@ -54,10 +54,10 @@ Note: The function returns \code{NA} if it runs for more than \code{100000}
 iterations without fulfilling the requirements of \code{nFinal} and 
 \code{extOnly}.}
 
-\item{trueExt}{A \code{logical} used for \code{bd.sim.general}, indicating 
-whether it should return true or truncated extinction times. When \code{TRUE}, 
-time of extinction of extant species will be the true time, otherwise it will
-be \code{NA} if a species is alive at the end of the simulation.}
+\item{trueExt}{A \code{logical} indicating whether the function should return
+true or truncated extinction times. When \code{TRUE}, time of extinction of 
+extant species will be the true time, otherwise it will be \code{NA} if a 
+species is alive at the end of the simulation.}
 }
 \value{
 A \code{sim} object, containing extinction times, speciation times,
@@ -81,10 +81,8 @@ packages in the literature.
 }
 \examples{
 
-# we can show a couple scenarios
-
 ###
-# first, extinction 0
+# first, let us try no extinction
 
 # initial number of species
 n0 <- 1

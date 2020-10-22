@@ -30,10 +30,8 @@
 #'
 #' @examples
 #' 
-#' # we can show a couple scenarios
-#' 
 #' ###
-#' # first, extinction 0
+#' # first, let us try no extinction
 #' 
 #' # initial number of species
 #' n0 <- 1
@@ -120,7 +118,7 @@ bd.sim.constant <- function(n0, lambda, mu, tMax,
                             trueExt = FALSE) {
   # check that the rates are constant
   if (!(is.numeric(lambda) & length(lambda) == 1 &
-        is.numeric(mu) * length(mu) == 1)) {
+        is.numeric(mu) & length(mu) == 1)) {
     stop("bd.sim.constant requires constant rates")
   }
   
@@ -129,7 +127,7 @@ bd.sim.constant <- function(n0, lambda, mu, tMax,
     stop("rates cannot be negative")
   }
   
-  # check that n0 is not negative
+  # check that n0 is positive
   if (n0 <= 0) {
     stop("initial number of species must be positive")
   }
@@ -177,7 +175,7 @@ bd.sim.constant <- function(n0, lambda, mu, tMax,
       # calculate when extinction will happen
       tExp <- tNow + waitTimeE
   
-      # while there are fast enough speciations before the species goes extinct
+      # while there are speciations before the species goes extinct
       while ((tNow + waitTimeS) <= min(tExp, tMax)) {
         # update time
         tNow <- tNow + waitTimeS
@@ -188,8 +186,8 @@ bd.sim.constant <- function(n0, lambda, mu, tMax,
         parent <- c(parent, sCount)
         isExtant <- c(isExtant, TRUE) # it is alive
   
-        # take a new waiting time - if now + waitTimeS is still less than when
-        # the species goes extinct, repeat
+        # take a new waiting time - if now + waitTimeS is still less than 
+        # when the species goes extinct, repeat
         waitTimeS <- ifelse(lambda > 0, rexp(1, lambda), Inf)
       }
   
@@ -197,8 +195,11 @@ bd.sim.constant <- function(n0, lambda, mu, tMax,
       tNow <- tExp
   
       # record the extinction - if TE[sCount] is NA, it is extant
-      TE[sCount] <- ifelse(tNow >= tMax | trueExt, NA, tNow)
       isExtant[sCount] <- ifelse(is.na(TE[sCount]), TRUE, FALSE)
+      
+      # if trueExt is true or the species went extinct before tMax,
+      # record it. If both are false record it as NA
+      TE[sCount] <- ifelse(tNow < tMax | trueExt, tNow, NA)
   
       # next species
       sCount <- sCount + 1
@@ -213,13 +214,15 @@ bd.sim.constant <- function(n0, lambda, mu, tMax,
     len <- ifelse(extOnly, sum(isExtant), length(isExtant))
     # if this is in nFinal, the while loop stops
     
-    # if we have ran for too long, stop
+    # add to the counter
     counter <- counter + 1
   }
   
   # create the return
   sim <- list(TE = TE, TS = TS, PAR = parent, EXTANT = isExtant)
   class(sim) <- "sim"
+  
+  # for more on the seem class, see ?sim
 
   return(sim)
 }
