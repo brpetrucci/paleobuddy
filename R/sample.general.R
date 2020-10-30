@@ -224,8 +224,8 @@
 #'       col = "red")
 #' 
 #' ###
-#' # now, lets use a hat-shaped increase through the duration of a species with more
-#' # parameters than TS and TE
+#' # now, let us use a hat-shaped increase through the duration of a species with 
+#' # more parameters than TS and TE
 #' 
 #' # sampling rate
 #' rho <- function(t) {
@@ -661,6 +661,9 @@
 #' 
 #' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
 #'       col = "red")
+#'       
+#' # note rho can be any function of time, so one can use make.rate for 
+#' # more flexibility (see ?bd.sim.general for examples)
 #' 
 #' @name sample.general
 #' @rdname sample.general

@@ -14,10 +14,11 @@ of generating phylogenetic trees from the same underlying process.
 Users have access to a large array of scenarios to use and combine for species
 birth-death simulation. The function \code{bd.sim} allows for constant rates,
 rates varying as a function of time, or time and/or an environmental variable,
-besides age-dependent rates with the use of a shape parameter. Extinction and 
-speciation rates can be supplied independently, so that one can combine any
-types of scenarios for birth and death rates. See \code{?bd.sim},
-\code{?bd.sim.constant} and \code{?bd.sim.general} for more information.
+besides age-dependent rates with the use of a shape parameter (which can also
+be time-dependent). Extinction and speciation rates can be supplied 
+independently, so that one can combine any types of scenarios for birth and 
+death rates. See \code{?bd.sim}, \code{?bd.sim.constant} and 
+\code{?bd.sim.general} for more information.
 
 All birth-death simulation functions return a \code{sim} object, which is a 
 list of vectors containing speciation times, extinction times, status
@@ -67,14 +68,14 @@ The package makes use of a few helper functions for simulating and testing
 that we provide the user for completion. \code{rexp.var} aims to emulate the
 behavior of \code{rexp}, with the possibility of supplying a time-varying
 rate. The function also allows for a shape parameter, in which case the times
-drawn will be distributed as a Weibull, for age-dependent rates. 
-\code{var.rate.div} calculates the expected diversity of a birth-death process
-with varying rates for any time period, and is useful when testing birth-death
-simulation functions. Finally, \code{binner} simply returns the number of 
-fossil occurrences in each time bin for an occurrence and a bins vector
-supplied by the user. This is mostly for use in the \code{sample.clade}
-function. See \code{?rexp.var}, \code{?var.rate.div} and \code{?binner} for
-more information.
+drawn will be distributed as a Weibull, possibly with time-varying
+parameters, for age-dependent rates. \code{var.rate.div} calculates the 
+expected diversity of a birth-death process with varying rates for any time 
+period, and is useful when testing birth-death simulation functions. Finally, 
+\code{binner} simply returns the number of fossil occurrences in each time bin
+for an occurrence and a bins vector supplied by the user. This is mostly for 
+use in the \code{sample.clade} function. See \code{?rexp.var}, 
+\code{?var.rate.div} and \code{?binner} for more information.
 }
 
 \examples{

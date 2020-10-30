@@ -51,19 +51,22 @@ species that would be generated after \code{tMax} is not born.}
 equal to the shape parameter in a Weibull distribution: when smaller than one, 
 speciation rate will decrease along each species' age (negative 
 age-dependency). When larger than one, speciation rate will increase along each
-species's age (positive age-dependency). Default is \code{NULL}, equivalent to 
+species's age (positive age-dependency). It may be a function of time, but 
+see note below for caveats therein. Default is \code{NULL}, equivalent to 
 an age-independent process. For \code{lShape != NULL} (including when equal to 
-one), \code{lambda} will be considered a scale (= 1/rate), and \code{rexp.var} will
-draw a Weibull distribution instead of an exponential. This means 
+one), \code{lambda} will be considered a scale (= 1/rate), and \code{rexp.var} 
+will draw a Weibull distribution instead of an exponential. This means 
 Weibull(rate, 1) = Exponential(1/rate). Note that even when 
 \code{lShape != NULL}, \code{lambda} may still be time-dependent.}
 
 \item{mShape}{Similar to \code{lShape}, but for the extinction rate.
 
-Note: Time-varying shape is implemented, so one could have \code{lShape} or 
-\code{mShape} be a function of time. It is not thoroughly tested, however, 
-so it may be prudent to wait for a future release where this feature is well
-established.
+Note: Time-varying shape is within expectations for most cases, but if it is
+lower than 1 and varies too much (e.g. \code{0.5 + 0.5*t}), it can be biased
+for higher waiting times due to computational error. Slopes (or equivalent,
+since it can be any function of time) of the order of 0.01 are advisable.
+It rarely also displays small biases for abrupt variations. In both cases,
+error is still quite low for the purposes of the package.
 
 Note: Shape must be greater than 0. We arbitrarily chose 0.01 as the minimum
 accepted value, so if shape is under 0.01 for any reasonable time in the 
@@ -280,7 +283,7 @@ if (requireNamespace("ape", quietly = TRUE)) {
 }
 
 ###
-# scale can be a time-varying function as well
+# scale can be a time-varying function
 
 # initial number of species
 n0 <- 1
@@ -308,6 +311,37 @@ if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(phy)
 }
 
+###
+# and so can shape
+
+# initial number of species
+n0 <- 1
+
+# maximum simulation time
+tMax <- 40
+
+# speciation - here note it is a Weibull scale
+lambda <- function(t) {
+  return(2 + 0.25*t)
+}
+
+# speciation shape
+lShape <- function(t) {
+  return(1 + 0.02*t)
+}
+
+# extinction
+mu <- 0.2
+
+# run the simulation
+sim <- bd.sim(n0, lambda, mu, tMax, lShape = lShape, nFinal = c(2, Inf))
+
+# we can plot the phylogeny to take a look
+if (requireNamespace("ape", quietly = TRUE)) {
+  phy <- make.phylo(sim)
+  ape::plot.phylo(phy)
+}
+ 
 ###
 # finally, we can also have a rate dependent on an environmental variable,
 # like temperature data
@@ -493,16 +527,40 @@ if (requireNamespace("ape", quietly = TRUE)) {
 # the dependence of each in a different function and putting those
 # together
 
+###
 # finally, note one could create an extinction rate that turns age-dependent
 # in the middle, by making shape time-dependent
-shape <- function(t) {
+
+# initial number of species
+n0 <- 1
+
+# maximum simulation time
+tMax <- 40
+
+# speciation
+lambda <- 0.15
+
+# extinction - a Weibull scale
+mu <- function(t) {
+  return(8 + 0.05*t)
+}
+
+# speciation shape
+mShape <- function(t) {
   return(
     ifelse(t < 30, 1, 2)
   )
 }
 
-# but note that this uses time-dependent shape, which as we note above is not
-# yet thoroughly tested
+# run simulation
+sim <- bd.sim(n0, lambda, mu, tMax, mShape = mShape,
+               nFinal = c(2, Inf))
+
+# we can plot the phylogeny to take a look
+if (requireNamespace("ape", quietly = TRUE)) {
+  phy <- make.phylo(sim)
+  ape::plot.phylo(phy)
+}
 
 ###
 # note nFinal has to be sensible

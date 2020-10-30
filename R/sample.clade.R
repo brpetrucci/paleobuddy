@@ -224,24 +224,24 @@
 #' envR <- temp
 #' 
 #' # we can then make sampling dependent on the temperature
-#' rho <- function(t, env) {
+#' r_t <- function(t, env) {
 #'   return(0.5*env)
 #' }
 #' 
 #' # make it a function so we can plot it
-#' rho <- make.rate(rho, envRate = envR)
+#' rho <- make.rate(r_t, envRate = envR)
 #' 
-#' # let us check that r is high enough to see a pattern
+#' # let us check that rho is high enough to see a pattern
 #' plot(1:10, rho(1:10), type = 'l', main = "Sampling rate",
 #'      xlab = "My", ylab = "rho")
 #' 
-#' # the resolution of the fossil dataset:
+#' # the resolution of the fossil data set:
 #' bins <- seq(from = 10, to = 0,
 #'             by = -0.1)
 #' # note that we will provide a very high resolution to test the function
 #' 
 #' # find the occurrence data frame
-#' dt <- sample.clade(sim, rho, tMax = 10, envR = envR,
+#' dt <- sample.clade(sim, r_t, tMax = 10, envR = envR,
 #'                    bins = bins, returnTrue = FALSE)
 #' 
 #' # extract species identity

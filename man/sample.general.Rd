@@ -165,7 +165,7 @@ lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
 
 # sampling rate
 rho <- function(t) {
-  return(2 + 0.1*t) 
+  return(1 + 0.5*t) 
 }
 
 # simulate a group
@@ -231,12 +231,12 @@ lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
       col = "red")
 
 ###
-# now, lets use a hat-shaped increase through the duration of a species with more
-# parameters than TS and TE
+# now, let us use a hat-shaped increase through the duration of a species with 
+# more parameters than TS and TE
 
 # sampling rate
 rho <- function(t) {
-  return(2 + 0.1*t) 
+  return(1 + 0.5*t) 
 }
 
 # simulate a group
@@ -336,7 +336,7 @@ Pres_time_adppNorm <- function(t, s, e, sp, ...) {
 }
 
 lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], 
-                                     sp = 1, md=8), col = "red")
+                                     sp = 1, md = 8), col = "red")
 
 ###
 # we can also have a hat-shaped increase through the duration of a species
@@ -345,7 +345,7 @@ lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1],
 
 # sampling rate
 rho <- function(t) {
-  return(2 + 0.1*t) 
+  return(1 + 0.5*t) 
 }
 
 # simulate a group
@@ -415,6 +415,7 @@ hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
 
 # expected curve - probably will not fit great because of low sample size
+
 # getting expected values form age-dependence alone
 tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
 lines(x = tt, y = dTRImod1(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
@@ -446,7 +447,7 @@ lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
 
 # sampling rate
 rho <- function(t) {
-  return(2 + 0.1*t) 
+  return(1 + 0.5*t) 
 }
 
 # simulate a group
@@ -514,6 +515,7 @@ hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
 
 # expected curve - probably will not fit great because of low sample size
+
 # getting expected values form age-dependence alone
 tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
 lines(x = tt, y = dTRImod2(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
@@ -546,7 +548,7 @@ lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
 
 # sampling rate
 rho <- function(t) {
-  return(5 + 0.1*t)
+  return(1 + 0.5*t)
 }
 # note one can also vary the model used for sampling rate
 # see ?sample.species for examples
@@ -644,6 +646,7 @@ hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
 
 # expected curve - probably will not fit great because of low sample size
+
 # getting expected values form age-dependence alone
 tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
 lines(x = tt, y = dTriAndUniform(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
@@ -665,6 +668,9 @@ Pres_time_adppNorm <- function(t, s, e, sp, ...) {
 
 lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
       col = "red")
+      
+# note rho can be any function of time, so one can use make.rate for 
+# more flexibility (see ?bd.sim.general for examples)
 
 }
 \author{

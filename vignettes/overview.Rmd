@@ -315,22 +315,29 @@ set.seed(1)
 # age-dependent speciation with a step function
 lList <- c(10, 5, 12)
 lShifts <- c(0, 10, 15)
-lShape <- 0.5
+lShape <- 2
 
 # age-dependent extinction with a step function of an environmental variable
 q <- function(t, env) {
-  ifelse(t < 10, 20*env,
-         ifelse(t < 15, 10*env, 13*env / 2))
+  ifelse(t < 10, 2*env,
+         ifelse(t < 15, 1.4*env, env / 2))
 }
-mShape <- 2
+
+# note shape can be time-dependent as well, though
+# we advise for variation not to be too abrupt due
+# to computational issues
+mShape <- function(t) {
+  return(1.2 + 0.025*t)
+}
 
 # run the simulation
-sim <- bd.sim(n0, lList, q, tMax, lShape = 0.5, mShape = mShape, envM = temp, lShifts = lShifts)
+sim <- bd.sim(n0, lList, q, tMax, lShape = lShape, mShape = mShape, envM = temp, lShifts = lShifts)
+
+# check out the phylogeny
+ape::plot.phylo(make.phylo(sim), show.tip.label = FALSE)
 ```
 
 We set this to not run because it takes a long time - both because of the high speciation and because the method of creating a step function rate with `shifts` and `lists` takes a long time to integrate. It is however a good illustration of the power of `paleobuddy`s flexibility. 
-
-Note shape may also be a time-varying function, but that was not thoroughly tested and therefore not a recommended feature at the moment.
 
 None of the scenarios we have listed here are specific to speciation or extinction - one can mix and match any combination listed here for either rate. 
 
@@ -414,7 +421,7 @@ for (i in 1:length(ids)) {
 }
 ```
 
-For more details and examples of age-dependent models, check out `?sample.general` and `?sample.clade`. When a `adFun` argument is supplied for age dependency, the average sampling rate `rho` must be a constant. We omit examples of non-age-dependent sampling rate options since they are just the same options as birth-death rates, excluding shape parameters.
+For more details and examples of age-dependent models, check out `?sample.general` and `?sample.clade`. Even if an `adFun` argument is supplied for age dependency, the average sampling rate `rho` may have the same flexibility. We omit examples of other sampling rate options since they are just the same options as birth-death rates, excluding shape parameters.
 
 ## Conclusion
 
@@ -424,7 +431,7 @@ For completion, we present a final list of the functions of the package
 * `bd.sim.constant` function called by `bd.sim` when rates are constant.
 * `bd.sim.general` function called by `bd.sim` when they are not.
 * `make.phylo` creates a `phylo` object from the `ape` package.
-* `sample.clade` samples a whole group, usually outputted from `bd.sim`. Sampling rate can be anything a speciation or extinction rate can be, without the option of a shape parameter. If sampling is constant, the user may also supply a distribution of age-dependent occurrences.
+* `sample.clade` samples a whole group, usually outputted from `bd.sim`. Sampling rate can be anything a speciation or extinction rate can be, without the option of a shape parameter. The user may instead supply a distribution of ocurrences accross a species age, so as to simulate age-dependency in sampling with more flexibility.
 * `sample.species` function called by `sample.clade` when sampling is not age-dependent
 * `sample.general` function called by `sample.clade` when sampling is age-dependent (i.e. Age Dependent Poisson Process)
 * `rexp.var` exponential and weibull waiting time drawing with variable rates. Used by `bd.sim` and `sample.clade`.

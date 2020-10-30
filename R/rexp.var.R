@@ -27,7 +27,8 @@
 #' \code{tMax} will be \code{Inf}, but if \code{FAST == TRUE} one must supply
 #' a finite value.
 #'
-#' @param shape Shape of the Weibull distribution. This means when smaller than
+#' @param shape Shape of the Weibull distribution. Can be a \code{numeric} for 
+#' constant shape or a \code{function(t)} for time-varying. When smaller than
 #' one, rate will decrease along species' age (negative age-dependency). When 
 #' larger than one, rate will increase along each species's age (positive 
 #' age-dependency). Default is \code{NULL}, so the function acts asan exponential
@@ -37,9 +38,17 @@
 #' Weibull(rate, 1) = Exponential(1/rate). Notice even when \code{Shape != NULL}, 
 #' \code{rate} may still be time-dependent. 
 #'
-#' Note: Time-varying shape is implemented, so one could have \code{shape} be a
-#' function of time. It is not thoroughly tested, however, so it may be prudent to
-#' wait for a future release where this feature is well established.
+#' Note: Time-varying shape is within expectations for most cases, but if it is
+#' lower than 1 and varies too much (e.g. \code{0.5 + 0.5*t}), it can be biased
+#' for higher waiting times due to computational error. Slopes (or equivalent,
+#' since it can be any function of time) of the order of 0.01 are advisable.
+#' It rarely also displays small biases for abrupt variations. In both cases,
+#' error is still quite low for the purposes of the package.
+#' 
+#' Note: We do not test for shape > 0 here since as we allow shape to be a 
+#' function this would severely slow the rest of the package. It is tested on
+#' the birth-death functions, and the user should make sure not to use any
+#' functions that become negative eventually.
 #'
 #' @param TS Speciation time, used to account for the scaling between simulation 
 #' and species time. The default is \code{0}. Supplying a \code{TS > now} will
@@ -49,7 +58,7 @@
 #' not be thrown away. This argument is needed so one can test the function
 #' without bias.
 #'
-#' @return A vector of waiting times fpllowing the exponential or Weibull 
+#' @return A vector of waiting times following the exponential or Weibull 
 #' distribution with the given parameters.
 #'
 #' @author Bruno do Rosario Petrucci.
@@ -168,9 +177,7 @@
 #' # note how some results may be tMax + 0.01, since fast = TRUE
 #' 
 #' ###
-#' # both rate and shape can be time varying for a Weibull, but since we have
-#' # only been able to test time-varying rate effectively, we do not recommend
-#' # using shape as a function
+#' # both rate and shape can be time varying for a Weibull
 #' 
 #' # scale
 #' rate <- function(t) {
@@ -194,6 +201,29 @@
 #'               shape = shape, TS = TS, fast = TRUE)
 #' t
 #' 
+#' ###
+#' # scale
+#' rate <- 10
+#' 
+#' # shape
+#' shape <- function(t) {
+#'   return(1.5 + 0.05*t)
+#' }
+#' 
+#' # current time
+#' now <- 0
+#' 
+#' # maximum time to check
+#' tMax <- 40
+#' 
+#' # speciation time
+#' TS <- 0
+#' 
+#' # find the vector of waiting times - it doesn't need to be just one
+#' t <- rexp.var(n = 5, rate, now, tMax,
+#'               shape = shape, TS = TS, fast = TRUE)
+#' t
+#'
 #' ###
 #' # rate can be any function of time, remember
 #' 
@@ -301,7 +331,7 @@ rexp.var <- function(n, rate,
 
         # if f(t) = 0, t is distributed as a Weibull
         vars[i] <- suppressWarnings(uniroot(f, c(spnow, upper), 
-                                            extendInt="yes"))$root - spnow
+                                            extendInt = "yes"))$root - spnow
         
         # if rate is really high and the integral goes to +-infinity (computationally
         # speaking), uniroot substitutes it for a really high/low value instead. Since
