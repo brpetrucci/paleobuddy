@@ -3,17 +3,17 @@
 #' Simulates a species birth-death process with general rates for any number of
 #' starting species. Allows for the speciation/extinction rate to be (1) a 
 #' constant, (2) a function of time, (3) a function of time and an environmental
-#' variable, or (4) a vector of numbers rpresenting a step function. 
-#' Allows for constraining results on the 
-#' number of species at the end of the simulation, either total or extant. The 
-#' function can also take an optional shape argument to generate age-dependence on
-#' speciation and/or extinction, assuming a Weibull distribution as a model of 
-#' age-dependence. Returns a \code{sim} object (see \code{?sim}). It may return 
-#' true extinction times or simply information on whether species lived after the 
-#' maximum simulation time, depending on input. \code{bd.sim} calls 
-#' \code{bd.sim.constant} or \code{bd.sim.general} depending on the nature of the 
-#' birth and death rates supplied. For more information on the code used for the 
-#' birth-death process, see those corresponding functions.
+#' variable, or (4) a vector of numbers representing a step function. 
+#' Allows for constraining results on the number of species at the end of the 
+#' simulation, either total or extant. The function can also take an optional 
+#' shape argument to generate age-dependence on speciation and/or extinction, 
+#' assuming a Weibull distribution as a model of  age-dependence. Returns a 
+#' \code{sim} object (see \code{?sim}). It may return true extinction times or 
+#' simply information on whether species lived after the  maximum simulation time, 
+#' depending on input. \code{bd.sim} calls \code{bd.sim.constant} or 
+#' \code{bd.sim.general} depending on the nature of the birth and death rates 
+#' supplied. For more information on the code used for the birth-death process, 
+#' see those corresponding functions.
 #' Please note while time runs from \code{0} to \code{tMax} in the simulation, it 
 #' returns speciation/extinction times as \code{tMax} (origin of the group) to 
 #' \code{0} (the "present" and end of simulation), so as to conform to other
