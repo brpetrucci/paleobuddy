@@ -3,7 +3,8 @@
 #' Simulates a species birth-death process with general rates for any number of
 #' starting species. Allows for the speciation/extinction rate to be (1) a 
 #' constant, (2) a function of time, (3) a function of time and an environmental
-#' variable, or (4) a vector of numbers. Allows for constraining results on the 
+#' variable, or (4) a vector of numbers rpresenting a step function. 
+#' Allows for constraining results on the 
 #' number of species at the end of the simulation, either total or extant. The 
 #' function can also take an optional shape argument to generate age-dependence on
 #' speciation and/or extinction, assuming a Weibull distribution as a model of 
