@@ -276,9 +276,13 @@ make.rate <- function(rate, tMax = NULL, envRate = NULL, rateShifts = NULL) {
 
     fList <- rate
 
-    # if user gave a vector from past to present, make it from present to past
+    # if user gave a vector from past to present, invert it
     if (rateShifts[2] < rateShifts[1]) {
       rateShifts <- tMax - rateShifts
+    }
+    
+    if (min(rateShifts) != 0) {
+      rateShifts[which(rateShifts == min(rateShifts))] = 0
     }
 
     # create the step function
