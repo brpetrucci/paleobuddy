@@ -1,4 +1,4 @@
-#' Phylogeny generating
+#' Phylogeny generatin function
 #'
 #' Generates a phylogeny from a \code{sim} object containing speciation and 
 #' extinction times, parent and status information (see \code{?sim}). Returns a
