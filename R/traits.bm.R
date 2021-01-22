@@ -7,18 +7,17 @@
 #' value, one can simply sum the desired starting value to the result.
 #'
 #' @param tMax The only required parameter. Ending time of the simulation, usually
-#' inherited from the birth-death or sampling function that called 
-#' \code{traits.bm}.
+#' inherited from a birth-death or sampling function.
 #' 
 #' @param nTraits The number of traits to be simulated. Traits are assumed to be
 #' independent from one another. By default, the function simulates one trait.
 #' 
 #' @param sigma2 The variance of the normal distribution. This defines the 
-#' expected variance of the trait values, which will be \code{sigma2 * t}, where
-#' \code{t} is the total running time of the trait evolution simulation. The
-#' default is \code{1}, so that variance in trait values by time \code{nStart + t}
-#' will be \code{t}. This can optionally be a vector with size equal to
-#' \code{nTraits}, in which case each trait will have a different variance.
+#' expected variance of the trait values, which will be \code{sigma2 * t}, for
+#' each time interval \code{t} to be considered. The default is \code{1}, so that
+#' variance in trait values by time \code{nStart + t} will be \code{t}. This can 
+#' optionally be a vector with size equal to \code{nTraits}, in which case each 
+#' trait will have a different variance.
 #' 
 #' @param tStart The starting time of the simulation. Standard Brownian Motion 
 #' starts at \code{0}, so we set the default value as such, but this argument is
@@ -37,6 +36,11 @@
 #'
 #' @return A named list of functions, where \code{traits.bm$traitN(t)}
 #' corresponds to the trait value of trait \code{N} at time \code{t}.
+#' 
+#' @references 
+#' 
+#' Felsenstein, J. (1973). Maximum-Likelihood estimation of evolutionary trees
+#' from continuous chracters. American Journal of Human Genetics. 25(5):471-492.
 #'
 #' @examples
 #' ###
@@ -119,7 +123,8 @@
 #'      xlab = "Time (my)", ylab = "Trait value", ylim = c(-10, 10))
 #' lines(times, bmFuncs[[2]](times), col = 'RED')
 #' lines(times, bmFuncs[[3]](times), col = 'BLUE')
-#' legend(x = 1, y = -5, legend = c(0.5, 0.1, 0.05), col = c('BLACK', 'RED', 'BLUE'), lty = c(1,1,1))
+#' legend(x = 1, y = -5, legend = c(0.5, 0.1, 0.05),
+#'        col = c('BLACK', 'RED', 'BLUE'), lty = c(1, 1, 1))
 #'
 #' @name traits.bm
 #' @rdname traits.bm
@@ -144,12 +149,14 @@ traits.bm <- function(tMax, nTraits = 1, sigma2 = 1, tStart = 0, nPoints = 100) 
   } else {
     if (length(sigma2) != nTraits) {
       stop("sigma2 must have length equal to nTraits")
+    } else if (any(sigma2 <= 0)) {
+      stop("All variance values must be positive")
     }
   }
   
   # create a results list
   res <- list()
-  
+
   # for each trait,
   for (i in 1:nTraits) {
     # calculate vector of times
@@ -157,17 +164,18 @@ traits.bm <- function(tMax, nTraits = 1, sigma2 = 1, tStart = 0, nPoints = 100) 
     
     # calculate nPoints - 1 randomly distributed normal
     # variates with variance sigma2
-    jumps <- rnorm(nPoints - 1, mean = 0, sd = sqrt(sigma2))
+    jumps <- rnorm(nPoints - 1, mean = 0, 
+                   sd = sqrt(sigma2[i] * (tMax - tStart) / (nPoints - 1)))
     
     # calculate the bm vector being 0 and the cumulative sum of jumps
     bm <- c(0, cumsum(jumps))
-    
+
     # make it a function using linear interpolation
     bmFunc <- approxfun(times, bm)
     
     # append it to the results list
     res[[paste0("trait", i)]] <- bmFunc
   }
-  
+
   return(res)
 }

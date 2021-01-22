@@ -8,18 +8,17 @@ traits.bm(tMax, nTraits = 1, sigma2 = 1, tStart = 0, nPoints = 100)
 }
 \arguments{
 \item{tMax}{The only required parameter. Ending time of the simulation, usually
-inherited from the birth-death or sampling function that called 
-\code{traits.bm}.}
+inherited from a birth-death or sampling function.}
 
 \item{nTraits}{The number of traits to be simulated. Traits are assumed to be
 independent from one another. By default, the function simulates one trait.}
 
 \item{sigma2}{The variance of the normal distribution. This defines the 
-expected variance of the trait values, which will be \code{sigma2 * t}, where
-\code{t} is the total running time of the trait evolution simulation. The
-default is \code{1}, so that variance in trait values by time \code{nStart + t}
-will be \code{t}. This can optionally be a vector with size equal to
-\code{nTraits}, in which case each trait will have a different variance.}
+expected variance of the trait values, which will be \code{sigma2 * t}, for
+each time interval \code{t} to be considered. The default is \code{1}, so that
+variance in trait values by time \code{nStart + t} will be \code{t}. This can 
+optionally be a vector with size equal to \code{nTraits}, in which case each 
+trait will have a different variance.}
 
 \item{tStart}{The starting time of the simulation. Standard Brownian Motion 
 starts at \code{0}, so we set the default value as such, but this argument is
@@ -126,8 +125,13 @@ plot(times, bmFuncs[[1]](times), type = 'l',
      xlab = "Time (my)", ylab = "Trait value", ylim = c(-10, 10))
 lines(times, bmFuncs[[2]](times), col = 'RED')
 lines(times, bmFuncs[[3]](times), col = 'BLUE')
-legend(x = 1, y = -5, legend = c(0.5, 0.1, 0.05), col = c('BLACK', 'RED', 'BLUE'), lty = c(1,1,1))
+legend(x = 1, y = -5, legend = c(0.5, 0.1, 0.05),
+       col = c('BLACK', 'RED', 'BLUE'), lty = c(1, 1, 1))
 
+}
+\references{
+Felsenstein, J. (1973). Maximum-Likelihood estimation of evolutionary trees
+from continuous chracters. American Journal of Human Genetics. 25(5):471-492.
 }
 \author{
 Bruno do Rosario Petrucci.
