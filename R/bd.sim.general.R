@@ -441,12 +441,6 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
          of species")
   }
   
-  # initialize species count with a value that makes sure the while loop runs
-  len <- -1
-  
-  # counter to make sure the nFinal is achievable
-  counter <- 1
-  
   # if shape is not null, make scale a function to facilitate checking
   if (!is.null(lShape)) {
     message("since lShape is not null, lambda will be a Weibull scale and
@@ -493,6 +487,12 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
       }
     }
   }
+ 
+  # initialize species count with a value that makes sure the while loop runs
+  len <- -1
+  
+  # counter to make sure the nFinal is achievable
+  counter <- 1
 
   while (len < nFinal[1] | len > nFinal[2]) {
     # create vectors to hold times of speciation, extinction, 
