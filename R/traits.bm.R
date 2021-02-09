@@ -130,7 +130,8 @@
 #' @rdname traits.bm
 #' @export
 
-traits.bm <- function(tMax, nTraits = 1, sigma2 = 1, tStart = 0, nPoints = 100) {
+traits.bm <- function(tMax, tStart = 0, nTraits = 1, 
+                      sigma2 = 1, X0 = 0, nPoints = 100) {
   # make sure tMax > tStart
   if (tStart >= tMax) {
     stop("tMax must be greater than tStart")
@@ -146,6 +147,9 @@ traits.bm <- function(tMax, nTraits = 1, sigma2 = 1, tStart = 0, nPoints = 100) 
     if (sigma2 <= 0) {
       stop("sigma2 must be a positive number")
     }
+    
+    # if nTraits > 1, make it a vector
+    sigma2 <- rep(sigma2, nTraits)
   } else {
     if (length(sigma2) != nTraits) {
       stop("sigma2 must have length equal to nTraits")
@@ -154,9 +158,22 @@ traits.bm <- function(tMax, nTraits = 1, sigma2 = 1, tStart = 0, nPoints = 100) 
     }
   }
   
+  # same for X0
+  if (length(X0) != 1) {
+    if (length(X0) != nTraits) {
+      stop("X0 have length equal to nTraits")
+    }
+  }
+  
+  # if it is of length 1, make it a vector
+  # if nTraits is not 1
+  else {
+    X0 <- rep(X0, nTraits)
+  }
+  
   # create a results list
   res <- list()
-
+  
   # for each trait,
   for (i in 1:nTraits) {
     # calculate vector of times
@@ -167,11 +184,17 @@ traits.bm <- function(tMax, nTraits = 1, sigma2 = 1, tStart = 0, nPoints = 100) 
     jumps <- rnorm(nPoints - 1, mean = 0, 
                    sd = sqrt(sigma2[i] * (tMax - tStart) / (nPoints - 1)))
     
-    # calculate the bm vector being 0 and the cumulative sum of jumps
-    bm <- c(0, cumsum(jumps))
+    # calculate the bm vector being X0 and the cumulative sum of jumps
+    bm <- c(X0[i], cumsum(jumps))
 
     # make it a function using linear interpolation
     bmFunc <- approxfun(times, bm)
+    
+    # extend trait values after the end (to be able to integrate)
+    bmF <- bmFunc
+    bmFunc <- function(t) {
+      ifelse(t <= tMax, bmF(t), bmF(tMax))
+    }
     
     # append it to the results list
     res[[paste0("trait", i)]] <- bmFunc

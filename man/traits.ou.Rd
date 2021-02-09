@@ -6,11 +6,11 @@
 \usage{
 traits.ou(
   tMax,
+  tStart = 0,
   nTraits = 1,
   sigma2 = 1,
-  tStart = 0,
   theta = 0.5,
-  mu = 0,
+  mean = 0,
   X0 = 0,
   nPoints = 100
 )
@@ -18,6 +18,12 @@ traits.ou(
 \arguments{
 \item{tMax}{The only required parameter. Ending time of the simulation, usually
 inherited from a birth-death or sampling function.}
+
+\item{tStart}{The starting time of the simulation. Standard Brownian Motion 
+starts at \code{0}, so we set the default value as such, but this argument is
+required to accurately return a function based on the trait evolution of a
+trait for a species born after the beginning of a birth-death simulation. Note
+that the trait value for \code{t = 0} is always \code{0}.}
 
 \item{nTraits}{The number of traits to be simulated. Traits are assumed to be
 independent from one another. By default, the function simulates one trait.}
@@ -30,20 +36,14 @@ trait values, which will be
 equal to \code{nTraits}, in which case each trait will have a different 
 variance.}
 
-\item{tStart}{The starting time of the simulation. Standard Brownian Motion 
-starts at \code{0}, so we set the default value as such, but this argument is
-required to accurately return a function based on the trait evolution of a
-trait for a species born after the beginning of a birth-death simulation. Note
-that the trait value for \code{t = 0} is always \code{0}.}
-
-\item{theta}{The intensity of drift towards the target value \code{mu}. 
+\item{theta}{The intensity of drift towards the target value \code{mean}. 
 Increasing \code{theta} leads to a higher probability of trait values being 
 close to the target value, which decreases variance (see \code{sigma2}).
 The default is \code{0.5}. This can optionally be a vector with size 
 equal to \code{nTraits}, in which case each trait will have a different 
 drift intensity.}
 
-\item{mu}{The target value of the process. The higher the difference between
+\item{mean}{The target value of the process. The higher the difference between
 a trait value and its target, the more likely the next time step is to bringing
 the value closer to the target. Default is \code{0}. This can optionally be a 
 vector with size equal to \code{nTraits}, in which case each trait will have a 

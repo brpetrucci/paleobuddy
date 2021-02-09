@@ -17,14 +17,14 @@
 #' equal to \code{nTraits}, in which case each trait will have a different 
 #' variance.
 #' 
-#' @param theta The intensity of drift towards the target value \code{mu}. 
+#' @param theta The intensity of drift towards the target value \code{mean}. 
 #' Increasing \code{theta} leads to a higher probability of trait values being 
 #' close to the target value, which decreases variance (see \code{sigma2}).
 #' The default is \code{0.5}. This can optionally be a vector with size 
 #' equal to \code{nTraits}, in which case each trait will have a different 
 #' drift intensity.
 #' 
-#' @param mu The target value of the process. The higher the difference between
+#' @param mean The target value of the process. The higher the difference between
 #' a trait value and its target, the more likely the next time step is to bringing
 #' the value closer to the target. Default is \code{0}. This can optionally be a 
 #' vector with size equal to \code{nTraits}, in which case each trait will have a 
@@ -149,8 +149,8 @@
 #' @rdname traits.ou
 #' @export
 
-traits.ou <- function(tMax, nTraits = 1, sigma2 = 1, tStart = 0,
-                      theta = 0.5, mu = 0, X0 = 0, nPoints = 100) {
+traits.ou <- function(tMax, tStart = 0, nTraits = 1, sigma2 = 1,
+                      theta = 0.5, mean = 0, X0 = 0, nPoints = 100) {
   # make sure tMax > tStart
   if (tStart >= tMax) {
     stop("tMax must be greater than tStart")
@@ -162,7 +162,7 @@ traits.ou <- function(tMax, nTraits = 1, sigma2 = 1, tStart = 0,
   }
   
   # make a list of parameters
-  pars <- list(sigma2, theta, mu, X0)
+  pars <- list(sigma2, theta, mean, X0)
   
   # sigma2 is either a constant, or a vector with size nTraits
   if (length(sigma2) == 1) {
@@ -200,7 +200,7 @@ traits.ou <- function(tMax, nTraits = 1, sigma2 = 1, tStart = 0,
     }
   }
   
-  # finally, X0 and mu can also be constants or vectors with size nTraits
+  # finally, X0 and mean can also be constants or vectors with size nTraits
   if ((length(X0) != 1) && (length(X0) != nTraits)) {
     stop("X0 must be either a constant or a vector with size nTraits")
   }
@@ -210,13 +210,13 @@ traits.ou <- function(tMax, nTraits = 1, sigma2 = 1, tStart = 0,
     X0 <- rep(X0, nTraits)
   }
   
-  if ((length(mu) != 1) && (length(mu) != nTraits)) {
-    stop("mu must be either a constant or a vector with size nTraits")
+  if ((length(mean) != 1) && (length(mean) != nTraits)) {
+    stop("mean must be either a constant or a vector with size nTraits")
   }
   
   # make it a vector if needed
-  if (length(mu) < max(lengths(pars))) {
-    mu <- rep(mu, nTraits)
+  if (length(mean) < max(lengths(pars))) {
+    mean <- rep(mean, nTraits)
   }
   
   # create a results list
@@ -240,12 +240,18 @@ traits.ou <- function(tMax, nTraits = 1, sigma2 = 1, tStart = 0,
     
     # calculate the OU process for the remaining time points
     for (j in 2:length(times)) {
-      ou[j] <- ou[j - 1] + theta[i]*(mu[i] - ou[j - 1])*dt + 
+      ou[j] <- ou[j - 1] + theta[i]*(mean[i] - ou[j - 1])*dt + 
         sqrt(sigma2[i])*dw[j - 1]
     }
 
     # make it a function using linear interpolation
     ouFunc <- approxfun(times, ou)
+    
+    # extend trait values after the end (to be able to integrate)
+    ouF <- ouFunc
+    ouFunc <- function(t) {
+      ifelse(t <= tMax, ouF(t), ouF(tMax))
+    }
     
     # append it to the results list
     res[[paste0("trait", i)]] <- ouFunc

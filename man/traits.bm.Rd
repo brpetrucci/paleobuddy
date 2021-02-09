@@ -4,11 +4,17 @@
 \alias{traits.bm}
 \title{Simulate trait evolution through Brownian Motion}
 \usage{
-traits.bm(tMax, nTraits = 1, sigma2 = 1, tStart = 0, nPoints = 100)
+traits.bm(tMax, tStart = 0, nTraits = 1, sigma2 = 1, X0 = 0, nPoints = 100)
 }
 \arguments{
 \item{tMax}{The only required parameter. Ending time of the simulation, usually
 inherited from a birth-death or sampling function.}
+
+\item{tStart}{The starting time of the simulation. Standard Brownian Motion 
+starts at \code{0}, so we set the default value as such, but this argument is
+required to accurately return a function based on the trait evolution of a
+trait for a species born after the beginning of a birth-death simulation. Note
+that the trait value for \code{t = 0} is always \code{0}.}
 
 \item{nTraits}{The number of traits to be simulated. Traits are assumed to be
 independent from one another. By default, the function simulates one trait.}
@@ -19,12 +25,6 @@ each time interval \code{t} to be considered. The default is \code{1}, so that
 variance in trait values by time \code{nStart + t} will be \code{t}. This can 
 optionally be a vector with size equal to \code{nTraits}, in which case each 
 trait will have a different variance.}
-
-\item{tStart}{The starting time of the simulation. Standard Brownian Motion 
-starts at \code{0}, so we set the default value as such, but this argument is
-required to accurately return a function based on the trait evolution of a
-trait for a species born after the beginning of a birth-death simulation. Note
-that the trait value for \code{t = 0} is always \code{0}.}
 
 \item{nPoints}{The total number of points in the discretization of the process.
 While Brownian Motion is a continuous process, we must simulate it discretely.
