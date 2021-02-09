@@ -149,7 +149,7 @@ sigma2 <- c(5, 0.5, 1)
 theta <- c(1, 0.5, 0.25)
 
 # and mu, but say we want to keep it a constant
-mu <- 0.5
+mean <- 0.5
 
 # finally, define the starting value for each trait
 X0 <- c(0, 0.3, 1)
@@ -157,9 +157,9 @@ X0 <- c(0, 0.3, 1)
 # set a seed so we can control ylim and legend position
 set.seed(1)
 
-# calculate BM functions
+# calculate OU functions
 ouFuncs <- traits.ou(tMax, nTraits = 3, sigma2 = sigma2, theta = theta,
-                     mu = mu, X0 = X0)
+                     mean = mean, X0 = X0)
 
 # plot them
 plot(times, ouFuncs[[1]](times), type = 'l',
