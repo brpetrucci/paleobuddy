@@ -19,6 +19,10 @@
 #' optionally be a vector with size equal to \code{nTraits}, in which case each 
 #' trait will have a different variance.
 #' 
+#' @param X0 The initial trait value. For a BM process, one can simply run the
+#' process starting from \code{0} and sum \code{X0} at the end, but we add this
+#' for simplicity.
+#' 
 #' @param tStart The starting time of the simulation. Standard Brownian Motion 
 #' starts at \code{0}, so we set the default value as such, but this argument is
 #' required to accurately return a function based on the trait evolution of a

@@ -26,6 +26,10 @@ variance in trait values by time \code{nStart + t} will be \code{t}. This can
 optionally be a vector with size equal to \code{nTraits}, in which case each 
 trait will have a different variance.}
 
+\item{X0}{The initial trait value. For a BM process, one can simply run the
+process starting from \code{0} and sum \code{X0} at the end, but we add this
+for simplicity.}
+
 \item{nPoints}{The total number of points in the discretization of the process.
 While Brownian Motion is a continuous process, we must simulate it discretely.
 As such, the user can provide a number of time points, by default set to 
