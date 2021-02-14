@@ -569,7 +569,7 @@ bd.sim <- function(n0, lambda, mu, tMax,
     m <- mu
     
     # call bd.sim.constant
-    return(bd.sim.constant(n0, l, m, tMax, nFinal, extOnly))
+    return(bd.sim.constant(n0, l, m, tMax, nFinal, extOnly, trueExt))
   }
 
   # else it is not constant
