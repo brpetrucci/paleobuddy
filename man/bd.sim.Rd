@@ -88,10 +88,7 @@ time for the simulation (\code{0} or \code{tMax}). It must have the same length
 as \code{lambda}. \code{c(0, x, tMax)} is equivalent to 
 \code{c(tMax, tMax - x, 0)} for the purposes of \code{make.rate}.}
 
-\item{mShifts}{Similar to \code{mShifts}, but for the extinction rate.
-
-Note that using this method for step-function rates is currently slower than 
-using \code{ifelse}.}
+\item{mShifts}{Similar to \code{mShifts}, but for the extinction rate.}
 
 \item{nFinal}{A \code{vector} of length \code{2}, indicating an interval of 
 acceptable number of species at the end of the simulation. Default value is 
@@ -248,7 +245,6 @@ mu <- function(t) {
 # run the simulation
 sim <- bd.sim(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 # we could instead have used mList and mShifts
-# that is, however, much slower
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {

@@ -38,9 +38,6 @@
 #' as \code{lambda}. \code{c(0, x, tMax)} is equivalent to 
 #' \code{c(tMax, tMax - x, 0)} for the purposes of \code{make.rate}.
 #'
-#' Note: using this method for step-function rates is currently slower than using
-#' \code{ifelse}.
-#'
 #' @param returnTrue If set to \code{FALSE}, it will contain the occurrence
 #' times as ranges. In this way, we simulate the granularity presented by
 #' empirical fossil records. If \code{returnTrue} is \code{TRUE}, this is ignored.
