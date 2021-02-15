@@ -88,9 +88,6 @@
 #' 
 #' @param mShifts Similar to \code{mShifts}, but for the extinction rate.
 #' 
-#' Note that using this method for step-function rates is currently slower than 
-#' using \code{ifelse}.
-#' 
 #' @param nFinal A \code{vector} of length \code{2}, indicating an interval of 
 #' acceptable number of species at the end of the simulation. Default value is 
 #' \code{c(0, Inf)}, so that any number of species (including zero, the extinction
@@ -227,7 +224,6 @@
 #' # run the simulation
 #' sim <- bd.sim(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 #' # we could instead have used mList and mShifts
-#' # that is, however, much slower
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {

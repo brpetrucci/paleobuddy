@@ -221,8 +221,7 @@ mu <- function(t) {
 
 # run the simulation
 sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
-# we could instead have used q made with make.rate
-# that is, however, much slower
+# we could instead have used q made with make.rates
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
