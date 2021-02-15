@@ -51,10 +51,7 @@ more examples.}
 \item{rShifts}{Vector of rate shifts. First element must be the starting
 time for the simulation (\code{0} or \code{tMax}). It must have the same length
 as \code{lambda}. \code{c(0, x, tMax)} is equivalent to 
-\code{c(tMax, tMax - x, 0)} for the purposes of \code{make.rate}.
-
-Note: using this method for step-function rates is currently slower than using
-\code{ifelse}.}
+\code{c(tMax, tMax - x, 0)} for the purposes of \code{make.rate}.}
 
 \item{returnTrue}{If set to \code{FALSE}, it will contain the occurrence
 times as ranges. In this way, we simulate the granularity presented by

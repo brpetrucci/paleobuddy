@@ -286,18 +286,7 @@ make.rate <- function(rate, tMax = NULL, envRate = NULL, rateShifts = NULL) {
     }
 
     # create the step function
-    r <- function(t) {
-
-      if (t < 0) {
-        return(0)
-      }
-
-      else {
-        # get the rate for this time by subtracting the shifts
-        # and finding where the subtraction is positive
-        return(fList[utils::tail(which(t - rateShifts >= 0), n = 1)])
-      }
-    }
+    r <- stepfun(rateShifts[2:length(rateShifts)], fList)
 
     # vectorize the function so we can integrate it
     r <- Vectorize(r)
