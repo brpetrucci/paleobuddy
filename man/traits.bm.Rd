@@ -117,19 +117,22 @@ times <- seq(tStart, tMax, (tMax - tStart) / nPoints)
 # a different variance, in the corresponding order
 sigma2 <- c(0.5, 0.1, 0.05)
 
+# we can also have different starting points
+X0 <- c(0, 0.2, -0.1)
+
 # set a seed so we can control ylim and legend position
 set.seed(1) 
 
 # calculate BM functions
-bmFuncs <- traits.bm(tMax, nTraits = 3, sigma2 = sigma2)
+bmFuncs <- traits.bm(tMax, nTraits = 3, sigma2 = sigma2, X0 = X0)
 
 # plot them
 plot(times, bmFuncs[[1]](times), type = 'l', 
      main = "Trait values for traits with sigma2 = 0.5, 0.1 and 0.05",
-     xlab = "Time (my)", ylab = "Trait value", ylim = c(-10, 10))
+     xlab = "Time (my)", ylab = "Trait value", ylim = c(-2.5, 3))
 lines(times, bmFuncs[[2]](times), col = 'RED')
 lines(times, bmFuncs[[3]](times), col = 'BLUE')
-legend(x = 1, y = -5, legend = c(0.5, 0.1, 0.05),
+legend(x = 1, y = -1, legend = c(0.5, 0.1, 0.05),
        col = c('BLACK', 'RED', 'BLUE'), lty = c(1, 1, 1))
 
 }

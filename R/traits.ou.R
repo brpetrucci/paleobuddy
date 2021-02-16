@@ -139,11 +139,11 @@
 #' # plot them
 #' plot(times, ouFuncs[[1]](times), type = 'l',
 #'      main = "Trait values for traits with mu = 0.5",
-#'      xlab = "Time (my)", ylab = "Trait value", ylim = c(-3, 3))
+#'      xlab = "Time (my)", ylab = "Trait value", ylim = c(-3, 4))
 #' lines(times, ouFuncs[[2]](times), col = 'RED')
 #' lines(times, ouFuncs[[3]](times), col = 'BLUE')
 #' legend(x = 1, y = -1.5, legend = c("5, 1, 0", "0.5, 0.5, 0.3", "1, 0.25, 1"), 
-#'       col = c('BLACK', 'RED', 'BLUE'), lty = c(1,1,1))
+#'       col = c('BLACK', 'RED', 'BLUE'), lty = c(1, 1, 1))
 #'
 #' @name traits.ou
 #' @rdname traits.ou
@@ -245,13 +245,7 @@ traits.ou <- function(tMax, tStart = 0, nTraits = 1, sigma2 = 1,
     }
 
     # make it a function using linear interpolation
-    ouFunc <- approxfun(times, ou)
-    
-    # extend trait values after the end (to be able to integrate)
-    ouF <- ouFunc
-    ouFunc <- function(t) {
-      ifelse(t <= tMax, ouF(t), ouF(tMax))
-    }
+    ouFunc <- approxfun(times, ou, rule = 2)
     
     # append it to the results list
     res[[paste0("trait", i)]] <- ouFunc

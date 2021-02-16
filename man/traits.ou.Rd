@@ -164,11 +164,11 @@ ouFuncs <- traits.ou(tMax, nTraits = 3, sigma2 = sigma2, theta = theta,
 # plot them
 plot(times, ouFuncs[[1]](times), type = 'l',
      main = "Trait values for traits with mu = 0.5",
-     xlab = "Time (my)", ylab = "Trait value", ylim = c(-3, 3))
+     xlab = "Time (my)", ylab = "Trait value", ylim = c(-3, 4))
 lines(times, ouFuncs[[2]](times), col = 'RED')
 lines(times, ouFuncs[[3]](times), col = 'BLUE')
 legend(x = 1, y = -1.5, legend = c("5, 1, 0", "0.5, 0.5, 0.3", "1, 0.25, 1"), 
-      col = c('BLACK', 'RED', 'BLUE'), lty = c(1,1,1))
+      col = c('BLACK', 'RED', 'BLUE'), lty = c(1, 1, 1))
 
 }
 \references{
