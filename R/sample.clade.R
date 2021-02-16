@@ -782,20 +782,20 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
       # bin it
       if (length(pointEstimates[[i]]) > 0) {
         binned_occs <- binner(pointEstimates[[i]], bins = bins)
-      }
-      
-      # for each bin
-      for (k in 1:(length(bins) - 1)) {
+        
+        # for each bin
+        for (k in 1:(length(bins) - 1)) {
         # if there are occurrences in that bin
-        if (binned_occs[k] > 0) {
-          # make a row of the data frame
-          aux <- data.frame(Species = i, 
-                            Extant = NA, 
-                            MinT = bins[k + 1],
-                            MaxT = rep(bins[k], times = binned_occs[k]))
+          if (binned_occs[k] > 0) {
+            # make a row of the data frame
+            aux <- data.frame(Species = i,
+                              Extant = NA, 
+                              MinT = bins[k + 1],
+                              MaxT = rep(bins[k], times = binned_occs[k]))
           
-          # add row to data frame
-          res <- rbind(res, aux)
+            # add row to data frame
+            res <- rbind(res, aux)
+          }
         }
       }
     }
