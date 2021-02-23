@@ -695,14 +695,14 @@ sample.general <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
   TE[sim$EXTANT] <- 0
   
   # check if adFun is a function with the right parameters
-  if(!(is.null(adFun))){
+  if (!(is.null(adFun))) {
     if (sum(c("t", "s", "e", "sp") %in% names(formals(adFun))) < 3) {
       stop("adFun must have \"t\", \"s\", \"e\", and  \"sp\" parameters")
     }
   }
   
   # if adFun is null, it is the same as sample.species
-  if(is.null(adFun)){
+  if (is.null(adFun)) {
     message("Preservation will be Age-independent \n")
     
     # run sample.species
