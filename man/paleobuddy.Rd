@@ -141,7 +141,7 @@ for (c in clades) {
 if (requireNamespace("ape", quietly = TRUE)) {
   par(mfrow = c(1, 2))
   ape::plot.phylo(phy, root.edge = TRUE)
-  axisPhylo()
+  ape::axisPhylo()
   
   # we can also plot the species longevities
   draw.sim(c$sim)
