@@ -1,7 +1,8 @@
 #' Simulate trait evolution with a discrete number of states
 #'
 #' Generates trait evolution simulations for a number of traits under a continuous
-#' Markov Chain process with discrete states.
+#' Markov Chain process with discrete states, usually known as BiSSE (when
+#' considering only two states) or MuSSE.
 #' 
 #' @inheritParams traits.bm
 #' 

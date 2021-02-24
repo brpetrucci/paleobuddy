@@ -176,7 +176,7 @@ Uhlenbeck, G. E., Ornstein, L. S. (1930). On the theory of Brownian Motion.
 Phys. Rev. 36 (5): 823–841.
 
 Felsenstein, J. (1988). Phylogenies and Quantitative Characters. Annual Review
-of Ecology and Systematics
+of Ecology and Systematics. 19:445-71.
 }
 \author{
 Bruno do Rosario Petrucci.

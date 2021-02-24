@@ -47,7 +47,7 @@
 #' Phys. Rev. 36 (5): 823–841.
 #' 
 #' Felsenstein, J. (1988). Phylogenies and Quantitative Characters. Annual Review
-#' of Ecology and Systematics
+#' of Ecology and Systematics. 19:445-71.
 #' 
 #' @examples
 #' ###
