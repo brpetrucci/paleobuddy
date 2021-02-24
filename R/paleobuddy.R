@@ -96,9 +96,10 @@
 #' plot(seq(0, 10, 0.1), div, type = 'l', main = "Expected diversity",
 #'      xlab = "Time (My)", ylab = "Species")
 #' 
-#' set.seed(3)
-#' 
 #' # around 28 species by the end, seems pretty good
+#' 
+#' set.seed(1)
+#' 
 #' # run the simulation
 #' sim <- bd.sim(n0 = 3, lambda = lambda, mu = mu, tMax = 10, nFinal = c(20, Inf))
 #' # nFinal controls the final number of species
@@ -131,10 +132,11 @@
 #' # take a look at the phylogeny
 #' if (requireNamespace("ape", quietly = TRUE)) {
 #'   par(mfrow = c(1, 2))
-#'   ape::plot.phylo(phy)
+#'   ape::plot.phylo(phy, root.edge = TRUE)
+#'   axisPhylo()
 #'   
-#'   # we can also plot the molecular phylogeny
-#'   ape::plot.phylo(ape::drop.fossil(phy))
+#'   # we can also plot the species longevities
+#'   draw.sim(c$sim)
 #' }
 #' 
 #' @docType package
