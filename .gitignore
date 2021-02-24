@@ -9,3 +9,4 @@ man/.RData
 inst/doc
 doc
 Meta
+.DS_Store
