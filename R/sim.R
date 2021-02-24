@@ -184,13 +184,13 @@ summary.sim <- function(object, ...) {
 
 #' @rdname sim
 #' 
-#' @details \code{plot.sim} Plots births, deaths, and diversity through time for
+#' @details \code{plot.sim.ltt} Plots births, deaths, and diversity through time for
 #' the sim object.
 #' 
 #' @export
 #' 
 
-plot.sim <- function(x, ...) {
+plot.sim.ltt <- function(x, ...) {
   # change name just for clarity of the object
   sim <- x
   
