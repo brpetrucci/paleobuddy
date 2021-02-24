@@ -5,7 +5,7 @@
 \alias{is.sim}
 \alias{print.sim}
 \alias{summary.sim}
-\alias{plot.sim}
+\alias{plot.sim.ltt}
 \alias{sim.counts}
 \title{Details, generics, and methods for the \code{sim} class}
 \usage{
@@ -15,7 +15,7 @@ is.sim(sim)
 
 \method{summary}{sim}(object, ...)
 
-\method{plot}{sim}(x, ...)
+\method{plot}{sim.ltt}(x, ...)
 
 sim.counts(sim, t)
 }
@@ -64,7 +64,7 @@ simulations with 10+ species.
 Prints the number of species, number of extant species, summary of durations
 and speciation waiting times, in case there are more than one species.
 
-\code{plot.sim} Plots births, deaths, and diversity through time for
+\code{plot.sim.ltt} Plots births, deaths, and diversity through time for
 the sim object.
 
 \code{sim.counts} Calculates the births, deaths, and diversity for a 
