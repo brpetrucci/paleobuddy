@@ -1,10 +1,9 @@
 #' Simulate trait evolution through Brownian Motion
 #'
 #' Generates trait evolution simulations for a number of traits under Brownian
-#' Motion. Each trait starts with a value of \code{0} and, for each time point,
+#' Motion. Each trait starts with a value of \code{Z0} and, for each time point,
 #' changes by an amount calculated stochastically by a normally distributed
-#' variable with given variance. Note that if one wishes to start at a nonzero
-#' value, one can simply sum the desired starting value to the result.
+#' variable with given variance.
 #'
 #' @param tMax The only required parameter. Ending time of the simulation, usually
 #' inherited from a birth-death or sampling function.
