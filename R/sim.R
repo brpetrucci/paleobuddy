@@ -32,7 +32,6 @@
 #' @importFrom utils head
 #' 
 NULL
-#> NULL
 
 #' @rdname sim
 #' 
