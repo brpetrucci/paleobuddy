@@ -128,30 +128,21 @@ clades <- find.lineages(sim = sim)
 # note if we wanted to check for clades originated from specific species we
 # need only pass S as a vector with those species to find.lineages
 
-# get a phylogeny whichever one has a lot of species
+# get a phylogeny for whichever one has a lot of species
 for (c in clades) {
   if (length(c$sim$TE) > 10) {
-    sim <- c$sim
     phy <- make.phylo(c$sim)
     break
   }
 }
 
-# take a look at the phylogeny and longevity plot
+# take a look at the phylogeny
 if (requireNamespace("ape", quietly = TRUE)) {
   par(mfrow = c(1, 2))
-  ape::plot.phylo(phy, main = "Phylogenetic tree", root.edge = TRUE)
-  ape::axisPhylo()
+  ape::plot.phylo(phy)
   
-  # empty plot
-  plot(length(sim$TE):0, 0:length(sim$TE), xlab = "Time (mya)", 
-       ylab = "Species", main = "Longevity per species", 
-       col = "WHITE", xlim = c(10, 0))
-       
-  # plot longevities
-  for (i in 1:length(sim$TE)) {
-    lines(x = c(sim$TS[i], ifelse(is.na(sim$TE[i]), 0, sim$TE[])), y = c(i, i), lwd = 3)
-  }
+  # we can also plot the molecular phylogeny
+  ape::plot.phylo(ape::drop.fossil(phy))
 }
 
 }
