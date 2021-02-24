@@ -11,25 +11,26 @@
 #' @param fossil_occ A \code{data.frame} containing the fossil occurrences of 
 #' each lineage, as returned by the \code{sample.clade} function.
 #' 
-#' @param sort_by A character indicating which element in the \code{sim} object
-#'  that should be used to sort lineages in the plot. Default value is "TS". 
-#'  Users should note that this possibility involves the "PAR" element, which 
-#'  produces a figure that resembles Raup's (1985) concept of "paraclades".
+#' @param sort_by A single character or integer vector indicating how lineages 
+#' should be sorted in the plot. If inputted as character (see example 3), it 
+#' indicates which element in the \code{sim} object that should be used to sort 
+#' lineages in the plot. If inputted as a vector of integers, it directly 
+#' specifies the order in which lineages should be drawn (from the bottom 
+#' (i.e. integer = 1)) to the upper side (integer = length of the \code{sim} 
+#' elements) of the figure). Default value of this parameter is "TS". 
 #' 
 #' @return A draw of the simulation in the graphics window. If the 
 #' \code{fossil_occ} data.frame is inputted, its format will dictate how 
 #' fossil occurrences will be plotted. If \code{fossil_occ} have a column named
 #'  "SampT" (i.e. the fossil sampling is known with exactitude), fossil 
 #' occurrences are assigned as dots. If \code{fossil_occ} have two columns, 
-#' each named as "MaxT" and "MinT" (i.e. ----), fossil occurrences are 
+#' each named as "MaxT" and "MinT" (i.e. the early and late stage bounds 
+#' associated with each occurrence), fossil occurrences are 
 #' represented as slightly jittered, semitransparent bars indicating the early 
 #' and late bounds of each fossil occurrence.
 #' 
 #' @author Matheus Januario. 
 #' 
-#' @references
-#'
-#' Raup, D. M. (1985). Mathematical models of cladogenesis. Paleobiology, 42-52.
 #' 
 #' @importFrom grDevices col2rgb rgb
 #' @importFrom graphics points segments text
@@ -75,7 +76,38 @@
 #' #adding the bounds of the simulated bins:
 #' abline(v=bins, lty=2, col="red", lwd=.5)
 #' 
+#' #### Example 3
+#'  
+#' #maximum simulation time
+#' tMax=10 
+#' 
+#' #runing simulation (biological process)
+#' sim=bd.sim(1, .6, .55, tMax = tMax, nFinal = c(10,20)) 
+#'  
+#' #ploting (and this time sorting lineages randomly):
+#' fdt=sample.clade(sim=sim, rho = 4, tMax = tMax, returnTrue = TRUE)
+#' 
+#' #assignin a random order of lineages to be ploted:
+#' draw.sim(sim, fossil_occ = fdt, sort_by = sample(1:length(sim$TE)))
+#' 
 draw.sim=function(sim, fossil_occ=NULL, sort_by="TS"){
+  
+  #checking input:
+  if(!is.sim(sim)){
+    stop("sim input is not a sim object")
+  }
+  
+  if(!is.null(fossil_occ)){
+    if(!((c("SampT") %in% colnames(fossil_occ)) | all(c("MaxT", "MinT") %in% colnames(fossil_occ)))){
+      stop("fossil_occ is wrongly assigned. please see help(draw.sim)")
+    } 
+  }
+  
+  if(!class(sort_by) %in% c("character", "integer", "numeric")){
+    stop("sort_by should be a character or a vector of integers. please see help(draw.sim)")
+  }else if(class(sort_by) == "integer" & length(sort_by) != length(sim$TE)){
+    stop("must have the same length than all elements in the sim object")
+  }
   
   #aux function:
   makeTransparent<-function(someColor, alpha=25)
@@ -105,13 +137,18 @@ draw.sim=function(sim, fossil_occ=NULL, sort_by="TS"){
   sim$TE[sim$TE<0]=0
   
   #reordering sim object
-  if(sort_by %in% c("PAR")){
-    test=TRUE
+  if(is.character(sort_by)){
+    if(sort_by %in% c("PAR")){
+      test=TRUE
+    }else{
+      test=FALSE
+    }
+    
+    ord=order(unlist(sim[sort_by]), decreasing = test)
   }else{
-    test=FALSE
+    ord=sort_by
   }
   
-  ord=order(unlist(sim[sort_by]), decreasing = test)
   sim_mod=sim
   sim_mod$TE=sim_mod$TE[ord]
   sim_mod$TS=sim_mod$TS[ord]
@@ -119,14 +156,14 @@ draw.sim=function(sim, fossil_occ=NULL, sort_by="TS"){
   sim_mod$EXTANT=sim_mod$EXTANT[ord]
   
   #ploting
-  plot(NA, xlim=c(max(sim$TS), min(sim_mod$TE)), ylim=c(1,length(sim_mod$TE)), yaxt="n", ylab="Simulated lineages", xlab="Time (Mya", frame.plot = F)
+  plot(NA, xlim=c(max(sim$TS), min(sim$TE)-.6), ylim=c(1,max(ord)), yaxt="n", ylab="Simulated lineages", xlab="Time (Mya", frame.plot = F)
   
   #adding durations
   segments(x0 = sim_mod$TS, x1=sim_mod$TE, y1=1:length(sim_mod$TE),
            y0=1:length(sim_mod$TE), lwd=4, col="black")
   
   #adding labels
-  text(y=1:length(sim_mod$TE), x=sim_mod$TE-.13, labels = paste0("t", ord))
+  text(y=1:length(sim_mod$TE), x=sim_mod$TE-((max(sim$TS) - min(sim$TE) )*.035), labels = paste0("t", sprintf(paste0("%0",round(length(sim$TE)/10, digits = 0),"d"), ord)))
   
   #adding budding events
   luca=which(is.na(sim_mod$PAR))
@@ -163,5 +200,4 @@ draw.sim=function(sim, fossil_occ=NULL, sort_by="TS"){
   }
   
 }
-
 
