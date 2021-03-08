@@ -14,10 +14,13 @@ See \code{?sim}.}
 \item{fossil_occ}{A \code{data.frame} containing the fossil occurrences of 
 each lineage, as returned by the \code{sample.clade} function.}
 
-\item{sort_by}{A character indicating which element in the \code{sim} object
-that should be used to sort lineages in the plot. Default value is "TS". 
-Users should note that this possibility involves the "PAR" element, which 
-produces a figure that resembles Raup's (1985) concept of "paraclades".}
+\item{sort_by}{A single character or integer vector indicating how lineages 
+should be sorted in the plot. If inputted as character (see example 3), it 
+indicates which element in the \code{sim} object that should be used to sort 
+lineages in the plot. If inputted as a vector of integers, it directly 
+specifies the order in which lineages should be drawn (from the bottom 
+(i.e. integer = 1)) to the upper side (integer = length of the \code{sim} 
+elements) of the figure). Default value of this parameter is "TS".}
 }
 \value{
 A draw of the simulation in the graphics window. If the 
@@ -25,7 +28,8 @@ A draw of the simulation in the graphics window. If the
 fossil occurrences will be plotted. If \code{fossil_occ} have a column named
  "SampT" (i.e. the fossil sampling is known with exactitude), fossil 
 occurrences are assigned as dots. If \code{fossil_occ} have two columns, 
-each named as "MaxT" and "MinT" (i.e. ----), fossil occurrences are 
+each named as "MaxT" and "MinT" (i.e. the early and late stage bounds 
+associated with each occurrence), fossil occurrences are 
 represented as slightly jittered, semitransparent bars indicating the early 
 and late bounds of each fossil occurrence.
 }
@@ -72,9 +76,20 @@ draw.sim(sim, fossil_occ = fdt, sort_by = "PAR")
 #adding the bounds of the simulated bins:
 abline(v=bins, lty=2, col="red", lwd=.5)
 
-}
-\references{
-Raup, D. M. (1985). Mathematical models of cladogenesis. Paleobiology, 42-52.
+#### Example 3
+ 
+#maximum simulation time
+tMax=10 
+
+#runing simulation (biological process)
+sim=bd.sim(1, .6, .55, tMax = tMax, nFinal = c(10,20)) 
+ 
+#ploting (and this time sorting lineages randomly):
+fdt=sample.clade(sim=sim, rho = 4, tMax = tMax, returnTrue = TRUE)
+
+#assignin a random order of lineages to be ploted:
+draw.sim(sim, fossil_occ = fdt, sort_by = sample(1:length(sim$TE)))
+
 }
 \author{
 Matheus Januario.

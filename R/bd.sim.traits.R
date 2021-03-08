@@ -63,8 +63,10 @@
 #' \item \code{pars[["EB"]]} should be a named list containing "sigma2", "X0" and
 #' "b" fields. See \code{?traits.eb} for more information.
 #' 
-#' \item \code{pars[["ST"]]} should be a named list containing "states" and "Q"
-#' fields. See \code{?traits.states} for more information.
+#' \item \code{pars[["ST"]]} should be a named list containing "states", "X0" and
+#' "Q" fields. Since \code{X0} and \code{Q} are always of length greater than 1,
+#' they must be passed inside a list to allow for tests to run correctly. See 
+#' \code{?traits.states} for more information.
 #' }
 #'
 #' @return A \code{sim} object, containing extinction times, speciation times,
@@ -244,8 +246,8 @@ bd.sim.traits <- function(n0, lambda, mu, tMax,
       # incorporate trait values in lambda and mu if needed
       
       # if lambda is a function and has more than one argument
-      if (!is.numeric(lambda)) {
-        if (length(formals(lambda)) == 2) {
+      if (!is.numeric(lambda0)) {
+        if (length(formals(lambda0)) == 2) {
           # define lambda with trait functions and lambda0
           lambda <- function(t) {
             # for t, get lambda of t and the corresponding trait values
@@ -267,14 +269,16 @@ bd.sim.traits <- function(n0, lambda, mu, tMax,
         }
       }
       
-      # same for mu
-      if (!is.numeric(mu)) {
-        if (length(formals(mu)) == 2) {
+      # if mu is a function and has more than one argument
+      if (!is.numeric(mu0)) {
+        if (length(formals(mu0)) == 2) {
           # define mu with trait functions and mu0
           mu <- function(t) {
             # for t, get mu of t and the corresponding trait values
             ifelse(t < TS[sCount], 0,
-                   mu0(t, unname(unlist(lapply(traits, function(x) x(t))))))
+                   mu0(t, 
+                           unname(unlist(
+                             lapply(traits[[sCount]], function(x) x(t))))))
             # need unname and unlist due to how lapply returns lists
             
             # note that if t < TS[sCount] the function has value
@@ -446,8 +450,8 @@ traits.species <- function(tMax, tStart, nTraits, traitModel, pars) {
       # take the (stCount)th pars and run evolution
       traitFuncs[paste0("trait", i)] <-
         traits.states(tMax = tMax, tStart = tStart, nTraits = 1, 
-                     states = stPars[["states"]][stCount],
-                     Q = stPars[["Q"]][stCount], 
+                     states = stPars[["states"]][[stCount]],
+                     Q = stPars[["Q"]][[stCount]], 
                      X0 = stPars[["X0"]][stCount])
       
       # increase the count

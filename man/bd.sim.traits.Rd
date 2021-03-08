@@ -96,8 +96,10 @@ fields. See \code{?traits.bm} for more information.
 \item \code{pars[["EB"]]} should be a named list containing "sigma2", "X0" and
 "b" fields. See \code{?traits.eb} for more information.
 
-\item \code{pars[["ST"]]} should be a named list containing "states" and "Q"
-fields. See \code{?traits.states} for more information.
+\item \code{pars[["ST"]]} should be a named list containing "states", "X0" and
+"Q" fields. Since \code{X0} and \code{Q} are always of length greater than 1,
+they must be passed inside a list to allow for tests to run correctly. See 
+\code{?traits.states} for more information.
 }}
 
 \item{nFinal}{A \code{vector} of length \code{2}, indicating an interval of 

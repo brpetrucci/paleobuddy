@@ -212,17 +212,17 @@ plot.sim.ltt <- function(x, ...) {
   counts <- sim.counts(sim, t)
   
   # plot births
-  plot(t, counts$births, xlim = c(10, 0), ylim = c(0, length(sim$TE) + 0.2), 
+  plot(t, counts$births, xlim = c(max(t), 0), ylim = c(0, length(sim$TE) + 0.2), 
        type = 'l', main = "Speciation number through time",
        ylab = "Births", xlab = "Time (mya)")
   
   # deaths
-  plot(t, counts$deaths, xlim = c(10, 0), ylim = c(0, sum(!sim$EXTANT) + 0.2),
+  plot(t, counts$deaths, xlim = c(max(t), 0), ylim = c(0, sum(!sim$EXTANT) + 0.2),
        type = 'l', main = "Extinction number through time", 
        ylab = "Deaths", xlab = "Time (mya)")
   
   # and diversity
-  plot(t, counts$div, xlim = c(10, 0), ylim = c(0, max(counts$div) + 0.2), 
+  plot(t, counts$div, xlim = c(max(t), 0), ylim = c(0, max(counts$div) + 0.2), 
        type = 'l', main = "Species number through time", 
        ylab = "Species", xlab = "Time (mya)")
 }
