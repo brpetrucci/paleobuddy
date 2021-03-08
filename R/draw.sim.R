@@ -107,7 +107,7 @@ draw.sim=function(sim, fossil_occ=NULL, sort_by="TS"){
     stop("sort_by should be a character or a vector of integers. please see help(draw.sim)")
   }else if(class(sort_by) == "integer" & length(sort_by) != length(sim$TE)){
     stop("must have the same length than all elements in the sim object")
-  }else if(!(class(sort_by) == "integer" & all(1:length(sim$TE) %in% unique(sort_by)))){
+  }else if((class(sort_by) == "numeric") & !(all(1:length(sim$TE) %in% unique(sort_by)))){
     stop("sort_by must skip no lineage, and all lineages should have unique indexes")
   }
   
