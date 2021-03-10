@@ -167,7 +167,7 @@ traits.bm <- function(tMax, tStart = 0, nTraits = 1,
   # same for X0
   if (length(X0) != 1) {
     if (length(X0) != nTraits) {
-      stop("X0 have length equal to nTraits")
+      stop("X0 must have length equal to nTraits")
     }
   }
   

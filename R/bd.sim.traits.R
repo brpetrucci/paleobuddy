@@ -238,7 +238,7 @@ bd.sim.traits <- function(n0, lambda, mu, tMax,
       }
       
       # run trait evolution and append it to list
-      traits[[paste0("spp_", sCount)]] <- 
+      traits[[paste0("t", sCount)]] <- 
         traits.species(tMax = tMax, 
                        tStart = TS[sCount], nTraits = nTraits, 
                        traitModel = traitModel, pars = spPars)
@@ -416,7 +416,8 @@ traits.species <- function(tMax, tStart, nTraits, traitModel, pars) {
     if (traitModel[i] == "BM") {
       # take the (bmCount)th pars and run evolution
       traitFuncs[paste0("trait", i)] <- 
-        traits.bm(tMax = tMax, nTraits = 1, tStart = tStart, X0 = bmPars[["X0"]],
+        traits.bm(tMax = tMax, nTraits = 1, tStart = tStart, 
+                  X0 = bmPars[["X0"]][bmCount],
                   sigma2 = bmPars[["sigma2"]][bmCount])
       
       # increase the count
