@@ -302,7 +302,8 @@ make.rate <- function(rate, tMax = NULL, envRate = NULL, rateShifts = NULL) {
 
     # use predict to find the rate at all times
     envFunc <- function(t) {
-      predict(spline_result, t)$y
+      ifelse(t < tMax, predict(spline_result, t)$y,
+             predict(spline_result, tMax)$y)
     }
 
     # make it a function of time only

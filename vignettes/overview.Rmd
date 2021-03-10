@@ -164,7 +164,7 @@ head(samp)
 
 The output of `sample.clade` is a data frame organized as follows
 
-* `Species` the species name, usually `spp_` followed by the number in the order it is organized on `sim`.
+* `Species` the species name, usually `t` followed by the number in the order it is organized on `sim`.
 * `Extant` whether the species is extant or not.
 * `minT` the lower bound of the geologic range the fossil is found. The range vectors is an input, `bins`, used to simulate the granularity of the fossil record. If not provided, `bins` will go from `tMax` to `0` by `-0.01`.
 * `maxT` the upper bound of the geologic range the fossil is found.
@@ -301,7 +301,7 @@ q <- function(t, env) {
 }
 
 # pass it to make.rate with environmental data
-mu <- make.rate(q, envRate = temp)
+mu <- make.rate(q, tMax = tMax, envRate = temp)
 plot(t, mu(t), type = 'l', main = "Environmental step function extinction rate",
      xlab = "Time (My)", ylab = "Rate")
 ```
@@ -407,11 +407,11 @@ mids <- (samp$MaxT - samp$MinT) / 2 + samp$MinT
 # for each species
 for (i in 1:length(ids)) {
   # get the species number
-  sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+  sp <- unique(as.numeric(gsub("t", "", ids[i])))
 
   # check the histogram
   hist(mids[samp$Species == ids[[i]]],
-       main = paste0("spp = ", sp, "; duration ~ ",
+       main = paste0("t = ", sp, "; duration ~ ",
                      round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
        xlab = "Time (My)", probability = TRUE)
 

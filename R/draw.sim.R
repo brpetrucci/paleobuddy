@@ -207,13 +207,13 @@ draw.sim <- function(sim, fossils = NULL, sort_by = "TS"){
   # adding fossils
   if (!(is.null(fossils))) {
     if ("SampT" %in% colnames(fossils)) {
-      ids <- as.numeric(gsub('spp_', '', fossils$Species))
+      ids <- as.numeric(gsub("t", '', fossils$Species))
       points(x = fossils$SampT, 
              y =  unlist(lapply(ids, function(x) 
                which(ord == x))), col = "red", pch = 16)
     } else if("MaxT" %in% colnames(fossils) & 
               "MinT" %in% colnames(fossils)) {
-      ids = as.numeric(gsub('spp_', '', fossils$Species))
+      ids = as.numeric(gsub("t", '', fossils$Species))
       
       y_jittered <- jitter_foo(unlist(lapply(ids, function(x) 
                                                   which(ord == x))))
