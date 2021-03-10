@@ -161,7 +161,7 @@ rate <- function(t, env) {
 }
 
 # make the rate
-r <- make.rate(rate, tMax = tMax, envRate = temp)
+r <- make.rate(rate, envRate = temp)
 
 # plot it
 plot(time, r(time), type = 'l')
@@ -175,7 +175,7 @@ rate <- function(t, env) {
 }
 
 # make a rate
-r <- make.rate(rate, tMax = tMax, envRate = temp)
+r <- make.rate(rate, envRate = temp)
 
 # plot it
 plot(time, r(time), type = 'l')
@@ -192,7 +192,7 @@ rate <- function(t, env) {
 }
 
 # rate
-r <- make.rate(rate, tMax = tMax, envRate = temp)
+r <- make.rate(rate, envRate = temp)
 
 # plot it
 plot(time, r(time), type = 'l')

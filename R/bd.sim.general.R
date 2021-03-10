@@ -286,7 +286,7 @@
 #' data(temp)
 #' 
 #' # speciation
-#' lambda <- make.rate(l_t, tMax = tMax envRate = temp)
+#' lambda <- make.rate(l_t, tMax = tMax, envRate = temp)
 #' 
 #' # run simulation
 #' sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))

@@ -159,7 +159,7 @@
 #' }
 #' 
 #' # make the rate
-#' r <- make.rate(rate, tMax = tMax, envRate = temp)
+#' r <- make.rate(rate, envRate = temp)
 #' 
 #' # plot it
 #' plot(time, r(time), type = 'l')
@@ -173,7 +173,7 @@
 #' }
 #' 
 #' # make a rate
-#' r <- make.rate(rate, tMax = tMax, envRate = temp)
+#' r <- make.rate(rate, envRate = temp)
 #' 
 #' # plot it
 #' plot(time, r(time), type = 'l')
@@ -190,7 +190,7 @@
 #' }
 #' 
 #' # rate
-#' r <- make.rate(rate, tMax = tMax, envRate = temp)
+#' r <- make.rate(rate, envRate = temp)
 #' 
 #' # plot it
 #' plot(time, r(time), type = 'l')
@@ -302,8 +302,8 @@ make.rate <- function(rate, tMax = NULL, envRate = NULL, rateShifts = NULL) {
 
     # use predict to find the rate at all times
     envFunc <- function(t) {
-      ifelse(t < tMax, predict(spline_result, t)$y,
-             predict(spline_result, tMax)$y)
+      ifelse(t < max(envRate[, 1]), predict(spline_result, t)$y,
+             predict(spline_result, max(envRate[, 1]))$y)
     }
 
     # make it a function of time only
