@@ -805,14 +805,16 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
     }
   }
   
-  # make the extant column
-  res$Extant <- FALSE
-  
-  # based on the vector in sim
-  res$Extant[res$Species %in% which(sim$EXTANT)] <- TRUE
-  
-  # and the species column
-  res$Species <- paste0("spp_", res$Species)
+  if (nrow(res) > 0) {
+    # make the extant column
+    res$Extant <- FALSE
+    
+    # based on the vector in sim
+    res$Extant[res$Species %in% which(sim$EXTANT)] <- TRUE
+    
+    # and the species column
+    res$Species <- paste0("spp_", res$Species)
+  }
 
   if (returnAll) {
     # if returnAll is true, return res as is
