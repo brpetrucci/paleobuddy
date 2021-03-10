@@ -332,7 +332,7 @@ mu <- 0.075
 data(temp)
 
 # speciation
-lambda <- make.rate(l_t, envRate = temp)
+lambda <- make.rate(l_t, tMax = tMax, envRate = temp)
 
 # run simulation
 sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
@@ -371,7 +371,7 @@ mu <- 0.1
 data(temp)
 
 # speciation
-lambda <- make.rate(l_t, envRate = temp)
+lambda <- make.rate(l_t, tMax = tMax envRate = temp)
 
 # run simulation
 sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
@@ -404,7 +404,7 @@ m_t1 <- function(t, temp) {
 data(temp)
 
 # make first function
-mu1 <- make.rate(m_t1, envRate = temp) 
+mu1 <- make.rate(m_t1, tMax = tMax, envRate = temp) 
 
 # co2-dependent extinction
 m_t2 <- function(t, co2) {
@@ -415,7 +415,7 @@ m_t2 <- function(t, co2) {
 data(co2)
 
 # make second function
-mu2 <- make.rate(m_t2, envRate = co2)
+mu2 <- make.rate(m_t2, tMax = tMax, envRate = co2)
 
 # final extinction function
 mu <- function(t) {

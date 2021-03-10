@@ -159,7 +159,7 @@
 #' }
 #' 
 #' # make the rate
-#' r <- make.rate(rate, envRate = temp)
+#' r <- make.rate(rate, tMax = tMax, envRate = temp)
 #' 
 #' # plot it
 #' plot(time, r(time), type = 'l')
@@ -173,7 +173,7 @@
 #' }
 #' 
 #' # make a rate
-#' r <- make.rate(rate, envRate = temp)
+#' r <- make.rate(rate, tMax = tMax, envRate = temp)
 #' 
 #' # plot it
 #' plot(time, r(time), type = 'l')
@@ -190,7 +190,7 @@
 #' }
 #' 
 #' # rate
-#' r <- make.rate(rate, envRate = temp)
+#' r <- make.rate(rate, tMax = tMax, envRate = temp)
 #' 
 #' # plot it
 #' plot(time, r(time), type = 'l')

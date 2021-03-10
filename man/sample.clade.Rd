@@ -286,7 +286,7 @@ r_t <- function(t, env) {
 }
 
 # make it a function so we can plot it
-rho <- make.rate(r_t, envRate = envR)
+rho <- make.rate(r_t, tMax = tMax, envRate = envR)
 
 # let us check that rho is high enough to see a pattern
 plot(1:10, rho(1:10), type = 'l', main = "Sampling rate",
