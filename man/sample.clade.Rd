@@ -12,6 +12,7 @@ sample.clade(
   envR = NULL,
   rShifts = NULL,
   returnTrue = TRUE,
+  returnAll = FALSE,
   bins = NULL,
   adFun = NULL,
   ...
@@ -55,11 +56,13 @@ as \code{lambda}. \code{c(0, x, tMax)} is equivalent to
 
 \item{returnTrue}{If set to \code{FALSE}, it will contain the occurrence
 times as ranges. In this way, we simulate the granularity presented by
-empirical fossil records. If \code{returnTrue} is \code{TRUE}, this is ignored.
-If \code{bins} is not supplied and \code{returnTrue == FALSE}, the default is 
-\code{seq(tMax, 0, 0.1)}.}
+empirical fossil records. If \code{returnTrue} is \code{TRUE}, this is ignored.}
 
-\item{bins}{A vector of time intervals corresponding to geological time ranges.}
+\item{returnAll}{If set to \code{TRUE}, returns both the true sampling time and
+age ranges. Default is \code{FALSE}}
+
+\item{bins}{A vector of time intervals corresponding to geological time ranges.
+If it is not supplied, \code{seq(tMax, 0, -0.1)} is used.}
 
 \item{adFun}{A density function representing the age-dependent preservation
 model. It must be a density function, and consequently integrate to 1 (though
@@ -90,8 +93,8 @@ allowing for \code{dFun} to be species-inhomogeneous.
 }
 \value{
 A \code{data.frame} containing species names/numbers, whether each 
-species is extant, and either the true occurrence times of species or a range 
-of occurrence times based on \code{bins}.
+species is extant, and the true occurrence times of each fossil, a range of 
+occurrence times based on \code{bins}, or both.
 }
 \description{
 Generates occurrence times or time ranges (as most empirical fossil 
