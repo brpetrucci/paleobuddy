@@ -89,7 +89,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #'   
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[i]],
@@ -136,7 +136,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #'   
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[i]],
@@ -191,7 +191,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #'   
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[i]],
@@ -252,7 +252,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #' 
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[i]],
@@ -333,7 +333,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #'   
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[[i]]],
@@ -423,7 +423,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #'   
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[[i]]],
@@ -522,7 +522,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #'   
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[[i]]],
@@ -674,7 +674,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #'   
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[[i]]],
@@ -813,7 +813,7 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
     res$Extant[res$Species %in% which(sim$EXTANT)] <- TRUE
     
     # and the species column
-    res$Species <- paste0("spp_", res$Species)
+    res$Species <- paste0("t", res$Species)
   }
 
   if (returnAll) {
