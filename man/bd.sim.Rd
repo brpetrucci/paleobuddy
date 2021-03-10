@@ -370,7 +370,7 @@ envM <- temp
 
 # by passing q and envM to bd.sim, internally bd.sim will make q into a
 # function dependent only on time, using make.rate
-m <- make.rate(mu, envRate = envM)
+m <- make.rate(mu, tMax = tMax, envRate = envM)
 
 # take a look at how the rate itself will be
 plot(seq(0, tMax, 0.1), m(seq(0, tMax, 0.1)),
@@ -411,7 +411,7 @@ envL <- temp
 # this is kind of a complicated scale, let us take a look
 
 # make it a function of time
-l <- make.rate(lambda, envRate = envL)
+l <- make.rate(lambda, tMax = tMax, envRate = envL)
 
 # plot it
 plot(seq(0, tMax, 0.1), l(seq(0, tMax, 0.1)),
@@ -492,7 +492,7 @@ m_t1 <- function(t, temp) {
 data(temp)
 
 # make first function
-mu1 <- make.rate(m_t1, envRate = temp)
+mu1 <- make.rate(m_t1, tMax = tMax, envRate = temp)
 
 # co2-dependent extinction
 m_t2 <- function(t, co2) {
@@ -503,7 +503,7 @@ m_t2 <- function(t, co2) {
 data(co2)
 
 # make second function
-mu2 <- make.rate(m_t2, envRate = co2)
+mu2 <- make.rate(m_t2, tMax = tMax, envRate = co2)
 
 # final extinction function
 mu <- function(t) {

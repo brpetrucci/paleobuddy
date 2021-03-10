@@ -190,7 +190,7 @@ r_t <-  function(t, temp) {
 data(temp)
 
 # final preservation
-rho <- make.rate(r_t, envRate = temp)
+rho <- make.rate(r_t, tMax = tMax, envRate = temp)
 
 # visualizing the plot from past to present
 plot(x = time, y = rev(rho(time)), main = "Simulated preservation", type = "l",
@@ -237,7 +237,7 @@ r_t <-  function(t, temp) {
 data(temp)
 
 # final preservation
-rho <- make.rate(r_t, envRate = temp)
+rho <- make.rate(r_t, tMax = tMax, envRate = temp)
 
 # visualizing the plot from past to present
 plot(x = time, y = rev(rho(time)), main = "Simulated preservation", type = "l",
@@ -278,7 +278,7 @@ r_t1 <- function(t, temp) {
 data(temp)
 
 # make first function
-rho1 <- make.rate(r_t1, envRate = temp)
+rho1 <- make.rate(r_t1, tMax = tMax, envRate = temp)
 
 # co2-dependent preservation
 r_t2 <- function(t, co2) {
@@ -289,7 +289,7 @@ r_t2 <- function(t, co2) {
 data(co2)
 
 # make second function
-rho2 <- make.rate(r_t2, envRate = co2)
+rho2 <- make.rate(r_t2, tMax = tMax, envRate = co2)
 
 # final preservation function
 rho <- function(t) {

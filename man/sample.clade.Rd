@@ -147,7 +147,7 @@ mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 # for each species
 for (i in 1:length(ids)) {
   # get the species number
-  sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+  sp <- unique(as.numeric(gsub("t", "", ids[i])))
   
   # check the histogram
   hist(mids[dt$Species == ids[i]],
@@ -194,7 +194,7 @@ mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 # for each species
 for (i in 1:length(ids)) {
   # get the species number
-  sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+  sp <- unique(as.numeric(gsub("t", "", ids[i])))
   
   # check the histogram
   hist(mids[dt$Species == ids[i]],
@@ -249,7 +249,7 @@ mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 # for each species
 for (i in 1:length(ids)) {
   # get the species number
-  sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+  sp <- unique(as.numeric(gsub("t", "", ids[i])))
   
   # check the histogram
   hist(mids[dt$Species == ids[i]],
@@ -286,7 +286,7 @@ r_t <- function(t, env) {
 }
 
 # make it a function so we can plot it
-rho <- make.rate(r_t, envRate = envR)
+rho <- make.rate(r_t, tMax = tMax, envRate = envR)
 
 # let us check that rho is high enough to see a pattern
 plot(1:10, rho(1:10), type = 'l', main = "Sampling rate",
@@ -310,7 +310,7 @@ mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 # for each species
 for (i in 1:length(ids)) {
   # get the species number
-  sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+  sp <- unique(as.numeric(gsub("t", "", ids[i])))
 
   # check the histogram
   hist(mids[dt$Species == ids[i]],
@@ -391,7 +391,7 @@ mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 # for each species
 for (i in 1:length(ids)) {
   # get the species number
-  sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+  sp <- unique(as.numeric(gsub("t", "", ids[i])))
   
   # check the histogram
   hist(mids[dt$Species == ids[[i]]],
@@ -481,7 +481,7 @@ mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 # for each species
 for (i in 1:length(ids)) {
   # get the species number
-  sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+  sp <- unique(as.numeric(gsub("t", "", ids[i])))
   
   # check the histogram
   hist(mids[dt$Species == ids[[i]]],
@@ -580,7 +580,7 @@ mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 # for each species
 for (i in 1:length(ids)) {
   # get the species number
-  sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+  sp <- unique(as.numeric(gsub("t", "", ids[i])))
   
   # check the histogram
   hist(mids[dt$Species == ids[[i]]],
@@ -732,7 +732,7 @@ mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
 # for each species
 for (i in 1:length(ids)) {
   # get the species number
-  sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+  sp <- unique(as.numeric(gsub("t", "", ids[i])))
   
   # check the histogram
   hist(mids[dt$Species == ids[[i]]],

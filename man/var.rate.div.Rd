@@ -210,12 +210,12 @@ rate <- function(t, env) {
 }
 
 # visualize the rate
-r <- make.rate(rate, envRate = temp)
+r <- make.rate(rate, tMax = tMax, envRate = temp)
 plot(time, r(time), type = 'l')
 
 
 # get diversity and plot it
-div <- var.rate.div(rate, time, envRate = temp)
+div <- var.rate.div(rate, time, tMax = tMax, envRate = temp)
 plot(time, div, type = 'l')
 
 ###
@@ -227,11 +227,11 @@ rate <- function(t, env) {
 }
 
 # visualize the rate
-r <- make.rate(rate, envRate = temp)
+r <- make.rate(rate, tMax = tMax, envRate = temp)
 plot(time, r(time), type = 'l')
 
 # get diversity and plot it
-div <- var.rate.div(rate, time, envRate = temp)
+div <- var.rate.div(rate, time, tMax = tMax, envRate = temp)
 plot(time, div, type = 'l')
   
 ###
@@ -246,12 +246,12 @@ rate <- function(t, env) {
 }
 
 # visualize the rate
-r <- make.rate(rate, envRate = temp)
+r <- make.rate(rate, tMax = tMax, envRate = temp)
 plot(time, r(time), type = 'l')
 
 \dontrun{
 # get diversity and plot it
-div <- var.rate.div(rate, time, envRate = temp)
+div <- var.rate.div(rate, time, tMax = tMax, envRate = temp)
 plot(time, div, type = 'l')
 }
 
