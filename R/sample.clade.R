@@ -826,6 +826,4 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
     # if neither are true, delete true time
     return(res[, c("Species", "Extant", "MinT", "MaxT")])
   }
-
-  return(res)
 }
