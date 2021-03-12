@@ -4,7 +4,15 @@
 \alias{traits.bm}
 \title{Simulate trait evolution through Brownian Motion}
 \usage{
-traits.bm(tMax, tStart = 0, nTraits = 1, sigma2 = 1, X0 = 0, nPoints = 100)
+traits.bm(
+  tMax,
+  tStart = 0,
+  nTraits = 1,
+  sigma2 = 1,
+  X0 = 0,
+  bounds = NULL,
+  nPoints = 100
+)
 }
 \arguments{
 \item{tMax}{The only required parameter. Ending time of the simulation, usually
@@ -29,6 +37,12 @@ trait will have a different variance.}
 \item{X0}{The initial trait value. For a BM process, one can simply run the
 process starting from \code{0} and sum \code{X0} at the end, but we add this
 for simplicity.}
+
+\item{bounds}{A numeric vector with length two containing minimum and maximum
+trait values. If trait values fall under \code{bounds[1]} or over 
+\code{bounds[2]}, they default to the corresponding bound value. By default not
+supplied, so that any trait value is accepted as a return. Note that setting 
+bounds will alter the expectations of the process.}
 
 \item{nPoints}{The total number of points in the discretization of the process.
 While Brownian Motion is a continuous process, we must simulate it discretely.

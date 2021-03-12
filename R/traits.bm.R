@@ -28,6 +28,12 @@
 #' trait for a species born after the beginning of a birth-death simulation. Note
 #' that the trait value for \code{t = 0} is always \code{0}.
 #' 
+#' @param bounds A numeric vector with length two containing minimum and maximum
+#' trait values. If trait values fall under \code{bounds[1]} or over 
+#' \code{bounds[2]}, they default to the corresponding bound value. By default not
+#' supplied, so that any trait value is accepted as a return. Note that setting 
+#' bounds will alter the expectations of the process.
+#' 
 #' @param nPoints The total number of points in the discretization of the process.
 #' While Brownian Motion is a continuous process, we must simulate it discretely.
 #' As such, the user can provide a number of time points, by default set to 
@@ -137,7 +143,7 @@
 #' @export
 
 traits.bm <- function(tMax, tStart = 0, nTraits = 1, 
-                      sigma2 = 1, X0 = 0, nPoints = 100) {
+                      sigma2 = 1, X0 = 0, bounds = NULL, nPoints = 100) {
   # make sure tMax > tStart
   if (tStart >= tMax) {
     stop("tMax must be greater than tStart")
@@ -196,6 +202,12 @@ traits.bm <- function(tMax, tStart = 0, nTraits = 1,
     
     # calculate the bm vector being X0 and the cumulative sum of jumps
     bm <- c(X0[i], cumsum(jumps))
+    
+    # bound it, if bounds exists
+    if (!is.null(bounds)) {
+      bm <- ifelse(bm < bounds[1], bounds[1], bm)
+      bm <- ifelse(bm > bounds[2], bounds[2], bm)
+    }
 
     # make it a function using linear interpolation
     bmFunc <- approxfun(times, bm, rule = 2)

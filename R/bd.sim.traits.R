@@ -418,7 +418,8 @@ traits.species <- function(tMax, tStart, nTraits, traitModel, pars) {
       traitFuncs[paste0("trait", i)] <- 
         traits.bm(tMax = tMax, nTraits = 1, tStart = tStart, 
                   X0 = bmPars[["X0"]][bmCount],
-                  sigma2 = bmPars[["sigma2"]][bmCount])
+                  sigma2 = bmPars[["sigma2"]][bmCount],
+                  bounds = bmPars[["bounds"]][[bmCount]])
       
       # increase the count
       bmCount <- bmCount + 1
