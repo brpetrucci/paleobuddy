@@ -14,6 +14,7 @@
 #' age-dependent sampling - for more information.
 #'
 #' @param bins A vector of time intervals corresponding to geological time ranges.
+#' If it is not supplied, \code{seq(tMax, 0, -0.1)} is used.
 #' 
 #' @inheritParams sample.general
 #'
@@ -41,12 +42,13 @@
 #' @param returnTrue If set to \code{FALSE}, it will contain the occurrence
 #' times as ranges. In this way, we simulate the granularity presented by
 #' empirical fossil records. If \code{returnTrue} is \code{TRUE}, this is ignored.
-#' If \code{bins} is not supplied and \code{returnTrue == FALSE}, the default is 
-#' \code{seq(tMax, 0, 0.1)}.
+#' 
+#' @param returnAll If set to \code{TRUE}, returns both the true sampling time and
+#' age ranges. Default is \code{FALSE}
 #'
 #' @return A \code{data.frame} containing species names/numbers, whether each 
-#' species is extant, and either the true occurrence times of species or a range 
-#' of occurrence times based on \code{bins}.
+#' species is extant, and the true occurrence times of each fossil, a range of 
+#' occurrence times based on \code{bins}, or both.
 #'
 #' @author Matheus Januario and Bruno do Rosario Petrucci.
 #'
@@ -87,7 +89,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #'   
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[i]],
@@ -134,7 +136,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #'   
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[i]],
@@ -189,7 +191,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #'   
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[i]],
@@ -226,7 +228,7 @@
 #' }
 #' 
 #' # make it a function so we can plot it
-#' rho <- make.rate(r_t, envRate = envR)
+#' rho <- make.rate(r_t, tMax = tMax, envRate = envR)
 #' 
 #' # let us check that rho is high enough to see a pattern
 #' plot(1:10, rho(1:10), type = 'l', main = "Sampling rate",
@@ -250,7 +252,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #' 
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[i]],
@@ -331,7 +333,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #'   
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[[i]]],
@@ -421,7 +423,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #'   
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[[i]]],
@@ -520,7 +522,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #'   
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[[i]]],
@@ -672,7 +674,7 @@
 #' # for each species
 #' for (i in 1:length(ids)) {
 #'   # get the species number
-#'   sp <- unique(as.numeric(gsub("spp_", "", ids[i])))
+#'   sp <- unique(as.numeric(gsub("t", "", ids[i])))
 #'   
 #'   # check the histogram
 #'   hist(mids[dt$Species == ids[[i]]],
@@ -714,7 +716,7 @@
 #' @export
 
 sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
-                         returnTrue = TRUE, bins = NULL, 
+                         returnTrue = TRUE, returnAll = FALSE, bins = NULL, 
                          adFun = NULL, ...) {
   # check that sim is a valid sim object
   if (!is.sim(sim)) {
@@ -727,7 +729,7 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
   }
 
   # set a default bin
-  if (is.null(bins) & !returnTrue) {
+  if (is.null(bins)) {
     bins <- seq(tMax, 0, -0.1)
   }
   
@@ -766,76 +768,62 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
                                  adFun = adFun, ...)
   }
 
-  # wrapping data
-
-  # output as fossil occurrence binned within bins/bins
-  if (!returnTrue) {
-    # create the data frame
-    res <- data.frame(matrix(nrow = 0, ncol = 4))
+  # create data frame containing both ranges and time points
+  res <- data.frame(matrix(nrow = 0, ncol = 5))
+  
+  # name the columns
+  colnames(res) <- c("Species", "Extant", "SampT", "MaxT", "MinT")
+  
+  # for each occurrence
+  for (i in 1:length(pointEstimates)) {
     
-    # name the columns
-    colnames(res) <- c("Species", "Extant", "MaxT", "MinT")
-    
-    # for each occurrence
-    for (i in 1:length(pointEstimates)) {
-      
+    if (length(pointEstimates[[i]]) > 0) {
       # bin it
-      if (length(pointEstimates[[i]]) > 0) {
-        binned_occs <- binner(pointEstimates[[i]], bins = bins)
-        
-        # for each bin
-        for (k in 1:(length(bins) - 1)) {
+      binned_occs <- binner(pointEstimates[[i]], bins = bins)
+      
+      # counter for point estimates
+      counter <- 1
+      
+      # for each bin
+      for (k in 1:(length(bins) - 1)) {
         # if there are occurrences in that bin
-          if (binned_occs[k] > 0) {
-            # make a row of the data frame
-            aux <- data.frame(Species = i,
-                              Extant = NA, 
-                              MinT = bins[k + 1],
-                              MaxT = rep(bins[k], times = binned_occs[k]))
+        if (binned_occs[k] > 0) {
+          # make a row of the data frame
+          aux <- data.frame(Species = i,
+                            Extant = NA, 
+                            SampT = pointEstimates[[i]][counter],
+                            MinT = bins[k + 1],
+                            MaxT = rep(bins[k], times = binned_occs[k]))
           
-            # add row to data frame
-            res <- rbind(res, aux)
-          }
+          # add row to data frame
+          res <- rbind(res, aux)
+          
+          # increase counter
+          counter <- counter + 1
         }
       }
     }
+  }
+  
+  if (nrow(res) > 0) {
     # make the extant column
     res$Extant <- FALSE
     
     # based on the vector in sim
     res$Extant[res$Species %in% which(sim$EXTANT)] <- TRUE
-
+    
     # and the species column
-    res$Species <- paste0("spp_", res$Species)
-  } 
-  
-  # if user wants the true times of occurrences, get a a data frame with the 
-  # real sampling times only
-  else {
-    # create the data frame - one less column
-    res <- data.frame(matrix(nrow = length(unlist(pointEstimates)), ncol = 3))
-    
-    # name the columns
-    colnames(res) <- c("Species", "Extant", "SampT")
-    
-    # if there are occurrences
-    if (nrow(res) > 1) {
-      # make species column
-      res$Species <- rep(S, times = lapply(pointEstimates, length))
-      
-      # make the extant column
-      res$Extant <- FALSE
-      
-      # based on the vector in sim
-      res$Extant[res$Species %in% which(sim$EXTANT)] <- TRUE
-      
-      # name the species 
-      res$Species <- paste0("spp_", res$Species)
-      
-      # make the sampling times column
-      res$SampT <- unlist(pointEstimates)
-    }
+    res$Species <- paste0("t", res$Species)
   }
 
-  return(res)
+  if (returnAll) {
+    # if returnAll is true, return res as is
+    return(res)
+  } else if (returnTrue) {
+    # if returnTrue is true and returnAll is not, delete age ranges
+    return(res[, c("Species", "Extant", "SampT")])
+  } else {
+    # if neither are true, delete true time
+    return(res[, c("Species", "Extant", "MinT", "MaxT")])
+  }
 }

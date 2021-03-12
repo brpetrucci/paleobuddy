@@ -4,14 +4,14 @@
 \alias{draw.sim}
 \title{Draw a sim object}
 \usage{
-draw.sim(sim, fossil_occ = NULL, sort_by = "TS")
+draw.sim(sim, fossils = NULL, sort_by = "TS")
 }
 \arguments{
 \item{sim}{A \code{sim} object, containing extinction times, speciation 
 times, parent, and status information for each species in the simulation. 
 See \code{?sim}.}
 
-\item{fossil_occ}{A \code{data.frame} containing the fossil occurrences of 
+\item{fossils}{A \code{data.frame} containing the fossil occurrences of 
 each lineage, as returned by the \code{sample.clade} function.}
 
 \item{sort_by}{A single character or integer vector indicating how lineages 
@@ -23,74 +23,82 @@ specifies the order in which lineages should be drawn (from the bottom
 elements) of the figure). Default value of this parameter is "TS".}
 }
 \value{
-A draw of the simulation in the graphics window. If the 
-\code{fossil_occ} data.frame is inputted, its format will dictate how 
-fossil occurrences will be plotted. If \code{fossil_occ} have a column named
- "SampT" (i.e. the fossil sampling is known with exactitude), fossil 
-occurrences are assigned as dots. If \code{fossil_occ} have two columns, 
-each named as "MaxT" and "MinT" (i.e. the early and late stage bounds 
-associated with each occurrence), fossil occurrences are 
+A plot of the simulation in the graphics window. If the 
+\code{fossils} data.frame is inputted, its format will dictate how fossil
+occurrences will be plotted. If \code{fossils} has a \code{SampT} column
+(i.e. the occurrence times are exact), fossil occurrences are assigned as dots. 
+If \code{fossils} has columns \code{MaxT} and \code{MinT} (i.e. the early and 
+late stage bounds associated with each occurrence), fossil occurrences are 
 represented as slightly jittered, semitransparent bars indicating the early 
 and late bounds of each fossil occurrence.
 }
 \description{
 Draws a paleobuddy simulation (a \code{sim} object - please see 
-\code{?sim}) in the graphics window. Allows for the assign of speciation or 
-sampling events, and further customization.
+\code{?sim}) in the graphics window. Allows for the assignment of speciation
+or sampling events, and further customization.
 }
 \examples{
-#### Example 1
 
-#maximum simulation time
-tMax=10 
+###
+# start simple
 
-#runing simulation (biological process)
-sim=bd.sim(1, .6, .55, tMax = tMax, nFinal = c(10,20)) 
+# maximum simulation time
+tMax <- 10 
 
-#simulating data resulting from a fossilization process (in this case, 
-# with a record of perfect resolution in time)
-fdt=sample.clade(sim=sim, rho = 4, tMax = tMax, returnTrue = TRUE)
+# run birth-death simulation
+sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
+              nFinal = c(10,20)) 
 
-#ploting:
-draw.sim(sim, fossil_occ = fdt, sort_by = "PAR")
+# simulate data resulting from a fossilization process
+# with exact occurrence times
+fdt <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
 
-#### Example 2
+# draw it
+draw.sim(sim, fossils = fdt, sort_by = "PAR")
 
-#maximum simulation time
-tMax=10 
+###
+# try with fossil ranges
 
-#runing simulation (biological process)
-sim=bd.sim(1, .6, .55, tMax = tMax, nFinal = c(10,20)) 
+# maximum simulation time
+tMax <- 10 
 
-#simulating data resulting from a fossilization process (in this case, 
-# with a record that has limited time resolution - i.e. occurrences
-# are binned in time)
+# run birth-death simulation
+sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
+              nFinal = c(10,20)) 
 
-#first lets create random bins:
-bins=c(tMax, 0, runif(n = rpois(1, lambda = 6), min = 0, max = tMax))
-#then lets simulate the fosisliation process:
-fdt=sample.clade(sim=sim, rho = 2, tMax = tMax, returnTrue = FALSE, bins = bins)
+# simulate data resulting from a fossilization process
+# with fossil occurrence time ranges
 
-#ploting (and this time sorting lineages by their parent lineage):
-draw.sim(sim, fossil_occ = fdt, sort_by = "PAR")
-#adding the bounds of the simulated bins:
-abline(v=bins, lty=2, col="red", lwd=.5)
+# create time bins randomly
+bins <- c(tMax, 0, runif(n = rpois(1, lambda = 6), min = 0, max = tMax))
 
-#### Example 3
+# simulate fossil sampling
+fdt <- sample.clade(sim = sim, rho = 2, tMax = tMax, 
+                    returnTrue = FALSE, bins = bins)
+
+# draw it, sorting lineages by their parent
+draw.sim(sim, fossils = fdt, sort_by = "PAR")
+
+# adding the bounds of the simulated bins
+abline(v = bins, lty = 2, col = "red", lwd = 0.5)
+
+###
+# we can control how to sort displayed species exactly
+
+# maximum simulation time
+tMax <- 10 
+
+# run birth-death simulations
+sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
+              nFinal = c(10,20)) 
  
-#maximum simulation time
-tMax=10 
-
-#runing simulation (biological process)
-sim=bd.sim(1, .6, .55, tMax = tMax, nFinal = c(10,20)) 
+# simulate fossil sampling
+fdt <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
  
-#ploting (and this time sorting lineages randomly):
-fdt=sample.clade(sim=sim, rho = 4, tMax = tMax, returnTrue = TRUE)
-
-#assignin a random order of lineages to be ploted:
-draw.sim(sim, fossil_occ = fdt, sort_by = sample(1:length(sim$TE)))
+# draw it with random sorting
+draw.sim(sim, fossils = fdt, sort_by = sample(1:length(sim$TE)))
 
 }
 \author{
-Matheus Januario.
+Matheus Januario
 }
