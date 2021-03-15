@@ -789,17 +789,17 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
         # if there are occurrences in that bin
         if (binned_occs[k] > 0) {
           # make a row of the data frame
-          aux <- data.frame(Species = i,
+          aux <- data.frame(Species = rep(i, times = binned_occs[k]),
                             Extant = NA, 
-                            SampT = pointEstimates[[i]][counter],
-                            MinT = bins[k + 1],
+                            SampT = pointEstimates[[i]][counter:(counter + binned_occs[k] - 1)],
+                            MinT = rep(bins[k + 1], times = binned_occs[k]),
                             MaxT = rep(bins[k], times = binned_occs[k]))
           
           # add row to data frame
           res <- rbind(res, aux)
           
           # increase counter
-          counter <- counter + 1
+          counter <- counter + binned_occs[k]
         }
       }
     }
