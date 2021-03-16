@@ -88,8 +88,8 @@ For illustration, we create a simulation with more than 1000 tips, with 547 exta
 set.seed(3)
 
 # create simulation
-# note nFinal and extOnly, defining we want 200 or more extant species at the end
-sim <- bd.sim(n0, lambda, mu, tMax, nFinal = c(200, Inf), extOnly = TRUE)
+# note nExtant, defining we want 200 or more extant species at the end
+sim <- bd.sim(n0, lambda, mu, tMax, nExtant = c(200, Inf))
 
 # check the number of extant species
 sum(sim$EXTANT)

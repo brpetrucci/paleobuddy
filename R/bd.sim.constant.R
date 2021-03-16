@@ -116,7 +116,7 @@
 
 
 bd.sim.constant <- function(n0, lambda, mu, tMax, 
-                            nFinal = c(0, Inf), extOnly = FALSE,
+                            nFinal = c(0, Inf), nExtant = c(0, Inf),
                             trueExt = FALSE) {
   # check that the rates are constant
   if (!(is.numeric(lambda) & length(lambda) == 1 &
@@ -140,21 +140,13 @@ bd.sim.constant <- function(n0, lambda, mu, tMax,
          of species")
   }
   
-  # initialize species count with a value that makes sure the while loop runs
-  len <- -1
+  # initialize test making sure while loop runs
+  inBounds <- FALSE
   
   # counter to make sure the nFinal is achievable
   counter <- 1
   
-  while (len < nFinal[1] | len > nFinal[2]) {
-    # if we have gone through more than 100000 simulations, it is probably 
-    # impossible to achieve the nFinal we want
-    if (counter > 100000) {
-      warning("This value of nFinal took more than 100000 simulations 
-              to achieve")
-      return(NA)
-    }
-    
+  while (!inBounds) {
     # initialize the vectors to hold times of speciation and extinction, parents
     # and status (extant or not)
     TS <- rep(0, n0)
@@ -213,12 +205,19 @@ bd.sim.constant <- function(n0, lambda, mu, tMax,
     TE <- tMax - TE
     TS <- tMax - TS
   
-    # check the size of the simulation
-    len <- ifelse(extOnly, sum(isExtant), length(isExtant))
-    # if this is in nFinal, the while loop stops
+    # check whether we are in bounds
+    inBounds <- (length(TE) >= nFinal[1]) &&
+      (length(TE) <= nFinal[2]) &&
+      (sum(isExtant) >= nExtant[1]) &&
+      (sum(isExtant) <= nExtant[2])
     
-    # add to the counter
+    # if we have ran for too long, stop
     counter <- counter + 1
+    if (counter > 100000) {
+      warning("This value of nFinal took more than 100000 simulations 
+              to achieve")
+      return(NA)
+    }
   }
   
   # create the return

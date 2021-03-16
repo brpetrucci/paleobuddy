@@ -402,7 +402,7 @@
 
 bd.sim.general <- function(n0, lambda, mu, tMax, 
                          lShape = NULL, mShape = NULL,
-                         nFinal = c(0, Inf), extOnly = FALSE,
+                         nFinal = c(0, Inf), nExtant = c(0, Inf),
                          trueExt = FALSE) {
   # error check - rate cannot be negative
   if ((is.numeric(lambda))) {
@@ -487,13 +487,13 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
     }
   }
  
-  # initialize species count with a value that makes sure the while loop runs
-  len <- -1
+  # initialize test making sure while loop runs
+  inBounds <- FALSE
   
   # counter to make sure the nFinal is achievable
   counter <- 1
 
-  while (len < nFinal[1] | len > nFinal[2]) {
+  while (!inBounds) {
     # create vectors to hold times of speciation, extinction, 
     # parents and status
     TS <- rep(0, n0)
@@ -566,10 +566,15 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
     # now we invert TE and TS so time goes from tMax to 0
     TE <- tMax - TE
     TS <- tMax - TS
+    
+    print(sum(isExtant))
+    print(length(TE))
 
-    # check the size of the simulation
-    len <- ifelse(extOnly, sum(isExtant), length(isExtant))
-    # if this is in nFinal, the while loop stops
+    # check whether we are in bounds
+    inBounds <- (length(TE) >= nFinal[1]) &&
+      (length(TE) <= nFinal[2]) &&
+      (sum(isExtant) >= nExtant[1]) &&
+      (sum(isExtant) <= nExtant[2])
     
     # if we have ran for too long, stop
     counter <- counter + 1
