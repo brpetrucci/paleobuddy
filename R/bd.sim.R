@@ -93,22 +93,15 @@
 #' \code{c(0, Inf)}, so that any number of species (including zero, the extinction
 #' of the whole clade) is accepted. If different from default value, the process
 #' will run until the number of total species reaches a number in the interval
-#' \code{nFinal}. Please note that \code{extOnly} can modify the meaning of this 
-#' parameter. If \code{extOnly = TRUE}, the function will run repeatedly until the
-#' number of \emph{extant} species at the end of the simulation lies within the 
-#' \code{nFinal} interval. Note that using values other than the default for 
-#' \code{nFinal} might condition simulation results.
+#' \code{nFinal}. 
 #' 
-#' @param extOnly A \code{logical} indicating whether \code{nFinal} should be 
-#' taken as an interval of the number of total or extant species during the 
-#' simulation. If \code{TRUE}, the function will run repeatedly until the number 
-#' of \emph{extant} species at the end of the simulation lies within the 
-#' \code{nFinal} interval. If \code{FALSE} (as default), it will run until the 
-#' \emph{total} number of species generated lies within that interval.
+#' @param nExtant A \code{vector} of length \code{2}, indicating an interval of
+#' acceptable number of extant species at the end of the simulation. Equal to 
+#' \code{nFinal} in every respect except for that.
 #' 
 #' Note: The function returns \code{NA} if it runs for more than \code{100000}
 #' iterations without fulfilling the requirements of \code{nFinal} and 
-#' \code{extOnly}.
+#' \code{nExtant}.
 #' 
 #' @param trueExt A \code{logical} indicating whether the function should return
 #' true or truncated extinction times. When \code{TRUE}, time of extinction of 
@@ -554,7 +547,7 @@ bd.sim <- function(n0, lambda, mu, tMax,
                   lShape = NULL, mShape = NULL, 
                   envL = NULL, envM = NULL, 
                   lShifts = NULL, mShifts = NULL, 
-                  nFinal = c(0, Inf), extOnly = FALSE,
+                  nFinal = c(0, Inf), nExtant = c(0, Inf),
                   trueExt = FALSE) {
   
   # if we have ONLY numbers for lambda and mu, it is constant
@@ -565,7 +558,7 @@ bd.sim <- function(n0, lambda, mu, tMax,
     m <- mu
     
     # call bd.sim.constant
-    return(bd.sim.constant(n0, l, m, tMax, nFinal, extOnly, trueExt))
+    return(bd.sim.constant(n0, l, m, tMax, nFinal, nExtant, trueExt))
   }
 
   # else it is not constant
@@ -578,7 +571,7 @@ bd.sim <- function(n0, lambda, mu, tMax,
 
     # call bd.sim.general
     return(bd.sim.general(n0, l, m, tMax, lShape, mShape, 
-                          nFinal, extOnly, trueExt))
+                          nFinal, nExtant, trueExt))
   }
 }
 

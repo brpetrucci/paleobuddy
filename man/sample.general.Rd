@@ -240,11 +240,11 @@ rho <- function(t) {
 }
 
 # simulate a group
-sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.2, tMax = 10, nFinal = c(0,1))
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # in case first simulation is short-lived
 while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10, nFinal = c(0,1))
+  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 }
 
 # fixing the extinction times

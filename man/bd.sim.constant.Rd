@@ -10,7 +10,7 @@ bd.sim.constant(
   mu,
   tMax,
   nFinal = c(0, Inf),
-  extOnly = FALSE,
+  nExtant = c(0, Inf),
   trueExt = FALSE
 )
 }
@@ -36,22 +36,15 @@ acceptable number of species at the end of the simulation. Default value is
 \code{c(0, Inf)}, so that any number of species (including zero, the extinction
 of the whole clade) is accepted. If different from default value, the process
 will run until the number of total species reaches a number in the interval
-\code{nFinal}. Please note that \code{extOnly} can modify the meaning of this 
-parameter. If \code{extOnly = TRUE}, the function will run repeatedly until the
-number of \emph{extant} species at the end of the simulation lies within the 
-\code{nFinal} interval. Note that using values other than the default for 
-\code{nFinal} might condition simulation results.}
+\code{nFinal}.}
 
-\item{extOnly}{A \code{logical} indicating whether \code{nFinal} should be 
-taken as an interval of the number of total or extant species during the 
-simulation. If \code{TRUE}, the function will run repeatedly until the number 
-of \emph{extant} species at the end of the simulation lies within the 
-\code{nFinal} interval. If \code{FALSE} (as default), it will run until the 
-\emph{total} number of species generated lies within that interval.
+\item{nExtant}{A \code{vector} of length \code{2}, indicating an interval of
+acceptable number of extant species at the end of the simulation. Equal to 
+\code{nFinal} in every respect except for that.
 
 Note: The function returns \code{NA} if it runs for more than \code{100000}
 iterations without fulfilling the requirements of \code{nFinal} and 
-\code{extOnly}.}
+\code{nExtant}.}
 
 \item{trueExt}{A \code{logical} indicating whether the function should return
 true or truncated extinction times. When \code{TRUE}, time of extinction of 
