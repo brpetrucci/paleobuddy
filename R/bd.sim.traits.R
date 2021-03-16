@@ -236,7 +236,7 @@ bd.sim.traits <- function(n0, lambda, mu, tMax,
         # if it started this simulation, nothing changes
         spPars <- pars
       }
-      print("traits")
+
       # run trait evolution and append it to list
       traits[[paste0("spp_", sCount)]] <- 
         traits.species(tMax = tMax, 
@@ -292,7 +292,7 @@ bd.sim.traits <- function(n0, lambda, mu, tMax,
              is not negative for any trait value")
         }
       }
-      print('waittimes')
+
       # find the waiting time using rexp.var if lambda is not constant
       waitTimeS <- ifelse(
         is.numeric(lambda), ifelse(lambda > 0, rexp(1, lambda), Inf),
@@ -309,7 +309,6 @@ bd.sim.traits <- function(n0, lambda, mu, tMax,
       
       tExp <- tNow + waitTimeE
       
-      print("while")
       # while there are fast enough speciations before the species 
       # goes extinct,
       while ((tNow + waitTimeS) <= min(tExp, tMax)) {
@@ -331,7 +330,6 @@ bd.sim.traits <- function(n0, lambda, mu, tMax,
                           fast = TRUE), Inf))
         # fast is true since we do not record speciations after
         # the extinction anyway
-        print("still in while")
       }
       
       # reached the time of extinction
@@ -347,7 +345,6 @@ bd.sim.traits <- function(n0, lambda, mu, tMax,
       
       # next species
       sCount <- sCount + 1
-      print(sCount)
     }
     
     # now we invert TE and TS so time goes from tMax to 0
