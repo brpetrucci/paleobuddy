@@ -566,12 +566,15 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
     # now we invert TE and TS so time goes from tMax to 0
     TE <- tMax - TE
     TS <- tMax - TS
+    
+    print(sum(isExtant))
+    print(length(TE))
 
     # check whether we are in bounds
-    inBounds <- (length(TE) > nFinal[1]) &&
-      (length(TE) < nFinal[2]) &&
-      (sum(isExtant) > nExtant[1]) &&
-      (sum(isExtant) < nExtant[2])
+    inBounds <- (length(TE) >= nFinal[1]) &&
+      (length(TE) <= nFinal[2]) &&
+      (sum(isExtant) >= nExtant[1]) &&
+      (sum(isExtant) <= nExtant[2])
     
     # if we have ran for too long, stop
     counter <- counter + 1
