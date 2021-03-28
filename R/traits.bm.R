@@ -201,7 +201,7 @@ traits.bm <- function(tMax, tStart = 0, nTraits = 1,
                    sd = sqrt(sigma2[i] * (tMax - tStart) / (nPoints - 1)))
     
     # calculate the bm vector being X0 and the cumulative sum of jumps
-    bm <- c(X0[i], cumsum(jumps))
+    bm <- c(X0[i], X0[i] + cumsum(jumps))
     
     # bound it, if bounds exists
     if (!is.null(bounds)) {
