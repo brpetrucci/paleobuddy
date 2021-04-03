@@ -174,7 +174,7 @@ make.phylo <- function(sim, fossils = NULL) {
       sampT <- fossils[i, ]$SampT
       
       # and species number
-      nSp <- fossils$Species[i]
+      nSp <- fossils[i, ]$Species
       
       # if sampT is out of the time nSp was alive, error
       if ((sampT > sim$TS[nSp]) || (sampT < sim$TE[nSp])) {
