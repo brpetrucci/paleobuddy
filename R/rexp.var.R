@@ -365,14 +365,9 @@ rexp.var <- function(n, rate,
         # speaking), uniroot substitutes it for a really high/low value instead. Since
         # this does not change our results, we accept it and simply suppress the warning
         vars[i] <- suppressWarnings(uniroot(f, c(now, upper), 
+                                            tol = min(.Machine$double.eps^0.25, p/2),
                                             extendInt="yes"))$root - now
-        if (vars[i] == 0) {
-          print(paste0("p = ", p))
-          print(rate)
-          print(paste0("tMax = ", tMax))
-          print(paste0("now = ", now))
-          print(paste0("TS = ", TS))
-        }
+        # the tol argument is so we do not get 0 for vars when p is very small
       }
     }
   }
