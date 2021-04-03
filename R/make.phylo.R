@@ -178,6 +178,10 @@ make.phylo <- function(sim, fossils = NULL) {
       
       # if sampT is out of the time nSp was alive, error
       if ((sampT > sim$TS[nSp]) || (sampT < sim$TE[nSp])) {
+	print(sampT)
+	print(sim$TS[nSp])
+	print(fossils)
+	print(sim$TS)
         stop("Fossil occurrences must fall during corresponding species' period")
       }
       
