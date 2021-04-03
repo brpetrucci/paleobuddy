@@ -528,7 +528,12 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
       # while there are fast enough speciations before the species 
       # goes extinct,
       while ((tNow + waitTimeS) <= min(tExp, tMax)) {
-  
+	if (waitTimeS == 0) {
+	  print(lambda)
+	  print(mu)
+	  print(tNow)
+	  print(TS[sCount])
+ 	} 
         # advance to the time of speciation
         tNow <- tNow + waitTimeS
   
