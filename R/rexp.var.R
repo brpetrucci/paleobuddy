@@ -366,6 +366,13 @@ rexp.var <- function(n, rate,
         # this does not change our results, we accept it and simply suppress the warning
         vars[i] <- suppressWarnings(uniroot(f, c(now, upper), 
                                             extendInt="yes"))$root - now
+        if (vars[i] == 0) {
+          print(paste0("p = ", p))
+          print(rate)
+          print(paste0("tMax = ", tMax))
+          print(paste0("now = ", now))
+          print(paste0("TS = ", TS))
+        }
       }
     }
   }

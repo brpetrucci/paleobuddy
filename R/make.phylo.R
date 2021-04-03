@@ -202,7 +202,6 @@ make.phylo <- function(sim, fossils = NULL) {
       } else {
         # if there are daughters with a higher age, it will be younger than those
         pos <- which(sim$TS == min(sim$TS[daug][sim$TS[daug] > sampT])) + 1
-	if (length(pos) > 1) print(sim$TS[daug][sim$TS[daug] > sampT])
       }
       
       # before and after this position
