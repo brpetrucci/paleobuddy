@@ -210,6 +210,14 @@ bd.sim.traits <- function(n0, lambda, mu, tMax,
     
     # while we have species to be analyzed still
     while (length(TE) >= sCount) {
+      # if sCount > nFinal[2], no reason to continue
+      if (sCount > nFinal[2]) {
+        # so we fail the inBounds test
+        sCount <- Inf
+        
+        # leave while
+        break
+      }
       # start at the time of speciation of sCount
       tNow <- TS[sCount]
       
@@ -342,7 +350,7 @@ bd.sim.traits <- function(n0, lambda, mu, tMax,
       # record the extinction -
       isExtant[sCount] <- ifelse(is.na(TE[sCount]) | TE[sCount] > tMax,
                                  TRUE, FALSE)
-      
+
       # next species
       sCount <- sCount + 1
     }
