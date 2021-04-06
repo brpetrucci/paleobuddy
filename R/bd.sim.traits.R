@@ -319,7 +319,7 @@ bd.sim.traits <- function(n0, lambda, mu, tMax,
       
       # while there are fast enough speciations before the species 
       # goes extinct,
-      while ((tNow + waitTimeS) <= min(tExp, tMax)) {
+      while ((tNow + waitTimeS) < min(tExp, tMax)) {
         
         # advance to the time of speciation
         tNow <- tNow + waitTimeS

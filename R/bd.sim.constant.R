@@ -170,7 +170,7 @@ bd.sim.constant <- function(n0, lambda, mu, tMax,
       tExp <- tNow + waitTimeE
   
       # while there are speciations before the species goes extinct
-      while ((tNow + waitTimeS) <= min(tExp, tMax)) {
+      while ((tNow + waitTimeS) < min(tExp, tMax)) {
         # update time
         tNow <- tNow + waitTimeS
   
