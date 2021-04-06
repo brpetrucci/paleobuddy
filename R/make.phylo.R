@@ -163,18 +163,18 @@ make.phylo <- function(sim, fossils = NULL) {
     # for each fossil occurrence
     for (i in 1:nrow(fossils)) {
       # change count as needed
-      if (fossils$Species[i] == prevFossil) {
+      if (fossils[i, ]$Species == prevFossil) {
         count <- count + 1
       } else {
         count <- 1
-        prevFossil <- fossils$Species[i]
+        prevFossil <- fossils[i, ]$Species
       }
       
       # take fossil sampling time
       sampT <- fossils[i, ]$SampT
       
       # and species number
-      nSp <- fossils$Species[i]
+      nSp <- fossils[i, ]$Species
       
       # if sampT is out of the time nSp was alive, error
       if ((sampT > sim$TS[nSp]) || (sampT < sim$TE[nSp])) {

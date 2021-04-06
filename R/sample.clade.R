@@ -731,6 +731,8 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
   # set a default bin
   if (is.null(bins)) {
     bins <- seq(tMax, 0, -0.1)
+  } else if (max(bins) < tMax) {
+    stop("Bins must include maximum time of simulation")
   }
   
   # if rho is not a constant, apply make.rate to it

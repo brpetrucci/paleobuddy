@@ -306,7 +306,7 @@ rexp.var <- function(n, rate,
       # calculate the probability that the event will happen at all
       total <- 1 - exp(-(integrate(
         Vectorize(function(x) 1/rate(x + TS)), lower = spnow, 
-        upper = upper, subdivisions = 2000)$value) ^ shape(upper))
+        upper = upper, subdivisions = 2000, stop.on.error = FALSE)$value) ^ shape(upper))
 
       # if the probability is lower than p, the event will not happen
       if (total < p & fast) {
@@ -327,7 +327,7 @@ rexp.var <- function(n, rate,
           {
           1 - p - exp(-(integrate(Vectorize(function(x) 1/rate(x + TS)), 
                                   lower = spnow, upper = t, 
-                                  subdivisions = 2000)$value) ^ shape(t))})
+                                  subdivisions = 2000, stop.on.error = FALSE)$value) ^ shape(t))})
 
         # if f(t) = 0, t is distributed as a Weibull
         vars[i] <- suppressWarnings(uniroot(f, c(spnow, upper), 
@@ -342,7 +342,7 @@ rexp.var <- function(n, rate,
       # calculate the probability that the event will happen at all
       total <- 1 - exp(-integrate(Vectorize(function(x) rate(x)), 
                                   lower = now, upper = upper, 
-                                  subdivisions = 2000)$value)
+                                  subdivisions = 2000, stop.on.error = FALSE)$value)
       
       # if the probability is lower than p, the event will not happen
       if (total < p & fast) {
@@ -359,13 +359,15 @@ rexp.var <- function(n, rate,
         # if f(t) = 0, t is exponentially distributed
         f <- Vectorize(function(t) {
           1 - p - exp(-integrate(Vectorize(function(x) rate(x)), lower = now, 
-                                 upper = t, subdivisions = 2000)$value)})
+                                 upper = t, subdivisions = 2000, stop.on.error = FALSE)$value)})
 
         # if rate is really high and the integral goes to +-infinity (computationally
         # speaking), uniroot substitutes it for a really high/low value instead. Since
         # this does not change our results, we accept it and simply suppress the warning
-        vars[i] <- suppressWarnings(uniroot(f, c(now, upper), 
-                                            extendInt="yes"))$root - now
+        vars[i] <- max(suppressWarnings(uniroot(f, c(now, upper), 
+                                            extendInt = "yes"))$root - now,
+                       1e-6)
+        # min so that we never have a 0 due to numerical issues when p is small
       }
     }
   }
