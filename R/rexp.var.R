@@ -364,8 +364,10 @@ rexp.var <- function(n, rate,
         # if rate is really high and the integral goes to +-infinity (computationally
         # speaking), uniroot substitutes it for a really high/low value instead. Since
         # this does not change our results, we accept it and simply suppress the warning
-        vars[i] <- suppressWarnings(uniroot(f, c(now, upper), 
-                                            extendInt="yes"))$root - now
+        vars[i] <- max(suppressWarnings(uniroot(f, c(now, upper), 
+                                            extendInt = "yes"))$root - now,
+                       1e-6)
+        # min so that we never have a 0 due to numerical issues when p is small
       }
     }
   }
