@@ -413,7 +413,7 @@ make.phylo <- function(sim, fossils = NULL) {
     Nnode = nNode, 
     root.edge = sim$TS[1] - sim$TS[2])
   
-  phy$root.time <- sim$TS[1]
+  #phy$root.time <- sim$TS[1]
   phy$node.label <- seq(from = length(sim$TE) + 1, 
                         to = length(sim$TE) + 1 + nNode)
   
