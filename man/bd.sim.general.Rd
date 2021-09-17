@@ -17,11 +17,11 @@ bd.sim.general(
 )
 }
 \arguments{
-\item{n0}{Initial number of species. Usually 1, in which case the simulation 
+\item{n0}{Initial number of species. Usually 1, in which case the simulation
 will describe the full diversification of a monophyletic lineage. Note that
-when \code{lambda} is less than or equal to \code{mu},  many simulations will
-go extinct before speciating even once. One way of generating large sample
-sizes in this case is to increase \code{n0}, which will simulate the
+when \code{lambda} is less than or equal to \code{mu},  many simulations 
+will go extinct before speciating even once. One way of generating large 
+sample sizes in this case is to increase \code{n0}, which will simulate the
 diversification of a paraphyletic group.}
 
 \item{lambda}{Function to hold the speciation rate over time. It will either be
@@ -42,49 +42,54 @@ allows for as much flexibility, nor calls \code{make.rate}. If the user wishes
 to use \code{bd.sim.general} with environmental or step-function rates, they
 can generate the rate with \code{make.rate} and supply it to the function.}
 
-\item{tMax}{Ending time of simulation, in million years after the clade origin. 
-Any species still living after \code{tMax} is considered extant, and any 
-species that would be generated after \code{tMax} is not born.}
+\item{tMax}{Ending time of simulation, in million years after the clade 
+origin. Any species still living after \code{tMax} is considered extant, and 
+any species that would be generated after \code{tMax} is not present in the
+return.}
 
-\item{lShape}{Shape of the age-dependency in speciation rate. This will be 
-equal to the shape parameter in a Weibull distribution: when smaller than one, 
-speciation rate will decrease along each species' age (negative 
-age-dependency). When larger than one, speciation rate will increase along each
-species's age (positive age-dependency). It may be a function of time, but 
+\item{lShape}{Shape parameter defining the degree of age-dependency in 
+speciation rate. This will be equal to the shape parameter in a Weibull 
+distribution: as a species' longevity increases (negative age-dependency). 
+When larger than one, speciation rate will increase as a species' longevity 
+increases (positive age-dependency). It may be a function of time, but 
 see note below for caveats therein. Default is \code{NULL}, equivalent to 
-an age-independent process. For \code{lShape != NULL} (including when equal to 
-one), \code{lambda} will be considered a scale (= 1/rate), and \code{rexp.var} 
-will draw a Weibull distribution instead of an exponential. This means 
-Weibull(rate, 1) = Exponential(1/rate). Note that even when 
+an age-independent process. For \code{lShape != NULL} (including when equal 
+to one), \code{lambda} will be considered a scale (= 1/rate), and 
+\code{rexp.var} will draw a Weibull distribution instead of an exponential. 
+This means Weibull(rate, 1) = Exponential(1/rate). Note that even when 
 \code{lShape != NULL}, \code{lambda} may still be time-dependent.}
 
 \item{mShape}{Similar to \code{lShape}, but for the extinction rate.
 
-Note: Time-varying shape is within expectations for most cases, but if it is
-lower than 1 and varies too much (e.g. \code{0.5 + 0.5*t}), it can be biased
-for higher waiting times due to computational error. Slopes (or equivalent,
-since it can be any function of time) of the order of 0.01 are advisable.
-It rarely also displays small biases for abrupt variations. In both cases,
+Note: Simulations with time-varying shape behave within theoretical 
+expectations for most cases, but if shape is lower than 1 and varies too 
+much (e.g. \code{0.5 + 0.5*t}), it can be biased for higher waiting times 
+due to computational error. A degree of time dependence of the order of 
+0.01 events/my^2 are advisable. It might, although rarely, exhibit a small 
+bias when using shape functions with abrupt time variationsIn both cases,
 error is still quite low for the purposes of the package.
 
 Note: Shape must be greater than 0. We arbitrarily chose 0.01 as the minimum
 accepted value, so if shape is under 0.01 for any reasonable time in the 
 simulation, it returns an error.}
 
-\item{nFinal}{A \code{vector} of length \code{2}, indicating an interval of 
-acceptable number of species at the end of the simulation. Default value is 
-\code{c(0, Inf)}, so that any number of species (including zero, the extinction
-of the whole clade) is accepted. If different from default value, the process
-will run until the number of total species reaches a number in the interval
-\code{nFinal}.}
+\item{nFinal}{A \code{vector} of length \code{2}, indicating an interval of
+acceptable number of species at the end of the simulation. Default value is
+\code{c(0, Inf)}, so that any number of species (including zero, the
+extinction of the whole clade) is accepted. If different from default value,
+simulation will restart until the number of total species at \code{tMax}
+is in the \code{nFinal} interval.}
 
 \item{nExtant}{A \code{vector} of length \code{2}, indicating an interval of
-acceptable number of extant species at the end of the simulation. Equal to 
+acceptable number of extant species at the end of the simulation. Equal to
 \code{nFinal} in every respect except for that.
 
 Note: The function returns \code{NA} if it runs for more than \code{100000}
-iterations without fulfilling the requirements of \code{nFinal} and 
-\code{nExtant}.}
+iterations without fulfilling the requirements of \code{nFinal} and
+\code{nExtant}.
+
+Note: Using values other than the default for \code{nFinal} and
+\code{nExtant} will condition simulation results.}
 
 \item{trueExt}{A \code{logical} indicating whether the function should return
 true or truncated extinction times. When \code{TRUE}, time of extinction of 
@@ -95,7 +100,7 @@ Note: This is interesting to use to test age-dependent extinction.
 Age-dependent speciation would require all speciation times (including
 the ones after extinction) to be recorded, so we do not attempt to add an
 option to account for that. Since age-dependent extinction and speciation
-use the same underlying process, however, if one is tested to satisfacton
+use the same underlying process, however, if one is tested to satisfaction
 the other should also be in expectations.}
 }
 \value{
