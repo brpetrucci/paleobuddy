@@ -15,11 +15,11 @@ bd.sim.constant(
 )
 }
 \arguments{
-\item{n0}{Initial number of species. Usually 1, in which case the simulation 
+\item{n0}{Initial number of species. Usually 1, in which case the simulation
 will describe the full diversification of a monophyletic lineage. Note that
-when \code{lambda} is less than or equal to \code{mu},  many simulations will
-go extinct before speciating even once. One way of generating large sample
-sizes in this case is to increase \code{n0}, which will simulate the
+when \code{lambda} is less than or equal to \code{mu},  many simulations 
+will go extinct before speciating even once. One way of generating large 
+sample sizes in this case is to increase \code{n0}, which will simulate the
 diversification of a paraphyletic group.}
 
 \item{lambda}{Speciation rate. Must be constant, and greater than or equal
@@ -27,24 +27,28 @@ to zero.}
 
 \item{mu}{Extinction rate, similar to above.}
 
-\item{tMax}{Ending time of simulation, in million years after the clade origin. 
-Any species still living after \code{tMax} is considered extant, and any 
-species that would be generated after \code{tMax} is not born.}
+\item{tMax}{Ending time of simulation, in million years after the clade 
+origin. Any species still living after \code{tMax} is considered extant, and 
+any species that would be generated after \code{tMax} is not present in the
+return.}
 
-\item{nFinal}{A \code{vector} of length \code{2}, indicating an interval of 
-acceptable number of species at the end of the simulation. Default value is 
-\code{c(0, Inf)}, so that any number of species (including zero, the extinction
-of the whole clade) is accepted. If different from default value, the process
-will run until the number of total species reaches a number in the interval
-\code{nFinal}.}
+\item{nFinal}{A \code{vector} of length \code{2}, indicating an interval of
+acceptable number of species at the end of the simulation. Default value is
+\code{c(0, Inf)}, so that any number of species (including zero, the
+extinction of the whole clade) is accepted. If different from default value,
+simulation will restart until the number of total species at \code{tMax}
+is in the \code{nFinal} interval.}
 
 \item{nExtant}{A \code{vector} of length \code{2}, indicating an interval of
-acceptable number of extant species at the end of the simulation. Equal to 
+acceptable number of extant species at the end of the simulation. Equal to
 \code{nFinal} in every respect except for that.
 
 Note: The function returns \code{NA} if it runs for more than \code{100000}
-iterations without fulfilling the requirements of \code{nFinal} and 
-\code{nExtant}.}
+iterations without fulfilling the requirements of \code{nFinal} and
+\code{nExtant}.
+
+Note: Using values other than the default for \code{nFinal} and
+\code{nExtant} will condition simulation results.}
 
 \item{trueExt}{A \code{logical} indicating whether the function should return
 true or truncated extinction times. When \code{TRUE}, time of extinction of 
