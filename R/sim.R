@@ -66,13 +66,15 @@ is.sim <- function(sim) {
   siz <- (length(unique(c(length(sim[[1]]), length(sim[[2]]), length(sim[[3]]),
                     length(sim[[4]])))) == 1)
   
-  # checks that there are three double vectors and one logical, or two of each
-  # when there is only one species
-  types <- unlist(lapply(1:4, function(x) typeof(sim[[x]])))
-  typ <- (sum(types == "double") == 3 && sum(types == "logical") == 1) ||
-    (sum(types == "double") == 2 && sum(types == "logical") == 2 &&
-       length(sim[[1]]) == 1)
+  # check how many vectors in sim are all NA
+  allNA <- sum(unlist(lapply(1:length(sim), function(x) !any(!is.na(sim[[x]])))))
   
+  # checks that there either are 3 double vectors and 1 logical, or
+  # 2 doubles and 2 logicals when PAR is all NA
+  types <- unlist(lapply(1:4, function(x) typeof(sim[[x]])))
+  typ <- (sum(types == "logical") == 1 && sum(types == "double") == 3) ||
+    (sum(types == "logical") == 2 && sum(types == "double") == 2 && 
+       (length(sim[[1]] == 1) || allNA > 0))
 
   # check that, if typ is false, it is because there are NA-only 
   return(siz && typ)
