@@ -75,16 +75,22 @@
 #' @examples
 #'
 #' ###
-#' # generating a phylogeny using constant rates
-#' sim <- bd.sim(n0 = 1, lambda = 0.2, mu = 0.05, tMax = 10, 
+#' # we can start with a simple phylogeny
+#' 
+#' # set a simulation seed
+#' set.seed(1) 
+#' 
+#' # simulate a BD process with constant rates
+#' sim <- bd.sim(n0 = 1, lambda = 0.3, mu = 0.1, tMax = 10, 
 #'              nExtant = c(2, Inf))
 #' 
 #' # make the phylogeny
 #' phy <- make.phylo(sim)
 #' 
-#' par(mfrow = c(1, 2))
 #' # plot it
 #' if (requireNamespace("ape", quietly = TRUE)) {
+#'   par(mfrow = c(1, 2))
+#'   
 #'   ape::plot.phylo(phy)
 #'   
 #'   # we can also plot only the molecular phylogeny
@@ -92,16 +98,34 @@
 #' }
 #' 
 #' ###
-#' # this works for sim generated with any of the scenarios in bd.sim, of course
-#' sim <- bd.sim(n0 = 1, lambda = function(t) 0.05 + 0.01*t, 
+#' # this works for sim generated with any of the scenarios in bd.sim
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # simulate
+#' sim <- bd.sim(n0 = 1, lambda = function(t) 0.2 + 0.01*t, 
 #'              mu = function(t) 0.03 + 0.015*t, tMax = 10, 
 #'              nExtant = c(2, Inf))
 #' 
 #' # make the phylogeny
 #' phy <- make.phylo(sim)
 #' 
+#' # plot it
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   par(mfrow = c(1, 2))
+#'   
+#'   ape::plot.phylo(phy)
+#'   
+#'   # we can also plot only the molecular phylogeny
+#'   ape::plot.phylo(ape::drop.fossil(phy))
+#' }
+#' 
 #' ### 
-#' # Let us try out the fossils argument to generate a Sample Ancestor tree
+#' # we can use the fossils argument to generate a sample ancestors tree
+#' 
+#' # set seed
+#' set.seed(1)
 #' 
 #' # simulate a simple birth-death process
 #' sim <- bd.sim(n0 = 1, lambda = 0.2, mu = 0.05, tMax = 10, 
@@ -110,15 +134,19 @@
 #' # make the traditional phylogeny
 #' phy <- make.phylo(sim)
 #' 
+#' # set another seed
+#' 
+#' 
 #' # sample fossils
 #' fossils <- sample.clade(sim, 0.1, 10)
 #' 
 #' # make the sampled ancestor tree
 #' saTree <- make.phylo(sim, fossils)
 #' 
-#' par(mfrow = c(1, 2))
 #' # plot them
 #' if (requireNamespace("ape", quietly = TRUE)) {
+#'   par(mfrow = c(1, 2))
+#' 
 #'   ape::plot.phylo(phy, main = "Phylogenetic tree")
 #'   ape::axisPhylo()
 #'   
@@ -127,30 +155,36 @@
 #' }
 #' 
 #' ### 
-#' # Now let's draw a completely extinct tree using ape::axisPhylo()
-#' and see differences caused by the additon of root.time:
+#' # finally, we can test the usage of returnRootTime
+#' 
+#' # set seed
+#' set.seed(1)
 #' 
 #' # simulate a simple birth-death process with more than one
 #' # species and completely extinct:
-#' sim <- bd.sim(n0 = 1, lambda = 0.2, mu = 0.05, tMax = 10, nExtant = c(0,0))
-#' 
-#' sim
+#' sim <- bd.sim(n0 = 1, lambda = 0.5, mu = 0.5, tMax = 10, nExtant = c(0,0))
 #' 
 #' # make a phylogeny using default values
 #' phy <- make.phylo(sim)
-#' # forcing the phylo to not have root.time info:
+#' 
+#' # force phylo to not have root.time info
 #' phy_rootless <- make.phylo(sim, returnRootTime = FALSE)
 #' 
-#' #plot the phylogeny:
-#' par(mfrow = c(1, 3))
 #' # plot them
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   ape::plot.phylo(phy, root.edge = T, main = "root.time default value")
+#'   par(mfrow = c(1, 3))
+#'   
+#'   # if we use the default value, axisPhylo works as intended
+#'   ape::plot.phylo(phy, root.edge = TRUE, main = "root.time default value")
 #'   ape::axisPhylo()
 #'   
+#'   # note that without root.edge, we have incorrect times,
+#'   # as APE assumes tMax was the time of first speciation
 #'   ape::plot.phylo(phy, main = "root.edge not passed to plot.phylo")
 #'   ape::axisPhylo()
 #'   
+#'   # if we force root.time to be FALSE, APE assumes the tree is
+#'   # ultrametric, which leads to an incorrect time axis
 #'   ape::plot.phylo(phy_rootless, main = "root.time forced as FALSE")
 #'   ape::axisPhylo()
 #' }
