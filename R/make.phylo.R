@@ -40,7 +40,7 @@
 #' from other packages. For extinct phylogenies, it might usually be important to 
 #' explicitlyprovide information that the edge is indeed a relevant parte of the phylogeny 
 #' (for instance adding \code{root.edge = T} when ploting a phylogeny with root.time 
-#' information with \cpde{ape::plot.phylo}. The last example in the help page provides 
+#' information with \code{ape::plot.phylo}. The last example in the help page provides 
 #' a visualization of this issue (please note the time scale after axisPhylo is added to 
 #' the plot).
 #' 
@@ -467,13 +467,16 @@ make.phylo <- function(sim, fossils = NULL, returnRootTime = NULL) {
     root.edge = sim$TS[1] - sim$TS[2])
   
   
-  # if user does not force root.time:
-  if(!is.null(returnRootTime)){
-    if(sum(sim$EXTANT)<1){
+  # if user does not force root.time
+  if(is.null(returnRootTime)) {
+    # if there are no extinct species, set root time to
+    # origin of the simulation so phylo axis are not wrong
+    if (sum(sim$EXTANT) < 1) {
         phy$root.time <- sim$TS[1]
     }
-  }else{
-    if(returnRootTime){
+  } else {
+    # otherwise, return root time if user asked for it
+    if (returnRootTime) {
       phy$root.time <- sim$TS[1]
     }
   }
