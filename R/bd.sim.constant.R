@@ -47,6 +47,9 @@
 #' # extinction
 #' mu <- 0
 #' 
+#' # set seed
+#' set.seed(1)
+#' 
 #' # run the simulation
 #' sim <- bd.sim.constant(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 #' 
@@ -57,7 +60,7 @@
 #' }
 #' 
 #' ###
-#' # now let us try to turn extinction up a bit
+#' # now let us try to add a bit extinction
 #' 
 #' # initial number of species
 #' n0 <- 1
@@ -70,6 +73,9 @@
 #' 
 #' # extinction
 #' mu <- 0.04
+#' 
+#' # set seed
+#' set.seed(1)
 #' 
 #' # run the simulation
 #' sim <- bd.sim.constant(n0, lambda, mu, tMax, nFinal = c(2, Inf))
@@ -96,10 +102,16 @@
 #' # extinction
 #' mu <- 0.02
 #' 
+#' # set seed
+#' set.seed(1)
+#' 
 #' # run the simulation
 #' sim <- bd.sim.constant(n0, lambda, mu, tMax)
 #' 
-#' # of course in this case there are no phylogenies to plot
+#' # because we started this simulation with 100 independent
+#' # species and no speciation, in this case there is no
+#' # phylogeny to plot, though we can look at a summary of longevities
+#' summary(sim)
 #' 
 #' ###
 #' # note nFinal has to be sensible
