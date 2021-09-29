@@ -24,23 +24,25 @@ will go extinct before speciating even once. One way of generating large
 sample sizes in this case is to increase \code{n0}, which will simulate the
 diversification of a paraphyletic group.}
 
-\item{lambda}{Function to hold the speciation rate over time. It will either be
-interpreted as an exponential rate, or a Weibull scale if 
-\code{lShape != NULL}. Can be constant, to allow for mixing of constant and
-non-constant rates. One can use constructs such as \code{ifelse()} to create
-rates whose underlying model change over time (see the last examples). Note
-that \code{lambda} should always be greater than or equal to zero.}
+\item{lambda}{Function that defines the speciation rate over time. It will 
+either be interpreted the rate of an exponential distribution, or the scale 
+of a Weibull distribution if \code{lShape != NULL}. Can be constant, to 
+allow for mixing of constant and non-constant rates. One can use constructs 
+such as \code{ifelse()} to create rates whose underlying model change over 
+time (see the last examples). Note that \code{lambda} should always be 
+greater than or equal to zero.}
 
 \item{mu}{Similar to above, but for the extinction rate.
 
 Note: rates should be considered as running from \code{0} to \code{tMax}, as
-the simulation runs in that direction even though the function inverts times
-before returning in the end.
+the simulation runs in that direction even though the function inverts 
+speciation and extinction times before returning.
 
 Note: this function is meant to be called by \code{bd.sim}, so it neither
-allows for as much flexibility, nor calls \code{make.rate}. If the user wishes
-to use \code{bd.sim.general} with environmental or step-function rates, they
-can generate the rate with \code{make.rate} and supply it to the function.}
+allows for as much flexibility, nor calls \code{make.rate}. If the user 
+wishes to use \code{bd.sim.general} with environmental or step-function 
+rates, they can generate the rate with \code{make.rate} and supply it to the
+function.}
 
 \item{tMax}{Ending time of simulation, in million years after the clade 
 origin. Any species still living after \code{tMax} is considered extant, and 
@@ -113,18 +115,18 @@ Simulates a species birth-death process with general rates for any number of
 starting species. Allows for the speciation/extinction rate to be (1) a 
 constant, or (2) a function of time. Allows for constraining results on the 
 number of species at the end of the simulation, either total or extant. The 
-function can also take an optional shape argument to generate age-dependence on
-speciation and/or extinction, assuming a Weibull distribution as a model of 
-age-dependence. Returns a \code{sim} object (see \code{?sim}). It may return 
-true extinction times or simply information on whether species lived after the
-maximum simulation time, depending on input. For constant rate simulations, see
-\code{bd.sim.constant}. For a function that unites all scenarios, see 
-\code{bd.sim}. \code{bd.sim} also allows for extra inputs, creating a
-time-dependent only rate internally through \code{make.rate}. For similar
-flexibility, use \code{make.rate} to generate the desired rate.
-Please note while time runs from \code{0} to \code{tMax} in the simulation, it 
-returns speciation/extinction times as \code{tMax} (origin of the group) to 
-\code{0} (the "present" and end of simulation), so as to conform to other
+function can also take an optional shape argument to generate age-dependence
+on speciation and/or extinction, assuming a Weibull distribution as a model 
+of age-dependence. Returns a \code{sim} object (see \code{?sim}). It may 
+return calculated extinction times or simply information on whether species 
+lived after the maximum simulation time, depending on input. For constant 
+rate simulations, see \code{bd.sim.constant}. For a function that unites all
+scenarios, see \code{bd.sim}. \code{bd.sim} also allows for extra inputs, 
+creating a time-dependent only rate internally through \code{make.rate}. For
+similar flexibility, use \code{make.rate} to generate the desired rate.
+Please note while time runs from \code{0} to \code{tMax} in the simulation,
+it returns speciation/extinction times as \code{tMax} (origin of the group) 
+to \code{0} (the "present" and end of simulation), so as to conform to other
 packages in the literature.
 }
 \examples{
@@ -147,6 +149,9 @@ lambda <- 0.11
 # extinction
 mu <- 0.08
 
+# set a seed
+set.seed(1)
+
 # run the simulation
 sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 
@@ -165,13 +170,19 @@ n0 <- 1
 # maximum simulation time
 tMax <- 40
 
-# speciation
+# make a vector for time
+time <- seq(0, tMax, 0.1)
+
+# speciation rate
 lambda <- function(t) {
-  return(0.03 + 0.005*t)
+  return(0.05 + 0.005*t)
 }
 
-# extinction
-mu <- 0.05
+# extinction rate
+mu <- 0.1
+
+# set a seed
+set.seed(4)
 
 # run the simulation
 sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
@@ -191,35 +202,40 @@ n0 <- 1
 # maximum simulation time
 tMax <- 40
 
-# speciation rate
+# speciation
 lambda <- function(t) {
-  return(0.03 + 0.005*t)
+  return(0.02 + 0.005*t)
 }
 
 # vector of extinction rates
-mList <- c(0.06, 0.09, 0.11)
+mList <- c(0.09, 0.08, 0.1)
 
-# vector of shift times. Note mShifts could be c(40, 25, 15) for
-# identical results
-mShifts <- c(0, 15, 25)
+# vector of shift times. Note mShifts could be c(40, 20, 5) for identical 
+# results
+mShifts <- c(0, 20, 35)
 
 # let us take a look at how make.rate will make it a step function
 mu <- make.rate(mList, tMax = tMax, rateShifts = mShifts)
 
 # and plot it
-plot(seq(0, tMax, 0.1), mu(seq(0, tMax, 0.1)), type = 'l',
+plot(seq(0, tMax, 0.1), rev(mu(seq(0, tMax, 0.1))), type = 'l',
      main = "Extintion rate as a step function", xlab = "Time (My)",
-     ylab = "Rate (species/My)")
+     ylab = "Rate (species/My)", xlim = c(tMax, 0))
+
+# looking good, we will keep everything else the same
 
 # a different way to define the same extinction function
 mu <- function(t) {
-  ifelse(t < 15, 0.06,
-         ifelse(t < 25, 0.09, 0.11))
+  ifelse(t < 20, 0.09,
+         ifelse(t < 35, 0.08, 0.1))
 }
+
+# set seed
+set.seed(2)
 
 # run the simulation
 sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
-# we could instead have used q made with make.rates
+# we could instead have used mu made with make.rates
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -229,6 +245,8 @@ if (requireNamespace("ape", quietly = TRUE)) {
 
 ###
 # another feature to add is age dependency
+
+# initial number of species
 n0 <- 1
 
 # maximum simulation time
@@ -237,11 +255,15 @@ tMax <- 40
 # speciation
 lambda <- 0.1
 
-# extinction - a Weibull scale
+# extinction - note that since this is a Weibull scale,
+# the unites are my/events/lineage, not events/lineage/my
 mu <- 10
 
 # extinction shape
-mShape <- 1
+mShape <- 2
+
+# set seed
+set.seed(3)
 
 # run simulation
 sim <- bd.sim.general(n0, lambda, mu, tMax, mShape = mShape, 
@@ -254,6 +276,7 @@ if (requireNamespace("ape", quietly = TRUE)) {
 }
 
 ###
+# scale can be a time-varying function  
  
 # initial number of species
 n0 <- 1
@@ -264,13 +287,17 @@ tMax <- 40
 # speciation
 lambda <- 0.15
 
-# extinction - a Weibull scale
+# extinction - note that since this is a Weibull scale,
+# the unites are my/events/lineage, not events/lineage/my
 mu <- function(t) {
   return(8 + 0.05*t)
 }
 
 # extinction shape
-mShape <- 1
+mShape <- 2
+
+# set seed
+set.seed(1)
 
 # run simulation
 sim <- bd.sim.general(n0, lambda, mu, tMax, mShape = mShape, 
@@ -283,6 +310,8 @@ if (requireNamespace("ape", quietly = TRUE)) {
 }
 
 ###
+# and shape can also vary with time
+
 # initial number of species
 n0 <- 1
 
@@ -292,13 +321,17 @@ tMax <- 40
 # speciation
 lambda <- 0.15
 
-# extinction - a Weibull scale
+# extinction - note that since this is a Weibull scale,
+# the unites are my/events/lineage, not events/lineage/my
 mu <- 5
 
 # extinction shape
 mShape <- function(t) {
   return(8 + 0.05*t)
 }
+
+# set seed
+set.seed(2)
 
 # run simulation
 sim <- bd.sim.general(n0, lambda, mu, tMax, mShape = mShape, 
@@ -312,6 +345,10 @@ if (requireNamespace("ape", quietly = TRUE)) {
 
 ###
 # finally, we could have environmental dependency on a rate
+
+# get the temperature data - see ?temp for information on the data set
+data(temp)
+
 # initial number of species
 n0 <- 1
 
@@ -323,14 +360,18 @@ l_t <- function(t, temp) {
  return(0.025*exp(0.1*temp))
 }
 
+# need a data frame describing the temperature at different times
+envL <- temp
+
+# speciation - note that bd.sim does this internally when supplied
+# with the equivalent of l_t and envL
+lambda <- make.rate(l_t, tMax = tMax, envRate = envL)
+
 # extinction
-mu <- 0.075
+mu <- 0.08
 
-# get the temperature data
-data(temp)
-
-# speciation
-lambda <- make.rate(l_t, tMax = tMax, envRate = temp)
+# set seed
+set.seed(3)
 
 # run simulation
 sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
@@ -341,12 +382,70 @@ if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(phy)
 }
 
+###
+# one can mix and match all of these scenarios as they wish - age-dependency
+# and constant rates, age-dependent and temperature-dependent rates, etc. 
+# the only combination that is not allowed by make.rate is a step function 
+# rate and environmental data, but one can get around that as follows
+
+# get the temperature data - see ?temp for information on the data set
+data(temp)
+
+# initial number of species
+n0 <- 1
+
+# speciation - a step function of temperature built using ifelse()
+# note that this creates two shifts for lambda, for a total of 3 values
+# throughout the simulation
+l_t <- function(t, env) {
+  ifelse(t < 20, env,
+         ifelse(t < 30, env / 4, env / 3))
+}
+
+# speciation shape
+lShape <- 2
+
+# environment variable to use - temperature
+envL <- temp
+
+# speciation
+lambda <- make.rate(l_t, tMax = tMax, envRate = envL)
+
+# plot it to take a look
+plot(seq(0, tMax, 0.1), rev(lambda(seq(0, tMax, 0.1))),
+     main = "Speciation scale varying with temperature", xlab = "Time (My)",
+     ylab = "Scale", type = 'l', xlim = c(tMax, 0))
+
+# extinction
+mu <- 0.1
+
+# maximum simulation time
+tMax <- 40
+
+# set seed
+set.seed(1)
+
+\dontrun{
+# run the simulation
+sim <- bd.sim.general(n0, lambda, mu, tMax, lShape = lShape,
+                      nFinal = c(2, Inf))
+
+# we can plot the phylogeny to take a look
+if (requireNamespace("ape", quietly = TRUE)) {
+  phy <- make.phylo(sim)
+  ape::plot.phylo(phy)
+}
+}
+
 # after presenting the possible models, we can consider how to
 # create mixed models, where the dependency changes over time
 
 ###
 # consider speciation that becomes environment dependent
 # in the middle of the simulation
+
+# get the temperature data - see ?temp for information on the data set
+data(temp)
 
 # initial number of species
 n0 <- 1
@@ -362,15 +461,16 @@ l_t <- function(t, temp) {
   )
 }
 
-# extinction
-mu <- 0.1
-
-# get the temperature data
-data(temp)
-
 # speciation
 lambda <- make.rate(l_t, tMax = tMax, envRate = temp)
 
+# extinction
+mu <- 0.1
+
+# set seed
+set.seed(4)
+
+\dontrun{
 # run simulation
 sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 
@@ -379,10 +479,17 @@ if (requireNamespace("ape", quietly = TRUE)) {
   phy <- make.phylo(sim)
   ape::plot.phylo(phy)
 }
+}
 
 ###
 # we can also change the environmental variable
 # halfway into the simulation
+
+# get the temperature data - see ?temp for information on the data set
+data(temp)
+
+# same for co2 data (and ?co2)
+data(co2)
 
 # initial number of species
 n0 <- 1
@@ -398,9 +505,6 @@ m_t1 <- function(t, temp) {
   return(0.05 + 0.1*exp(0.02*temp))
 }
 
-# get the temperature data
-data(temp)
-
 # make first function
 mu1 <- make.rate(m_t1, tMax = tMax, envRate = temp) 
 
@@ -409,9 +513,6 @@ m_t2 <- function(t, co2) {
   return(0.02 + 0.14*exp(0.01*co2))
 }
 
-# get the co2 data
-data(co2)
-
 # make second function
 mu2 <- make.rate(m_t2, tMax = tMax, envRate = co2)
 
@@ -419,6 +520,9 @@ mu2 <- make.rate(m_t2, tMax = tMax, envRate = co2)
 mu <- function(t) {
   ifelse(t < 20, mu1(t), mu2(t))
 }
+
+# set seed
+set.seed(3)
 
 # run simulation
 sim <- bd.sim.general(n0, lambda, mu, tMax, nFinal = c(2, Inf))
@@ -435,7 +539,7 @@ if (requireNamespace("ape", quietly = TRUE)) {
 # together
 
 ###
-# finally, note one could create an extinction rate that turns age-dependent
+# finally, one could create an extinction rate that turns age-dependent
 # in the middle, by making shape time-dependent
 
 # initial number of species
@@ -447,17 +551,21 @@ tMax <- 40
 # speciation
 lambda <- 0.15
 
-# extinction - a Weibull scale
+# extinction - note that since this is a Weibull scale,
+# the unites are my/events/lineage, not events/lineage/my
 mu <- function(t) {
   return(8 + 0.05*t)
 }
 
-# speciation shape
+# extinction shape
 mShape <- function(t) {
   return(
     ifelse(t < 30, 1, 2)
   )
 }
+
+# set seed
+set.seed(3)
 
 # run simulation
 sim <- bd.sim.general(n0, lambda, mu, tMax, mShape = mShape,

@@ -40,8 +40,8 @@
 #' @param mu Similar to \code{lambda}, but for the extinction rate.
 #' 
 #' Note: rates should be considered as running from \code{0} to \code{tMax}, as
-#' the simulation runs in that direction even though the function inverts times
-#' before returning in the end.
+#' the simulation runs in that direction even though the function inverts 
+#' speciation and extinction times before returning.
 #'
 #' @param tMax Ending time of simulation, in million years after the clade 
 #' origin. Any species still living after \code{tMax} is considered extant, and 
@@ -197,6 +197,17 @@
 #' ###
 #' # what if we want mu to be a step function?
 #' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 40
+#' 
+#' # speciation
+#' lambda <- function(t) {
+#'   return(0.02 + 0.005*t)
+#' }
+#' 
 #' # vector of extinction rates
 #' mList <- c(0.09, 0.08, 0.1)
 #' 
@@ -213,17 +224,6 @@
 #'      ylab = "Rate (species/My)", xlim = c(tMax, 0))
 #' 
 #' # looking good, we will keep everything else the same
-#' 
-#' # maximum simulation time
-#' tMax <- 40
-#' 
-#' # initial number of species
-#' n0 <- 1
-#' 
-#' # speciation
-#' lambda <- function(t) {
-#'   return(0.02 + 0.005*t)
-#' }
 #' 
 #' # a different way to define the same extinction function
 #' mu <- function(t) {
@@ -253,7 +253,8 @@
 #' # maximum simulation time
 #' tMax <- 40
 #' 
-#' # speciation - here note it is a Weibull scale
+#' # speciation - note that since this is a Weibull scale,
+#' # the unites are my/events/lineage, not events/lineage/my
 #' lambda <- 10
 #' 
 #' # speciation shape
@@ -283,7 +284,8 @@
 #' # maximum simulation time
 #' tMax <- 40
 #' 
-#' # speciation - here note it is a Weibull scale
+#' # speciation - note that since this is a Weibull scale,
+#' # the unites are my/events/lineage, not events/lineage/my
 #' lambda <- function(t) {
 #'   return(2 + 0.25*t)
 #' }
@@ -315,7 +317,8 @@
 #' # maximum simulation time
 #' tMax <- 40
 #' 
-#' # speciation - here note it is a Weibull scale
+#' # speciation - note that since this is a Weibull scale,
+#' # the unites are my/events/lineage, not events/lineage/my
 #' lambda <- function(t) {
 #'   return(2 + 0.25*t)
 #' }
@@ -355,8 +358,7 @@
 #' 
 #' # speciation - a scale
 #' lambda <- 10
-#' 
-#' # note the scale for the age-dependency can be a time-varying function
+#' # note the scale for the age-dependency could be a time-varying function
 #' 
 #' # speciation shape
 #' lShape <- 2
@@ -393,9 +395,12 @@
 #' 
 #' ###
 #' # one can mix and match all of these scenarios as they wish - age-dependency
-#' # and constant rates, age-dependent and temperature-dependent rates, etc. The
-#' # only combination that is not allowed is a vector rate and environmental
-#' # data, but one can get around that as follows
+#' # and constant rates, age-dependent and temperature-dependent rates, etc. 
+#' # the only combination that is not allowed is a step function rate and 
+#' # environmental data, but one can get around that as follows
+#' 
+#' # get the temperature data - see ?temp for information on the data set
+#' data(temp)
 #' 
 #' # initial number of species
 #' n0 <- 1
@@ -413,7 +418,7 @@
 #' 
 #' # environment variable to use - temperature
 #' envL <- temp
-#' 
+#'
 #' # this is kind of a complicated scale, let us take a look
 #' 
 #' # make it a function of time
@@ -452,6 +457,9 @@
 #' # consider speciation that becomes environment dependent
 #' # in the middle of the simulation
 #' 
+#' # get the temperature data - see ?temp for information on the data set
+#' data(temp)
+#' 
 #' # initial number of species
 #' n0 <- 1
 #' 
@@ -469,11 +477,8 @@
 #' # extinction
 #' mu <- 0.11
 #' 
-#' # get the temperature data
-#' data(temp)
-#' 
 #' # set seed
-#' set.seed(1)
+#' set.seed(4)
 #' 
 #' \dontrun{
 #' # run simulation
@@ -490,6 +495,15 @@
 #' # we can also change the environmental variable
 #' # halfway into the simulation
 #' 
+#' # note below that for this complex scenario we need make.rate, 
+#' # so that the usage of bd.sim here is equivalent to bd.sim.general
+#' 
+#' # get the temperature data - see ?temp for information on the data set
+#' data(temp)
+#' 
+#' # same for co2 data (and ?co2)
+#' data(co2)
+#' 
 #' # initial number of species
 #' n0 <- 1
 #' 
@@ -504,9 +518,6 @@
 #'   return(0.05 + 0.1*exp(0.02*temp))
 #' }
 #' 
-#' # get the temperature data
-#' data(temp)
-#' 
 #' # make first function
 #' mu1 <- make.rate(m_t1, tMax = tMax, envRate = temp)
 #' 
@@ -514,9 +525,6 @@
 #' m_t2 <- function(t, co2) {
 #'   return(0.02 + 0.14*exp(0.01*co2))
 #' }
-#' 
-#' # get the co2 data
-#' data(co2)
 #' 
 #' # make second function
 #' mu2 <- make.rate(m_t2, tMax = tMax, envRate = co2)
@@ -544,7 +552,7 @@
 #' # together
 #' 
 #' ###
-#' # finally, note one could create an extinction rate that turns age-dependent
+#' # finally, one could create an extinction rate that turns age-dependent
 #' # in the middle, by making shape time-dependent
 #'
 #' # initial number of species
@@ -556,12 +564,13 @@
 #' # speciation
 #' lambda <- 0.15
 #' 
-#' # extinction - a Weibull scale
+#' # extinction - note that since this is a Weibull scale,
+#' # the unites are my/events/lineage, not events/lineage/my
 #' mu <- function(t) {
 #'   return(8 + 0.05*t)
 #' }
 #' 
-#' # speciation shape
+#' # extinction shape
 #' mShape <- function(t) {
 #'   return(
 #'     ifelse(t < 30, 1, 2)
