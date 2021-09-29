@@ -1,59 +1,91 @@
 #' Draw a sim object
 #'
-#' Draws a paleobuddy simulation (a \code{sim} object - please see 
-#' \code{?sim}) in the graphics window. Allows for the assignment of speciation
-#' or sampling events, and further customization.
+#' Draws species longevities for a paleobuddy simulation (a \code{sim} object -
+#' see \code{?sim}) in the graphics window. Allows for the assignment of 
+#' speciation and sampling events, and further customization.
 #'
 #' @param sim A \code{sim} object, containing extinction times, speciation 
 #' times, parent, and status information for each species in the simulation. 
 #' See \code{?sim}.
 #' 
 #' @param fossils A \code{data.frame} containing the fossil occurrences of 
-#' each lineage, as returned by the \code{sample.clade} function.
+#' each lineage, e.g. as returned by the \code{sample.clade} function. The
+#' format of this argument will define the way fossils are drawn, see below.
 #' 
-#' @param sort_by A single character or integer vector indicating how lineages 
-#' should be sorted in the plot. If inputted as character (see example 3), it 
-#' indicates which element in the \code{sim} object that should be used to sort 
-#' lineages in the plot. If inputted as a vector of integers, it directly 
-#' specifies the order in which lineages should be drawn (from the bottom 
+#' @param sortBy A single character or integer vector indicating how lineages 
+#' should be sorted in the plot. If it is a string (see example 3), it 
+#' indicates which element in the \code{sim} object that should be used to sort
+#' lineages in the plot. If it is a vector of integers, it directly specifies
+#' the order in which lineages should be drawn (from the bottom 
 #' (i.e. integer = 1)) to the upper side (integer = length of the \code{sim} 
-#' elements) of the figure). Default value of this parameter is "TS".
+#' elements) of the figure). Default value of this parameter is "TS", so by
+#' default species will be sorted by order of origination in the simulation.
 #' 
 #' @return A plot of the simulation in the graphics window. If the 
-#' \code{fossils} data.frame is inputted, its format will dictate how fossil
+#' \code{fossils} data.frame is supplied, its format will dictate how fossil
 #' occurrences will be plotted. If \code{fossils} has a \code{SampT} column
-#' (i.e. the occurrence times are exact), fossil occurrences are assigned as dots. 
-#' If \code{fossils} has columns \code{MaxT} and \code{MinT} (i.e. the early and 
-#' late stage bounds associated with each occurrence), fossil occurrences are 
-#' represented as slightly jittered, semitransparent bars indicating the early 
-#' and late bounds of each fossil occurrence.
+#' (i.e. the occurrence times are exact), fossil occurrences are assigned as 
+#' dots. If \code{fossils} has columns \code{MaxT} and \code{MinT} (i.e. the 
+#' early and late stage bounds associated with each occurrence), fossil 
+#' occurrences are represented as slightly jittered, semitransparent bars 
+#' indicating the early and late bounds of each fossil occurrence.
 #' 
 #' @author Matheus Januario
 #'
 #' @examples
 #' 
 #' ###
-#' # start simple
-#' 
-#' # maximum simulation time
-#' tMax <- 10 
+#' # we start drawing a simple simulation
 #'
-#' # run birth-death simulation
+#' # maximum simulation time
+#' tMax <- 10
+#'
+#' # set seed
+#' set.seed(1)
+#'
+#' # run a simulation
+#' sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
+#'               nFinal = c(10,20)) 
+#'               
+#' # draw it
+#' draw.sim(sim)
+#' 
+#' ###
+#' # we can add fossils to the drawing
+#'
+#' # maximum simulation time
+#' tMax <- 10
+#'
+#' # set seed
+#' set.seed(1)
+#'
+#' # run a simulation
 #' sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
 #'               nFinal = c(10,20)) 
 #'
+#' # set seed
+#' set.seed(1)
+#'
 #' # simulate data resulting from a fossilization process
 #' # with exact occurrence times
-#' fdt <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
+#' fossils <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
 #' 
 #' # draw it
-#' draw.sim(sim, fossils = fdt, sort_by = "PAR")
+#' draw.sim(sim, fossils = fossils)
+#' 
+#' # we can order the vertical drawing of species based on
+#' # any element of sim
+#' draw.sim(sim, fossils = fossils, sortBy = "PAR")
+#' # here we cluster species with their daughters
 #' 
 #' ###
 #' # try with fossil ranges
 #' 
 #' # maximum simulation time
-#' tMax <- 10 
+#' tMax <- 10
+#' 
+#' # set seed
+#' set.seed(1)
 #' 
 #' # run birth-death simulation
 #' sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
@@ -65,12 +97,15 @@
 #' # create time bins randomly
 #' bins <- c(tMax, 0, runif(n = rpois(1, lambda = 6), min = 0, max = tMax))
 #' 
+#' # set seed
+#' set.seed(1)
+#' 
 #' # simulate fossil sampling
-#' fdt <- sample.clade(sim = sim, rho = 2, tMax = tMax, 
-#'                     returnTrue = FALSE, bins = bins)
+#' fossils <- sample.clade(sim = sim, rho = 2, tMax = tMax, 
+#'                         returnTrue = FALSE, bins = bins)
 #' 
 #' # draw it, sorting lineages by their parent
-#' draw.sim(sim, fossils = fdt, sort_by = "PAR")
+#' draw.sim(sim, fossils = fossils, sortBy = "PAR")
 #' 
 #' # adding the bounds of the simulated bins
 #' abline(v = bins, lty = 2, col = "red", lwd = 0.5)
@@ -79,17 +114,23 @@
 #' # we can control how to sort displayed species exactly
 #' 
 #' # maximum simulation time
-#' tMax <- 10 
+#' tMax <- 10
+#' 
+#' # set seed
+#' set.seed(1)
 #' 
 #' # run birth-death simulations
 #' sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
 #'               nFinal = c(10,20)) 
-#'  
+#'
+#'  # set seed
+#'  set.seed(1)  
+#'
 #' # simulate fossil sampling
-#' fdt <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
-#'  
+#' fossils <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
+#' 
 #' # draw it with random sorting
-#' draw.sim(sim, fossils = fdt, sort_by = sample(1:length(sim$TE)))
+#' draw.sim(sim, fossils = fossils, sortBy = sample(1:length(sim$TS)))
 #' 
 #' @importFrom grDevices col2rgb rgb
 #' @importFrom graphics points segments text
@@ -99,7 +140,7 @@
 #' @export
 #' 
 
-draw.sim <- function(sim, fossils = NULL, sort_by = "TS"){
+draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
   # some error checking
   
   # check that sim is a valid sim object
@@ -116,18 +157,19 @@ draw.sim <- function(sim, fossils = NULL, sort_by = "TS"){
     } 
   }
   
-  # check that sort_by has an accepted type
-  if (!class(sort_by) %in% c("character", "integer", "numeric")) {
-    stop("sort_by should be a character or a vector of integers.")
-  } else if (class(sort_by) == "integer" & length(sort_by) != length(sim$TE)) {
+  # check that sortBy has an accepted type
+  if (!class(sortBy) %in% c("character", "integer", "numeric")) {
+    stop("sortBy should be a character or a vector of integers.")
+  } else if (class(sortBy) == "integer" & length(sortBy) != length(sim$TE)) {
     
     # if it is a vector of integers with the wrong length, error
-    stop("sort_by must have the same length as elements of sim.")
-  } else if((class(sort_by) == "numeric") & 
-            !(all(1:length(sim$TE) %in% unique(sort_by)))) {
+    stop("sortBy must have the same length as elements of sim.")
+  } else if((class(sortBy) == "numeric") & 
+            !(all(1:length(sim$TE) %in% unique(sortBy)))) {
     
     # if it s is numeric, it must include every lineage
-    stop("sort_by must skip no lineage, and all lineages should have unique indices.")
+    stop("sortBy must skip no lineage, and all lineages 
+         should have unique indices.")
   }
   
   # aux functions
@@ -159,16 +201,16 @@ draw.sim <- function(sim, fossils = NULL, sort_by = "TS"){
   sim$TE[is.na(sim$TE)] <- 0
   
   # reordering sim object
-  if (is.character(sort_by)) {
-    if (sort_by %in% c("PAR")) {
+  if (is.character(sortBy)) {
+    if (sortBy %in% c("PAR")) {
       test <- TRUE
     } else {
       test <- FALSE
     }
     
-    ord <- order(unlist(sim[sort_by]), decreasing = test)
+    ord <- order(unlist(sim[sortBy]), decreasing = test)
   } else {
-    ord <- sort_by
+    ord <- sortBy
   }
   
   sim_mod <- sim

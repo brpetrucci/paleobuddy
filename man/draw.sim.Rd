@@ -4,7 +4,7 @@
 \alias{draw.sim}
 \title{Draw a sim object}
 \usage{
-draw.sim(sim, fossils = NULL, sort_by = "TS")
+draw.sim(sim, fossils = NULL, sortBy = "TS")
 }
 \arguments{
 \item{sim}{A \code{sim} object, containing extinction times, speciation 
@@ -12,55 +12,87 @@ times, parent, and status information for each species in the simulation.
 See \code{?sim}.}
 
 \item{fossils}{A \code{data.frame} containing the fossil occurrences of 
-each lineage, as returned by the \code{sample.clade} function.}
+each lineage, e.g. as returned by the \code{sample.clade} function. The
+format of this argument will define the way fossils are drawn, see below.}
 
-\item{sort_by}{A single character or integer vector indicating how lineages 
-should be sorted in the plot. If inputted as character (see example 3), it 
-indicates which element in the \code{sim} object that should be used to sort 
-lineages in the plot. If inputted as a vector of integers, it directly 
-specifies the order in which lineages should be drawn (from the bottom 
+\item{sortBy}{A single character or integer vector indicating how lineages 
+should be sorted in the plot. If it is a string (see example 3), it 
+indicates which element in the \code{sim} object that should be used to sort
+lineages in the plot. If it is a vector of integers, it directly specifies
+the order in which lineages should be drawn (from the bottom 
 (i.e. integer = 1)) to the upper side (integer = length of the \code{sim} 
-elements) of the figure). Default value of this parameter is "TS".}
+elements) of the figure). Default value of this parameter is "TS", so by
+default species will be sorted by order of origination in the simulation.}
 }
 \value{
 A plot of the simulation in the graphics window. If the 
-\code{fossils} data.frame is inputted, its format will dictate how fossil
+\code{fossils} data.frame is supplied, its format will dictate how fossil
 occurrences will be plotted. If \code{fossils} has a \code{SampT} column
-(i.e. the occurrence times are exact), fossil occurrences are assigned as dots. 
-If \code{fossils} has columns \code{MaxT} and \code{MinT} (i.e. the early and 
-late stage bounds associated with each occurrence), fossil occurrences are 
-represented as slightly jittered, semitransparent bars indicating the early 
-and late bounds of each fossil occurrence.
+(i.e. the occurrence times are exact), fossil occurrences are assigned as 
+dots. If \code{fossils} has columns \code{MaxT} and \code{MinT} (i.e. the 
+early and late stage bounds associated with each occurrence), fossil 
+occurrences are represented as slightly jittered, semitransparent bars 
+indicating the early and late bounds of each fossil occurrence.
 }
 \description{
-Draws a paleobuddy simulation (a \code{sim} object - please see 
-\code{?sim}) in the graphics window. Allows for the assignment of speciation
-or sampling events, and further customization.
+Draws species longevities for a paleobuddy simulation (a \code{sim} object -
+see \code{?sim}) in the graphics window. Allows for the assignment of 
+speciation and sampling events, and further customization.
 }
 \examples{
 
 ###
-# start simple
+# we start drawing a simple simulation
 
 # maximum simulation time
-tMax <- 10 
+tMax <- 10
 
-# run birth-death simulation
+# set seed
+set.seed(1)
+
+# run a simulation
+sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
+              nFinal = c(10,20)) 
+              
+# draw it
+draw.sim(sim)
+
+###
+# we can add fossils to the drawing
+
+# maximum simulation time
+tMax <- 10
+
+# set seed
+set.seed(1)
+
+# run a simulation
 sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
               nFinal = c(10,20)) 
 
+# set seed
+set.seed(1)
+
 # simulate data resulting from a fossilization process
 # with exact occurrence times
-fdt <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
+fossils <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
 
 # draw it
-draw.sim(sim, fossils = fdt, sort_by = "PAR")
+draw.sim(sim, fossils = fossils)
+
+# we can order the vertical drawing of species based on
+# any element of sim
+draw.sim(sim, fossils = fossils, sortBy = "PAR")
+# here we cluster species with their daughters
 
 ###
 # try with fossil ranges
 
 # maximum simulation time
-tMax <- 10 
+tMax <- 10
+
+# set seed
+set.seed(1)
 
 # run birth-death simulation
 sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
@@ -72,12 +104,15 @@ sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax,
 # create time bins randomly
 bins <- c(tMax, 0, runif(n = rpois(1, lambda = 6), min = 0, max = tMax))
 
+# set seed
+set.seed(1)
+
 # simulate fossil sampling
-fdt <- sample.clade(sim = sim, rho = 2, tMax = tMax, 
-                    returnTrue = FALSE, bins = bins)
+fossils <- sample.clade(sim = sim, rho = 2, tMax = tMax, 
+                        returnTrue = FALSE, bins = bins)
 
 # draw it, sorting lineages by their parent
-draw.sim(sim, fossils = fdt, sort_by = "PAR")
+draw.sim(sim, fossils = fossils, sortBy = "PAR")
 
 # adding the bounds of the simulated bins
 abline(v = bins, lty = 2, col = "red", lwd = 0.5)
@@ -86,17 +121,23 @@ abline(v = bins, lty = 2, col = "red", lwd = 0.5)
 # we can control how to sort displayed species exactly
 
 # maximum simulation time
-tMax <- 10 
+tMax <- 10
+
+# set seed
+set.seed(1)
 
 # run birth-death simulations
 sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
               nFinal = c(10,20)) 
- 
+
+ # set seed
+ set.seed(1)  
+
 # simulate fossil sampling
-fdt <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
- 
+fossils <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
+
 # draw it with random sorting
-draw.sim(sim, fossils = fdt, sort_by = sample(1:length(sim$TE)))
+draw.sim(sim, fossils = fossils, sortBy = sample(1:length(sim$TS)))
 
 }
 \author{
