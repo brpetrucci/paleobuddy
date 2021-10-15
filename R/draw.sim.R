@@ -94,11 +94,12 @@
 #' # simulate data resulting from a fossilization process
 #' # with fossil occurrence time ranges
 #' 
+#' # set seed
+#' set.seed(20)
+#'
 #' # create time bins randomly
 #' bins <- c(tMax, 0, runif(n = rpois(1, lambda = 6), min = 0, max = tMax))
 #' 
-#' # set seed
-#' set.seed(1)
 #' 
 #' # simulate fossil sampling
 #' fossils <- sample.clade(sim = sim, rho = 2, tMax = tMax, 
