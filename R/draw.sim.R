@@ -173,6 +173,9 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
   }
   
   # aux functions
+    
+  #this function creates transparent colors
+     #form and alpha value + color name
   makeTransparent <- function(someColor, alpha = 25) {
     newColor <- col2rgb(someColor)
     apply(newColor, 2, function(curcoldata) {
@@ -184,6 +187,10 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
       })
   }
   
+  #this function only jitters (i.e.
+    #adds a small noise) to the Y-axis
+      #it improves visualization when there
+       #are many fossil bins
   jitter_foo <- function(x){
     jit <- vector()
     while (length(jit) < length(x)) {
@@ -197,7 +204,7 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
     return(x + jit)
   }
   
-  # changing conventions
+  # changing conventions of sim object:
   sim$TE[is.na(sim$TE)] <- 0
   
   # reordering sim object
@@ -213,6 +220,7 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
     ord <- sortBy
   }
   
+  #changing order based on above criteria
   sim_mod <- sim
   sim_mod$TE <- sim_mod$TE[ord]
   sim_mod$TS <- sim_mod$TS[ord]
@@ -236,7 +244,7 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
                                       round(length(sim$TE) / 10, 
                                             digits = 0), "d"), ord)))
   
-  # adding budding events
+  # adding budding events (i.e. speciations)
   luca <- which(is.na(sim_mod$PAR))
   aux_y <- unlist(lapply(sim$PAR, function(x) which(ord == x)[1]))
   
@@ -247,22 +255,27 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
            lty = 2, lwd=1, col="gray50")
   
   # adding fossils
-  if (!(is.null(fossils))) {
-    if ("SampT" %in% colnames(fossils)) {
-      ids <- as.numeric(gsub("t", '', fossils$Species))
-      points(x = fossils$SampT, 
+  #if fossils are inputed:
+  if (!(is.null(fossils))) { 
+    #if they are time points (i.e. perfect sampling)
+    if ("SampT" %in% colnames(fossils)) { 
+      ids <- as.numeric(gsub("t", '', fossils$Species)) #extracts number in ID
+      points(x = fossils$SampT,  #plot points accourdingly
              y =  unlist(lapply(ids, function(x) 
                which(ord == x))), col = "red", pch = 16)
     } else if("MaxT" %in% colnames(fossils) & 
               "MinT" %in% colnames(fossils)) {
-      ids = as.numeric(gsub("t", '', fossils$Species))
+      #if fossils are inputted as bins:
+      #extracts number in ID
+      ids = as.numeric(gsub("t", '', fossils$Species)) 
       
+      #adds a small jittering (i.e. noise) to the y location of eahc point
       y_jittered <- jitter_foo(unlist(lapply(ids, function(x) 
-                                                  which(ord == x))))
-      
+                                                  which(ord == x)))) 
+      #plot semi-transparent bars with a jitter, 
       segments(x1 = fossils$MaxT, x0 = fossils$MinT, 
                y1 = y_jittered, y0 = y_jittered, 
-               col = makeTransparent("red", 100), lwd = 3)
+               col = makeTransparent("red", 100), lwd = 3) 
       
     }
   }
