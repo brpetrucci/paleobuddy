@@ -100,6 +100,8 @@
 #' # create time bins randomly
 #' bins <- c(tMax, 0, runif(n = rpois(1, lambda = 6), min = 0, max = tMax))
 #' 
+#' # set seed
+#' 
 #' 
 #' # simulate fossil sampling
 #' fossils <- sample.clade(sim = sim, rho = 2, tMax = tMax, 
@@ -124,8 +126,8 @@
 #' sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
 #'               nFinal = c(10,20)) 
 #'
-#'  # set seed
-#'  set.seed(1)  
+#' # set seed
+#' set.seed(1)  
 #'
 #' # simulate fossil sampling
 #' fossils <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
@@ -168,15 +170,14 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
   } else if((class(sortBy) == "numeric") & 
             !(all(1:length(sim$TE) %in% unique(sortBy)))) {
     
-    # if it s is numeric, it must include every lineage
+    # if it is numeric, it must include every lineage
     stop("sortBy must skip no lineage, and all lineages 
          should have unique indices.")
   }
   
-  # aux functions
+  ## aux functions
     
-  #this function creates transparent colors
-     #form and alpha value + color name
+  # this function creates transparent colors form and alpha value + color name
   makeTransparent <- function(someColor, alpha = 25) {
     newColor <- col2rgb(someColor)
     apply(newColor, 2, function(curcoldata) {
@@ -188,10 +189,8 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
       })
   }
   
-  #this function only jitters (i.e.
-    #adds a small noise) to the Y-axis
-      #it improves visualization when there
-       #are many fossil bins
+  # this function only jitters (i.e. adds a small noise) to the y-axis,
+  # improving visualization when there are many fossil bins
   jitter_foo <- function(x){
     jit <- vector()
     while (length(jit) < length(x)) {
@@ -221,7 +220,7 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
     ord <- sortBy
   }
   
-  #changing order based on above criteria
+  # changing order based on above criteria
   sim_mod <- sim
   sim_mod$TE <- sim_mod$TE[ord]
   sim_mod$TS <- sim_mod$TS[ord]
@@ -256,9 +255,9 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
            lty = 2, lwd=1, col="gray50")
   
   # adding fossils
-  #if fossils are inputed:
+  # if fossils are inputed:
   if (!(is.null(fossils))) { 
-    #if they are time points (i.e. perfect sampling)
+    # if they are time points (i.e. perfect sampling)
     if ("SampT" %in% colnames(fossils)) { 
       ids <- as.numeric(gsub("t", '', fossils$Species)) #extracts number in ID
       points(x = fossils$SampT,  #plot points accourdingly
@@ -266,14 +265,14 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
                which(ord == x))), col = "red", pch = 16)
     } else if("MaxT" %in% colnames(fossils) & 
               "MinT" %in% colnames(fossils)) {
-      #if fossils are inputted as bins:
-      #extracts number in ID
+      # if fossils are inputted as ranges,
+      # extracts number in ID
       ids = as.numeric(gsub("t", '', fossils$Species)) 
       
-      #adds a small jittering (i.e. noise) to the y location of eahc point
+      # add a small jittering (i.e. noise) to the y location of each point
       y_jittered <- jitter_foo(unlist(lapply(ids, function(x) 
                                                   which(ord == x)))) 
-      #plot semi-transparent bars with a jitter, 
+      # plot semi-transparent bars with a jitter, 
       segments(x1 = fossils$MaxT, x0 = fossils$MinT, 
                y1 = y_jittered, y0 = y_jittered, 
                col = makeTransparent("red", 100), lwd = 3) 

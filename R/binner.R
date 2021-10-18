@@ -5,13 +5,18 @@
 #'
 #' @param x The vector containing occurrence times for one given species.
 #'
-#' @param bins A vector of time intervals corresponding to geological time ranges.
+#' @param bins A vector of time intervals corresponding to geological time 
+#' ranges.
 #'
-#' @return A vector of occurrence counts for each interval, sorted from furthest to closests to zero.
+#' @return A vector of occurrence counts for each interval, sorted from 
+#' furthest to closest to zero.
 #'
 #' @author Matheus Januario and Bruno do Rosario Petrucci
 #'
-#' @details Convention is, for each bin, to include all occurrences exactly in the boundary furtherst from zero and exclude bins exactly in the boundary closest to zero. Then, in the bin closest to zero (i.e., the "last", or "most recent" bin), include all occurrence on each of the two boundaries.
+#' @details The convention is, for each bin, to include all occurrences exactly
+#' in the boundary furthest from zero and exclude bins exactly in the boundary
+#' closest to zero. Then, in the bin closest to zero (i.e., the "last", or 
+#' "most recent" bin), include all occurrence on each of the two boundaries.
 #'
 #' @examples
 #'
@@ -44,8 +49,14 @@
 #' ###
 #' # let us try with a real simulated species fossil record
 #' 
+#' # set seed
+#' set.seed(1)
+#' 
 #' # run the simulation
 #' sim <- bd.sim(1, lambda = 0.1, mu = 0.05, tMax = 15)
+#' 
+#' # set seed
+#' 
 #' 
 #' # sample it
 #' sampled <- sample.species(sim = sim, rho = 1, tMax = 15, S = 1)
@@ -80,13 +91,13 @@ binner <- function(x, bins) {
   x <- sort(x, decreasing = TRUE)
   
   # for each bin (except last)
-  for (i in 1:(length(bins)-1)) {
+  for (i in 1:(length(bins) - 1)) {
     # get the occurrences between this bin and the previous
-    res <- c(res, sum(x <= bins[i] & x > bins[i+1]))
+    res <- c(res, sum(x <= bins[i] & x > bins[i + 1]))
   }
   
-  #adding bins exactly at the smaller bin boundary
-  res[length(res)]=res[length(res)] + sum(x==bins[length(bins)])
+  # add bins exactly at the smaller bin boundary
+  res[length(res)] <- res[length(res)] + sum(x == bins[length(bins)])
   
   return(res)
 }

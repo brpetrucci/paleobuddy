@@ -7,16 +7,24 @@
 binner(x, bins)
 }
 \arguments{
-\item{x}{The vector containing occurrence times for a given species.}
+\item{x}{The vector containing occurrence times for one given species.}
 
-\item{bins}{A vector of time intervals corresponding to geological time ranges.}
+\item{bins}{A vector of time intervals corresponding to geological time 
+ranges.}
 }
 \value{
-A vector of occurrence counts for each interval.
+A vector of occurrence counts for each interval, sorted from 
+furthest to closest to zero.
 }
 \description{
 Given a vector of fossil occurrences and time bins to represent geological
 ranges, returns the occurrence counts in each bin.
+}
+\details{
+The convention is, for each bin, to include all occurrences exactly
+in the boundary furthest from zero and exclude bins exactly in the boundary
+closest to zero. Then, in the bin closest to zero (i.e., the "last", or 
+"most recent" bin), include all occurrence on each of the two boundaries.
 }
 \examples{
 
@@ -49,29 +57,17 @@ binnedSamp
 ###
 # let us try with a real simulated species fossil record
 
+# set seed
+set.seed(1)
+
 # run the simulation
 sim <- bd.sim(1, lambda = 0.1, mu = 0.05, tMax = 15)
 
+# set seed
+
+
 # sample it
 sampled <- sample.species(sim = sim, rho = 1, tMax = 15, S = 1)
-
-# bins vector
-bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
-
-# result
-binnedsample <- binner(sampled, bins)
-binnedsample
-
-### 
-# just one more
-
-# run the simulation
-sim <- bd.sim(1, lambda = function(t) {
-  return(0.05 + 0.005*t)
-}, mu = 0.05, tMax = 20)
-
-# sample it
-sampled <- sample.species(sim = sim, rho = 1, tMax = 20, S = 1)
 
 # bins vector
 bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
