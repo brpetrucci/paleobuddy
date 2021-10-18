@@ -3,7 +3,7 @@
 #' Given a vector of fossil occurrences and time bins to represent geological
 #' ranges, returns the occurrence counts in each bin.
 #'
-#' @param x The vector containing occurrence times for a given species.
+#' @param x The vector containing occurrence times for one given species.
 #'
 #' @param bins A vector of time intervals corresponding to geological time ranges.
 #'
