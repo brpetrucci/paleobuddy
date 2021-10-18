@@ -3,13 +3,13 @@
 #' Generates a phylogeny from a \code{sim} object containing speciation and 
 #' extinction times, parent and status information (see \code{?sim}). Returns a
 #' \code{phylo} object containing information on the phylogeny, following an 
-#' "evolutionary Hennigian" (sensu Ezard et al 2011) format. Takes an optional
-#' argument encoding fossil occurrences to return a Sampled Ancestor tree (see
-#' references), with fossil occurrences as tips with branch length \code{0}.
-#' Returns \code{NA} and sends a warning if the simulation has only one lineage or
-#' if more than one species has \code{NA} as parent (i.e. there is no single 
-#' common ancestor in the simulation). In the latter case, please use 
-#' \code{find.lineages} first. 
+#' "evolutionary Hennigian" (sensu Ezard et al 2011) format (i.e., a bifurcating
+#' tree). Takes an optional argument encoding fossil occurrences to return a 
+#' Sampled Ancestor tree (see references), with fossil occurrences as tips with
+#' branch length \code{0}. Returns \code{NA} and sends a warning if the 
+#' simulation has only one lineage or if more than one species has \code{NA} 
+#' as parent (i.e. there is no single common ancestor in the simulation).
+#' In the latter case, please use \code{find.lineages} first. 
 #'
 #' @param sim A \code{sim} object, containing extinction times, speciation times,
 #' parent, and status information for each species in the simulation. See 
@@ -49,9 +49,9 @@
 #' data was supplied, the tree will include fossil occurrences as tips with branch
 #' length \code{0}, bifurcating at its sampling time from the corresponding
 #' species' edge (i.e. a sampled ancestor tree, sensu Heath et al, (2014)). Note
-#' that to obtain a true SA tree, one must perform the last step of deleting tips
-#' that are not either extant or fossil occurrences (i.e. the tips at true time of
-#' extinction).
+#' that to obtain a true sampled ancestor (SA) tree, one must perform the last 
+#' step of deleting tips that are not either extant or fossil occurrences (i.e. 
+#' the tips at true time of extinction).
 #' 
 #' Note this package does not depend on APE (Paradis et al, 2004) since it is 
 #' never used inside its functions, but it is suggested since one might want to
@@ -145,7 +145,9 @@
 #' 
 #' # plot them
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   par(mfrow = c(1, 2))
+#'   par(mfrow = c(1, 3))
+#' 
+#'   draw.sim(sim, fossils)
 #' 
 #'   ape::plot.phylo(phy, main = "Phylogenetic tree")
 #'   ape::axisPhylo()
