@@ -78,6 +78,9 @@
 #' draw.sim(sim, fossils = fossils, sortBy = "PAR")
 #' # here we cluster species with their daughters
 #' 
+#' draw.sim(sim, fossils = fossils, sortBy = "TE")
+#' # here by their extinction times
+#' 
 #' ###
 #' # try with fossil ranges
 #' 
@@ -111,7 +114,7 @@
 #' draw.sim(sim, fossils = fossils, sortBy = "PAR")
 #' 
 #' # adding the bounds of the simulated bins
-#' abline(v = bins, lty = 2, col = "red", lwd = 0.5)
+#' abline(v = bins, lty = 2, col = "blue", lwd = 0.5)
 #' 
 #' ###
 #' # we can control how to sort displayed species exactly
