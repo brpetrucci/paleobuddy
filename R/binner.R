@@ -7,9 +7,11 @@
 #'
 #' @param bins A vector of time intervals corresponding to geological time ranges.
 #'
-#' @return A vector of occurrence counts for each interval.
+#' @return A vector of occurrence counts for each interval, sorted from furthest to closests to zero.
 #'
 #' @author Matheus Januario and Bruno do Rosario Petrucci
+#'
+#' @details Convention is, for each bin, to include all occurrences exactly in the boundary furtherst from zero and exclude bins exactly in the boundary closest to zero. Then, in the bin closest to zero (i.e., the "last", or "most recent" bin), include all occurrence on each of the two boundaries.
 #'
 #' @examples
 #'
@@ -55,24 +57,6 @@
 #' binnedsample <- binner(sampled, bins)
 #' binnedsample
 #' 
-#' ### 
-#' # just one more
-#' 
-#' # run the simulation
-#' sim <- bd.sim(1, lambda = function(t) {
-#'   return(0.05 + 0.005*t)
-#' }, mu = 0.05, tMax = 20)
-#' 
-#' # sample it
-#' sampled <- sample.species(sim = sim, rho = 1, tMax = 20, S = 1)
-#' 
-#' # bins vector
-#' bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
-#' 
-#' # result
-#' binnedsample <- binner(sampled, bins)
-#' binnedsample
-#'
 #' @name binner
 #' @rdname binner
 #' @export
@@ -90,16 +74,20 @@ binner <- function(x, bins) {
   
   # create result
   res <- vector()
-
+  
   # in case time was passed wrong
   bins <- sort(bins, decreasing = TRUE)
   x <- sort(x, decreasing = TRUE)
-
-  # for each bin
-  for (i in 2:length(bins)) {
+  
+  # for each bin (except last)
+  for (i in 1:(length(bins)-1)) {
     # get the occurrences between this bin and the previous
-    res <- c(res, sum(x < bins[i - 1] & x >= bins[i]))
+    res <- c(res, sum(x <= bins[i] & x > bins[i+1]))
   }
+  
+  #adding bins exactly at the smaller bin boundary
+  res[length(res)]=res[length(res)] + sum(x==bins[length(bins)])
   
   return(res)
 }
+
