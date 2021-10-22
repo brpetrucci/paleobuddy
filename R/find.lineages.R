@@ -1,25 +1,29 @@
 #' Separate a paleobuddy simulation into monophyletic clades
 #'
 #' Separates a \code{sim} object into \code{sim} objects each with a mother
-#' species and its descendants. Returns by default the list of \code{sim} objects
+#' species and its descendants. If argument "S" is not used, it 
+#' returns by default the list of \code{sim} objects
 #' descended from each species with an \code{NA} parent in the original input 
-#' (meaning species alive at the beginning of the simulation). Allows for the user
-#' to input a vector of species to be the mother of each resulting member of the 
-#' returning list instead. Returns for each clade a vector with the original 
+#' (meaning species alive at the beginning of the simulation, \code{paleobuddy}
+#' temrinology). Argument "S" allows user to input a vector of species whose 
+#' daughters + itself will be the clade that makes the returned "sim" 
+#' object (i.e., the subclade formed by "s" + daughters).
+#' Returns for each clade a vector with the original 
 #' identity of member species as well.
 #'
 #' @inheritParams make.phylo
 #'
 #' @param S A vector of species in \code{sim}. If not supplied, \code{S} will be
 #' the starting species in the simulation (i.e. those for which the parent is
-#' \code{NA}).
+#' \code{NA} - please note that if only one species has \code{NA} as parent,
+#' function will return the same object).
 #'
 #' @author Bruno Petrucci and Matheus Januario.
 #'
 #' @return A \code{list} object with (named) \code{sim} objects corresponding to 
 #' the clades descended from species in \code{S}. For each clade, an extra vector 
 #' \code{LIN} is included so the user can identify the order of species in the
-#' return with the order of species in the original simulation.
+#' returned \code{sim} object with the order of species in the original simulation.
 #'
 #' @examples
 #'
