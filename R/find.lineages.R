@@ -83,6 +83,7 @@
 #' 
 #' ###
 #' # it works with any number of clades, of course
+#' set.seed(8)
 #' sim <- bd.sim(n0 = 5, lambda = 0.1, mu = 0.08, tMax = 10, nFinal = c(20, Inf))
 #' 
 #' # using the functions
@@ -138,6 +139,9 @@
 #' 
 #' ###
 #' # including one clade
+#' # To show the behavior of the function, we will not use the "S" argument.
+#' As there is only one lineage whose parent is "NA", find.linages() will 
+#' return the same phylogeny
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.08, tMax = 10, nFinal = c(5, Inf))
 #' 
 #' par(mfrow = c(1, 2))
@@ -151,30 +155,37 @@
 #'   ape::axisPhylo()
 #' }
 #'
-#' ###
+###
 #' # now let us check that when S does not contain a starting species, we still
 #' # get correct subsets of the simulation
-#' sim <- bd.sim(1, 0.1, 0.05, 40, nFinal = c(5, Inf))
+#' set.seed(8)
+#' sim <- bd.sim(1, 0.1, 0.05, 20, nFinal = c(5, Inf))
 #' 
 #' # making sure we have a couple of clades to explore
 #' while ((length(which(sim$PAR == 1)) < 3) | (length(which(sim$PAR == 2)) < 3) |
 #'        (length(which(sim$PAR == 3)) < 3)) {
-#'   sim <- bd.sim(1, 0.1, 0.05, 40, nFinal = c(5, Inf))
+#'   sim <- bd.sim(1, 0.1, 0.05, 20, nFinal = c(5, Inf))
 #' }
 #' 
+#' par(mfrow=c(2,2))
 #' if (requireNamespace("ape", quietly = TRUE)) {
 #'   # first we plot the clade started by 1
 #'   ape::plot.phylo(make.phylo(sim), main="original")
+#'   ape::axisPhylo()
 #'   
 #'   # this should look the same
 #'   ape::plot.phylo(make.phylo(find.lineages(sim)[[1]]$sim), 
-#'                  main="after find.lineages()")
+#'                   main="after find.lineages()")
+#'   ape::axisPhylo()
 #'   
 #'   # and these should be part of the previous phylogenies
 #'   ape::plot.phylo(make.phylo(find.lineages(sim, c(2, 3))$clade_2$sim),
-#'                   main = "Clade_2")
+#'                   main = "Daughters of sp 2")
+#'   ape::axisPhylo()
+#'   
 #'   ape::plot.phylo(make.phylo(find.lineages(sim, c(2, 3))$clade_3$sim),
-#'                   main = "Clade_3")
+#'                   main = "Daughters of sp 3")
+#'   ape::axisPhylo()
 #' }
 #' 
 #' @name find.lineages
