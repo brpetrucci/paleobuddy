@@ -76,10 +76,11 @@
 #' # we can order the vertical drawing of species based on
 #' # any element of sim
 #' draw.sim(sim, fossils = fossils, sortBy = "PAR")
-#' # here we cluster species with their daughters
+#' # here we cluster lineages with their daughters by
+#' # sorting them by the "PAR" list of the sim object
 #' 
 #' draw.sim(sim, fossils = fossils, sortBy = "TE")
-#' # here by their extinction times
+#' # here we sort lineages by their extinction times
 #' 
 #' ###
 #' # try with fossil ranges
