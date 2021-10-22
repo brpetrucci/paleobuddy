@@ -136,7 +136,8 @@
 #' # simulate fossil sampling
 #' fossils <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
 #' 
-#' # draw it with random sorting
+#' # draw it with random sorting (in pratice this could be a trait
+#' #value, for instance)
 #' draw.sim(sim, fossils = fossils, sortBy = sample(1:length(sim$TS)))
 #' 
 #' @importFrom grDevices col2rgb rgb
