@@ -27,6 +27,7 @@
 #' 
 #' ###
 #' # first, let us try a simulation with 3 clades,
+#' set.seed(4)
 #' sim <- bd.sim(n0 = 3, lambda = 0.1, mu = 0.1, tMax = 10, nFinal = c(20, Inf))
 #' 
 #' # using the functions
