@@ -13,7 +13,7 @@ See \code{?sim}.}
 
 \item{fossils}{A \code{data.frame} containing the fossil occurrences of 
 each lineage, e.g. as returned by the \code{sample.clade} function. The
-format of this argument will define the way fossils are drawn, see below.}
+format of this argument will define the way fossils are drawn (see below).}
 
 \item{sortBy}{A single character or integer vector indicating how lineages 
 should be sorted in the plot. If it is a string (see example 3), it 
@@ -83,7 +83,11 @@ draw.sim(sim, fossils = fossils)
 # we can order the vertical drawing of species based on
 # any element of sim
 draw.sim(sim, fossils = fossils, sortBy = "PAR")
-# here we cluster species with their daughters
+# here we cluster lineages with their daughters by
+# sorting them by the "PAR" list of the sim object
+
+draw.sim(sim, fossils = fossils, sortBy = "TE")
+# here we sort lineages by their extinction times
 
 ###
 # try with fossil ranges
@@ -108,7 +112,7 @@ set.seed(20)
 bins <- c(tMax, 0, runif(n = rpois(1, lambda = 6), min = 0, max = tMax))
 
 # set seed
-
+set.seed(1)
 
 # simulate fossil sampling
 fossils <- sample.clade(sim = sim, rho = 2, tMax = tMax, 
@@ -118,7 +122,7 @@ fossils <- sample.clade(sim = sim, rho = 2, tMax = tMax,
 draw.sim(sim, fossils = fossils, sortBy = "PAR")
 
 # adding the bounds of the simulated bins
-abline(v = bins, lty = 2, col = "red", lwd = 0.5)
+abline(v = bins, lty = 2, col = "blue", lwd = 0.5)
 
 ###
 # we can control how to sort displayed species exactly
@@ -139,7 +143,8 @@ set.seed(1)
 # simulate fossil sampling
 fossils <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
 
-# draw it with random sorting
+# draw it with random sorting (in pratice this could be a trait
+# value, for instance)
 draw.sim(sim, fossils = fossils, sortBy = sample(1:length(sim$TS)))
 
 }

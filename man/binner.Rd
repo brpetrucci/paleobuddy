@@ -21,10 +21,11 @@ Given a vector of fossil occurrences and time bins to represent geological
 ranges, returns the occurrence counts in each bin.
 }
 \details{
-The convention is, for each bin, to include all occurrences exactly
-in the boundary furthest from zero and exclude bins exactly in the boundary
-closest to zero. Then, in the bin closest to zero (i.e., the "last", or 
-"most recent" bin), include all occurrence on each of the two boundaries.
+The convention for couting occurrences inside a bin is to count
+all occurrences exactly in the boundary furthest from zero and exclude
+bins exactly in the boundary closest to zero. Then, in the bin closest 
+to zero (i.e., the "last", or "most recent" bin), include all occurrence 
+on each of the two boundaries.
 }
 \examples{
 

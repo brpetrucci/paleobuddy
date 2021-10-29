@@ -144,9 +144,10 @@
 #' ###
 #' # including one clade
 #' # To show the behavior of the function, we will not use the "S" argument.
-#' As there is only one lineage whose parent is "NA", find.linages() will 
-#' return the same phylogeny
-#' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.08, tMax = 10, nFinal = c(5, Inf))
+#' # as there is only one lineage whose parent is "NA", find.linages() will 
+#' # return the same phylogeny
+#' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.08, tMax = 10, 
+#'               nFinal = c(5, Inf))
 #' 
 #' par(mfrow = c(1, 2))
 #' 

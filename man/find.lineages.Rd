@@ -13,21 +13,25 @@ parent, and status information for each species in the simulation. See
 
 \item{S}{A vector of species in \code{sim}. If not supplied, \code{S} will be
 the starting species in the simulation (i.e. those for which the parent is
-\code{NA}).}
+\code{NA} - please note that if only one species has \code{NA} as parent,
+function will return the same object).}
 }
 \value{
 A \code{list} object with (named) \code{sim} objects corresponding to 
 the clades descended from species in \code{S}. For each clade, an extra vector 
 \code{LIN} is included so the user can identify the order of species in the
-return with the order of species in the original simulation.
+returned \code{sim} object with the order of species in the original simulation.
 }
 \description{
 Separates a \code{sim} object into \code{sim} objects each with a mother
-species and its descendants. Returns by default the list of \code{sim} objects
+species and its descendants. If argument "S" is not used, it 
+returns by default the list of \code{sim} objects
 descended from each species with an \code{NA} parent in the original input 
-(meaning species alive at the beginning of the simulation). Allows for the user
-to input a vector of species to be the mother of each resulting member of the 
-returning list instead. Returns for each clade a vector with the original 
+(meaning species alive at the beginning of the simulation, \code{paleobuddy}
+temrinology). Argument "S" allows user to input a vector of species whose 
+daughters + itself will be the clade that makes the returned "sim" 
+object (i.e., the subclade formed by "s" + daughters).
+Returns for each clade a vector with the original 
 identity of member species as well.
 }
 \examples{
@@ -36,6 +40,7 @@ identity of member species as well.
 
 ###
 # first, let us try a simulation with 3 clades,
+set.seed(4)
 sim <- bd.sim(n0 = 3, lambda = 0.1, mu = 0.1, tMax = 10, nFinal = c(20, Inf))
 
 # using the functions
@@ -91,6 +96,7 @@ for (i in 1:length(clades)) {
 
 ###
 # it works with any number of clades, of course
+set.seed(8)
 sim <- bd.sim(n0 = 5, lambda = 0.1, mu = 0.08, tMax = 10, nFinal = c(20, Inf))
 
 # using the functions
@@ -146,7 +152,11 @@ for (i in 1:length(clades)) {
 
 ###
 # including one clade
-sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.08, tMax = 10, nFinal = c(5, Inf))
+# To show the behavior of the function, we will not use the "S" argument.
+# as there is only one lineage whose parent is "NA", find.linages() will 
+# return the same phylogeny
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.08, tMax = 10, 
+              nFinal = c(5, Inf))
 
 par(mfrow = c(1, 2))
 
@@ -159,30 +169,36 @@ if (requireNamespace("ape", quietly = TRUE)) {
   ape::axisPhylo()
 }
 
-###
 # now let us check that when S does not contain a starting species, we still
 # get correct subsets of the simulation
-sim <- bd.sim(1, 0.1, 0.05, 40, nFinal = c(5, Inf))
+set.seed(8)
+sim <- bd.sim(1, 0.1, 0.05, 20, nFinal = c(5, Inf))
 
 # making sure we have a couple of clades to explore
 while ((length(which(sim$PAR == 1)) < 3) | (length(which(sim$PAR == 2)) < 3) |
        (length(which(sim$PAR == 3)) < 3)) {
-  sim <- bd.sim(1, 0.1, 0.05, 40, nFinal = c(5, Inf))
+  sim <- bd.sim(1, 0.1, 0.05, 20, nFinal = c(5, Inf))
 }
 
+par(mfrow=c(2,2))
 if (requireNamespace("ape", quietly = TRUE)) {
   # first we plot the clade started by 1
   ape::plot.phylo(make.phylo(sim), main="original")
+  ape::axisPhylo()
   
   # this should look the same
   ape::plot.phylo(make.phylo(find.lineages(sim)[[1]]$sim), 
-                 main="after find.lineages()")
+                  main="after find.lineages()")
+  ape::axisPhylo()
   
   # and these should be part of the previous phylogenies
   ape::plot.phylo(make.phylo(find.lineages(sim, c(2, 3))$clade_2$sim),
-                  main = "Clade_2")
+                  main = "Daughters of sp 2")
+  ape::axisPhylo()
+  
   ape::plot.phylo(make.phylo(find.lineages(sim, c(2, 3))$clade_3$sim),
-                  main = "Clade_3")
+                  main = "Daughters of sp 3")
+  ape::axisPhylo()
 }
 
 }

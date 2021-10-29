@@ -10,7 +10,7 @@
 #' 
 #' @param fossils A \code{data.frame} containing the fossil occurrences of 
 #' each lineage, e.g. as returned by the \code{sample.clade} function. The
-#' format of this argument will define the way fossils are drawn, see below.
+#' format of this argument will define the way fossils are drawn (see below).
 #' 
 #' @param sortBy A single character or integer vector indicating how lineages 
 #' should be sorted in the plot. If it is a string (see example 3), it 
@@ -105,7 +105,7 @@
 #' bins <- c(tMax, 0, runif(n = rpois(1, lambda = 6), min = 0, max = tMax))
 #' 
 #' # set seed
-#' 
+#' set.seed(1)
 #' 
 #' # simulate fossil sampling
 #' fossils <- sample.clade(sim = sim, rho = 2, tMax = tMax, 
@@ -137,7 +137,7 @@
 #' fossils <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
 #' 
 #' # draw it with random sorting (in pratice this could be a trait
-#' #value, for instance)
+#' # value, for instance)
 #' draw.sim(sim, fossils = fossils, sortBy = sample(1:length(sim$TS)))
 #' 
 #' @importFrom grDevices col2rgb rgb
@@ -146,7 +146,6 @@
 #' @name draw.sim
 #' @rdname draw.sim
 #' @export
-#' 
 
 draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
   # some error checking
