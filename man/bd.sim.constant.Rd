@@ -37,7 +37,9 @@ acceptable number of species at the end of the simulation. Default value is
 \code{c(0, Inf)}, so that any number of species (including zero, the
 extinction of the whole clade) is accepted. If different from default value,
 simulation will restart until the number of total species at \code{tMax}
-is in the \code{nFinal} interval.}
+is in the \code{nFinal} interval. Note that \code{nFinal} must be a sensible
+vector. The function will error if its maximum is lower than \code{1}, or if
+its length is not \code{2}.}
 
 \item{nExtant}{A \code{vector} of length \code{2}, indicating an interval of
 acceptable number of extant species at the end of the simulation. Equal to

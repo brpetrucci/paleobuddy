@@ -541,13 +541,28 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
   if (n0 <= 0) {
     stop("initial number of species must be positive")
   }
-  
-  # check nFinal's length
-  if (length(nFinal) != 2) {
+  # check nFinal is sensible - two numbers, maximum >=1
+  if ((length(nFinal) != 2) || (typeof(nFinal) != "double")) {
     stop("nFinal must be a vector with a minimum and maximum number 
          of species")
+  } else if (max(nFinal) < 1) {
+    stop("nFinal must have a maximum number of species greater than 0")
+  } else {
+    # if everything is good, make sure it's sorted
+    nFinal <- sort(nFinal)
   }
   
+  # similarly for nExtant
+  if ((length(nExtant) != 2) || (typeof(nExtant) != "double")) {
+    stop("nExtant must be a vector with a minimum and maximum number 
+         of species")
+  } else if (max(nExtant) < 0) {
+    stop("nExtant must have a maximum number of species greater 
+         than or equal to 0")
+  } else {
+    # if everything is good, make sure it's sorted
+    nExtant <- sort(nExtant)
+  }
   # if shape is not null, make scale a function to facilitate checking
   if (!is.null(lShape)) {
     message("since lShape is not null, lambda will be a Weibull scale and
