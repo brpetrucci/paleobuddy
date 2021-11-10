@@ -13,16 +13,17 @@ It can be a
 \describe{
 \item{A number}{For constant birth-death rates.}
 
-\item{A function of time}{For rates that vary with time. Note that this can be
-any function of time.} 
+\item{A function of time}{For rates that vary with time. Note that this can 
+be any function of time.} 
 
-\item{A function of time and an environmental variable}{For rates varying with
-time and an environmental variable, such as temperature. Note that supplying a
-function on more than one variable without an accompanying \code{envRate} will
-result in an error.}
+\item{A function of time and an environmental variable}{For rates varying 
+with time and an environmental variable, such as temperature. Note that 
+supplying a function on more than one variable without an accompanying 
+\code{envRate} will result in an error.}
 
 \item{A numeric vector}{To create step function rates. Note this must be
- accompanied by a corresponding vector of shifts \code{rateShifts}.}}}
+ accompanied by a corresponding vector of rate shift times, 
+ \code{rateShifts}.}}}
 
 \item{t}{A time vector over which to consider the distribution.}
 
@@ -37,26 +38,33 @@ extinction is \code{0}).}
 \item{tMax}{Ending time of simulation, in million years after the clade's 
 origin. Needed to ensure \code{rateShifts} runs the correct way.}
 
-\item{envRate}{A \code{data.frame} representing the variation of an 
-environmental variable (e.g. CO2, temperature, available niches, etc) with 
-time. The first column of this \code{data.frame} must be time, and the second 
-column must be the values of the variable. The function will return an error if
-supplying \code{envRate} without \code{rate} being a function of two variables.
-Note \code{paleobuddy} has two environmental data frames, \code{temp} and 
-\code{co2}. One can check \code{RPANDA} for more examples.
+\item{envRate}{A \code{data.frame} representing a time-series, usually an 
+environmental variable (e.g. CO2, temperature, etc) varying with time. The 
+first column of this \code{data.frame} must be time, and the second column 
+must be the values of the variable. The function will return an error if 
+the user supplies \code{envRate} without \code{rate} being a function of two
+variables. \code{paleobuddy} has two environmental data frames, \code{temp}
+and \code{co2}. One can check \code{RPANDA} for more examples.
+
+Note that, since simulation functions are run in forward-time (i.e. with 
+\code{0} being the origin time of the simulation), the time column of
+\code{envRate} is assumed to do so as well, so that the row corresponding to
+\code{t = 0} is assumed to be the value of the time-series when the 
+simulation starts, and \code{t = tMax} is assumed to be its value when the
+simulation ends (the present).
 
 Acknowledgements: The strategy to transform a function of \code{t} and 
-\code{env} into a function of \code{t} only using \code{envRate} was adapted 
-from RPANDA.}
+\code{envRate} into a function of \code{t} only using \code{envRate} was 
+adapted from \code{RPANDA}.}
 
-\item{rateShifts}{A vector indicating the time placement of rate shifts in a 
-step function. The first element must be the first time point for the 
-simulation. This may be \code{0} or \code{tMax}. Since functions in paleobuddy 
-run from \code{0} to \code{tMax}, if \code{rateShifts} runs from past to 
-present (\code{rateShifts[2] < rateShifts[1]}), we take 
+\item{rateShifts}{A vector indicating the time of rate shifts in a step 
+function. The first element must be the first or last time point for the 
+simulation, i.e. \code{0} or \code{tMax}. Since functions in paleobuddy run
+from \code{0} to \code{tMax}, if \code{rateShifts} runs from past to present
+(meaning \code{rateShifts[2] < rateShifts[1]}), we take 
 \code{tMax - rateShifts} as the shifts vector. Note that supplying 
-\code{rateShifts} when \code{rate} is not a numeric vector of the same length 
-will result in an error.}
+\code{rateShifts} when \code{rate} is not a numeric vector of the same 
+length will result in an error.}
 }
 \value{
 A vector of the expected number of species per time point supplied
