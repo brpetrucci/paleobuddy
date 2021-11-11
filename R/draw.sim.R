@@ -245,8 +245,8 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
        x = sim_mod$TE - ((max(sim$TS) - min(sim$TE)) * 0.035), 
        labels = paste0("t", 
                        sprintf(paste0("%0", 
-                                      round(length(sim$TE) / 10, 
-                                            digits = 0), "d"), ord)))
+                                      round(log(length(sim$TE), 10), 
+                                            digits = 0) + 1, "d"), ord)))
   
   # adding budding events (i.e. speciations)
   luca <- which(is.na(sim_mod$PAR))
