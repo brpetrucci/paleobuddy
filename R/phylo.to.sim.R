@@ -1,29 +1,29 @@
 #' Converting a phylogeny in a paleobuddy object
 #'
-#' Generates a \code{sim} object using a \code{phylo} object and some additional 
-#' information (depending on other inputs). It is the inverse of the 
-#' \code{make.phylo} function. Input is (1) a phylogeny, following an "evolutionary
-#' Hennigian" (sensu Ezard et al 2011) format (i.e., a fully bidurcated phylogeny),
-#' (2) information on the "mother 
-#' lineage" of each tip in the phylogeny (see "mothers" section in "details" 
-#' below), (3) the status ("extant" or "extinct") of each lineage, (4) the stem 
-#' age (or age of origination of the clade), and (5) the "stem length" (or time 
-#' interval between the stem age and the appearance of the first "daughter"). The 
-#' user can also choose if the event dating should be done from root to tips or 
-#' from tips-to-root (this choice is important - see "dating" section in "details"
-#' below. The function returns a \code{sim} object (which contains speciation and
-#' extinction times, parent, and status information). The function does not accept
-#' more than one species having \code{NA} as parent (which is interpreted as if 
-#' there were no single common ancestor in the phylogeny). 
+#' Generates a \code{sim} object using a \code{phylo} object and some 
+#' additional information (depending on other arguments). It is the inverse of 
+#' the \code{make.phylo} function. Input is (1) a phylogeny, following an 
+#' evolutionary Hennigian (sensu Ezard et al 2011) format (i.e., a fully 
+#' bifurcating phylogeny), (2) information on the "mother lineage" of each tip 
+#' in the phylogeny, (3) the status ("extant" or "extinct") of each lineage, 
+#' (4) the stem age (or age of origination of the clade), and (5) the stem 
+#' length (or time interval between the stem age and the first speciation 
+#' event). The user can also choose if the event dating should be done from 
+#' root to tips or from tips-to-root. The function returns a \code{sim} object 
+#' (see \code{?sim}). The function does not accept more than one species having
+#' \code{NA} as parent (which is interpreted as if there were no single common
+#' ancestor in the phylogeny). In that case, use \code{find.lineages} first. 
+#' 
+#' See Details below for more information on each argument.
 #'
-#' @param phy A \code{phylo} object, which may contain only extant or extant and
-#' extinct lineages.
+#' @param phy A \code{phylo} object, which may contain only extant or extant 
+#' and extinct lineages.
 #'
 #' @param mothers Vector containing the mother of each tip in the phylogeny. 
-#' First species' mother should be \code{NA}. See "mothers" section in "details" 
-#' below.
+#' First species' mother should be \code{NA}. See details below.
 #' 
-#' @param extant Logical vetor indicating which lineages are extant and extinct.
+#' @param extant Logical vetor indicating which lineages are extant and 
+#' extinct.
 #' 
 #' @param dateFromPresent Logical vector indicating if TS/TE events should be 
 #' dated from present-to-root (\code{TRUE}, default value) of from root-to- 

@@ -148,7 +148,7 @@ draw.sim(sim)
 # rho is the fossil sampling rate, see ?sample.clade
 samp <- sample.clade(sim = sim, rho = 0.75, tMax = 10,
                      bins = seq(10, 0, -1))
-# note 7 out of the 23 species did not leave a fossil - we can in this way
+# note 7 out of the 31 species did not leave a fossil - we can in this way
 # simulate the incompleteness of the fossil record
 
 # we can draw fossil occurrences as well, and order by extinction time
@@ -156,7 +156,7 @@ draw.sim(sim, fossils = samp, sortBy = "TE")
 
 # take a look at the phylogeny
 if (requireNamespace("ape", quietly = TRUE)) {
-  ape::plot.phylo(phy, root.edge = TRUE)
+  ape::plot.phylo(make.phylo(sim), root.edge = TRUE)
   ape::axisPhylo()
 }
 

@@ -154,11 +154,14 @@
 #' if (requireNamespace("ape", quietly = TRUE)) {
 #'   par(mfrow = c(1, 3))
 #' 
+#'   # visualizing longevities and fossil occurrences
 #'   draw.sim(sim, fossils)
 #' 
+#'   # phylogeny
 #'   ape::plot.phylo(phy, main = "Phylogenetic tree")
 #'   ape::axisPhylo()
 #'   
+#'   # sampled ancestor tree
 #'   ape::plot.phylo(saTree, main = "Sampled Ancestor tree")
 #'   ape::axisPhylo()
 #' }

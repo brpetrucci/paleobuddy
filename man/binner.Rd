@@ -25,7 +25,8 @@ The convention for couting occurrences inside a bin is to count
 all occurrences exactly in the boundary furthest from zero and exclude
 bins exactly in the boundary closest to zero. Then, in the bin closest 
 to zero (i.e., the "last", or "most recent" bin), include all occurrence 
-on each of the two boundaries.
+on each of the two boundaries. So occurrences that fall on a boundary are
+placed on the most recent bin possible
 }
 \examples{
 
@@ -49,7 +50,7 @@ binnedSamp
 x <- c(6.7, 5.03, 4.2, 3.4, 1.2, 0.4)
 
 # bins vector
-bins <- c(7.2, 6.1, 5.6, 4.3, 3.2, sqrt(2), 1, 0)
+bins <- c(7.2, 6.7, 5.6, 4.3, 3.2, sqrt(2), 1, 0)
 
 # result
 binnedSamp <- binner(x, bins)
@@ -63,9 +64,6 @@ set.seed(1)
 
 # run the simulation
 sim <- bd.sim(1, lambda = 0.1, mu = 0.05, tMax = 15)
-
-# set seed
-
 
 # sample it
 sampled <- sample.species(sim = sim, rho = 1, tMax = 15, S = 1)

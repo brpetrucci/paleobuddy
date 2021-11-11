@@ -169,7 +169,7 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
     stop("sortBy should be a character or a vector of integers.")
   } else if (class(sortBy) == "integer" & length(sortBy) != length(sim$TE)) {
     
-    # if it is a vector of integers with the wrong length, error
+    # if it is a vector of integers, it must have the right length
     stop("sortBy must have the same length as elements of sim.")
   } else if((class(sortBy) == "numeric") & 
             !(all(1:length(sim$TE) %in% unique(sortBy)))) {
@@ -179,9 +179,9 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
          should have unique indices.")
   }
   
-  ## aux functions
+  # some auxiliary functions
     
-  # this function creates transparent colors form and alpha value + color name
+  # creates transparent colors from an alpha value and a color name
   makeTransparent <- function(someColor, alpha = 25) {
     newColor <- col2rgb(someColor)
     apply(newColor, 2, function(curcoldata) {
@@ -193,7 +193,7 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
       })
   }
   
-  # this function only jitters (i.e. adds a small noise) to the y-axis,
+  # jitters (i.e. adds a small noise) to the y-axis,
   # improving visualization when there are many fossil bins
   jitter_foo <- function(x){
     jit <- vector()
@@ -208,39 +208,44 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
     return(x + jit)
   }
   
-  # changing conventions of sim object:
+  # changing conventions of sim object
+  
+  # make NAs be 0
   sim$TE[is.na(sim$TE)] <- 0
   
-  # reordering sim object
+  # reorder sim object
+  
+  # if sortBy is a character
   if (is.character(sortBy)) {
-    if (sortBy %in% c("PAR")) {
-      test <- TRUE
-    } else {
-      test <- FALSE
-    }
+    # check if it is PAR
+    test <- sortBy %in% c("PAR")
     
+    # get order based on sortBy
     ord <- order(unlist(sim[sortBy]), decreasing = test)
   } else {
+    # otherwise, order is just sortBy itself
     ord <- sortBy
   }
   
-  # changing order based on above criteria
+  # change order based on above criteria
   sim_mod <- sim
   sim_mod$TE <- sim_mod$TE[ord]
   sim_mod$TS <- sim_mod$TS[ord]
   sim_mod$PAR <- sim_mod$PAR[ord]
   sim_mod$EXTANT <- sim_mod$EXTANT[ord]
   
-  # plotting
+  # plot
+  
+  # plot x-axis
   plot(NA, xlim = c(max(sim$TS), min(sim$TE) - 0.6), ylim = c(1, max(ord)), 
        yaxt = "n", ylab = "Simulated lineages", xlab = "Time (Mya)",
        frame.plot = FALSE)
   
-  # adding durations
+  # add durations
   segments(x0 = sim_mod$TS, x1 = sim_mod$TE, y1 = 1:length(sim_mod$TE),
            y0 = 1:length(sim_mod$TE), lwd = 4, col = "black")
   
-  # adding labels
+  # add labels
   text(y = 1:length(sim_mod$TE), 
        x = sim_mod$TE - ((max(sim$TS) - min(sim$TE)) * 0.035), 
        labels = paste0("t", 
@@ -248,35 +253,43 @@ draw.sim <- function(sim, fossils = NULL, sortBy = "TS"){
                                       round(log(length(sim$TE), 10), 
                                             digits = 0) + 1, "d"), ord)))
   
-  # adding budding events (i.e. speciations)
+  # add budding events (i.e. speciations)
+  
+  # find common ancestor
   luca <- which(is.na(sim_mod$PAR))
+  
+  # find which in the order is the luca
   aux_y <- unlist(lapply(sim$PAR, function(x) which(ord == x)[1]))
   
+  # add segments for budding events
   segments(x0 = sim_mod$TS[-luca], 
            x1 = sim_mod$TS[-luca], 
            y1 = (1:length(sim_mod$TE))[-luca], 
            y0 = (aux_y[ord])[-luca],
            lty = 2, lwd=1, col="gray50")
   
-  # adding fossils
-  # if fossils are inputed:
+  # add fossils
+  
+  # if fossils argument is supplied
   if (!(is.null(fossils))) { 
+    # extract species number
+    ids <- as.numeric(gsub("t", '', fossils$Species)) 
+    
     # if they are time points (i.e. perfect sampling)
     if ("SampT" %in% colnames(fossils)) { 
-      ids <- as.numeric(gsub("t", '', fossils$Species)) #extracts number in ID
-      points(x = fossils$SampT,  #plot points accourdingly
+      # add points for occurrences
+      points(x = fossils$SampT, 
              y =  unlist(lapply(ids, function(x) 
                which(ord == x))), col = "red", pch = 16)
+      
+      # if they are ranges
     } else if("MaxT" %in% colnames(fossils) & 
               "MinT" %in% colnames(fossils)) {
-      # if fossils are inputted as ranges,
-      # extracts number in ID
-      ids = as.numeric(gsub("t", '', fossils$Species)) 
-      
       # add a small jittering (i.e. noise) to the y location of each point
       y_jittered <- jitter_foo(unlist(lapply(ids, function(x) 
                                                   which(ord == x)))) 
-      # plot semi-transparent bars with a jitter, 
+      
+      # plot semi-transparent bars with a jitter
       segments(x1 = fossils$MaxT, x0 = fossils$MinT, 
                y1 = y_jittered, y0 = y_jittered, 
                col = makeTransparent("red", 100), lwd = 3) 
