@@ -17,7 +17,7 @@
 #' clade in the \code{sim} object, and therefore the function will return the 
 #' input.
 #'
-#' @author Bruno Petrucci and Matheus Januario.
+#' @author Bruno do Rosario Petrucci and Matheus Januario.
 #'
 #' @return A \code{list} object with (named) \code{sim} objects corresponding 
 #' to the clades descended from species in \code{S}. For each clade, an extra

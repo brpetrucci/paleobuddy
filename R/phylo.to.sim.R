@@ -25,28 +25,26 @@
 #' @param extant Logical vetor indicating which lineages are extant and 
 #' extinct.
 #' 
-#' @param dateFromPresent Logical vector indicating if TS/TE events should be 
-#' dated from present-to-root (\code{TRUE}, default value) of from root-to- 
-#' present. Please see "dating" section in "details", below. As it is impossible 
-#' to date "from present" without a living lineage, it is internally set 
-#' to \code{FALSE} and prints a message in the prompt if there are no extant
-#' species in the \code{extant} vector.
+#' @param dateFromPresent Logical vector indicating if speciation/extinction 
+#' events should be dated from present-to-root (\code{TRUE}, default value) or
+#' from root-to-present. As it is impossible to date "from present" without a
+#' living lineage, it is internally set to \code{FALSE} and prints a message in
+#' the prompt if there are no extant species.
 #' 
 #' @param stemAge Numeric vetor indicating the age, in absolute geological time
-#' (Mya), when the first lineage of the clade originated. It is not needed when
-#' \code{dateFromPresent} is \code{TRUE} and \code{stemLength} is provided, or 
-#' when \code{phy} has a \code{root.edge}. This argument is required if 
-#' \code{dateFromPresent} is \code{FALSE}.
+#' (million years ago), when the first lineage of the clade originated. It is 
+#' not needed when \code{dateFromPresent} is \code{TRUE} and \code{stemLength} 
+#' is provided, or when \code{phy} has a \code{root.edge}. This argument is 
+#' required if \code{dateFromPresent} is \code{FALSE}.
 #' 
 #' @param stemLength Numeric vector indicating the time difference between the 
-#' \code{stemAge} and the appearance of its first "daughter" lineage (that is, the
-#' second lineage to originate in the phylogeny). This argument is required if 
-#' \code{dateFromPresent} is \code{FALSE}, but users have no need to assign values
-#' in this parameter if \code{phy} have a \code{$root.edge}, which is taken by the
-#' function as the \code{stemLength} value.
+#' \code{stemAge} and the first speciation event of the group. This argument is
+#' required if \code{dateFromPresent} is \code{FALSE}, but users have no need 
+#' to assign values in this parameter if \code{phy} has a \code{$root.edge},
+#' which is taken by the function as the \code{stemLength} value.
 #' 
-#' @return A \code{sim} object. For details, see \code{?sim}. Items in the object 
-#' follow their tip assignment in the phylogeny.
+#' @return A \code{sim} object. For details, see \code{?sim}. Items in the 
+#' object follow their tip assignment in the phylogeny.
 #' 
 #' @details 
 #' 
@@ -54,47 +52,45 @@
 #' 
 #' The function needs the indication of a mother lineage for every tip in the 
 #' phylogeny but one (which is interpreted as the first known lineage in the 
-#' clade, which should have \code{NA} as the mother). This assignment might be 
-#' straightforward for simulations (as in the examples section below), but this 
-#' is evidently a non-trivial task for empirical phylogenies. As there are many 
-#' ways to assign impossible combinations of motherthood, the function does not 
-#' return any specific error message if the provided motherhood does not map to 
-#' possible lineages given the phylogeny. Instead, tests conducted by the 
-#' author showed the function tends to crash when an "impossible" motherhood is 
-#' assigned, but this is not guaranteed to happen because of the enormous universe 
-#' of "impossible" ways to assign motherhood has not allowed to test every 
-#' single possibility. However, if the function crashes when all lineages have 
-#' reasonable motherhood, users are invited to contact the author.
+#' clade, and should have \code{NA} as the mother). This assignment might be 
+#' straightforward for simulations (as in the examples section below), but is a
+#' non-trivial task for empirical phylogenies. As there are many ways to assign
+#' impossible combinations of motherthood, the function does not return any 
+#' specific error message if the provided motherhood does not map to possible 
+#' lineages given the phylogeny. Instead, the function tends to crash when an 
+#' "impossible" motherhood is assigned, but this is not guaranteed to happen 
+#' because the set of "impossible" ways to assign motherhood is vast, and 
+#' therefore has not allowed for a test of every possibility. If the function 
+#' crashes when all lineages have reasonable motherhood, users should submit an
+#' issue report at 
+#' \url{https://https://github.com/brpetrucci/paleobuddy/issues}.
 #' 
 #' Dating:
 #' 
-#' Phylogenies store, at least, therelative distances between speciation (and possibly 
+#' Phylogenies store the relative distances between speciation (and possibly 
 #' extinction) times of each lineage. However, to get absolute times for those 
 #' events (which are required to construct the output of this function), users 
-#' should provide a moment in absolute geological time to position the phylogeny. 
-#' This could be (1) the present, which is used as reference 
-#' in the case at least one lineage in the 
-#' phylogeny is extant (i.e., default behavior of the function), or
-#' (2) some time in the past, which is the \code{stemAge} 
-#' parameter. Those two possible dating methods are used by setting 
-#' \code{dateFromPresent} to \code{TRUE} or \code{FALSE}, respectively (see 
-#' \code{dateFromPresent} above). If users have extant lineages but in their phylogeny 
-#' but do not have a reasonable value for 
+#' should provide a moment in absolute geological time to position the 
+#' phylogeny. This could be (1) the present, which is used as reference 
+#' in the case at least one lineage in the phylogeny is extant (i.e., default 
+#' behavior of the function), or (2) some time in the past, which is the 
+#' \code{stemAge} parameter. Those two possible dating methods are used by 
+#' setting \code{dateFromPresent} to \code{TRUE} or \code{FALSE}. If users have
+#' extant lineages in their phylogeny but do not have a reasonable value for 
 #' \code{stemAge}, they are encouraged to use present-to-root dating 
 #' (\code{dateFromPresent = TRUE}), as in that case deviations in the value of 
-#' \code{stemLength} will only affect the speciation time of the first lineage of
-#' the clade. In other words, when \code{dateFromPresent} is set to 
-#' \code{FALSE}, eventual errors in \code{stemAge} or \code{stemLength} 
-#' will bias the absolute (but not the relative) dating of all nodes in 
-#' the phylogeny.
+#' \code{stemLength} will only affect the speciation time of the first lineage 
+#' of the clade. In other words, when \code{dateFromPresent} is set to 
+#' \code{FALSE}, user error in \code{stemAge} or \code{stemLength} will bias
+#' the absolute (but not the relative) dating of all nodes in the phylogeny.
 #' 
-#' @author Matheus Januario. 
+#' @author Matheus Januario.
 #' 
 #' @references
 #' 
 #' Ezard, T. H., Pearson, P. N., Aze, T., & Purvis, A. (2012). The meaning of 
-#' birth and death (in macroevolutionary birth-death models). Biology letters, 
-#' 8(1), 139-142.
+#' birth and death (in macroevolutionary birth-death models). 
+#' \emph{Biology letters}, 8(1), 139-142.
 #'
 #' @examples
 #'
@@ -104,9 +100,11 @@
 #' ### 
 #' # birth-death process
 #' 
-#' # simulate the clade
-#' tmax <- 10
-#' sim <- bd.sim(1, lambda = 0.3, mu = 0.1, tMax = tmax, nFinal = c(10, Inf))
+#' # set seed
+#' set.seed(1)
+#' 
+#' # run simulation
+#' sim <- bd.sim(1, lambda = 0.3, mu = 0.1, tMax = 10, nFinal = c(10, Inf))
 #' 
 #' # convert birth-death into phylo
 #' phy <- make.phylo(sim)
@@ -117,13 +115,14 @@
 #' # test if simulation and converted object are the same
 #' all.equal(sim, res)
 #' 
-#' 
 #' ###
 #' # pure birth process
 #' 
-#' # simulate the clade
-#' tmax <- 10
-#' sim <- bd.sim(1, lambda = 0.2, mu = 0, tMax = tmax, nFinal = c(10, Inf))
+#' # set seed
+#' set.seed(1)
+#' 
+#' # run simulation
+#' sim <- bd.sim(1, lambda = 0.2, mu = 0, tMax = 10, nFinal = c(10, Inf))
 #' 
 #' # convert birth-death into phylo
 #' phy <- make.phylo(sim)
@@ -131,8 +130,7 @@
 #' # convert phylo into birth-death again
 #' # note we can supply optional arguments, see description above
 #' res <- phylo.to.sim(phy = phy, extant = sim$EXTANT, mothers = sim$PAR, 
-#'                 stemAge = tmax, stemLength = (tmax-sim$TS[2]), 
-#'                 dateFromPresent = TRUE)
+#'                 stemAge = 10, stemLength = (10 - sim$TS[2]))
 #' 
 #' # testing if simulation and converted object are the same
 #' all.equal(sim, res)
@@ -145,7 +143,7 @@
 phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
                          stemAge = NULL, stemLength = NULL) {
   
-  # checking inputs
+  # if stemLength is not supplied, get it from root.edge if possible
   if (is.null(stemLength)) {
     if("root.edge" %in% names(phy)){
       stemLength <- phy$root.edge
@@ -186,17 +184,17 @@ phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
     }
   }
   
-  # declaring functions
+  # auxiliary functions
   
-  # dating functions
-  #dates from furthest to closest to the present
+  # dates from furthest to closest to the present
   date.nodes.forward <- function(phy, stemAge, stemLength) {
+    # create return
     dating <- vector()
     
-    #dates first node (first birth of sim):
+    # date first node (first birth of sim)
     dating[which(phy$edge[, 1] == min(phy$edge[, 1]))] <- stemAge - stemLength
     
-    # choose a focal node (the closest to StemAge without dating)
+    # choose a focal node (the closest to stemAge without dating)
     fnode <- min(phy$edge[, 1]) + 1 
     
     # while dating is not finished
@@ -204,15 +202,15 @@ phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
       # find where the nodes connects
       ids <- which(phy$edge[, 1] == fnode) 
       
-      # dates it
+      # date it
       dating[ids] <- dating[which(phy$edge[, 2] == fnode)] - 
         phy$edge.length[which(phy$edge[, 2] == fnode)]
       
-      # changes fnode to posterior node
+      # change fnode to posterior node
       fnode <- fnode + 1 
     }
     
-    # wrapping it all together
+    # wrap it all together
     res <- unique(cbind(phy$edge[, 1], dating))
     colnames(res) <- c("node", "dating")
     res <- as.data.frame(res)
@@ -220,38 +218,40 @@ phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
   }
   
   
-  # dates from to present to the past
+  # date from to present to the past
   date.nodes.rewind <- function(phy, extant) {
     # error if function not apply
     if (sum(extant) == 0) { 
       stop("\n No extant lineages. \"dateFromPresent\" is impossible")
     }
     
+    # create return
     dating <- vector()
     
-    # dating extant (0 - [each extant edge length])
+    # date extant (0 - [each extant edge length])
     dating[phy$edge[, 2] %in% which(extant)] <- 
       phy$edge.length[phy$edge[, 2] %in% which(extant)] 
     
-    # gets which is missing  dating
+    # get which is missing  dating
     tab <- table(phy$edge[!(is.na(dating)), 1])
     
     ids <- as.numeric(names(tab[tab == 1]))
     
-    # dating the extinct sisters of an extant
+    # date the extinct sisters of an extant
     for (i in 1:length(ids)) {
       dating[which(phy$edge[, 1] == ids[i] & is.na(dating))] <- 
         dating[which(phy$edge[, 1] == ids[i] & !(is.na(dating)))]
     }
     
+    # auxiliary vector for dating
     aux <- min(phy$edge[, 1])
     
-    # dating nodes in the insides of the phylo, from superficial to deep nodes
+    # date nodes in the insides of the phylo, from superficial to deep nodes
     while ((sum(is.na(dating[phy$edge[, 1] == min(phy$edge[, 1])]))) > 0) { 
-      # gets a nono-dated node
+      # get a nono-dated node
       aux <- min(phy$edge[!(is.na(dating)), 1])
       
-      # dates node
+      # date node
       new_date <- unique(dating[phy$edge[,1] == aux]) + 
         phy$edge.length[which(phy$edge[, 2] == aux)]
       aux <- phy$edge[which(phy$edge[, 2] == aux), 1]
@@ -260,10 +260,10 @@ phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
       dating[which(phy$edge[, 1] == aux)] <- new_date 
     }
     
-    # dating from root to tips
+    # date from root to tips
     aux <- min(phy$edge[, 1]) 
     
-    # dating in direction of root
+    # date in direction of root
     while (sum(is.na(dating)) > 0){ 
       aux <- min(phy$edge[((is.na(dating))), 1])
       new_date <- dating[phy$edge[, 2] == aux] - 
@@ -271,16 +271,14 @@ phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
       dating[which(phy$edge[, 1] == aux)] <- new_date
     }
     
-    # wrapping it all together
+    # wrap it all together
     res <- unique(cbind(phy$edge[, 1], dating))
     colnames(res) <- c("node", "dating")
     res <- as.data.frame(res)
     return(res)
   }
   
-  # coalescence function
-  
-  # "coalesces" lineage until first node in phy
+  # "coalesce" lineage until first node in phy
   # returns list of nodes until that event
   coal.lin <- function(lin, phy) { 
     # if lienage has no mother
@@ -288,11 +286,12 @@ phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
       return(NA) 
     }
     
+    # initialize aux variables
     lin.coal <- lin
     leng.aft <- 1
     stop <- FALSE
     
-    # coalescing branches until ancestor
+    # coalesce branches until ancestor
     while (!(stop)) {
       
       # append lins between mother and phy
@@ -306,7 +305,7 @@ phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
         stop <- TRUE
       }
       
-      # updating leng for testing next time
+      # update leng for testing next time
       else { 
         leng.aft <- len.bef 
       }
@@ -318,25 +317,23 @@ phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
   # choose dating method given inputs
   if (dateFromPresent) {
     dated_nodes <- date.nodes.rewind(phy, extant)
-  }
-  
-  else {
+  } else {
     dated_nodes <- date.nodes.forward(phy, stemAge, stemLength)
   }
   
   
-  # dating births and deaths
+  # date births and deaths
   res <- list(TE = vector(), TS = vector(), PAR = mothers, EXTANT = extant)
   
   for (i in 1:length(phy$tip.label)) {
-    
+    # aux variables
     mot.coal <- coal.lin(mothers[i], phy)
     dau.coal <- coal.lin(i, phy)
     
     # coalescence between mother and child
     ids <- which(!(dau.coal %in% mot.coal)) 
     
-    # correcting
+    # correct it
     ids <- c(ids, max(ids) + 1) 
     dau.coal <- dau.coal[ids]
     

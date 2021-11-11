@@ -205,5 +205,5 @@ if (requireNamespace("ape", quietly = TRUE)) {
 
 }
 \author{
-Bruno Petrucci and Matheus Januario.
+Bruno do Rosario Petrucci and Matheus Januario.
 }
