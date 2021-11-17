@@ -7,9 +7,9 @@
 sample.time(sim, rho, tMax, S = NULL)
 }
 \arguments{
-\item{sim}{A \code{sim} object, containing extinction times, speciation times,
-parent, and status information for each species in the simulation. See 
-\code{?sim}.}
+\item{sim}{A \code{sim} object, containing extinction times, speciation 
+times, parent, and status information for each species in the simulation. 
+See \code{?sim}.}
 
 \item{rho}{Sampling rate (events per species per million years) over time. 
 It can be a \code{numeric} describing a constant rate or a 
@@ -23,11 +23,12 @@ present, so for consistency we require this argument. This is also required
 to ensure time follows the correct direction both in the Poisson process and
 in the return.}
 
-\item{S}{A vector representing the species numbers to be sampled. If 
-\code{NULL}, as default, consider all species in the simulation.}
+\item{S}{A vector of species numbers to be sampled. The default is all 
+species in \code{sim}. Species not included in \code{S} will not be sampled 
+by the function.}
 }
 \value{
-A vector of occurrence times for that species.
+A list of vectors of occurrence times for each species in \code{S}.
 }
 \description{
 Generates a vector of occurrence times for species in a simulation using a
@@ -92,10 +93,8 @@ plot(x = time, y = rev(rho(time)), main = "Simulated preservation",
      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
      xlim = c(10, 0))
 
-\dontrun{
 # sample first two species
 occs <- sample.time(sim = sim, rho = rho, tMax = 10, S = 1:2)
-}
 
 ###
 # we can create a step function using ifelse as well

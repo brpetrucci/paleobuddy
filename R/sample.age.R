@@ -1,23 +1,24 @@
 #' Time-dependent and age-dependent rate species sampling
 #' 
 #' Generates a vector of occurrence times for a species in a simulation using a
-#' a Poisson process. Allows for the Poisson process to be (1) constant, (2) 
-#' time-dependent, (3) age-dependent or (4) a mix of age-dependent and
-#' time-dependent. For more flexibility options, see \code{make.rate} and
-#' \code{sample.clade}. Note that while the Poisson process occurs in forward 
-#' time, we return (both in birth-death functions and here) results in backwards 
-#' time, so that time is inverted using \code{tMax} both at the beginning and end
-#' of \code{sample.time}, which is used in this function.
+#' a Poisson process coupled with age-dependent fossil sampling. Allows for the 
+#' Poisson rate to be (1) constant or (2) time-dependent, and the distribution
+#' of occurrences throughout a species age to be any function between 
+#' speciation and extinction time. For more flexibility, see \code{make.rate} 
+#' and \code{sample.clade}. Note that while the simulation occurs in forward 
+#' time, we return (both in birth-death functions and here) results in 
+#' backwards time, so that time is inverted using \code{tMax} both at the 
+#' beginning and end of the function.
 #'
-#' @param sim A \code{sim} object, containing extinction times, speciation times,
-#' parent, and status information for each species in the simulation. See 
-#' \code{?sim}.
+#' @param sim A \code{sim} object, containing extinction times, speciation 
+#' times, parent, and status information for each species in the simulation. 
+#' See \code{?sim}.
 #' 
-#' @param rho Sampling rate (per species per million years) over time. It can be
-#' a \code{numeric} describing a constant rate or a \code{function(t)} describing
-#' the variation in sampling over time. For more flexibility on sampling, see
-#' \code{make.rate} to create more complex rates. Note that \code{rho} should
-#' always be greater than or equal to zero.
+#' @param rho Sampling rate (per species per million years) over time. It can 
+#' be a \code{numeric} describing a constant rate or a \code{function(t)} 
+#' describing the variation in sampling over time. For more flexibility on 
+#' sampling, see \code{make.rate} to create more complex rates. Note that 
+#' \code{rho} should always be greater than or equal to zero.
 #' 
 #' @param tMax The maximum simulation time, used by \code{rexp.var}. A sampling
 #' time greater than \code{tMax} would mean the occurrence is sampled after the
@@ -25,29 +26,29 @@
 #' to ensure time follows the correct direction both in the Poisson process and
 #' in the return.
 #'
-#' @param S A vector of species numbers to be sampled. Could be only a subset of 
-#' the species if the user wishes. The default is all species in \code{sim}. 
-#' Species not included in \code{S} will not be sampled by the function.
+#' @param S A vector of species numbers to be sampled. The default is all 
+#' species in \code{sim}. Species not included in \code{S} will not be sampled 
+#' by the function.
 #'
 #' @param adFun A density function representing the age-dependent preservation
-#' model. It must be a density function, and consequently integrate to 1 (though
-#' this condition is not verified by the function). If not provided, a uniform 
-#' distribution will be used. The function must also have the following 
+#' model. It must be a density function, and consequently integrate to 1 
+#' (though this condition is not verified by the function). If not provided, a 
+#' uniform distribution will be used. The function must also have the following 
 #' properties:
 #'
 #' \itemize{
 #'
-#' \item Returns a vector of preservation densities for each time in a given
+#' \item Return a vector of preservation densities for each time in a given
 #' vector \code{t} in geological time. 
 #'
-#' \item Be parametrized in absolute geological time (i.e. should be relative to
-#' absolute geological time, in Mya, \emph{not} the lineage's age). Because of
-#' this, it is assumed to go from \code{tMax} to \code{0}, as opposed to most
-#' functions in the package.
+#' \item Be parametrized in absolute geological time (i.e. should be relative 
+#' to absolute geological time, in Mya, \emph{not} the lineage's age). Because 
+#' of this, it is assumed to go from \code{tMax} to \code{0}, as opposed to 
+#' most functions in the package.
 #'
-#' \item Should be limited between \code{s} (i.e. the lineage's
-#' speciation/origination in geological time) and \code{e} (i.e. the lineage's 
-#' extinction in geological time), with \code{s} > \code{e}.
+#' \item Should be limited between \code{s} (i.e. the lineage's speciation in 
+#' geological time) and \code{e} (i.e. the lineage's extinction in geological 
+#' time), with \code{s} > \code{e}.
 #'
 #' \item Include the arguments \code{t}, \code{s}, \code{e} and \code{sp}. 
 #' The argument sp is used to pass species-specific parameters (see examples),
@@ -57,34 +58,34 @@
 #' @param ... Additional parameters related to \code{adFun}
 #'
 #' @return A list of occurrences for that species, with their distribution in 
-#' species relative time given by the \code{adFun} function provided by the user.
+#' species relative time given by the \code{adFun} function provided by the 
+#' user.
 #'
 #' @author Matheus Januario
 #'
 #' @examples
 #' 
+#' # vector of times
+#' time <- seq(10, 0, -0.1)
+#' 
 #' ###
-#' # we can start with a simple, constant sampling rate
+#' # we can start with a constant Poisson rate
+#' 
 #' # sampling rate
 #' rho <- 3
 #' 
+#' # set seed
+#' set.seed(1)
+#' 
 #' # simulate a group
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-#' 
-#' # in case first simulation is short-lived
-#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-#'   sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-#' }
-#' 
-#' # fixing the extinction times
-#' sim$TE[sim$EXTANT] <- 0
 #' 
 #' # add a hat-shaped increase through the duration of a species
 #' 
 #' # here we will use the PERT function as described
 #' # in Silvestro et al 2014
-#' 
-#' # preservation function
+#'
+#' # age-dependence distribution
 #' dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
 #'   
 #'   # check if it is a valid PERT
@@ -119,61 +120,29 @@
 #'   return(res)
 #' }
 #' 
-#' # find occurrences
-#' occs <- sample.age(sim, rho, tMax = 10, S = 1:length(sim$TE), adFun = dPERT)
+#' # plot for the first species to take a look
+#' plot(time, rev(dPERT(time, 10, 0, 1)), main = "Age-dependence distribution",
+#'      xlab = "Species age (My)", ylab = "Density", 
+#'      xlim = c(0, 10), type = "l")
 #' 
-#' # check histogram
-#' hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
-#'  Red = with time dependence", ylab = "Density of fossil occurrences",
-#'      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
-#' 
-#' # expected curve - probably will not fit great because of low sample size
-#' 
-#' # getting expected values from age-dependence alone
-#' tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
-#' lines(x = tt, y = dPERT(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
-#' 
-#' # getting expected values from age + time dependence
-#' Pres_time_adpp <- function(t, s, e, sp) {
-#'   # correction of scale
-#'   rhoMod <- function(t){
-#'     return(rho)
-#'   } 
-#'   return(rhoMod(t)*dPERT(t = t, s = s, e = e, sp = sp))
-#' }
-#' 
-#' # normalizing
-#' Pres_time_adppNorm <- function(t, s, e, sp) {
-#'   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp)/integrate(
-#'     Pres_time_adpp, lower = e, upper = s, e = e, s = s, sp = sp)$value)
-#' }
-#' 
-#' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
-#'       col = "red")
+#' # sample first species
+#' occs <- sample.age(sim, rho, tMax = 10, S = 1, adFun = dPERT)
 #' 
 #' ###
-#' # now we can test age-independent but time-dependent sampling (this is the same
-#' # as not declaring an input to the "adFun" argument, but lets do this for the 
-#' # sake of understanding how the function works)
+#' # now we can try time-dependent, age-indenpendent sampling
 #' 
 #' # sampling rate
 #' rho <- function(t) {
 #'   return(1 + 0.5*t) 
 #' }
 #' 
+#' # set seed
+#' set.seed(1)
+#' 
 #' # simulate a group
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 #' 
-#' # in case first simulation is short-lived
-#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-#'   sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-#' }
-#' 
-#' # fixing the extinction times
-#' sim$TE[sim$EXTANT] <- 0
-#' 
-#' # preservation function in respect to age
-#' # occurrences are uniformly distributed
+#' # age-dependence distribution - a uniform
 #' custom.uniform <- function(t, s, e, sp) {
 #'   
 #'   # make sure it is a valid uniform
@@ -186,68 +155,31 @@
 #'   
 #'   return(res)
 #' }
+#' # this is the same as not supplying adFun, just an illustration
 #' 
-#' # find occurrences
-#' occs <- sample.age(sim, rho, tMax = 10, S = 1:length(sim$TE),
+#' # sample first 3 species
+#' occs <- sample.age(sim, rho, tMax = 10, S = 1:3,
 #'                        adFun = custom.uniform)
 #' 
-#' # check histogram
-#' hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
-#'  Red = with time dependence", ylab = "Density of fossil occurrences",
-#'      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
-#' 
-#' # expected curve - probably will not fit great because of low sample size
-#' 
-#' # getting expected values form age-dependence alone
-#' tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
-#' lines(x = tt, y = custom.uniform(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
-#' 
-#' # need tMax to invert rho
-#' tMax <- 10
-#' 
-#' # getting expected values from age + time dependence
-#' Pres_time_adpp <- function(t, s, e, sp) {
-#' # correction of scale
-#'   rhoMod <- function(t){
-#'     return(rho(tMax - t))
-#'   } 
-#'   return(rhoMod(t)*custom.uniform(t = t, s = s, e = e, sp = sp))
-#' }
-#' 
-#' # normalizing
-#' Pres_time_adppNorm <- function(t, s, e, sp) {
-#'   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp)/integrate(
-#'     Pres_time_adpp, lower = e, upper = s, e = e, s = s, sp = sp)$value)
-#' }
-#' 
-#' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
-#'       col = "red")
-#' 
 #' ###
-#' # now, let us use a hat-shaped increase through the duration of a species with 
-#' # more parameters than TS and TE
+#' # we can have more parameters on adFun
 #' 
 #' # sampling rate
 #' rho <- function(t) {
 #'   return(1 + 0.5*t) 
 #' }
 #' 
+#' # set seed
+#' set.seed(1)
+#' 
 #' # simulate a group
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 #' 
-#' # in case first simulation is short-lived
-#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-#'   sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-#' }
-#' 
-#' # fixing the extinction times
-#' sim$TE[sim$EXTANT] <- 0
-#' 
-#' # here we will use the triangular distribution. We have some empirical evidence
-#' # that taxa occurrences might present a triangular shape (in a very broad sense)
+#' # here we will use the triangular distribution. We have some empirical 
+#' # evidence that taxa occurrences might present a triangular shape,
 #' # see Zliobaite et al 2017
 #' 
-#' # preservation function
+#' # age-dependence distribution
 #' dTRI <- function(t, s, e, sp, md) {
 #'   
 #'   # please note ths function is inverted. The correspondence would be:
@@ -277,13 +209,13 @@
 #'   res <- vector()
 #'   
 #'   # (t >= e & t < md)
-#'   res[id1] <- (2*(t[id1] - e)) / ((s - e)*(md - e))
+#'   res[id1] <- (2*(t[id1] - e)) / ((s - e) * (md - e))
 #'   
 #'   #(t == md)
 #'   res[id2] <- 2 / (s - e)
 #'   
 #'   #(md < t & t <= s)
-#'   res[id3] <- (2*(s - t[id3])) / ((s - e)*(s - md))
+#'   res[id3] <- (2*(s - t[id3])) / ((s - e) * (s - md))
 #'   
 #'   #outside function's limits
 #'   res[id4] <- 0
@@ -291,45 +223,16 @@
 #'   return(res)
 #' }
 #' 
+#' # plot for the first species to take a look
+#' plot(time, rev(dTRI(time, 10, 0, 1, 8)), 
+#'      main = "Age-dependence distribution",
+#'      xlab = "Species age (My)", ylab = "Density", 
+#'      xlim = c(0, 10), type = "l")
 #' 
-#' # note we are providing the mode for the triangular sampling as an argument
+#' # sample first species
 #' occs <- sample.age(sim = sim, rho = rho, adFun = dTRI, 
 #'                        tMax = 10, S = 1, md = 8)
-#' 
-#' # please note in the original parametrization, the "md" parameter (mode) is in
-#' # "absolute time", i.e. a specific number in the absolute timescale.
-#' 
-#' # check histogram
-#' hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
-#'  Red = with time dependence", ylab = "Density of fossil occurrences",
-#'      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
-#' 
-#' # expected curves - probably will not fit great because of low sample size
-#' 
-#' # getting expected values form age-dependence alone
-#' tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
-#' lines(x = tt, y = dTRI(tt, s = sim$TS[1], e = sim$TE[1], sp = 1, md = 8))
-#' 
-#' # need tMax to invert rho
-#' tMax <- 10
-#' 
-#' # getting expected values from age + time dependence
-#' Pres_time_adpp <- function(t, s, e, sp, ...) {
-#'   # correction of scale
-#'   rhoMod <- function(t) {
-#'     return(rho(tMax - t))
-#'   } 
-#'   return(rhoMod(t)*dTRI(t = t, s = s, e = e, sp = sp, ...))
-#' }
-#' 
-#' # normalizing
-#' Pres_time_adppNorm <- function(t, s, e, sp, ...) {
-#'   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...)/integrate(
-#'     Pres_time_adpp, lower = e, upper = s, e = e, s = s, sp = sp, ...)$value)
-#' }
-#' 
-#' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], 
-#'                                      sp = 1, md = 8), col = "red")
+#' # note we are providing the mode for the triangular sampling as an argument
 #' 
 #' ###
 #' # we can also have a hat-shaped increase through the duration of a species
@@ -341,19 +244,14 @@
 #'   return(1 + 0.5*t) 
 #' }
 #' 
+#' # set seed
+#' set.seed(1)
+#' 
 #' # simulate a group
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 #' 
-#' # in case first simulation is short-lived
-#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-#'   sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-#' }
-#' 
-#' # fixing the extinction times
-#' sim$TE[sim$EXTANT] <- 0
-#' 
-#' # preservation function, with the "mde" of the triangle being exactly at the
-#' # last quarter of the duration of EACH lineage
+#' # age-dependence distribution, with the "mde" of the triangle 
+#' # being exactly at the last quarter of the duration of EACH lineage
 #' dTRImod1 <- function(t, s, e, sp) {
 #'   # note that now we don't have the "md" parameter here,
 #'   # but it is calculated inside the function
@@ -387,84 +285,54 @@
 #'   # vectorize the function
 #'   res<-vector()
 #'   
-#'   res[id1] <- (2*(t[id1] - e)) / ((s - e)*(md - e))
+#'   res[id1] <- (2*(t[id1] - e)) / ((s - e) * (md - e))
 #'   res[id2] <- 2 / (s - e)
-#'   res[id3] <- (2*(s - t[id3])) / ((s - e)*(s - md))
+#'   res[id3] <- (2*(s - t[id3])) / ((s - e) * (s - md))
 #'   res[id4] <- 0
 #'   
 #'   return(res)
 #' }
 #' 
-#' # get occurrences
+#' # plot for the first species to take a look
+#' plot(time, rev(dTRImod1(time, 10, 0, 1)), 
+#'      main = "Age-dependence distribution",
+#'      xlab = "Species age (My)", ylab = "Density", 
+#'      xlim = c(0, 10), type = "l")
+#' 
+#' # sample first two species
 #' occs <- sample.age(sim = sim, rho = rho, adFun = dTRImod1, tMax = 10,
-#'                        S = 1:length(sim$TE))
+#'                        S = 1:2)
 #' 
 #' # please note in this case, function dTRImod1 fixes "md" at the last quarter
 #' # of the duration of the lineage
 #' 
-#' # check histogram
-#' hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
-#'  Red = with time dependence", ylab = "Density of fossil occurrences",
-#'      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
-#' 
-#' # expected curve - probably will not fit great because of low sample size
-#' 
-#' # getting expected values form age-dependence alone
-#' tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
-#' lines(x = tt, y = dTRImod1(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
-#' 
-#' # getting expected values from age + time dependence
-#' Pres_time_adpp <- function(t, s, e, sp, ...) {
-#'   # correction of scale
-#'   rhoMod <- function(t){
-#'     return(rho(tMax - t))
-#'   } 
-#'   return(rhoMod(t)*dTRImod1(t = t, s = s, e = e, sp = sp, ...))
-#' }
-#' 
-#' # normalizing
-#' Pres_time_adppNorm <- function(t, s, e, sp, ...) {
-#'   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...)/integrate(
-#'     Pres_time_adpp, lower = e, upper = s, e = e, s = s, 
-#'     sp = sp, ...)$value)
-#' }
-#' 
-#' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
-#'       col = "red")
-#' 
 #' ###
-#' # finally, a hat-shaped increase through the duration of a species with more
-#' # parameters than TS and TE, but the parameters relate to each specific lineage.
-#' # This is useful when the user wants to use variable parameters for each species
-#' # but wants to keep track of those parameters after the sampling is over
+#' # the parameters of adFun can also relate to each specific lineage,
+#' # which is useful when using variable parameters for each species
+#' # to keep track of those parameters after the sampling is over
 #' 
 #' # sampling rate
 #' rho <- function(t) {
 #'   return(1 + 0.5*t) 
 #' }
 #' 
+#' # set seed
+#' set.seed(1)
+#' 
 #' # simulate a group
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-#' 
-#' # in case first simulation is short-lived
-#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-#'   sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-#' }
-#' 
-#' # fixing the extinction times
-#' sim$TE[sim$EXTANT] <- 0
 #' 
 #' # get the par and par1 vectors
 #' 
 #' # a random quantity
-#' par <- runif(n = length(sim$TE), min = sim$TE, max = sim$TS) 
+#' par <- runif(n = length(sim$TE), min = 0, max = sim$TS) 
 #' # its complement to the middle of the lineage's age. 
-#' par1 <- (((sim$TS - sim$TE)/2) + sim$TE) - par 
-#' # Note that the interaction between these two parameters creates a 
+#' par1 <- sim$TS / 2 - par 
+#' # note that the interaction between these two parameters creates a 
 #' # deterministic parameter, but inside the function one of them ("par") 
 #' # is a random parameter
 #' 
-#' # preservation function in respect to age, with the "mode" of the triangle
+#' # age-dependence distribution, with the "mode" of the triangle
 #' # being dependent on par and par1
 #' dTRImod2 <- function(t, s, e, sp) {
 #'   
@@ -498,45 +366,21 @@
 #'   return(res)
 #' }
 #' 
-#' # get occurrences
+#' # plot for the first species to take a look
+#' plot(time, rev(dTRImod2(time, 10, 0, 1)), 
+#'      main = "Age-dependence distribution",
+#'      xlab = "Species age (My)", ylab = "Density", 
+#'      xlim = c(0, 10), type = "l")
+#' 
+#' # sample the first 3 species
 #' occs <- sample.age(sim = sim, rho = rho, adFun = dTRImod2, tMax = 10,
-#'                        S = 1:length(sim$TE))
+#'                        S = 1:3)
 #' 
-#' # check histogram
-#' hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
-#'  Red = with time dependence", ylab = "Density of fossil occurrences",
-#'      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
-#' 
-#' # expected curve - probably will not fit great because of low sample size
-#' 
-#' # getting expected values form age-dependence alone
-#' tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
-#' lines(x = tt, y = dTRImod2(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
-#' 
-#' # getting expected values from age + time dependences:
-#' Pres_time_adpp <- function(t, s, e, sp, ...) {
-#'   # correction of scale
-#'   rhoMod <- function(t) {
-#'     return(rho(tMax - t))
-#'   } 
-#'   return(rhoMod(t)*dTRImod2(t = t, s = s, e = e, sp = sp, ...))
-#' }
-#' 
-#' # normalizing
-#' Pres_time_adppNorm <- function(t, s, e, sp, ...) {
-#'   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...) / integrate(
-#'     Pres_time_adpp, lower = e, upper = s, e = e, s = s, 
-#'     sp = sp, ...)$value)
-#' }
-#' 
-#' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
-#'       col = "red")
-#'
 #' # we can also have a mix of age-independent and age-dependent
 #' # models in the same simulation
 #' 
 #' ###
-#' # let us have age-independent sampling before 5my and
+#' # we can have age-independent sampling before 5my and
 #' # age-dependent afterwards
 #' 
 #' # sampling rate
@@ -546,20 +390,15 @@
 #' # note one can also vary the model used for sampling rate
 #' # see ?sample.time for examples
 #' 
+#' # set seed
+#' set.seed(1)
+#' 
 #' # simulate a group
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 #' 
-#' # in case first simulation is short-lived
-#' while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-#'   sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-#' }
-#' 
-#' # fixing the extinction times
-#' sim$TE[sim$EXTANT] <- 0
-#' 
 #' # define uniform as above
 #' 
-#' # preservation function in respect to age
+#' # age-dependent distribution
 #' # occurrences are uniformly distributed
 #' custom.uniform <- function(t, s, e, sp) {
 #'   
@@ -577,17 +416,19 @@
 #' # same for TRI
 #' 
 #' # get the par and par1 vectors
-#' # a random quantity
-#' par <- runif(n = length(sim$TE), min = sim$TE, max = sim$TS)
-#' # its complement to the middle of the lineage's age.
-#' # Note that the interaction between these two parameters creates a
-#' # deterministic parameter, but inside the function one of them ("par")
-#' # is a random parameter
-#' par1 <- (((sim$TS - sim$TE)/2) + sim$TE) - par
 #' 
-#' # preservation function in respect to age, with the "mode" of the triangle
+#' # a random quantity
+#' par <- runif(n = length(sim$TE), min = 0, max = sim$TS) 
+#' # its complement to the middle of the lineage's age. 
+#' par1 <- sim$TS / 2 - par 
+#' # note that the interaction between these two parameters creates a 
+#' # deterministic parameter, but inside the function one of them ("par") 
+#' # is a random parameter
+#' 
+#' # age-dependence distribution, with the "mode" of the triangle
 #' # being dependent on par and par1
 #' dTRImod2 <- function(t, s, e, sp) {
+#'   
 #'   # make sure it is a valid TRI
 #'   if (e >= s) {
 #'     message("There is no TRI with e >= s")
@@ -626,44 +467,18 @@
 #'   )
 #' }
 #' 
-#' # get occurrences
+#' # plot for the first species to take a look
+#' plot(time, rev(dTriAndUniform(time, 10, 0, 1)), 
+#'      main = "Age-dependence distribution",
+#'      xlab = "Species age (My)", ylab = "Density", 
+#'      xlim = c(0, 10), type = "l")
+#' 
+#' # sample the first species
 #' occs <- sample.age(sim = sim, rho = rho, adFun = dTriAndUniform,
-#'                        tMax = 10, S = 1:length(sim$TE))
+#'                        tMax = 10, S = 1)
 #' 
 #' # please note in this case, function dTRImod2 fixes "md" at the last quarter
 #' # of the duration of the lineage
-#' 
-#' # check histogram
-#' hist(unlist(occs[[1]]), probability = TRUE, main = "Black = no time dependence
-#'  Red = with time dependence", ylab = "Density of fossil occurrences",
-#'      xlab = "Time (Mya)", xlim = c(max(occs[[1]]), min(occs[[1]])))
-#' 
-#' # expected curve - probably will not fit great because of low sample size
-#' 
-#' # getting expected values form age-dependence alone
-#' tt <- seq(from = sim$TE[1], to = sim$TS[1], by = 0.01)
-#' lines(x = tt, y = dTriAndUniform(tt, s = sim$TS[1], e = sim$TE[1], sp = 1))
-#' 
-#' # getting expected values from age + time dependences:
-#' Pres_time_adpp <- function(t, s, e, sp, ...) {
-#'   # correction of scale
-#'   rhoMod <- function(t) {
-#'     return(rho(tMax - t))
-#'   }
-#'   return(rhoMod(t)*dTriAndUniform(t = t, s = s, e = e, sp = sp, ...))
-#' }
-#' 
-#' Pres_time_adppNorm <- function(t, s, e, sp, ...) {
-#'   return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...)/integrate(
-#'     Pres_time_adpp, lower = e, upper = s, e = e, s = s,
-#'     sp = sp, ...)$value)
-#' }
-#' 
-#' lines(x = tt, y = Pres_time_adppNorm(tt, s = sim$TS[1], e = sim$TE[1], sp = 1),
-#'       col = "red")
-#'       
-#' # note rho can be any function of time, so one can use make.rate for 
-#' # more flexibility (see ?bd.sim.general for examples)
 #' 
 #' @name sample.age
 #' @rdname sample.age
@@ -714,10 +529,7 @@ sample.age <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
     return(occs)
   }
   
-  # creating function with the intersection of the age-dependent and the 
-  # time-varying poisson process
-  
-  # "prior step" function (interaction between time-dependency and age-dependency):
+  # create function combining adFun and rho
   Pres_time_adpp <- function(t, s, e, sp, ...) {
     # this correction is needed because "t" in rho means
     # "time since clade origin" and NOT absolute geologic time in Mya
@@ -727,14 +539,14 @@ sample.age <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
     return(rhoMod(t)*adFun(t = t, s = s, e = e, sp = sp, ...))
   }
   
-  # now normalizing to get a real density function
+  # normalize it
   Pres_time_adppNorm <- function(t, s, e, sp,...) {
     return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...) / 
              integrate(Pres_time_adpp, lower = e, upper = s, s = s, 
                        e = e, sp = sp, ...)$value)
   }
   
-  # getting the number of occurrences following a time-varying poisson process
+  # get the number of occurrences following a time-varying poisson process
   Noccs <- vector()
   Noccs[S] <- unlist(x = lapply(
     lapply(S, sample.time, sim = sim, rho = rho, tMax = tMax), FUN = length))
@@ -743,14 +555,14 @@ sample.age <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
   
   # for each species to sample
   for (sp in S) {
-    # getting the maximum of function for that specific species
+    # get the maximum of function for that specific species
     adFunMaxApprox <- optimize(Pres_time_adppNorm, interval = c(TE[sp],TS[sp]),
                                e = TE[sp], s = TS[sp], sp = sp, ..., 
                                maximum = T)$maximum
     
     nOccs <- Noccs[sp]
     
-    # placing occurrences along lineage's age using the accept-reject method
+    # place occurrences along lineage's age using the accept-reject method
     res <- vector()
     while (length(res) < nOccs) {
       t <- runif(n = 1, max = TS[sp], min = TE[sp])

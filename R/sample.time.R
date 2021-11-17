@@ -11,9 +11,6 @@
 #' in birth-death functions and here) results in backwards time, so that time 
 #' is inverted using \code{tMax} both at the beginning and end of 
 #' \code{sample.time}.
-#'
-#' @param S A vector representing the species numbers to be sampled. If 
-#' \code{NULL}, as default, consider all species in the simulation.
 #' 
 #' @param rho Sampling rate (events per species per million years) over time. 
 #' It can be a \code{numeric} describing a constant rate or a 
@@ -21,9 +18,9 @@
 #' flexibility on sampling, see \code{make.rate} for creating more complex 
 #' rates. Note that \code{rho} should always be greater than or equal to zero.
 #'
-#' @inheritParams sample.clade
+#' @inheritParams sample.age
 #'
-#' @return A vector of occurrence times for that species.
+#' @return A list of vectors of occurrence times for each species in \code{S}.
 #'
 #' @author Bruno do Rosario Petrucci and Matheus Januario.
 #'
@@ -76,10 +73,8 @@
 #'      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
 #'      xlim = c(10, 0))
 #' 
-#' \dontrun{
 #' # sample first two species
 #' occs <- sample.time(sim = sim, rho = rho, tMax = 10, S = 1:2)
-#' }
 #' 
 #' ###
 #' # we can create a step function using ifelse as well

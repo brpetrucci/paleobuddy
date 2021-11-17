@@ -19,9 +19,9 @@ sample.clade(
 )
 }
 \arguments{
-\item{sim}{A \code{sim} object, containing extinction times, speciation times,
-parent, and status information for each species in the simulation. See 
-\code{?sim}.}
+\item{sim}{A \code{sim} object, containing extinction times, speciation 
+times, parent, and status information for each species in the simulation. 
+See \code{?sim}.}
 
 \item{rho}{Sampling rate (per species per million years) over time. It can be 
 a \code{numeric} describing a constant rate, a \code{function(t)} describing 
@@ -38,9 +38,9 @@ present, so for consistency we require this argument. This is also required
 to ensure time follows the correct direction both in the Poisson process and
 in the return.}
 
-\item{S}{A vector of species numbers to be sampled. Could be only a subset of 
-the species if the user wishes. The default is all species in \code{sim}. 
-Species not included in \code{S} will not be sampled by the function.}
+\item{S}{A vector of species numbers to be sampled. The default is all 
+species in \code{sim}. Species not included in \code{S} will not be sampled 
+by the function.}
 
 \item{envR}{A data frame containing time points and values of an environmental
 variable, like temperature, for each time point. This will be used to create
@@ -65,24 +65,24 @@ age ranges. Default is \code{FALSE}}
 If it is not supplied, \code{seq(tMax, 0, -0.1)} is used.}
 
 \item{adFun}{A density function representing the age-dependent preservation
-model. It must be a density function, and consequently integrate to 1 (though
-this condition is not verified by the function). If not provided, a uniform 
-distribution will be used. The function must also have the following 
+model. It must be a density function, and consequently integrate to 1 
+(though this condition is not verified by the function). If not provided, a 
+uniform distribution will be used. The function must also have the following 
 properties:
 
 \itemize{
 
-\item Returns a vector of preservation densities for each time in a given
+\item Return a vector of preservation densities for each time in a given
 vector \code{t} in geological time. 
 
-\item Be parametrized in absolute geological time (i.e. should be relative to
-absolute geological time, in Mya, \emph{not} the lineage's age). Because of
-this, it is assumed to go from \code{tMax} to \code{0}, as opposed to most
-functions in the package.
+\item Be parametrized in absolute geological time (i.e. should be relative 
+to absolute geological time, in Mya, \emph{not} the lineage's age). Because 
+of this, it is assumed to go from \code{tMax} to \code{0}, as opposed to 
+most functions in the package.
 
-\item Should be limited between \code{s} (i.e. the lineage's
-speciation/origination in geological time) and \code{e} (i.e. the lineage's 
-extinction in geological time), with \code{s} > \code{e}.
+\item Should be limited between \code{s} (i.e. the lineage's speciation in 
+geological time) and \code{e} (i.e. the lineage's extinction in geological 
+time), with \code{s} > \code{e}.
 
 \item Include the arguments \code{t}, \code{s}, \code{e} and \code{sp}. 
 The argument sp is used to pass species-specific parameters (see examples),
