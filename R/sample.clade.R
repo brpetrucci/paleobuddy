@@ -3,20 +3,21 @@
 #' Generates occurrence times or time ranges (as most empirical fossil 
 #' occurrences) for each of the desired species using a Poisson process. Allows
 #' for the Poisson rate to be (1) a constant, (2) a function of time, (3) a 
-#' function of time and an environmental variable, or (4) a vector of numbers 
-#' (rates in a step function). Also allows as an optional parameter a 
-#' distribution representing the expected occurrence number over a species 
-#' duration. Allows for further flexibility in rates by a shift times vector and 
-#' environmental matrix parameters. Optionally takes a vector of time bins 
-#' representing geologic periods, so that if the user wishes occurrence times can 
-#' be presented as a range instead of true points. See \code{sample.species} - 
-#' absolute time-dependent sampling only - and \code{sample.general} - time and/or 
-#' age-dependent sampling - for more information.
+#' function of time and a time-series (usually environmental) variable, or (4) 
+#' a vector of numbers (rates in a step function). Allows for age-dependent 
+#' sampling with a parameter for a distribution representing the expected 
+#' occurrence number over a species duration. Allows for further flexibility in
+#' rates by a shift times vector and environmental matrix parameters. 
+#' Optionally takes a vector of time bins representing geologic periods, if the
+#' user wishes occurrence times to be represented as a range instead of true 
+#' points. See \code{sample.time} - absolute time-dependent sampling only - 
+#' and \code{sample.age} - time and/or age-dependent sampling - for more 
+#' information.
 #'
 #' @param bins A vector of time intervals corresponding to geological time ranges.
 #' If it is not supplied, \code{seq(tMax, 0, -0.1)} is used.
 #' 
-#' @inheritParams sample.general
+#' @inheritParams sample.age
 #'
 #' @param rho Sampling rate (per species per million years) over time. It can be 
 #' a \code{numeric} describing a constant rate, a \code{function(t)} describing 
@@ -263,7 +264,7 @@
 #' }
 #' 
 #' # we will now do some examples with age-dependent rates. For more details,
-#' # check sample.general.
+#' # check sample.age.
 #' 
 #' ###
 #' # simulate a group
@@ -572,7 +573,7 @@
 #'   return(2 + 0.1*t)
 #' }
 #' # note one can also vary the model used for sampling rate
-#' # see ?sample.species for examples
+#' # see ?sample.time for examples
 #' 
 #' # maximum simulation time
 #' tMax <- 10
@@ -752,8 +753,7 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
   # lineage's age)
   if (is.null(adFun)) { 
     # find occurrences times
-    pointEstimates <- lapply(S, sample.species, sim = sim, rho = rho, 
-                             tMax = tMax)
+    pointEstimates <- sample.time(sim, rho, tMax, S)
     
     # which species left no occurrences
     zeroOccs <- which(lapply(pointEstimates, length) == 0)
@@ -766,7 +766,7 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
   # according to adFun)
   else { 
     # find occurrence times
-    pointEstimates <- sample.general(sim = sim, rho = rho, tMax = tMax, S = S,
+    pointEstimates <- sample.age(sim = sim, rho = rho, tMax = tMax, S = S,
                                  adFun = adFun, ...)
   }
 

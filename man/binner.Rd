@@ -66,7 +66,7 @@ set.seed(1)
 sim <- bd.sim(1, lambda = 0.1, mu = 0.05, tMax = 15)
 
 # sample it
-sampled <- sample.species(sim = sim, rho = 1, tMax = 15, S = 1)
+sampled <- sample.time(sim = sim, rho = 1, tMax = 15, S = 1)[[1]]
 
 # bins vector
 bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)

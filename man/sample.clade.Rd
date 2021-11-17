@@ -100,15 +100,16 @@ occurrence times based on \code{bins}, or both.
 Generates occurrence times or time ranges (as most empirical fossil 
 occurrences) for each of the desired species using a Poisson process. Allows
 for the Poisson rate to be (1) a constant, (2) a function of time, (3) a 
-function of time and an environmental variable, or (4) a vector of numbers 
-(rates in a step function). Also allows as an optional parameter a 
-distribution representing the expected occurrence number over a species 
-duration. Allows for further flexibility in rates by a shift times vector and 
-environmental matrix parameters. Optionally takes a vector of time bins 
-representing geologic periods, so that if the user wishes occurrence times can 
-be presented as a range instead of true points. See \code{sample.species} - 
-absolute time-dependent sampling only - and \code{sample.general} - time and/or 
-age-dependent sampling - for more information.
+function of time and a time-series (usually environmental) variable, or (4) 
+a vector of numbers (rates in a step function). Allows for age-dependent 
+sampling with a parameter for a distribution representing the expected 
+occurrence number over a species duration. Allows for further flexibility in
+rates by a shift times vector and environmental matrix parameters. 
+Optionally takes a vector of time bins representing geologic periods, if the
+user wishes occurrence times to be represented as a range instead of true 
+points. See \code{sample.time} - absolute time-dependent sampling only - 
+and \code{sample.age} - time and/or age-dependent sampling - for more 
+information.
 }
 \examples{
 
@@ -321,7 +322,7 @@ for (i in 1:length(ids)) {
 }
 
 # we will now do some examples with age-dependent rates. For more details,
-# check sample.general.
+# check sample.age.
 
 ###
 # simulate a group
@@ -630,7 +631,7 @@ rho <- function(t) {
   return(2 + 0.1*t)
 }
 # note one can also vary the model used for sampling rate
-# see ?sample.species for examples
+# see ?sample.time for examples
 
 # maximum simulation time
 tMax <- 10

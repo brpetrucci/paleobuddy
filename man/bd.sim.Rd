@@ -244,8 +244,8 @@ mu <- make.rate(mList, tMax = tMax, rateShifts = mShifts)
 
 # and plot it
 plot(seq(0, tMax, 0.1), rev(mu(seq(0, tMax, 0.1))), type = 'l',
-     main = "Extintion rate as a step function", xlab = "Time (My)",
-     ylab = "Rate (species/My)", xlim = c(tMax, 0))
+     main = "Extintion rate as a step function", xlab = "Time (Mya)",
+     ylab = "Rate (events/species/My)", xlim = c(tMax, 0))
 
 # looking good, we will keep everything else the same
 
@@ -401,8 +401,8 @@ mFunc <- make.rate(mu, tMax = tMax, envRate = envM)
 
 # take a look at how the rate itself will be
 plot(seq(0, tMax, 0.1), rev(mFunc(seq(0, tMax, 0.1))),
-     main = "Extinction rate varying with temperature", xlab = "Time (My)",
-     ylab = "Rate", type = 'l', xlim = c(tMax, 0))
+     main = "Extinction rate varying with temperature", xlab = "Time (Mya)",
+     ylab = "Rate (events/species/My)", type = 'l', xlim = c(tMax, 0))
 
 # set seed
 set.seed(2)
@@ -450,8 +450,8 @@ lFunc <- make.rate(lambda, tMax = tMax, envRate = envL)
 
 # plot it
 plot(seq(0, tMax, 0.1), rev(lFunc(seq(0, tMax, 0.1))),
-     main = "Speciation scale varying with temperature", xlab = "Time (My)",
-     ylab = "Scale", type = 'l', xlim = c(tMax, 0))
+     main = "Speciation scale varying with temperature", xlab = "Time (Mya)",
+     ylab = "Scale (1/(events/species/My))", type = 'l', xlim = c(tMax, 0))
 
 # extinction
 mu <- 0.1

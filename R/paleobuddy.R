@@ -34,7 +34,7 @@
 #' time-varying, and environmentally dependent rates. Users might also supply a
 #' model describing the distribution of fossil occurrences over a species 
 #' duration to simulate age-dependent sampling. See \code{?sample.clade}, 
-#' \code{?sample.species}, and \code{?sample.general} for more information.
+#' \code{?sample.time}, and \code{?sample.age} for more information.
 #' 
 #' @section Phylogeny generation:
 #' We believe it is imperative to be able to generate fossil records and
