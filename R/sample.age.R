@@ -1,34 +1,16 @@
 #' Time-dependent and age-dependent rate species sampling
 #' 
-#' Generates a vector of occurrence times for a species in a simulation using a
+#' Generates a vector of occurrence times for a species in a simulation using 
 #' a Poisson process coupled with age-dependent fossil sampling. Allows for the 
-#' Poisson rate to be (1) constant or (2) time-dependent, and the distribution
-#' of occurrences throughout a species age to be any function between 
-#' speciation and extinction time. For more flexibility, see \code{make.rate} 
-#' and \code{sample.clade}. Note that while the simulation occurs in forward 
-#' time, we return (both in birth-death functions and here) results in 
-#' backwards time, so that time is inverted using \code{tMax} both at the 
-#' beginning and end of the function.
+#' Poisson rate to be (1) constant or (2) time-dependent, and additionally allows
+#' the distribution of occurrences throughout a species age to be any function 
+#' between speciation and extinction time. For more flexibility, see 
+#' \code{make.rate} and \code{sample.clade}. Note that while the simulation 
+#' occurs in forward time, we return (both in birth-death functions and here)
+#' results in backwards time, so that time is inverted using \code{tMax} both 
+#' at the beginning and end of the function.
 #'
-#' @param sim A \code{sim} object, containing extinction times, speciation 
-#' times, parent, and status information for each species in the simulation. 
-#' See \code{?sim}.
-#' 
-#' @param rho Sampling rate (per species per million years) over time. It can 
-#' be a \code{numeric} describing a constant rate or a \code{function(t)} 
-#' describing the variation in sampling over time. For more flexibility on 
-#' sampling, see \code{make.rate} to create more complex rates. Note that 
-#' \code{rho} should always be greater than or equal to zero.
-#' 
-#' @param tMax The maximum simulation time, used by \code{rexp.var}. A sampling
-#' time greater than \code{tMax} would mean the occurrence is sampled after the
-#' present, so for consistency we require this argument. This is also required
-#' to ensure time follows the correct direction both in the Poisson process and
-#' in the return.
-#'
-#' @param S A vector of species numbers to be sampled. The default is all 
-#' species in \code{sim}. Species not included in \code{S} will not be sampled 
-#' by the function.
+#' @inheritParams sample.time
 #'
 #' @param adFun A density function representing the age-dependent preservation
 #' model. It must be a density function, and consequently integrate to 1 
