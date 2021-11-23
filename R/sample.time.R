@@ -26,6 +26,7 @@
 #'
 #' @examples
 #'
+
 #' ###
 #' # let us start with constant fossil sampling rate
 #' 
@@ -52,7 +53,7 @@
 #' 
 #' # simulate a group
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-#'
+#' 
 #' # we can create the sampling rate here from a few vectors
 #' 
 #' # rates
@@ -133,7 +134,7 @@
 #' occs <- sample.time(sim = sim, rho = rho, tMax = 10, S = 1)
 #' 
 #' # after presenting the possible models, we can consider how to
-#' # create mixed models, where the dependency changes over time
+#' # create models that mix different time-dependent changes in preservation rate over time
 #' 
 #' ###
 #' # consider sampling that becomes temperature dependent
@@ -141,13 +142,13 @@
 #' 
 #' # set seed
 #' set.seed(1)
-#'
+#' 
 #' # simulate a group
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-#'
+#' 
 #' # get the temperature data
 #' data(temp)
-#'
+#' 
 #' # preservation function dependent on t and temperature
 #' r_t <-  function(t, temp) {
 #'   return(
