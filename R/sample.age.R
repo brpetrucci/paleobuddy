@@ -15,8 +15,8 @@
 #' @param adFun A density function representing the age-dependent preservation
 #' model. It must be a density function, and consequently integrate to 1 
 #' (though this condition is not verified by the function). If not provided, a 
-#' uniform distribution will be used. The function must also have the following 
-#' properties:
+#' uniform distribution will be used by default. The function must also 
+#' have the following properties:
 #'
 #' \itemize{
 #'
@@ -28,20 +28,20 @@
 #' of this, it is assumed to go from \code{tMax} to \code{0}, as opposed to 
 #' most functions in the package.
 #'
-#' \item Should be limited between \code{s} (i.e. the lineage's speciation in 
-#' geological time) and \code{e} (i.e. the lineage's extinction in geological 
-#' time), with \code{s} > \code{e}.
+#' \item Should be limited between \code{s} (i.e. the lineage's 
+#' speciation/birth) and \code{e} (i.e. the lineage's extinction/death), 
+#' with \code{s} > \code{e}.
 #'
 #' \item Include the arguments \code{t}, \code{s}, \code{e} and \code{sp}. 
 #' The argument sp is used to pass species-specific parameters (see examples),
 #' allowing for \code{dFun} to be species-inhomogeneous.
 #' }
 #'
-#' @param ... Additional parameters related to \code{adFun}
+#' @param ... Additional parameters used by the user's function (i.e.,
+#' \code{adFun})
 #'
-#' @return A list of occurrences for that species, with their distribution in 
-#' species relative time given by the \code{adFun} function provided by the 
-#' user.
+#' @return A list of occurrences for that species, given the time, age 
+#' and species-specific conditions assigned by the user.
 #'
 #' @author Matheus Januario
 #'
@@ -471,6 +471,14 @@ sample.age <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
   # check that sim is a valid sim object
   if (!is.sim(sim)) {
     stop("Invalid argument, must be a sim object. See ?sim")
+  }
+  
+  # Function needs exact durations for sampling so if user provide
+  #sim objects with NAs as extinction time, function will convert 
+  # those automatically to zeor and print warning
+  if (sum(is.na(sim$TE))>0) {
+    warning("TEs of extant species will be converted to 0")
+    sim$TE[sim$EXTANT] <- 0
   }
   
   # if rho is constant, make it a function
