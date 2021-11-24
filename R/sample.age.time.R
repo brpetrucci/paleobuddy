@@ -542,9 +542,9 @@ sample.age.time <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
   }
   
   # get the number of occurrences following a time-varying poisson process
-  Noccs <- vector()
-  Noccs[S] <- unlist(x = lapply(
-    lapply(S, sample.time, sim = sim, rho = rho, tMax = tMax), FUN = length))
+  Noccs <- vector(length = length(sim$TE))
+  Noccs <- unlist(lapply(sample.time(sim = sim, rho = rho, tMax = tMax,
+                                     S = S), FUN = length))
   
   occs <- list()
   
