@@ -56,6 +56,8 @@
 #'
 #' @examples
 #' 
+#Please note the shape of the fossilization becomes easier to see when rho is very high (e.g., >100). We will not do this here due to CRAN constraints on example length, but users are encoraged to try. Histograms can be used to visualize the sampling though age, as the examples do in the 2nd example (PERT function) - we will not do this is all examples to get a smaller number of code lines as examples
+#' 
 #' # vector of times
 #' time <- seq(10, 0, -0.1)
 #' 
@@ -75,7 +77,7 @@
 #' 
 #' # here we will use the PERT function as described
 #' # in Silvestro et al 2014
-#'
+#' 
 #' # age-dependence distribution
 #' dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
 #'   
@@ -111,13 +113,22 @@
 #'   return(res)
 #' }
 #' 
-#' # plot for the first species to take a look
-#' plot(time, rev(dPERT(time, 10, 0, 1)), main = "Age-dependence distribution",
-#'      xlab = "Species age (My)", ylab = "Density", 
-#'      xlim = c(0, 10), type = "l")
+#' # plot how this functions translate preservation and age for an example species:
+#' S_sp <- 10 #speciation time
+#' E_sp <- 5 #extinction time
 #' 
-#' # sample first species
-#' occs <- sample.age.time(sim, rho, tMax = 10, S = 1, adFun = dPERT)
+#' plot(time, rev(dPERT(t = time, s = S_sp, e = E_sp, a = 1)), main = "Age-dependence distribution",
+#'      xlab = "Species age (My)", ylab = "Density", 
+#'      xlim = c(0, S_sp-E_sp), type = "l")
+#' 
+#' # sample first and third species only
+#' occs <- sample.age(sim, rho = 3, tMax=10, dPERT, S = c(1,3))
+#' 
+#' #making histograms of each sp occs:
+#' par(mfrow=c(1,2))
+#' hist(occs[[1]], main="Occs of sp1")
+#' hist(occs[[3]], main="Occs of sp3")
+#' par(mfrow=c(1,1))
 #' 
 #' ###
 #' # now we can try time-dependent, age-indenpendent sampling
@@ -133,7 +144,7 @@
 #' # simulate a group
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 #' 
-#' # age-dependence distribution - a uniform
+#' # age-independence distribution (a uniform density distribution in age) inputted in the format that the function needs
 #' custom.uniform <- function(t, s, e, sp) {
 #'   
 #'   # make sure it is a valid uniform
@@ -149,8 +160,14 @@
 #' # this is the same as not supplying adFun, just an illustration
 #' 
 #' # sample first 3 species
-#' occs <- sample.age.time(sim, rho, tMax = 10, S = 1:3,
-#'                        adFun = custom.uniform)
+#' occs <- sample.age(sim, rho, tMax = 10, S = 1:3,
+#'                    adFun = custom.uniform)
+#' 
+#' par(mfrow=c(1,3))
+#' hist(occs[[1]], main="Occs of sp1")
+#' hist(occs[[2]], main="Occs of sp2")
+#' hist(occs[[3]], main="Occs of sp3")
+#' par(mfrow=c(1,1))
 #' 
 #' ###
 #' # we can have more parameters on adFun
@@ -215,15 +232,19 @@
 #' }
 #' 
 #' # plot for the first species to take a look
-#' plot(time, rev(dTRI(time, 10, 0, 1, 8)), 
+#' S_sp <- 10 #speciation time
+#' E_sp <- 5 #extinction time
+#' age=seq(S_sp, E_sp, by=-0.1)
+#' 
+#' plot(time, rev(dTRI(time, S_sp, E_sp, 1, 9)), 
 #'      main = "Age-dependence distribution",
 #'      xlab = "Species age (My)", ylab = "Density", 
 #'      xlim = c(0, 10), type = "l")
 #' 
 #' # sample first species
-#' occs <- sample.age.time(sim = sim, rho = rho, adFun = dTRI, 
-#'                        tMax = 10, S = 1, md = 8)
-#' # note we are providing the mode for the triangular sampling as an argument
+#' occs <- sample.age(sim = sim, rho = rho, adFun = dTRI, 
+#'                    tMax = 10, S = 1, md = 8)
+#' # note we are providing the mode (in absolute geologic time, not in "age" - for this ecxample see below) for the triangular sampling as an argument
 #' 
 #' ###
 #' # we can also have a hat-shaped increase through the duration of a species
@@ -291,8 +312,8 @@
 #'      xlim = c(0, 10), type = "l")
 #' 
 #' # sample first two species
-#' occs <- sample.age.time(sim = sim, rho = rho, adFun = dTRImod1, tMax = 10,
-#'                        S = 1:2)
+#' occs <- sample.age(sim = sim, rho = rho, adFun = dTRImod1, tMax = 10,
+#'                    S = 1:2)
 #' 
 #' # please note in this case, function dTRImod1 fixes "md" at the last quarter
 #' # of the duration of the lineage
@@ -364,8 +385,8 @@
 #'      xlim = c(0, 10), type = "l")
 #' 
 #' # sample the first 3 species
-#' occs <- sample.age.time(sim = sim, rho = rho, adFun = dTRImod2, tMax = 10,
-#'                        S = 1:3)
+#' occs <- sample.age(sim = sim, rho = rho, adFun = dTRImod2, tMax = 10,
+#'                    S = 1:3)
 #' 
 #' # we can also have a mix of age-independent and age-dependent
 #' # models in the same simulation
@@ -465,15 +486,11 @@
 #'      xlim = c(0, 10), type = "l")
 #' 
 #' # sample the first species
-#' occs <- sample.age.time(sim = sim, rho = rho, adFun = dTriAndUniform,
-#'                        tMax = 10, S = 1)
+#' occs <- sample.age(sim = sim, rho = rho, adFun = dTriAndUniform,
+#'                    tMax = 10, S = 1)
 #' 
 #' # please note in this case, function dTRImod2 fixes "md" at the last quarter
 #' # of the duration of the lineage
-#' 
-#' @name sample.age.time
-#' @rdname sample.age.time
-#' @export
 
 sample.age.time <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
   # checking input
