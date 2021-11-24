@@ -485,7 +485,7 @@ sample.age.time <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
   # convert NA elements of TE to 0
   # those automatically to zeor and print warning
   if (sum(is.na(sim$TE)) > 0) {
-    warning("TEs of extant species will be converted to 0")
+    message("TEs of extant species will be converted to 0")
     sim$TE[sim$EXTANT] <- 0
   }
   
