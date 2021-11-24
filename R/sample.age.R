@@ -496,9 +496,6 @@ sample.age <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
   TE <- sim$TE
   TS <- sim$TS
   
-  # fix extant extinction times
-  TE[sim$EXTANT] <- 0
-  
   # check if adFun is a function with the right parameters
   if (!(is.null(adFun))) {
     if (sum(c("t", "s", "e", "sp") %in% names(formals(adFun))) < 3) {
