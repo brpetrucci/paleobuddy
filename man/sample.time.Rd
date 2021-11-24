@@ -11,11 +11,11 @@ sample.time(sim, rho, tMax, S = NULL)
 times, parent, and status information for each species in the simulation. 
 See \code{?sim}.}
 
-\item{rho}{Sampling rate (events per species per million years) over time. 
-It can be a \code{numeric} describing a constant rate or a 
-\code{function(t)} describing the variation in sampling over time. For more
-flexibility on sampling, see \code{make.rate} for creating more complex 
-rates. Note that \code{rho} should always be greater than or equal to zero.}
+\item{rho}{Sampling rate (per species per million years) over time. It can 
+be a \code{numeric} describing a constant rate or a \code{function(t)} 
+describing the variation in sampling over time. For more flexibility on 
+sampling, see \code{make.rate} to create more complex rates. Note that 
+\code{rho} should always be greater than or equal to zero.}
 
 \item{tMax}{The maximum simulation time, used by \code{rexp.var}. A sampling
 time greater than \code{tMax} would mean the occurrence is sampled after the
@@ -34,7 +34,7 @@ A list of vectors of occurrence times for each species in \code{S}.
 Generates a vector of occurrence times for species in a simulation using a
 Poisson process. Allows for the Poisson rate to be (1) a constant or (2) a 
 function of time. For fossil sampling dependent on species age in addition 
-to absolute time, see \code{sample.age}. For a more general function that
+to absolute time, see \code{sample.age.time}. For a more general function that
 considers these and other fossil sampling rate cases, see 
 \code{sample.clade}.
 }
@@ -153,7 +153,7 @@ plot(x = time, y = rev(rho(time)), main = "Simulated preservation",
 occs <- sample.time(sim = sim, rho = rho, tMax = 10, S = 1)
 
 # after presenting the possible models, we can consider how to
-# create mixed models, where the dependency changes over time
+# create models that mix different time-dependent changes in preservation rate over time
 
 ###
 # consider sampling that becomes temperature dependent

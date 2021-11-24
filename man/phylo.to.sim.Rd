@@ -124,6 +124,23 @@ res <- phylo.to.sim(phy = phy, extant = sim$EXTANT, mothers = sim$PAR)
 # test if simulation and converted object are the same
 all.equal(sim, res)
 
+### 
+# birth-death process with extinct lineages:
+# set seed
+set.seed(1)
+
+# run simulation
+sim <- bd.sim(1, lambda = 0.1, mu = 0.3, tMax = 10, nFinal = c(2, 4))
+
+# convert birth-death into phylo
+phy <- make.phylo(sim)
+
+# convert phylo into a sim object again
+res <- phylo.to.sim(phy = phy, extant = sim$EXTANT, mothers = sim$PAR, stemAge = max(sim$TS))
+
+# test if simulation and converted object are the same
+all.equal(sim, res)
+
 ###
 # pure birth process
 

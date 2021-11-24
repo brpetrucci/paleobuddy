@@ -11,13 +11,11 @@
 #' Optionally takes a vector of time bins representing geologic periods, if the
 #' user wishes occurrence times to be represented as a range instead of true 
 #' points. See \code{sample.time} - absolute time-dependent sampling only - 
-#' and \code{sample.age} - time and/or age-dependent sampling - for more 
+#' and \code{sample.age.time} - time and/or age-dependent sampling - for more 
 #' information.
 #'
-#' @param bins A vector of time intervals corresponding to geological time ranges.
-#' If it is not supplied, \code{seq(tMax, 0, -0.1)} is used.
-#' 
-#' @inheritParams sample.age
+#' @param bins A vector of time intervals corresponding to geological time 
+#' ranges. If it is not supplied, \code{seq(tMax, 0, -0.1)} is used.
 #'
 #' @param rho Sampling rate (per species per million years) over time. It can be 
 #' a \code{numeric} describing a constant rate, a \code{function(t)} describing 
@@ -25,7 +23,7 @@
 #' describing the variation in sampling over time following both time AND 
 #' an environmental variable (please see \code{envR} for details), or a 
 #' \code{vector} containing rates that correspond to each rate between sampling
-#' rate shift times times (please see \code{rShifts}). Note that \code{rho} should
+#' rate shift times times (please see \code{rShifts}). Note that \code{rho} 
 #' should always be greater than or equal to zero.
 #' 
 #' @param envR A data frame containing time points and values of an environmental
@@ -50,6 +48,8 @@
 #' @return A \code{data.frame} containing species names/numbers, whether each 
 #' species is extant, and the true occurrence times of each fossil, a range of 
 #' occurrence times based on \code{bins}, or both.
+#'
+#' @inheritParams sample.age.time
 #'
 #' @author Matheus Januario and Bruno do Rosario Petrucci.
 #'
@@ -264,7 +264,7 @@
 #' }
 #' 
 #' # we will now do some examples with age-dependent rates. For more details,
-#' # check sample.age.
+#' # check sample.age.time.
 #' 
 #' ###
 #' # simulate a group
@@ -766,7 +766,7 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
   # according to adFun)
   else { 
     # find occurrence times
-    pointEstimates <- sample.age(sim = sim, rho = rho, tMax = tMax, S = S,
+    pointEstimates <- sample.age.time(sim = sim, rho = rho, tMax = tMax, S = S,
                                  adFun = adFun, ...)
   }
 

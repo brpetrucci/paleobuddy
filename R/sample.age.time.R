@@ -2,15 +2,22 @@
 #' 
 #' Generates a vector of occurrence times for a species in a simulation using 
 #' a Poisson process coupled with age-dependent fossil sampling. Allows for the 
-#' Poisson rate to be (1) constant or (2) time-dependent, and additionally allows
-#' the distribution of occurrences throughout a species age to be any function 
-#' between speciation and extinction time. For more flexibility, see 
+#' Poisson rate to be (1) constant or (2) time-dependent, and additionally 
+#' allows the distribution of occurrences throughout a species age to be any 
+#' function between speciation and extinction time. For more flexibility, see 
 #' \code{make.rate} and \code{sample.clade}. Note that while the simulation 
 #' occurs in forward time, we return (both in birth-death functions and here)
 #' results in backwards time, so that time is inverted using \code{tMax} both 
 #' at the beginning and end of the function.
-#'
-#' @inheritParams sample.time
+#' 
+#' @param rho Average fossil sampling rate (per species per million years) over 
+#' time. It can be a \code{numeric} describing a constant rate or a 
+#' \code{function(t)} describing the variation in sampling over time. For more 
+#' flexibility on sampling, see \code{make.rate} to create more complex rates.
+#' If \code{adFun} is supplied, it will be used to find the number of 
+#' occurrences during the species duration, and \code{adFun} will determine 
+#' their distribution. Note that \code{rho} should always be greater than or 
+#' equal to zero.
 #'
 #' @param adFun A density function representing the age-dependent preservation
 #' model. It must be a density function, and consequently integrate to 1 
@@ -39,6 +46,8 @@
 #'
 #' @param ... Additional parameters used by the user's function (i.e.,
 #' \code{adFun})
+#' 
+#' @inheritParams sample.time
 #'
 #' @return A list of occurrences for that species, given the time, age 
 #' and species-specific conditions assigned by the user.
@@ -108,7 +117,7 @@
 #'      xlim = c(0, 10), type = "l")
 #' 
 #' # sample first species
-#' occs <- sample.age(sim, rho, tMax = 10, S = 1, adFun = dPERT)
+#' occs <- sample.age.time(sim, rho, tMax = 10, S = 1, adFun = dPERT)
 #' 
 #' ###
 #' # now we can try time-dependent, age-indenpendent sampling
@@ -140,7 +149,7 @@
 #' # this is the same as not supplying adFun, just an illustration
 #' 
 #' # sample first 3 species
-#' occs <- sample.age(sim, rho, tMax = 10, S = 1:3,
+#' occs <- sample.age.time(sim, rho, tMax = 10, S = 1:3,
 #'                        adFun = custom.uniform)
 #' 
 #' ###
@@ -212,7 +221,7 @@
 #'      xlim = c(0, 10), type = "l")
 #' 
 #' # sample first species
-#' occs <- sample.age(sim = sim, rho = rho, adFun = dTRI, 
+#' occs <- sample.age.time(sim = sim, rho = rho, adFun = dTRI, 
 #'                        tMax = 10, S = 1, md = 8)
 #' # note we are providing the mode for the triangular sampling as an argument
 #' 
@@ -282,7 +291,7 @@
 #'      xlim = c(0, 10), type = "l")
 #' 
 #' # sample first two species
-#' occs <- sample.age(sim = sim, rho = rho, adFun = dTRImod1, tMax = 10,
+#' occs <- sample.age.time(sim = sim, rho = rho, adFun = dTRImod1, tMax = 10,
 #'                        S = 1:2)
 #' 
 #' # please note in this case, function dTRImod1 fixes "md" at the last quarter
@@ -355,7 +364,7 @@
 #'      xlim = c(0, 10), type = "l")
 #' 
 #' # sample the first 3 species
-#' occs <- sample.age(sim = sim, rho = rho, adFun = dTRImod2, tMax = 10,
+#' occs <- sample.age.time(sim = sim, rho = rho, adFun = dTRImod2, tMax = 10,
 #'                        S = 1:3)
 #' 
 #' # we can also have a mix of age-independent and age-dependent
@@ -456,27 +465,26 @@
 #'      xlim = c(0, 10), type = "l")
 #' 
 #' # sample the first species
-#' occs <- sample.age(sim = sim, rho = rho, adFun = dTriAndUniform,
+#' occs <- sample.age.time(sim = sim, rho = rho, adFun = dTriAndUniform,
 #'                        tMax = 10, S = 1)
 #' 
 #' # please note in this case, function dTRImod2 fixes "md" at the last quarter
 #' # of the duration of the lineage
 #' 
-#' @name sample.age
-#' @rdname sample.age
+#' @name sample.age.time
+#' @rdname sample.age.time
 #' @export
 
-sample.age <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
+sample.age.time <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
   # checking input
   # check that sim is a valid sim object
   if (!is.sim(sim)) {
     stop("Invalid argument, must be a sim object. See ?sim")
   }
   
-  # Function needs exact durations for sampling so if user provide
-  #sim objects with NAs as extinction time, function will convert 
+  # convert NA elements of TE to 0
   # those automatically to zeor and print warning
-  if (sum(is.na(sim$TE))>0) {
+  if (sum(is.na(sim$TE)) > 0) {
     warning("TEs of extant species will be converted to 0")
     sim$TE[sim$EXTANT] <- 0
   }

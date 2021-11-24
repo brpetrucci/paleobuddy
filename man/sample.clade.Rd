@@ -29,7 +29,7 @@ the variation in sampling over time \code{t}, a \code{function(t, env)}
 describing the variation in sampling over time following both time AND 
 an environmental variable (please see \code{envR} for details), or a 
 \code{vector} containing rates that correspond to each rate between sampling
-rate shift times times (please see \code{rShifts}). Note that \code{rho} should
+rate shift times times (please see \code{rShifts}). Note that \code{rho} 
 should always be greater than or equal to zero.}
 
 \item{tMax}{The maximum simulation time, used by \code{rexp.var}. A sampling
@@ -61,14 +61,14 @@ empirical fossil records. If \code{returnTrue} is \code{TRUE}, this is ignored.}
 \item{returnAll}{If set to \code{TRUE}, returns both the true sampling time and
 age ranges. Default is \code{FALSE}}
 
-\item{bins}{A vector of time intervals corresponding to geological time ranges.
-If it is not supplied, \code{seq(tMax, 0, -0.1)} is used.}
+\item{bins}{A vector of time intervals corresponding to geological time 
+ranges. If it is not supplied, \code{seq(tMax, 0, -0.1)} is used.}
 
 \item{adFun}{A density function representing the age-dependent preservation
 model. It must be a density function, and consequently integrate to 1 
 (though this condition is not verified by the function). If not provided, a 
-uniform distribution will be used. The function must also have the following 
-properties:
+uniform distribution will be used by default. The function must also 
+have the following properties:
 
 \itemize{
 
@@ -80,16 +80,17 @@ to absolute geological time, in Mya, \emph{not} the lineage's age). Because
 of this, it is assumed to go from \code{tMax} to \code{0}, as opposed to 
 most functions in the package.
 
-\item Should be limited between \code{s} (i.e. the lineage's speciation in 
-geological time) and \code{e} (i.e. the lineage's extinction in geological 
-time), with \code{s} > \code{e}.
+\item Should be limited between \code{s} (i.e. the lineage's 
+speciation/birth) and \code{e} (i.e. the lineage's extinction/death), 
+with \code{s} > \code{e}.
 
 \item Include the arguments \code{t}, \code{s}, \code{e} and \code{sp}. 
 The argument sp is used to pass species-specific parameters (see examples),
 allowing for \code{dFun} to be species-inhomogeneous.
 }}
 
-\item{...}{Additional parameters related to \code{adFun}}
+\item{...}{Additional parameters used by the user's function (i.e.,
+\code{adFun})}
 }
 \value{
 A \code{data.frame} containing species names/numbers, whether each 
@@ -108,7 +109,7 @@ rates by a shift times vector and environmental matrix parameters.
 Optionally takes a vector of time bins representing geologic periods, if the
 user wishes occurrence times to be represented as a range instead of true 
 points. See \code{sample.time} - absolute time-dependent sampling only - 
-and \code{sample.age} - time and/or age-dependent sampling - for more 
+and \code{sample.age.time} - time and/or age-dependent sampling - for more 
 information.
 }
 \examples{
@@ -322,7 +323,7 @@ for (i in 1:length(ids)) {
 }
 
 # we will now do some examples with age-dependent rates. For more details,
-# check sample.age.
+# check sample.age.time.
 
 ###
 # simulate a group
