@@ -75,9 +75,16 @@ at the beginning and end of the function.
 }
 \examples{
 
+# note the shape of the fossilization becomes easier to see when rho 
+# is very high (e.g., >100), not done here due to package publication
+# constraints
+
+# histograms can be used to visualize preservation through time,
+# as seen in some examples below
+ 
 # vector of times
 time <- seq(10, 0, -0.1)
-
+ 
 ###
 # we can start with a constant Poisson rate
 
@@ -97,11 +104,10 @@ sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # age-dependence distribution
 dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
-  
   # check if it is a valid PERT
   if (e >= s) {
-    message("There is no PERT with e >= s")
-    return(rep(NaN, times = length(t)))
+   message("There is no PERT with e >= s")
+   return(rep(NaN, times = length(t)))
   }
   
   # find the valid and invalid times
@@ -114,36 +120,44 @@ dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
   
   # if user wants a log function
   if (log) {
-    # invalid times get -Inf
-    res[id1] <- -Inf
-    
-    # valid times calculated with log
-    res[id2] <- log(((s - t) ^ 2)*((-e + t) ^ 2)/((s - e) ^ 5*beta(a,b)))
+   # invalid times get -Inf
+   res[id1] <- -Inf
+  
+   # valid times calculated with log
+   res[id2] <- log(((s - t) ^ 2)*((-e + t) ^ 2)/((s - e) ^ 5*beta(a,b)))
   }
+  
   # otherwise
   else{
-    res[id1] <- 0
-    
-    res[id2] <- ((s - t) ^ 2)*((-e + t) ^ 2)/((s - e) ^ 5*beta(a,b))
+   res[id1] <- 0
+  
+   res[id2] <- ((s - t) ^ 2)*((-e + t) ^ 2)/((s - e) ^ 5*beta(a,b))
   }
   
   return(res)
 }
 
-# plot for the first species to take a look
-plot(time, rev(dPERT(time, 10, 0, 1)), main = "Age-dependence distribution",
-     xlab = "Species age (My)", ylab = "Density", 
-     xlim = c(0, 10), type = "l")
+# plot it for an example species who lived from 10 to 5 million years ago
+plot(time, rev(dPERT(t = time, s = 10, e = 5, a = 1)), 
+     main = "Age-dependence distribution",
+     xlab = "Species age (My)", ylab = "Density",
+     xlim = c(0, 5), type = "l")
 
-# sample first species
-occs <- sample.age.time(sim, rho, tMax = 10, S = 1, adFun = dPERT)
+# sample first and third species only
+occs <- sample.age.time(sim, rho = 3, tMax = 10, dPERT, S = c(1, 3))
+
+# plotting occurrences on histograms
+par(mfrow = c(1, 2))
+hist(occs[["t1"]], main = "Occurrences of sp1", xlab = "Age (My)")
+hist(occs[["t3"]], main = "Occurrences of sp3", xlab = "Age (My)")
+par(mfrow = c(1, 1))
 
 ###
 # now we can try time-dependent, age-indenpendent sampling
 
 # sampling rate
 rho <- function(t) {
-  return(1 + 0.5*t) 
+ return(1 + 0.5*t)
 }
 
 # set seed
@@ -152,31 +166,38 @@ set.seed(1)
 # simulate a group
 sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
-# age-dependence distribution - a uniform
+# age-independence distribution (a uniform density distribution in age) 
+# in the format that the function needs
 custom.uniform <- function(t, s, e, sp) {
-  
   # make sure it is a valid uniform
   if (e >= s) {
-    message("There is no uniform function with e >= s")
-    return(rep(NaN, times = length(t)))
+   message("There is no uniform function with e >= s")
+   return(rep(NaN, times = length(t)))
   }
   
   res <- dunif(x = t, min = e, max = s)
   
   return(res)
 }
+
 # this is the same as not supplying adFun, just an illustration
 
 # sample first 3 species
 occs <- sample.age.time(sim, rho, tMax = 10, S = 1:3,
-                       adFun = custom.uniform)
+                        adFun = custom.uniform)
+
+par(mfrow = c(1, 3))
+hist(occs[["t1"]], main = "Occurrences of sp1", xlab = "Age (My)")
+hist(occs[["t2"]], main = "Occurrences of sp2", xlab = "Age (My)")
+hist(occs[["t3"]], main = "Occurrencess of sp3", xlab = "Age (My)")
+par(mfrow = c(1, 1))
 
 ###
 # we can have more parameters on adFun
 
 # sampling rate
 rho <- function(t) {
-  return(1 + 0.5*t) 
+ return(1 + 0.5*t)
 }
 
 # set seed
@@ -185,28 +206,20 @@ set.seed(1)
 # simulate a group
 sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
-# here we will use the triangular distribution. We have some empirical 
-# evidence that taxa occurrences might present a triangular shape,
-# see Zliobaite et al 2017
+# here we will use the triangular distribution
 
 # age-dependence distribution
 dTRI <- function(t, s, e, sp, md) {
-  
-  # please note ths function is inverted. The correspondence would be:
-  # s = b maximum
-  # e = a minimum
-  # md = c distribution's mode
-  
   # make sure it is a valid TRI
   if (e >= s) {
-    message("There is no TRI with e >= s")
-    return(rep(NaN, times = length(t)))
+   message("There is no TRI with e >= s")
+   return(rep(NaN, times = length(t)))
   }
   
   # another condition we must check
   if (md < e | md > s) {
-    message("There is no TRI with md outside [s, e] interval")
-    return(rep(NaN, times = length(t)))
+   message("There is no TRI with md outside [s, e] interval")
+   return(rep(NaN, times = length(t)))
   }
   
   # needed to vectorize the function:
@@ -221,28 +234,31 @@ dTRI <- function(t, s, e, sp, md) {
   # (t >= e & t < md)
   res[id1] <- (2*(t[id1] - e)) / ((s - e) * (md - e))
   
-  #(t == md)
+  # (t == md)
   res[id2] <- 2 / (s - e)
   
-  #(md < t & t <= s)
+  # (md < t & t <= s)
   res[id3] <- (2*(s - t[id3])) / ((s - e) * (s - md))
   
-  #outside function's limits
+  # outside function's limits
   res[id4] <- 0
   
   return(res)
 }
 
-# plot for the first species to take a look
-plot(time, rev(dTRI(time, 10, 0, 1, 8)), 
-     main = "Age-dependence distribution",
-     xlab = "Species age (My)", ylab = "Density", 
-     xlim = c(0, 10), type = "l")
+# plot for a species living from 10 to 5 mya
+plot(time, rev(dTRI(time, 10, 5, 1, 9)),
+    main = "Age-dependence distribution",
+    xlab = "Species age (My)", ylab = "Density",
+    xlim = c(0, 10), type = "l")
 
 # sample first species
-occs <- sample.age.time(sim = sim, rho = rho, adFun = dTRI, 
-                       tMax = 10, S = 1, md = 8)
-# note we are providing the mode for the triangular sampling as an argument
+occs <- sample.age.time(sim = sim, rho = rho, adFun = dTRI,
+                  tMax = 10, S = 1, md = 8)
+# note we provide the peak for the triangular sampling as an argument
+# here that peak is assigned in absolute geological, but
+# it usually makes more sense to express this in terms
+# of age (a given percentile of the age, for instance)
 
 ###
 # we can also have a hat-shaped increase through the duration of a species
@@ -251,7 +267,7 @@ occs <- sample.age.time(sim = sim, rho = rho, adFun = dTRI,
 
 # sampling rate
 rho <- function(t) {
-  return(1 + 0.5*t) 
+ return(1 + 0.5*t)
 }
 
 # set seed
@@ -260,7 +276,7 @@ set.seed(1)
 # simulate a group
 sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
-# age-dependence distribution, with the "mde" of the triangle 
+# age-dependence distribution, with the "mde" of the triangle
 # being exactly at the last quarter of the duration of EACH lineage
 dTRImod1 <- function(t, s, e, sp) {
   # note that now we don't have the "md" parameter here,
@@ -268,8 +284,8 @@ dTRImod1 <- function(t, s, e, sp) {
   
   # check if it is a valid TRI
   if (e >= s) {
-    message("There is no TRI with e >= s")
-    return(rep(NaN, times = length(t)))
+   message("There is no TRI with e >= s")
+   return(rep(NaN, times = length(t)))
   }
   
   # calculate md
@@ -282,8 +298,8 @@ dTRImod1 <- function(t, s, e, sp) {
   
   # check it is a valid md
   if (md < e | md > s) {
-    message("There is no TRI with md outside [s, e] interval")
-    return(rep(NaN, times = length(t)))
+   message("There is no TRI with md outside [s, e] interval")
+   return(rep(NaN, times = length(t)))
   }
   
   # needed to vectorize function
@@ -304,14 +320,14 @@ dTRImod1 <- function(t, s, e, sp) {
 }
 
 # plot for the first species to take a look
-plot(time, rev(dTRImod1(time, 10, 0, 1)), 
-     main = "Age-dependence distribution",
-     xlab = "Species age (My)", ylab = "Density", 
-     xlim = c(0, 10), type = "l")
+plot(time, rev(dTRImod1(time, 10, 0, 1)),
+    main = "Age-dependence distribution",
+    xlab = "Species age (My)", ylab = "Density",
+    xlim = c(0, 10), type = "l")
 
 # sample first two species
 occs <- sample.age.time(sim = sim, rho = rho, adFun = dTRImod1, tMax = 10,
-                       S = 1:2)
+                  S = 1:2)
 
 # please note in this case, function dTRImod1 fixes "md" at the last quarter
 # of the duration of the lineage
@@ -323,7 +339,7 @@ occs <- sample.age.time(sim = sim, rho = rho, adFun = dTRImod1, tMax = 10,
 
 # sampling rate
 rho <- function(t) {
-  return(1 + 0.5*t) 
+ return(1 + 0.5*t)
 }
 
 # set seed
@@ -335,21 +351,20 @@ sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 # get the par and par1 vectors
 
 # a random quantity
-par <- runif(n = length(sim$TE), min = 0, max = sim$TS) 
-# its complement to the middle of the lineage's age. 
-par1 <- sim$TS / 2 - par 
-# note that the interaction between these two parameters creates a 
-# deterministic parameter, but inside the function one of them ("par") 
+par <- runif(n = length(sim$TE), min = 0, max = sim$TS)
+# its complement to the middle of the lineage's age.
+par1 <- sim$TS / 2 - par
+# note that the interaction between these two parameters creates a
+# deterministic parameter, but inside the function one of them ("par")
 # is a random parameter
 
-# age-dependence distribution, with the "mode" of the triangle
+# age-dependence distribution, with the "peak" of the triangle
 # being dependent on par and par1
 dTRImod2 <- function(t, s, e, sp) {
-  
   # make sure it is a valid TRI
   if (e >= s) {
-    message("There is no TRI with e >= s")
-    return(rep(NaN, times = length(t)))
+   message("There is no TRI with e >= s")
+   return(rep(NaN, times = length(t)))
   }
   
   # md depends on parameters
@@ -357,8 +372,8 @@ dTRImod2 <- function(t, s, e, sp) {
   
   # check that md is valid
   if (md < e | md > s) {
-    message("There is no TRI with md outside [s, e] interval")
-    return(rep(NaN, times = length(t)))
+   message("There is no TRI with md outside [s, e] interval")
+   return(rep(NaN, times = length(t)))
   }
   
   id1 <- which(t >= e & t < md)
@@ -377,14 +392,14 @@ dTRImod2 <- function(t, s, e, sp) {
 }
 
 # plot for the first species to take a look
-plot(time, rev(dTRImod2(time, 10, 0, 1)), 
-     main = "Age-dependence distribution",
-     xlab = "Species age (My)", ylab = "Density", 
-     xlim = c(0, 10), type = "l")
+plot(time, rev(dTRImod2(time, 10, 0, 1)),
+    main = "Age-dependence distribution",
+    xlab = "Species age (My)", ylab = "Density",
+    xlim = c(0, 10), type = "l")
 
 # sample the first 3 species
 occs <- sample.age.time(sim = sim, rho = rho, adFun = dTRImod2, tMax = 10,
-                       S = 1:3)
+                  S = 1:3)
 
 # we can also have a mix of age-independent and age-dependent
 # models in the same simulation
@@ -395,7 +410,7 @@ occs <- sample.age.time(sim = sim, rho = rho, adFun = dTRImod2, tMax = 10,
 
 # sampling rate
 rho <- function(t) {
-  return(1 + 0.5*t)
+ return(1 + 0.5*t)
 }
 # note one can also vary the model used for sampling rate
 # see ?sample.time for examples
@@ -411,11 +426,10 @@ sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 # age-dependent distribution
 # occurrences are uniformly distributed
 custom.uniform <- function(t, s, e, sp) {
-  
   # make sure it is a valid uniform
   if (e >= s) {
-    message("There is no uniform function with e >= s")
-    return(rep(NaN, times = length(t)))
+   message("There is no uniform function with e >= s")
+   return(rep(NaN, times = length(t)))
   }
   
   res <- dunif(x = t, min = e, max = s)
@@ -428,21 +442,20 @@ custom.uniform <- function(t, s, e, sp) {
 # get the par and par1 vectors
 
 # a random quantity
-par <- runif(n = length(sim$TE), min = 0, max = sim$TS) 
-# its complement to the middle of the lineage's age. 
-par1 <- sim$TS / 2 - par 
-# note that the interaction between these two parameters creates a 
-# deterministic parameter, but inside the function one of them ("par") 
+par <- runif(n = length(sim$TE), min = 0, max = sim$TS)
+# its complement to the middle of the lineage's age.
+par1 <- sim$TS / 2 - par
+# note that the interaction between these two parameters creates a
+# deterministic parameter, but inside the function one of them ("par")
 # is a random parameter
 
-# age-dependence distribution, with the "mode" of the triangle
+# age-dependence distribution, with the "peak" of the triangle
 # being dependent on par and par1
 dTRImod2 <- function(t, s, e, sp) {
-  
   # make sure it is a valid TRI
   if (e >= s) {
-    message("There is no TRI with e >= s")
-    return(rep(NaN, times = length(t)))
+   message("There is no TRI with e >= s")
+   return(rep(NaN, times = length(t)))
   }
   
   # md depends on parameters
@@ -450,8 +463,8 @@ dTRImod2 <- function(t, s, e, sp) {
   
   # check that md is valid
   if (md < e | md > s) {
-    message("There is no TRI with md outside [s, e] interval")
-    return(rep(NaN, times = length(t)))
+   message("There is no TRI with md outside [s, e] interval")
+   return(rep(NaN, times = length(t)))
   }
   
   id1 <- which(t >= e & t < md)
@@ -472,20 +485,20 @@ dTRImod2 <- function(t, s, e, sp) {
 # actual age-dependency defined by a mix
 dTriAndUniform <- function(t, s, e, sp) {
   return(
-    ifelse(t > 5, custom.uniform(t, s, e, sp),
-           dTRImod2(t, s, e, sp))
+  ifelse(t > 5, custom.uniform(t, s, e, sp),
+         dTRImod2(t, s, e, sp))
   )
 }
 
 # plot for the first species to take a look
-plot(time, rev(dTriAndUniform(time, 10, 0, 1)), 
-     main = "Age-dependence distribution",
-     xlab = "Species age (My)", ylab = "Density", 
-     xlim = c(0, 10), type = "l")
+plot(time, rev(dTriAndUniform(time, 10, 0, 1)),
+    main = "Age-dependence distribution",
+    xlab = "Species age (My)", ylab = "Density",
+    xlim = c(0, 10), type = "l")
 
 # sample the first species
 occs <- sample.age.time(sim = sim, rho = rho, adFun = dTriAndUniform,
-                       tMax = 10, S = 1)
+                  tMax = 10, S = 1)
 
 # please note in this case, function dTRImod2 fixes "md" at the last quarter
 # of the duration of the lineage

@@ -290,7 +290,7 @@ sample.time <- function(sim, rho, tMax, S = NULL) {
     sampled <- tMax - sampled
     
     # append to result
-    res[[s]] <- sampled
+    res[[paste0("t", s)]] <- sampled
   }
   
   return(res)
