@@ -99,7 +99,9 @@
 #'   return(2 - 0.15*t)
 #' }
 #' 
-#' #drawing whta the function for the preservation rate means:
+#' # Drawing what the function for the preservation rate means:
+#' # For the sake of completion, here we DID NOT reversed x-values just for 
+#' # ploting. A x-reversed example is in ?sample.time
 #' plot(x=10:0, y=rho(10:0), type="l", ylab="Preservation rate", xlab="Million 
 #' years since simulation started", xlim = c(10,0))
 #' 
@@ -136,7 +138,9 @@
 #' rho <- make.rate(rList, 10, rateShifts = rShifts)
 #' 
 #' 
-#' #drawing whta the function for the preservation rate means:
+#' # Drawing what the function for the preservation rate means:
+#' # For the sake of completion, here we DID NOT reversed x-values just for 
+#' # ploting. A x-reversed example is in ?sample.time
 #' plot(x=10:0, y=rho(10:0), type="l", ylab="Preservation rate", xlab="Million 
 #' years since simulation started", xlim = c(10,0))
 #' 
@@ -176,6 +180,8 @@
 #' rho <- make.rate(r_t, tMax = tMax, envRate = envR)
 #' 
 #' # let us check that rho is high enough to see a pattern
+#' # For the sake of completion, here we DID NOT reversed x-values just for 
+#' # ploting. A x-reversed example is in ?sample.time
 #' plot(seq(0,10,by=.1), rho(seq(0,10,by=.1)), type = 'l', main = "Sampling rate",
 #'      xlab = ""Million years since simulation started", ylab = "rho")
 #' 
