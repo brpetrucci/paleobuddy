@@ -50,8 +50,8 @@
 #' allowing for \code{dFun} to be species-inhomogeneous.
 #' }
 #'
-#' @param ... Additional parameters used by the user's function (i.e.,
-#' \code{adFun})
+#' @param ... Additional parameters (see examples) used by the user's function
+#' (i.e., \code{adFun}).
 #' 
 #' @inheritParams sample.time
 #'
