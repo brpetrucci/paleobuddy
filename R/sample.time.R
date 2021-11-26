@@ -39,6 +39,12 @@
 #' @examples
 #'
 #' ###
+#' #Note: sampling change in time and age are clearer to be seen in a plot
+#' # when the preservation rate (or its change) has a high magnitude (e.g., >10).
+#' #We will not do here due to constrains
+#' # on CRAN requisites, but users are encoraged to increase the numbers on the examples
+#' # to make any changes more easy to see.
+#' 
 #' # let us start with constant fossil sampling rate
 #' 
 #' # set seed
