@@ -365,7 +365,7 @@
 #'   return(res)
 #' }
 #' 
-#' #plting one example (species 1):
+#' #ploting one example (species 1):
 #' plot(x=0:10,dTRImod(t = 0:10, s = 10, e = 0, sp=1), type="l", xlab="age",
 #'      ylab="density")
 #' 
