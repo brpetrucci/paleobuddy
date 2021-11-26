@@ -49,6 +49,7 @@
 #' species is extant, and the true occurrence times of each fossil, a range of 
 #' occurrence times based on \code{bins}, or both.
 #'
+#' @inheritParams sample.time
 #' @inheritParams sample.age.time
 #'
 #' @author Matheus Januario and Bruno do Rosario Petrucci.
