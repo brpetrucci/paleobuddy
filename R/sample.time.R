@@ -86,7 +86,7 @@
 #' # time
 #' time <-  seq(0, 10, by = 0.1)
 #' 
-#' # visualizing the plot from past to present
+#' # visualizing the plot from past to present (note we reversed x-values)
 #' plot(x = time, y = rev(rho(time)), main = "Simulated preservation", 
 #'      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
 #'      xlim = c(10, 0))
@@ -113,7 +113,7 @@
 #' # time
 #' time <-  seq(0, 10, by = 0.1)
 #' 
-#' # visualizing the plot from past to present
+#' # visualizing the plot from past to present (note we reversed x-values)
 #' plot(x = time, y = rev(rho(time)), main = "Simulated preservation", 
 #'      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
 #'      xlim = c(10, 0))
@@ -142,7 +142,7 @@
 #' # final preservation
 #' rho <- make.rate(r_t, tMax = tMax, envRate = temp)
 #' 
-#' # visualizing the plot from past to present
+#' # visualizing the plot from past to present (note we reversed x-values)
 #' plot(x = time, y = rev(rho(time)), main = "Simulated preservation", 
 #'      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
 #'      xlim = c(10, 0))
@@ -177,7 +177,7 @@
 #' # final preservation
 #' rho <- make.rate(r_t, tMax = tMax, envRate = temp)
 #' 
-#' # visualizing the plot from past to present
+#' # visualizing the plot from past to present (note we reversed x-values)
 #' plot(x = time, y = rev(rho(time)), main = "Simulated preservation", 
 #'      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
 #'      xlim = c(10, 0))
@@ -222,7 +222,7 @@
 #'   ifelse(t < 5, rho1(t), rho2(t))
 #' }
 #' 
-#' # visualizing the plot from past to present
+#' # visualizing the plot from past to present (note we reversed x-values)
 #' plot(x = time, y = rev(rho(time)), main = "Simulated preservation", 
 #'      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
 #'      xlim = c(10, 0))
