@@ -100,8 +100,8 @@
 #' }
 #' 
 #' #drawing whta the function for the preservation rate means:
-#' plot(x=10:0, y=rho(10:0), type="l", ylab="Preservation rate", xlab="Time (Mya)",
-#'      xlim = c(10,0))
+#' plot(x=10:0, y=rho(10:0), type="l", ylab="Preservation rate", xlab="My 
+#' since simulation starts", xlim = c(10,0))
 #' 
 #' # the resolution of the fossil dataset:
 #' bins <- seq(from = 10, to = 0,
@@ -137,8 +137,8 @@
 #' 
 #' 
 #' #drawing whta the function for the preservation rate means:
-#' plot(x=10:0, y=rho(10:0), type="l", ylab="Preservation rate", xlab="Time (Mya)",
-#'      xlim = c(10,0))
+#' plot(x=10:0, y=rho(10:0), type="l", ylab="Preservation rate", xlab="My 
+#' since simulation starts", xlim = c(10,0))
 #' 
 #' # the resolution of the fossil dataset:
 #' bins <- seq(from = 10, to = 0,
