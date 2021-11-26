@@ -13,11 +13,11 @@
 #' \code{sample.time}.
 #'
 #' @param sim A \code{sim} object, containing extinction times, speciation 
-#' times, parent, and status information for each species in the simulation. 
-#' See \code{?sim}.
+#' times, parent, and status information (extant or extinct) for each species
+#' in the simulation. See \code{?sim}.
 #' 
-#' @param rho Sampling rate (per species per million years) over time. It can 
-#' be a \code{numeric} describing a constant rate or a \code{function(t)} 
+#' @param rho Sampling rate (eventsper species per million years) over time. 
+#' It can be a \code{numeric} describing a constant rate or a \code{function(t)} 
 #' describing the variation in sampling over time. For more flexibility on 
 #' sampling, see \code{make.rate} to create more complex rates. Note that 
 #' \code{rho} should always be greater than or equal to zero.
@@ -26,7 +26,7 @@
 #' time greater than \code{tMax} would mean the occurrence is sampled after the
 #' present, so for consistency we require this argument. This is also required
 #' to ensure time follows the correct direction both in the Poisson process and
-#' in the return.
+#' in the output.
 #'
 #' @param S A vector of species numbers to be sampled. The default is all 
 #' species in \code{sim}. Species not included in \code{S} will not be sampled 
