@@ -46,7 +46,7 @@
 #' age ranges. Default is \code{FALSE}
 #'
 #' @return A \code{data.frame} containing species names/numbers, whether each 
-#' species is extant, and the true occurrence times of each fossil, a range of 
+#' species is extant or extinct, and the true occurrence times of each fossil, a range of 
 #' occurrence times based on \code{bins}, or both.
 #'
 #' @inheritParams sample.time
