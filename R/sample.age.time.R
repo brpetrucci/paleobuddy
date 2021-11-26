@@ -30,14 +30,20 @@
 #' \item Return a vector of preservation densities for each time in a given
 #' vector \code{t} in geological time. 
 #'
-#' \item Be parametrized in absolute geological time (i.e. should be relative 
-#' to absolute geological time, in Mya, \emph{not} the lineage's age). Because 
-#' of this, it is assumed to go from \code{tMax} to \code{0}, as opposed to 
-#' most functions in the package.
+#' \item Be parametrized in the absolute geological time associated to 
+#' each moment in age (i.e. age works relative to absolute geological 
+#' time, in Mya - in other words, the convention is TS > 0)). The function 
+#' \emph{do not} directly uses the lineage's age (which case would mean that
+#' TS = 0 for all species whenever they are born)). Because of this, it is
+#' assumed to go from \code{tMax} to \code{0}, as opposed to most functions 
+#' in the package.
 #'
 #' \item Should be limited between \code{s} (i.e. the lineage's 
 #' speciation/birth) and \code{e} (i.e. the lineage's extinction/death), 
-#' with \code{s} > \code{e}.
+#' with \code{s} > \code{e}. It is possible to assign parameters in absolute 
+#' geological time (see third example) and in parameters relative to age
+#' as long as this follows the convention of age epxressed in absolute 
+#' geological time (see fourth example).
 #'
 #' \item Include the arguments \code{t}, \code{s}, \code{e} and \code{sp}. 
 #' The argument sp is used to pass species-specific parameters (see examples),
