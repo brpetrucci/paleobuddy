@@ -100,8 +100,8 @@
 #' }
 #' 
 #' #drawing whta the function for the preservation rate means:
-#' plot(x=10:0, y=rho(10:0), type="l", ylab="Preservation rate", xlab="My 
-#' since simulation starts", xlim = c(10,0))
+#' plot(x=10:0, y=rho(10:0), type="l", ylab="Preservation rate", xlab="Million 
+#' years since simulation started", xlim = c(10,0))
 #' 
 #' # the resolution of the fossil dataset:
 #' bins <- seq(from = 10, to = 0,
@@ -137,8 +137,8 @@
 #' 
 #' 
 #' #drawing whta the function for the preservation rate means:
-#' plot(x=10:0, y=rho(10:0), type="l", ylab="Preservation rate", xlab="My 
-#' since simulation starts", xlim = c(10,0))
+#' plot(x=10:0, y=rho(10:0), type="l", ylab="Preservation rate", xlab="Million 
+#' years since simulation started", xlim = c(10,0))
 #' 
 #' # the resolution of the fossil dataset:
 #' bins <- seq(from = 10, to = 0,
@@ -177,7 +177,7 @@
 #' 
 #' # let us check that rho is high enough to see a pattern
 #' plot(seq(0,10,by=.1), rho(seq(0,10,by=.1)), type = 'l', main = "Sampling rate",
-#'      xlab = "My since simulation starts", ylab = "rho")
+#'      xlab = ""Million years since simulation started", ylab = "rho")
 #' 
 #' # the resolution of the fossil dataset:
 #' bins <- seq(from = 10, to = 0,
