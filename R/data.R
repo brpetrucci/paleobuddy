@@ -2,7 +2,9 @@
 #' 
 #' Temperature data during the Cenozoic. Modified from the \code{InfTemp} data
 #' set in \href{https://github.com/hmorlon/PANDA}{RPANDA}, originally inferred 
-#' from delta O18 measurements.
+#' from delta O18 measurements. Inverted so lower times represent time since
+#' first measurement, to be in line with the past-to-present convention of most
+#' time-dependent functions in paleobuddy.
 #' 
 #' @usage 
 #' 
@@ -43,7 +45,9 @@
 #' 
 #' CO2 data during the Jurassic. Modified from the \code{co2} set in 
 #' \href{https://github.com/hmorlon/PANDA}{RPANDA}, originally taken from Mayhew 
-#' et al (2008, 2012). 
+#' et al (2008, 2012). Inverted so lower times represent time since first 
+#' measurement, to be in line with the past-to-present convention of most
+#' time-dependent functions in paleobuddy.
 #' 
 #' @usage 
 #' 

@@ -28,7 +28,9 @@ data(temp)
 \description{
 Temperature data during the Cenozoic. Modified from the \code{InfTemp} data
 set in \href{https://github.com/hmorlon/PANDA}{RPANDA}, originally inferred 
-from delta O18 measurements.
+from delta O18 measurements. Inverted so lower times represent time since
+first measurement, to be in line with the past-to-present convention of most
+time-dependent functions in paleobuddy.
 }
 \references{
 Morlon H. et al (2016) RPANDA: an R package for macroevolutionary analyses on 
