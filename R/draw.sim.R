@@ -21,7 +21,10 @@
 #' elements) of the figure). Default value of this parameter is "TS", so by
 #' default species will be sorted by order of origination in the simulation.
 #' 
-#' @param lwd_lin The relative thickness/size of all elements (i.e., lines and 
+#' @param showLabel A \code{logical} on whether to draw species labels (i.e. 
+#' species 1 being t1, species 2 t2 etc.). Default is \code{TRUE}.
+#' 
+#' @param lwdLin The relative thickness/size of all elements (i.e., lines and 
 #' points in the plot. Default value is 4 (i.e. equal to \code{lwd = 4} for 
 #' the black horizontal lines).
 #' 
@@ -153,7 +156,8 @@
 #' @rdname draw.sim
 #' @export
 
-draw.sim=function (sim, fossils = NULL, sortBy = "TS", lwd_lin=4, ...) {
+draw.sim <- function (sim, fossils = NULL, sortBy = "TS", 
+                      lwdLin = 4, showLabel = TRUE, ...) {
   # make NAs 0
   sim$TE[is.na(sim$TE)] <- 0
   
@@ -258,13 +262,17 @@ draw.sim=function (sim, fossils = NULL, sortBy = "TS", lwd_lin=4, ...) {
   
   plot(NA, ...)
   segments(x0 = sim_mod$TS, x1 = sim_mod$TE, y1 = 1:length(sim_mod$TE), 
-           y0 = 1:length(sim_mod$TE), lwd = lwd_lin, col = "black")
-  text(y = 1:length(sim_mod$TE), 
-       x = sim_mod$TE - ((max(sim$TS) - min(sim$TE)) * 0.035), 
-       labels = paste0("t", 
-                       sprintf(paste0("%0", 
-                                      round(log(length(sim$TE), 10), 
-                                            digits = 0) + 1, "d"), ord)))
+           y0 = 1:length(sim_mod$TE), lwd = lwdLin, col = "black")
+  
+  # show species labels if user wants
+  if (showLabel) {
+    text(y = 1:length(sim_mod$TE), 
+         x = sim_mod$TE - ((max(sim$TS) - min(sim$TE)) * 0.035), 
+         labels = paste0("t", 
+                         sprintf(paste0("%0", 
+                                        ceiling(log(length(sim$TE), 10)), "d"), 
+                                 ord)))
+  }
   
   luca <- which(is.na(sim_mod$PAR))
   
@@ -272,7 +280,7 @@ draw.sim=function (sim, fossils = NULL, sortBy = "TS", lwd_lin=4, ...) {
   
   segments(x0 = sim_mod$TS[-luca], x1 = sim_mod$TS[-luca], 
            y1 = (1:length(sim_mod$TE))[-luca], y0 = (aux_y[ord])[-luca], 
-           lty = 2, lwd = lwd_lin*0.25, col = "gray50")
+           lty = 2, lwd = lwdLin*0.25, col = "gray50")
   
   if (!(is.null(fossils))) {
     ids <- as.numeric(gsub("t", "", fossils$Species))
@@ -280,7 +288,7 @@ draw.sim=function (sim, fossils = NULL, sortBy = "TS", lwd_lin=4, ...) {
     if ("SampT" %in% colnames(fossils)) {
       points(x = fossils$SampT, 
              y = unlist(lapply(ids, function(x) which(ord == x))), 
-             col = "red", pch = 16, cex=lwd_lin*0.25)
+             col = "red", pch = 16, cex = lwdLin*0.25)
     }
     
     else if ("MaxT" %in% colnames(fossils) & "MinT" %in% 
@@ -290,7 +298,7 @@ draw.sim=function (sim, fossils = NULL, sortBy = "TS", lwd_lin=4, ...) {
       
       segments(x1 = fossils$MaxT, x0 = fossils$MinT, y1 = y_jittered, 
                y0 = y_jittered, col = makeTransparent("red", 100), 
-               lwd = lwd_lin * 0.75)
+               lwd = lwdLin * 0.75)
     }
   }
 }

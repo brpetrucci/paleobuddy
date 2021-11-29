@@ -29,7 +29,7 @@
 #' @name sim
 #' 
 #' @importFrom graphics plot par
-#' @importFrom utils head
+#' @importFrom utils head tail
 #' 
 NULL
 
@@ -110,20 +110,83 @@ print.sim <- function(x, ...) {
   
   # and then some details for first five
   cat("\nExtinction times (NA means extant)\n")
-  print(utils::head(sim$TE))
+  print(head(sim$TE))
   
   cat("\n\nSpeciation times \n")
-  print(utils::head(sim$TS))
+  print(head(sim$TS))
   
   cat("\n\nSpecies parents (NA for initial)\n")
-  print(utils::head(sim$PAR))
+  print(head(sim$PAR))
   
   cat("\n\nSpecies status (extinct or extant)\n")
-  print(utils::head(status))
+  print(head(status))
   
   # to see the whole vector
   cat("\n\nFor more details on vector y, try sim$y, with y one of\n")
   cat(names(sim))
+}
+
+#' @rdname sim
+#' @details \code{head.sim} Selects only a number of species from the beginning
+#' of a \code{sim} object.
+#' 
+#' @export
+
+head.sim <- function(x, ...) {
+  # change name for clarity
+  sim <- x
+  
+  # first check that it is a valid sim
+  if (!is.sim(sim)) {
+    stop("Invalid sim object, see ?sim")
+  }
+  
+  # create new object
+  res <- list()
+  
+  # fill it
+  res$TS <- head(sim$TS, ...)
+  res$TE <- head(sim$TE, ...)
+  res$PAR <- head(sim$PAR, ...)
+  res$EXTANT <- head(sim$EXTANT, ...)
+  
+  # make it a sim
+  class(res) <- "sim"
+  
+  # return it
+  return(res)
+}
+
+#' @rdname sim
+#' @details \code{tail.sim} Selects only a number of species from the end of a
+#' \code{sim} object.
+#' 
+#' @export
+#' 
+
+tail.sim <- function(x, ...) {
+  # change name for clarity
+  sim <- x
+  
+  # first check that it is a valid sim
+  if (!is.sim(sim)) {
+    stop("Invalid sim object, see ?sim")
+  }
+  
+  # create new object
+  res <- list()
+  
+  # fill it
+  res$TS <- tail(sim$TS, ...)
+  res$TE <- tail(sim$TE, ...)
+  res$PAR <- tail(sim$PAR, ...)
+  res$EXTANT <- tail(sim$EXTANT, ...)
+  
+  # make it a sim
+  class(res) <- "sim"
+  
+  # return it
+  return(res)
 }
 
 #' @rdname sim

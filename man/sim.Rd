@@ -4,6 +4,8 @@
 \alias{sim}
 \alias{is.sim}
 \alias{print.sim}
+\alias{head.sim}
+\alias{tail.sim}
 \alias{summary.sim}
 \alias{plot.sim}
 \alias{sim.counts}
@@ -12,6 +14,10 @@
 is.sim(sim)
 
 \method{print}{sim}(x, ...)
+
+\method{head}{sim}(x, ...)
+
+\method{tail}{sim}(x, ...)
 
 \method{summary}{sim}(object, ...)
 
@@ -59,6 +65,12 @@ irrelevant.
 straightforward and informative sequence manner. We provide details only for 
 the first few species, since otherwise this print could be overwhelming for 
 simulations with 10+ species.
+
+\code{head.sim} Selects only a number of species from the beginning
+of a \code{sim} object.
+
+\code{tail.sim} Selects only a number of species from the end of a
+\code{sim} object.
 
 \code{summary.sim} Quantitative details on the \code{sim} object. 
 Prints the number of species, number of extant species, summary of durations

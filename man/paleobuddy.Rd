@@ -100,6 +100,9 @@ information.
 
 \examples{
 
+# here we present a quick example of paleobuddy usage
+# for a more involved introduction, see the \code{overview} vignette
+
 # make a vector for time
 time <- seq(0, 10, 0.1)
 
