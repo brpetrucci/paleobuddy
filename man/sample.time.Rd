@@ -8,11 +8,11 @@ sample.time(sim, rho, tMax, S = NULL)
 }
 \arguments{
 \item{sim}{A \code{sim} object, containing extinction times, speciation 
-times, parent, and status information for each species in the simulation. 
-See \code{?sim}.}
+times, parent, and status information (extant or extinct) for each species
+in the simulation. See \code{?sim}.}
 
-\item{rho}{Sampling rate (per species per million years) over time. It can 
-be a \code{numeric} describing a constant rate or a \code{function(t)} 
+\item{rho}{Sampling rate (events per species per million years) over time. 
+It can be a \code{numeric} describing a constant rate or a \code{function(t)} 
 describing the variation in sampling over time. For more flexibility on 
 sampling, see \code{make.rate} to create more complex rates. Note that 
 \code{rho} should always be greater than or equal to zero.}
@@ -21,7 +21,7 @@ sampling, see \code{make.rate} to create more complex rates. Note that
 time greater than \code{tMax} would mean the occurrence is sampled after the
 present, so for consistency we require this argument. This is also required
 to ensure time follows the correct direction both in the Poisson process and
-in the return.}
+in the output.}
 
 \item{S}{A vector of species numbers to be sampled. The default is all 
 species in \code{sim}. Species not included in \code{S} will not be sampled 
@@ -34,8 +34,8 @@ A list of vectors of occurrence times for each species in \code{S}.
 Generates a vector of occurrence times for species in a simulation using a
 Poisson process. Allows for the Poisson rate to be (1) a constant or (2) a 
 function of time. For fossil sampling dependent on species age in addition 
-to absolute time, see \code{sample.age.time}. For a more general function that
-considers these and other fossil sampling rate cases, see 
+to absolute time, see \code{sample.age.time}. For a more general function 
+that considers these and other fossil sampling rate cases, see 
 \code{sample.clade}.
 }
 \details{
@@ -89,7 +89,7 @@ rho <- make.rate(rList, tMax = 10, rateShifts = rShifts)
 time <-  seq(0, 10, by = 0.1)
 
 # visualizing the plot from past to present
-plot(x = time, y = rev(rho(time)), main = "Simulated preservation", 
+plot(x = time, y = rev(rho(time)), main = "Preservation rate", 
      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
      xlim = c(10, 0))
 
@@ -116,7 +116,7 @@ rho <- function(t) {
 time <-  seq(0, 10, by = 0.1)
 
 # visualizing the plot from past to present
-plot(x = time, y = rev(rho(time)), main = "Simulated preservation", 
+plot(x = time, y = rev(rho(time)), main = "Preservation rate", 
      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
      xlim = c(10, 0))
 
@@ -145,7 +145,7 @@ r_t <-  function(t, temp) {
 rho <- make.rate(r_t, tMax = tMax, envRate = temp)
 
 # visualizing the plot from past to present
-plot(x = time, y = rev(rho(time)), main = "Simulated preservation", 
+plot(x = time, y = rev(rho(time)), main = "Preservation rate", 
      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
      xlim = c(10, 0))
 
@@ -180,7 +180,7 @@ r_t <-  function(t, temp) {
 rho <- make.rate(r_t, tMax = tMax, envRate = temp)
 
 # visualizing the plot from past to present
-plot(x = time, y = rev(rho(time)), main = "Simulated preservation", 
+plot(x = time, y = rev(rho(time)), main = "Preservation rate", 
      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
      xlim = c(10, 0))
 
@@ -225,7 +225,7 @@ rho <- function(t) {
 }
 
 # visualizing the plot from past to present
-plot(x = time, y = rev(rho(time)), main = "Simulated preservation", 
+plot(x = time, y = rev(rho(time)), main = "Preservation rate", 
      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
      xlim = c(10, 0))
 

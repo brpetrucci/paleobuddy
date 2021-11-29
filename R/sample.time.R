@@ -3,8 +3,8 @@
 #' Generates a vector of occurrence times for species in a simulation using a
 #' Poisson process. Allows for the Poisson rate to be (1) a constant or (2) a 
 #' function of time. For fossil sampling dependent on species age in addition 
-#' to absolute time, see \code{sample.age.time}. For a more general function that
-#' considers these and other fossil sampling rate cases, see 
+#' to absolute time, see \code{sample.age.time}. For a more general function 
+#' that considers these and other fossil sampling rate cases, see 
 #' \code{sample.clade}.
 #' 
 #' Note that while the Poisson process occurs in forward time, we return (both 
@@ -16,7 +16,7 @@
 #' times, parent, and status information (extant or extinct) for each species
 #' in the simulation. See \code{?sim}.
 #' 
-#' @param rho Sampling rate (eventsper species per million years) over time. 
+#' @param rho Sampling rate (events per species per million years) over time. 
 #' It can be a \code{numeric} describing a constant rate or a \code{function(t)} 
 #' describing the variation in sampling over time. For more flexibility on 
 #' sampling, see \code{make.rate} to create more complex rates. Note that 
@@ -39,12 +39,6 @@
 #' @examples
 #'
 #' ###
-#' #Note: sampling change in time and age are clearer to be seen in a plot
-#' # when the preservation rate (or its change) has a high magnitude (e.g., >10).
-#' #We will not do here due to constrains
-#' # on CRAN requisites, but users are encoraged to increase the numbers on the examples
-#' # to make any changes more easy to see.
-#' 
 #' # let us start with constant fossil sampling rate
 #' 
 #' # set seed
@@ -86,8 +80,8 @@
 #' # time
 #' time <-  seq(0, 10, by = 0.1)
 #' 
-#' # visualizing the plot from past to present (note we reversed x-values)
-#' plot(x = time, y = rev(rho(time)), main = "Simulated preservation", 
+#' # visualizing the plot from past to present
+#' plot(x = time, y = rev(rho(time)), main = "Preservation rate", 
 #'      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
 #'      xlim = c(10, 0))
 #' 
@@ -113,8 +107,8 @@
 #' # time
 #' time <-  seq(0, 10, by = 0.1)
 #' 
-#' # visualizing the plot from past to present (note we reversed x-values)
-#' plot(x = time, y = rev(rho(time)), main = "Simulated preservation", 
+#' # visualizing the plot from past to present
+#' plot(x = time, y = rev(rho(time)), main = "Preservation rate", 
 #'      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
 #'      xlim = c(10, 0))
 #' 
@@ -142,8 +136,8 @@
 #' # final preservation
 #' rho <- make.rate(r_t, tMax = tMax, envRate = temp)
 #' 
-#' # visualizing the plot from past to present (note we reversed x-values)
-#' plot(x = time, y = rev(rho(time)), main = "Simulated preservation", 
+#' # visualizing the plot from past to present
+#' plot(x = time, y = rev(rho(time)), main = "Preservation rate", 
 #'      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
 #'      xlim = c(10, 0))
 #' 
@@ -177,8 +171,8 @@
 #' # final preservation
 #' rho <- make.rate(r_t, tMax = tMax, envRate = temp)
 #' 
-#' # visualizing the plot from past to present (note we reversed x-values)
-#' plot(x = time, y = rev(rho(time)), main = "Simulated preservation", 
+#' # visualizing the plot from past to present
+#' plot(x = time, y = rev(rho(time)), main = "Preservation rate", 
 #'      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
 #'      xlim = c(10, 0))
 #' 
@@ -222,8 +216,8 @@
 #'   ifelse(t < 5, rho1(t), rho2(t))
 #' }
 #' 
-#' # visualizing the plot from past to present (note we reversed x-values)
-#' plot(x = time, y = rev(rho(time)), main = "Simulated preservation", 
+#' # visualizing the plot from past to present
+#' plot(x = time, y = rev(rho(time)), main = "Preservation rate", 
 #'      type = "l", xlab = "Time (Mya)", ylab = "Rate (events/species/My)",
 #'      xlim = c(10, 0))
 #' 

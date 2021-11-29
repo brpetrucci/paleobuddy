@@ -4,7 +4,7 @@
 \alias{draw.sim}
 \title{Draw a sim object}
 \usage{
-draw.sim(sim, fossils = NULL, sortBy = "TS")
+draw.sim(sim, fossils = NULL, sortBy = "TS", lwd_lin = 4, ...)
 }
 \arguments{
 \item{sim}{A \code{sim} object, containing extinction times, speciation 
@@ -23,6 +23,12 @@ the order in which lineages should be drawn (from the bottom
 (i.e. integer = 1)) to the upper side (integer = length of the \code{sim} 
 elements) of the figure). Default value of this parameter is "TS", so by
 default species will be sorted by order of origination in the simulation.}
+
+\item{lwd_lin}{The relative thickness/size of all elements (i.e., lines and 
+points in the plot. Default value is 4 (i.e. equal to \code{lwd = 4} for 
+the black horizontal lines).}
+
+\item{...}{Further arguments to be passed to \code{plot}}
 }
 \value{
 A plot of the simulation in the graphics window. If the 

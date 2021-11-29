@@ -32,26 +32,25 @@
 #'
 #' \item Be parametrized in the absolute geological time associated to 
 #' each moment in age (i.e. age works relative to absolute geological 
-#' time, in Mya - in other words, the convention is TS > 0)). The function 
-#' \emph{do not} directly uses the lineage's age (which case would mean that
-#' TS = 0 for all species whenever they are born)). Because of this, it is
+#' time, in Mya - in other words, the convention is TS > 0). The function 
+#' \emph{does not} directly use the lineage's age (which would mean that
+#' TS = 0 for all species whenever they are born). Because of this, it is
 #' assumed to go from \code{tMax} to \code{0}, as opposed to most functions 
 #' in the package.
 #'
 #' \item Should be limited between \code{s} (i.e. the lineage's 
 #' speciation/birth) and \code{e} (i.e. the lineage's extinction/death), 
 #' with \code{s} > \code{e}. It is possible to assign parameters in absolute 
-#' geological time (see third example) and in parameters relative to age
-#' as long as this follows the convention of age epxressed in absolute 
-#' geological time (see fourth example).
+#' geological time (see third example) and relative to age as long as this 
+#' follows the convention of age expressed in absolute geological time (see 
+#' fourth example).
 #'
 #' \item Include the arguments \code{t}, \code{s}, \code{e} and \code{sp}. 
 #' The argument sp is used to pass species-specific parameters (see examples),
 #' allowing for \code{dFun} to be species-inhomogeneous.
 #' }
 #'
-#' @param ... Additional parameters (see examples) used by the user's function
-#' (i.e., \code{adFun}).
+#' @param ... Additional parameters used by \code{adFun}. See examples.
 #' 
 #' @inheritParams sample.time
 #'
@@ -61,21 +60,12 @@
 #' @author Matheus Januario
 #'
 #' @examples
-#' 
-#' #Note: sampling change in time and age are clearer to be seen in a plot
-#' # when the preservation rate (or its change) has a high magnitude (e.g., >10).
-#' #We will not do here due to constrains
-#' # on CRAN requisites, but users are encoraged to increase the numbers on the examples
-#' # to make any changes more easy to see.
-#' 
-#' # histograms can be used to visualize preservation through time,
-#' # as seen in some examples below
 #'  
 #' # vector of times
 #' time <- seq(10, 0, -0.1)
 #'  
 #' ###
-#' # we can start with a constant Poisson rate
+#' # we can start with a constant case
 #' 
 #' # sampling rate
 #' rho <- 3
@@ -113,14 +103,15 @@
 #'    res[id1] <- -Inf
 #'   
 #'    # valid times calculated with log
-#'    res[id2] <- log(((s - t) ^ 2)*((-e + t) ^ 2)/((s - e) ^ 5*beta(a,b)))
+#'    res[id2] <- log(((s - t) ^ 2) * ((-e + t) ^ 2) / 
+#'                  ((s - e) ^ 5 * beta(a, b)))
 #'   }
 #'   
 #'   # otherwise
 #'   else{
 #'    res[id1] <- 0
 #'   
-#'    res[id2] <- ((s - t) ^ 2)*((-e + t) ^ 2)/((s - e) ^ 5*beta(a,b))
+#'    res[id2] <- ((s - t) ^ 2) * ((-e + t) ^ 2) / ((s - e) ^ 5 * beta(a, b))
 #'   }
 #'   
 #'   return(res)
@@ -133,7 +124,7 @@
 #'      xlim = c(0, 5), type = "l")
 #' 
 #' # sample first and third species only
-#' occs <- sample.age.time(sim, rho = 3, tMax = 10, dPERT, S = c(1, 3))
+#' occs <- sample.age.time(sim, rho, tMax = 10, adFun = dPERT, S = c(1, 3))
 #' 
 #' # plotting occurrences on histograms
 #' par(mfrow = c(1, 2))
@@ -155,7 +146,7 @@
 #' # simulate a group
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 #' 
-#' # age-independence distribution (a uniform density distribution in age) 
+#' # age-dependence distribution (a uniform density distribution in age) 
 #' # in the format that the function needs
 #' custom.uniform <- function(t, s, e, sp) {
 #'   # make sure it is a valid uniform
@@ -235,15 +226,18 @@
 #'   return(res)
 #' }
 #' 
+#' # set mode at 8
+#' md <- 8
+#' 
 #' # plot for a species living from 10 to 5 mya
-#' plot(time, rev(dTRI(time, 10, 5, 1, 9)),
+#' plot(time, rev(dTRI(time, 10, 5, 1, md)),
 #'     main = "Age-dependence distribution",
 #'     xlab = "Species age (My)", ylab = "Density",
 #'     xlim = c(0, 10), type = "l")
 #' 
 #' # sample first species
 #' occs <- sample.age.time(sim = sim, rho = rho, adFun = dTRI,
-#'                   tMax = 10, S = 1, md = 8)
+#'                   tMax = 10, S = 1, md = md)
 #' # note we provide the peak for the triangular sampling as an argument
 #' # here that peak is assigned in absolute geological, but
 #' # it usually makes more sense to express this in terms
@@ -300,15 +294,15 @@
 #'   # vectorize the function
 #'   res<-vector()
 #'   
-#'   res[id1] <- (2*(t[id1] - e)) / ((s - e) * (md - e))
+#'   res[id1] <- (2 * (t[id1] - e)) / ((s - e) * (md - e))
 #'   res[id2] <- 2 / (s - e)
-#'   res[id3] <- (2*(s - t[id3])) / ((s - e) * (s - md))
+#'   res[id3] <- (2 * (s - t[id3])) / ((s - e) * (s - md))
 #'   res[id4] <- 0
 #'   
 #'   return(res)
 #' }
 #' 
-#' # plot for the first species to take a look
+#' # plot for a species living between 10 and 0 mya
 #' plot(time, rev(dTRImod1(time, 10, 0, 1)),
 #'     main = "Age-dependence distribution",
 #'     xlab = "Species age (My)", ylab = "Density",
@@ -339,10 +333,14 @@
 #' 
 #' # get the par and par1 vectors
 #' 
-#' # a random quantity
-#' par <- runif(n = length(sim$TE), min = 0, max = sim$TS)
+#' # get mins vector
+#' minsPar <- ifelse(is.na(sim$TE), 0, sim$TE)
+#' 
+#' # a random time inside each species' duration
+#' par <- runif(n = length(sim$TE), min = minsPar, max = sim$TS)
+#'              
 #' # its complement to the middle of the lineage's age.
-#' par1 <- sim$TS / 2 - par
+#' par1 <- (((sim$TS - minsPar) / 2) + minsPar) - par
 #' # note that the interaction between these two parameters creates a
 #' # deterministic parameter, but inside the function one of them ("par")
 #' # is a random parameter
@@ -372,16 +370,16 @@
 #'   
 #'   res <- vector()
 #'   
-#'   res[id1] <- (2*(t[id1] - e)) / ((s - e)*(md - e))
+#'   res[id1] <- (2*(t[id1] - e)) / ((s - e) * (md - e))
 #'   res[id2] <- 2 / (s - e)
-#'   res[id3] <- (2*(s - t[id3])) / ((s - e)*(s - md))
+#'   res[id3] <- (2*(s - t[id3])) / ((s - e) * (s - md))
 #'   res[id4] <- 0
 #'   
 #'   return(res)
 #' }
 #' 
-#' # plot for the first species to take a look
-#' plot(time, rev(dTRImod2(time, 10, 0, 1)),
+#' # plot for the first species
+#' plot(time, rev(dTRImod2(time, sim$TS[1], minsPar[1], 1)),
 #'     main = "Age-dependence distribution",
 #'     xlab = "Species age (My)", ylab = "Density",
 #'     xlim = c(0, 10), type = "l")
@@ -390,12 +388,9 @@
 #' occs <- sample.age.time(sim = sim, rho = rho, adFun = dTRImod2, tMax = 10,
 #'                   S = 1:3)
 #' 
-#' # we can also have a mix of age-independent and age-dependent
-#' # models in the same simulation
-#' 
 #' ###
-#' # we can have age-independent sampling before 5my and
-#' # age-dependent afterwards
+#' # we can also have a mix of age-independent and age-dependent
+#' # sampling in the same simulation
 #' 
 #' # sampling rate
 #' rho <- function(t) {
@@ -430,10 +425,14 @@
 #' 
 #' # get the par and par1 vectors
 #' 
-#' # a random quantity
-#' par <- runif(n = length(sim$TE), min = 0, max = sim$TS)
+#' # get mins vector
+#' minsPar <- ifelse(is.na(sim$TE), 0, sim$TE)
+#' 
+#' # a random time inside each species' duration
+#' par <- runif(n = length(sim$TE), min = minsPar, max = sim$TS)
+#'              
 #' # its complement to the middle of the lineage's age.
-#' par1 <- sim$TS / 2 - par
+#' par1 <- (((sim$TS - minsPar) / 2) + minsPar) - par
 #' # note that the interaction between these two parameters creates a
 #' # deterministic parameter, but inside the function one of them ("par")
 #' # is a random parameter
@@ -478,9 +477,11 @@
 #'          dTRImod2(t, s, e, sp))
 #'   )
 #' }
+#' # starts out uniform, then becomes TRI 
+#' # after 5my (in absolute geological time)
 #' 
-#' # plot for the first species to take a look
-#' plot(time, rev(dTriAndUniform(time, 10, 0, 1)),
+#' # plot for the first species
+#' plot(time, rev(dTriAndUniform(time, sim$TS[1], minsPar[1], 1)),
 #'     main = "Age-dependence distribution",
 #'     xlab = "Species age (My)", ylab = "Density",
 #'     xlim = c(0, 10), type = "l")
@@ -488,9 +489,6 @@
 #' # sample the first species
 #' occs <- sample.age.time(sim = sim, rho = rho, adFun = dTriAndUniform,
 #'                   tMax = 10, S = 1)
-#' 
-#' # please note in this case, function dTRImod2 fixes "md" at the last quarter
-#' # of the duration of the lineage
 #' 
 #' @name sample.age.time
 #' @rdname sample.age.time

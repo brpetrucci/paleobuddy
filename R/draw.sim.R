@@ -21,11 +21,11 @@
 #' elements) of the figure). Default value of this parameter is "TS", so by
 #' default species will be sorted by order of origination in the simulation.
 #' 
-#' @param lwd_lin relative thickness/size of all elements (i.e., lines and 
-#' points in the plot. Default value is 4 (i.e. equals to lwd=4 for the black
-#' horizontal lines).
+#' @param lwd_lin The relative thickness/size of all elements (i.e., lines and 
+#' points in the plot. Default value is 4 (i.e. equal to \code{lwd = 4} for 
+#' the black horizontal lines).
 #' 
-#' @param ... further arguments to be passed to \code{plot}
+#' @param ... Further arguments to be passed to \code{plot}
 #' 
 #' @return A plot of the simulation in the graphics window. If the 
 #' \code{fossils} data.frame is supplied, its format will dictate how fossil
@@ -153,52 +153,54 @@
 #' @rdname draw.sim
 #' @export
 
-draw.sim=function (sim, fossils = NULL, sortBy = "TS", lwd_lin=4, ...) 
-{
-  
-  #function need numeric values for TE, so:
+draw.sim=function (sim, fossils = NULL, sortBy = "TS", lwd_lin=4, ...) {
+  # make NAs 0
   sim$TE[is.na(sim$TE)] <- 0
   
-  #setting default parameters for plot and par, if user didn't
+  # set default parameters for plot and par
   args <- list(...)
   
-  if(("yaxt" %in% names(args))){
-    par(yaxt="n")
+  if (("yaxt" %in% names(args))) {
+    par(yaxt = "n")
   }
   
-  if(!("ylab" %in% names(args))){
+  if (!("ylab" %in% names(args))) {
     formals(plot.default)$ylab <- "Simulated lineages"
   }
   
-  if(!("xlab" %in% names(args))){
+  if (!("xlab" %in% names(args))) {
     formals(plot.default)$xlab <- "Time (Mya)"
   }
   
-  if(!("xlim" %in% names(args))){
-    formals(plot.default)$xlim <- c(max(sim$TS, na.rm = T), min(sim$TE, 
-                                                                na.rm = T) - 1)
+  if (!("xlim" %in% names(args))) {
+    formals(plot.default)$xlim <- 
+      c(max(sim$TS, na.rm = TRUE), min(sim$TE, na.rm = TRUE) - 1)
   }
   
-  if(!("ylim" %in% names(args))){
+  if (!("ylim" %in% names(args))) {
     test <- sortBy %in% c("PAR")
     ord <- order(unlist(sim[sortBy]), decreasing = test)
     formals(plot.default)$ylim <- c(1, max(ord))
   }
   
-  if(!("frame.plot" %in% names(args))){
+  if (!("frame.plot" %in% names(args))) {
     formals(plot.default)$frame.plot <- FALSE
   }
   
-  #checking inputs:
+  # check inputs
+
   if (!is.sim(sim)) {
     stop("sim must be a valid sim object")
   }
+  
   if (!is.null(fossils)) {
     if (!((c("SampT") %in% colnames(fossils)) | all(c("MaxT", 
                                                       "MinT") %in% colnames(fossils)))) {
-      stop("fossils must contain either a SampT or both a MinT and MaxT\n           columns. See ?draw.sim and ?sample.clade.")
+      stop("fossils must contain either a SampT or both a MinT and MaxT
+           columns. See ?draw.sim and ?sample.clade.")
     }
   }
+  
   if (!class(sortBy) %in% c("character", "integer", "numeric")) {
     stop("sortBy should be a character or a vector of integers.")
   }
@@ -207,65 +209,88 @@ draw.sim=function (sim, fossils = NULL, sortBy = "TS", lwd_lin=4, ...)
   }
   else if ((class(sortBy) == "numeric") & !(all(1:length(sim$TE) %in% 
                                                 unique(sortBy)))) {
-    stop("sortBy must skip no lineage, and all lineages \n         should have unique indices.")
+    stop("sortBy must skip no lineage, and all lineages
+         should have unique indices.")
   }
+  
   makeTransparent <- function(someColor, alpha = 25) {
     newColor <- col2rgb(someColor)
+    
     apply(newColor, 2, function(curcoldata) {
       rgb(red = curcoldata[1], green = curcoldata[2], blue = curcoldata[3], 
           alpha = alpha, maxColorValue = 255)
     })
   }
+  
   jitter_foo <- function(x) {
     jit <- vector()
+    
     while (length(jit) < length(x)) {
       r <- 1.2
+      
       while (r > 0.25 | r < (-0.25)) {
         r <- rnorm(1, sd = 2)
       }
+  
       jit <- c(jit, r)
     }
+    
     return(x + jit)
   }
   
   if (is.character(sortBy)) {
     test <- sortBy %in% c("PAR")
+    
     ord <- order(unlist(sim[sortBy]), decreasing = test)
   }
   else {
     ord <- sortBy
   }
   sim_mod <- sim
+  
   sim_mod$TE <- sim_mod$TE[ord]
+  
   sim_mod$TS <- sim_mod$TS[ord]
+  
   sim_mod$PAR <- sim_mod$PAR[ord]
+  
   sim_mod$EXTANT <- sim_mod$EXTANT[ord]
+  
   plot(NA, ...)
   segments(x0 = sim_mod$TS, x1 = sim_mod$TE, y1 = 1:length(sim_mod$TE), 
            y0 = 1:length(sim_mod$TE), lwd = lwd_lin, col = "black")
-  text(y = 1:length(sim_mod$TE), x = sim_mod$TE - ((max(sim$TS) - 
-                                                      min(sim$TE)) * 0.035), labels = paste0("t", sprintf(paste0("%0", 
-                                                                                                                 round(log(length(sim$TE), 10), digits = 0) + 1, "d"), 
-                                                                                                          ord)))
+  text(y = 1:length(sim_mod$TE), 
+       x = sim_mod$TE - ((max(sim$TS) - min(sim$TE)) * 0.035), 
+       labels = paste0("t", 
+                       sprintf(paste0("%0", 
+                                      round(log(length(sim$TE), 10), 
+                                            digits = 0) + 1, "d"), ord)))
+  
   luca <- which(is.na(sim_mod$PAR))
-  aux_y <- unlist(lapply(sim$PAR, function(x) which(ord == 
-                                                      x)[1]))
+  
+  aux_y <- unlist(lapply(sim$PAR, function(x) which(ord == x)[1]))
+  
   segments(x0 = sim_mod$TS[-luca], x1 = sim_mod$TS[-luca], 
            y1 = (1:length(sim_mod$TE))[-luca], y0 = (aux_y[ord])[-luca], 
            lty = 2, lwd = lwd_lin*0.25, col = "gray50")
+  
   if (!(is.null(fossils))) {
     ids <- as.numeric(gsub("t", "", fossils$Species))
+    
     if ("SampT" %in% colnames(fossils)) {
-      points(x = fossils$SampT, y = unlist(lapply(ids, 
-                                                  function(x) which(ord == x))), col = "red", pch = 16, cex=lwd_lin*0.25)
+      points(x = fossils$SampT, 
+             y = unlist(lapply(ids, function(x) which(ord == x))), 
+             col = "red", pch = 16, cex=lwd_lin*0.25)
     }
+    
     else if ("MaxT" %in% colnames(fossils) & "MinT" %in% 
              colnames(fossils)) {
-      y_jittered <- jitter_foo(unlist(lapply(ids, function(x) which(ord == 
-                                                                      x))))
+      y_jittered <- jitter_foo(unlist(lapply(ids, 
+                                             function(x) which(ord == x))))
+      
       segments(x1 = fossils$MaxT, x0 = fossils$MinT, y1 = y_jittered, 
-               y0 = y_jittered, col = makeTransparent("red", 
-                                                      100), lwd = lwd_lin*0.75)
+               y0 = y_jittered, col = makeTransparent("red", 100), 
+               lwd = lwd_lin * 0.75)
     }
   }
 }

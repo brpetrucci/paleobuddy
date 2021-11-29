@@ -20,8 +20,8 @@ sample.clade(
 }
 \arguments{
 \item{sim}{A \code{sim} object, containing extinction times, speciation 
-times, parent, and status information for each species in the simulation. 
-See \code{?sim}.}
+times, parent, and status information (extant or extinct) for each species
+in the simulation. See \code{?sim}.}
 
 \item{rho}{Sampling rate (per species per million years) over time. It can be 
 a \code{numeric} describing a constant rate, a \code{function(t)} describing 
@@ -36,7 +36,7 @@ should always be greater than or equal to zero.}
 time greater than \code{tMax} would mean the occurrence is sampled after the
 present, so for consistency we require this argument. This is also required
 to ensure time follows the correct direction both in the Poisson process and
-in the return.}
+in the output.}
 
 \item{S}{A vector of species numbers to be sampled. The default is all 
 species in \code{sim}. Species not included in \code{S} will not be sampled 
@@ -75,27 +75,32 @@ have the following properties:
 \item Return a vector of preservation densities for each time in a given
 vector \code{t} in geological time. 
 
-\item Be parametrized in absolute geological time (i.e. should be relative 
-to absolute geological time, in Mya, \emph{not} the lineage's age). Because 
-of this, it is assumed to go from \code{tMax} to \code{0}, as opposed to 
-most functions in the package.
+\item Be parametrized in the absolute geological time associated to 
+each moment in age (i.e. age works relative to absolute geological 
+time, in Mya - in other words, the convention is TS > 0). The function 
+\emph{does not} directly use the lineage's age (which would mean that
+TS = 0 for all species whenever they are born). Because of this, it is
+assumed to go from \code{tMax} to \code{0}, as opposed to most functions 
+in the package.
 
 \item Should be limited between \code{s} (i.e. the lineage's 
 speciation/birth) and \code{e} (i.e. the lineage's extinction/death), 
-with \code{s} > \code{e}.
+with \code{s} > \code{e}. It is possible to assign parameters in absolute 
+geological time (see third example) and relative to age as long as this 
+follows the convention of age expressed in absolute geological time (see 
+fourth example).
 
 \item Include the arguments \code{t}, \code{s}, \code{e} and \code{sp}. 
 The argument sp is used to pass species-specific parameters (see examples),
 allowing for \code{dFun} to be species-inhomogeneous.
 }}
 
-\item{...}{Additional parameters used by the user's function (i.e.,
-\code{adFun})}
+\item{...}{Additional parameters used by \code{adFun}. See examples.}
 }
 \value{
 A \code{data.frame} containing species names/numbers, whether each 
-species is extant, and the true occurrence times of each fossil, a range of 
-occurrence times based on \code{bins}, or both.
+species is extant or extinct, and the true occurrence times of each fossil, 
+a range of occurrence times based on \code{bins}, or both.
 }
 \description{
 Generates occurrence times or time ranges (as most empirical fossil 
@@ -114,118 +119,74 @@ information.
 }
 \examples{
 
+# vector of times
+time <- seq(10, 0, -0.1)
+
 ###
 # we can start with a constant case
 
+# set seed
+set.seed(1)
+
 # simulate a group
 sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-
-# in case first simulation is short-lived
-while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-}
-
-# we will need to get exact durations for some examples, so
-sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have NA for extant species
 
 # sampling rate
 rho <- 2
 
-# the resolution of the fossil dataset:
-bins <- seq(from = 10, to = 0,
-            by = -0.1)
-# note that we will provide a very high resolution to test the function
+# bins for fossil ranges
+bins <- seq(from = 10, to = 0, by = -1)
 
-# find the occurrence data frame
-dt <- sample.clade(sim, rho, tMax = 10, bins = bins, returnTrue = FALSE)
+# simulate fossil occurrences data frame
+occs <- sample.clade(sim, rho, tMax = 10, bins = bins, returnTrue = FALSE)
 
-# extract species identity
-ids <- unique(dt$Species)
-
-# approximate sampling time (since it is a range)
-mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
-
-# for each species
-for (i in 1:length(ids)) {
-  # get the species number
-  sp <- unique(as.numeric(gsub("t", "", ids[i])))
-  
-  # check the histogram
-  hist(mids[dt$Species == ids[i]],
-       main = paste0("spp = ", sp, "; duration ~ ",
-                     round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
-       xlab = "Time (My)",
-       xlim = c(sim$TS[i], sim$TE[i]))
-}
+# draw simulation with fossil occurrences as ranges
+draw.sim(sim, fossils = occs)
 
 ###
 # sampling can be any function of time 
 
+# set seed
+set.seed(1)
+
 # simulate a group
 sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
-# in case first simulation is short-lived
-while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-}
-
-# we will need to get exact durations for some examples, so
-sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have NA for extant species
-
 # sampling rate
 rho <- function(t) {
-  return(3 - 0.15*t)
+  return(2 - 0.15*t)
 }
 
-# the resolution of the fossil dataset:
-bins <- seq(from = 10, to = 0,
-            by = -0.1)
-# note that we will provide a very high resolution to test the function
+# plot sampling function
+plot(x = time, y = rho(time), type = "l", 
+     ylab = "Preservation rate", 
+     xlab = "Time since the start of the simulation (My)")
+# note for these examples we do not reverse time in the plot
+# see other functions in the package for examples where we do
 
-# find the occurrence data frame
-dt <- sample.clade(sim, rho, tMax = 10, bins = bins, returnTrue = FALSE)
+# bins for fossil ranges
+bins <- seq(from = 10, to = 0, by = -1)
 
-# extract species identity
-ids <- unique(dt$Species)
+# simulate fossil occurrences data frame
+occs <- sample.clade(sim, rho, tMax = 10, bins = bins, returnTrue = FALSE)
 
-# approximate sampling time (since it is a range)
-mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
-
-# for each species
-for (i in 1:length(ids)) {
-  # get the species number
-  sp <- unique(as.numeric(gsub("t", "", ids[i])))
-  
-  # check the histogram
-  hist(mids[dt$Species == ids[i]],
-       main = paste0("spp = ", sp, "; duration ~ ",
-                     round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
-       xlab = "Time (My)",
-       xlim = c(sim$TS[i], sim$TE[i]))
-}
+# draw simulation with fossil occurrences as ranges
+draw.sim(sim, fossils = occs)
 
 ###
 # now we can try a step function rate
 
+# set seed
+set.seed(1)
+
 # simulate a group
 sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-
-# in case first simulation is short-lived
-while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-}
-
-# we will need to get exact durations for some examples, so
-sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have NA for extant species
 
 # we will use the less efficient method of creating a step function
 # one could instead use ifelse()
 
 # rates vector
-rList <- c(1, 2, 0.5)
+rList <- c(2, 5, 0.5)
 
 # rate shifts vector
 rShifts <- c(0, 4, 8)
@@ -233,33 +194,22 @@ rShifts <- c(0, 4, 8)
 # make it a function so we can plot it
 rho <- make.rate(rList, 10, rateShifts = rShifts)
 
-# the resolution of the fossil dataset:
-bins <- seq(from = 10, to = 0,
-            by = -0.1)
-# note that we will provide a very high resolution to test the function
+# plot sampling function
+plot(x = time, y = rho(time), type = "l", 
+     ylab = "Preservation rate", 
+     xlab = "Time since the start of the simulation (My)")
 
-# find the occurrence data frame
-dt <- sample.clade(sim, rList, rShifts = rShifts, 
-                   tMax = 10, bins = bins, returnTrue = FALSE)
+# bins for fossil ranges
+bins <- seq(from = 10, to = 0, by = -1)
 
-# extract species identity
-ids <- unique(dt$Species)
-
-# approximate sampling time (since it is a range)
-mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
-
-# for each species
-for (i in 1:length(ids)) {
-  # get the species number
-  sp <- unique(as.numeric(gsub("t", "", ids[i])))
-  
-  # check the histogram
-  hist(mids[dt$Species == ids[i]],
-       main = paste0("spp = ", sp, "; duration ~ ",
-                     round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
-       xlab = "Time (My)",
-       xlim = c(sim$TS[i], sim$TE[i]))
+\dontrun{
+# simulate fossil occurrences data frame
+occs <- sample.clade(sim, rho = rList, rShifts = rShifts, tMax = 10, 
+                     bins = bins, returnTrue = FALSE)
 }
+
+# draw simulation with fossil occurrences as ranges
+draw.sim(sim, fossils = occs)
 
 ###
 # finally, sample.clade also accepts an environmental variable
@@ -267,87 +217,59 @@ for (i in 1:length(ids)) {
 # get temperature data
 data(temp)
 
+# set seed
+set.seed(1)
+
 # simulate a group
 sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
-# in case first simulation is short-lived
-while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-}
-
-# we will need to get exact durations for some examples, so
-sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have NA for extant species
-
-# make temperature the environmental dependency of r
+# rho will be temperature dependent
 envR <- temp
 
-# we can then make sampling dependent on the temperature
+# function describing environmental dependence
 r_t <- function(t, env) {
-  return(0.5*env)
+  return(((env) / 12) ^ 6)
 }
 
 # make it a function so we can plot it
 rho <- make.rate(r_t, tMax = tMax, envRate = envR)
 
-# let us check that rho is high enough to see a pattern
-plot(1:10, rho(1:10), type = 'l', main = "Sampling rate",
-     xlab = "My", ylab = "rho")
+# plot sampling function
+plot(x = time, y = rho(time), type = "l", 
+     ylab = "Preservation rate", 
+     xlab = "Time since the start of the simulation (My)")
 
-# the resolution of the fossil data set:
-bins <- seq(from = 10, to = 0,
-            by = -0.1)
-# note that we will provide a very high resolution to test the function
-
-# find the occurrence data frame
-dt <- sample.clade(sim, r_t, tMax = 10, envR = envR,
-                   bins = bins, returnTrue = FALSE)
-
-# extract species identity
-ids <- unique(dt$Species)
-
-# approximate sampling time (since it is a range)
-mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
-
-# for each species
-for (i in 1:length(ids)) {
-  # get the species number
-  sp <- unique(as.numeric(gsub("t", "", ids[i])))
-
-  # check the histogram
-  hist(mids[dt$Species == ids[i]],
-       main = paste0("spp = ", sp, "; duration ~ ",
-                     round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
-       xlab = "Time (My)",
-       xlim = c(sim$TS[i], sim$TE[i]))
+\dontrun{
+# simulate fossil occurrences data frame
+occs <- sample.clade(sim, rho = r_t, envR = envR, tMax = 10, bins = bins)
+# now we record the true time of fossil occurrences 
 }
 
-# we will now do some examples with age-dependent rates. For more details,
-# check sample.age.time.
+# draw simulation with fossil occurrences as time points
+draw.sim(sim, fossils = occs)
 
 ###
+# sampling can also be age-dependent
+# for more examples, see ?sample.age.time
+
+# set seed
+set.seed(1)
+
 # simulate a group
 sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
-# in case first simulation is short-lived
-while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-}
-
-# we will need to get exact durations for some examples, so
-sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have NA for extant species
+# sampling rate
+rho <- 3
 
 # here we will use the PERT function. It is described in:
 # Silvestro et al 2014
 
-# preservation function
+# age-dependence distribution
 dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
-  
   # check if it is a valid PERT
   if (e >= s) {
-    message("There is no PERT with e >= s")
-    return(rep(NaN, times = length(t)))
+   message("There is no PERT with e >= s")
+   return(rep(NaN, times = length(t)))
   }
   
   # find the valid and invalid times
@@ -360,95 +282,80 @@ dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
   
   # if user wants a log function
   if (log) {
-    # invalid times get -Inf
-    res[id1] <- -Inf
-    
-    # valid times calculated with log
-    res[id2] <- log(((s - t) ^ 2)*((-e + t) ^ 2)/((s - e) ^ 5*beta(a,b)))
+   # invalid times get -Inf
+   res[id1] <- -Inf
+  
+   # valid times calculated with log
+   res[id2] <- log(((s - t) ^ 2) * ((-e + t) ^ 2) / 
+                 ((s - e) ^ 5 * beta(a, b)))
   }
+  
   # otherwise
   else{
-    res[id1] <- 0
-    
-    res[id2] <- ((s - t) ^ 2)*((-e + t) ^ 2)/((s - e) ^ 5*beta(a,b))
+   res[id1] <- 0
+  
+   res[id2] <- ((s - t) ^ 2) * ((-e + t) ^ 2) / ((s - e) ^ 5 * beta(a, b))
   }
   
   return(res)
 }
 
-# the resolution of the fossil dataset:
-bins <- seq(from = 10, to = 0,
-            by = -0.1)
-# note that we will provide a very high resolution to test the function
+# plot it for an example species who lived from 10 to 5 million years ago
+plot(time, rev(dPERT(t = time, s = 10, e = 5, a = 1)), 
+     main = "Age-dependence distribution",
+     xlab = "Species age (My)", ylab = "Density",
+     xlim = c(0, 5), type = "l")
 
-dt <- sample.clade(sim, rho = 3, tMax = 10, bins = bins,
-                   adFun = dPERT, returnTrue = FALSE)
+# bins for fossil ranges
+bins <- seq(from = 10, to = 0, by = -1)
 
-# extract species identity
-ids <- unique(dt$Species)
+# simulate fossil occurrences data frame
+occs <- sample.clade(sim, rho, tMax = 10, adFun = dPERT, bins = bins, 
+                     returnTrue = FALSE)
 
-# approximate sampling time (since it is a range)
-mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
-
-# for each species
-for (i in 1:length(ids)) {
-  # get the species number
-  sp <- unique(as.numeric(gsub("t", "", ids[i])))
-  
-  # check the histogram
-  hist(mids[dt$Species == ids[[i]]],
-       main = paste0("spp = ", sp, "; duration ~ ",
-                     round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
-       xlab = "Time (My)", probability = TRUE)
-  
-  # expected curve
-  curve(dPERT(x, s = sim$TS[sp], e = sim$TE[sp], sp = sp), from = sim$TE[sp],
-        to = sim$TS[sp], add = TRUE, col = "red", n = 100)
-}
-# we provide curves for comparison here, but remember the low sample sizes 
-# (and bins) may affect the quality of the fit
+# draw simulation with fossil occurrences as ranges
+draw.sim(sim, fossils = occs)
 
 ###
-# now, a hat-shaped increase through the duration of a species dependent on two
-# parameters
+# we can have adFun dependent on other parameters
+
+# set seed
+set.seed(1)
 
 # simulate a group
 sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
-# in case first simulation is short-lived
-while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-}
+# sampling rate
+rho <- 3
 
-# we will need to get exact durations for some examples, so
-sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have NA for extant species
+# get the par and par1 vectors
 
-# get parameters 
+# get mins vector
+minsPar <- ifelse(is.na(sim$TE), 0, sim$TE)
 
-# a random point inside each lineage's duration
-par <- runif (n = length(sim$TE), min = sim$TE, max = sim$TS)
+# a random time inside each species' duration
+par <- runif(n = length(sim$TE), min = minsPar, max = sim$TS)
+             
+# its complement to the middle of the lineage's age.
+par1 <- (((sim$TS - minsPar) / 2) + minsPar) - par
+# note that the interaction between these two parameters creates a
+# deterministic parameter, but inside the function one of them ("par")
+# is a random parameter
 
-# a distance between "par" and the lineage's duration middle
-par1 <- (((sim$TS - sim$TE) / 2) + sim$TE) - par
-
-# preservation function in respect to age, with the "mode" of the triangle
-# being dependent on par and par1
-dTRImod <- function(t, s, e, sp) {
-  
+dTRImod2 <- function(t, s, e, sp) {
   # make sure it is a valid TRI
   if (e >= s) {
-    message("There is no TRI with e >= s")
-    return(rep(NaN, times = length(t)))
+   message("There is no TRI with e >= s")
+   return(rep(NaN, times = length(t)))
   }
   
-  # md depends on the two parameters
+  # md depends on parameters
   md <- par[sp] + par1[sp]
   
   # check that md is valid
   if (md < e | md > s) {
-    message("There is no TRI with md outside [s, e] interval")
-    return(rep(NaN, times = length(t)))
+   message("There is no TRI with md outside [s, e] interval")
+   return(rep(NaN, times = length(t)))
   }
   
   id1 <- which(t >= e & t < md)
@@ -458,45 +365,26 @@ dTRImod <- function(t, s, e, sp) {
   
   res <- vector()
   
-  res[id1] <- (2*(t[id1] - e)) / ((s - e)*(md - e))
+  res[id1] <- (2*(t[id1] - e)) / ((s - e) * (md - e))
   res[id2] <- 2 / (s - e)
-  res[id3] <- (2*(s - t[id3])) / ((s - e)*(s - md))
+  res[id3] <- (2*(s - t[id3])) / ((s - e) * (s - md))
   res[id4] <- 0
   
   return(res)
 }
 
-# the resolution of the fossil dataset:
-bins <- seq(from = 10, to = 0,
-            by = -0.1)
-# note that we will provide a very high resolution to test the function
+# plot for a species living between 10 and 0 mya
+plot(time, rev(dTRImod2(time, 10, 0, 1)),
+    main = "Age-dependence distribution",
+    xlab = "Species age (My)", ylab = "Density",
+    xlim = c(0, 10), type = "l")
 
-dt <- sample.clade(sim, rho = 4, tMax = 10, bins = bins,
-                   adFun = dTRImod, returnTrue = FALSE)
+# simulate fossil occurrences data frame
+occs <- sample.clade(sim, rho, tMax = 10, adFun = dTRImod2, bins = bins, 
+                     returnTrue = FALSE)
 
-# extract species identity
-ids <- unique(dt$Species)
-
-# approximate sampling time (since it is a range)
-mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
-
-# for each species
-for (i in 1:length(ids)) {
-  # get the species number
-  sp <- unique(as.numeric(gsub("t", "", ids[i])))
-  
-  # check the histogram
-  hist(mids[dt$Species == ids[[i]]],
-       main = paste0("spp = ", sp, "; duration ~ ",
-                     round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
-       xlab = "Time (My)", probability = TRUE)
-  
-  # expected curve
-  curve(dTRImod(x, e = sim$TE[sp], s = sim$TS[sp], sp = sp),from = sim$TE[sp],
-        to = sim$TS[sp], add = TRUE, col="red", n = 100)
-}
-# we provide curves for comparison here, but remember the low sample sizes 
-# (and bins) may affect the quality of the fit
+# draw simulation with fossil occurrences as time ranges
+draw.sim(sim, fossils = occs)
 
 ###
 # let us keep everything from the last example, but
@@ -504,50 +392,45 @@ for (i in 1:length(ids)) {
 
 # in this case, the function finds the number of
 # occurrences using rho, and their distribution
-# using a normalized version of rho * adFun
+# using a normalized rho * adFun
+
+# simulate a group
+set.seed(1)
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 
 # sampling rate
 rho <- function(t) {
   return(2 + 0.1*t)
 }
 
-# simulate a group
-sim <- bd.sim(n0 = 1, lambda = 0.2, mu = 0.1, tMax = 10)
+# get the par and par1 vectors
 
-# in case first simulation is short-lived
-while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-}
+# get mins vector
+minsPar <- ifelse(is.na(sim$TE), 0, sim$TE)
 
-# we will need to get exact durations for some examples, so
-sim$TE[sim$EXTANT] <- 0
-# this is necessary since the default is to have NA for extant species
+# a random time inside each species' duration
+par <- runif(n = length(sim$TE), min = minsPar, max = sim$TS)
+             
+# its complement to the middle of the lineage's age.
+par1 <- (((sim$TS - minsPar) / 2) + minsPar) - par
+# note that the interaction between these two parameters creates a
+# deterministic parameter, but inside the function one of them ("par")
+# is a random parameter
 
-# get parameters
-
-# a random point inside each lineage's duration
-par <- runif (n = length(sim$TE), min = sim$TE, max = sim$TS)
-
-# a distance between "par" and the lineage's duration middle
-par1 <- (((sim$TS - sim$TE) / 2) + sim$TE) - par
-
-# preservation function in respect to age, with the "mode" of the triangle
-# being exactly at the last quarter of the duration of EACH lineage.
-dTRImod <- function(t, s, e, sp) {
-  
+dTRImod2 <- function(t, s, e, sp) {
   # make sure it is a valid TRI
   if (e >= s) {
-    message("There is no TRI with e >= s")
-    return(rep(NaN, times = length(t)))
+   message("There is no TRI with e >= s")
+   return(rep(NaN, times = length(t)))
   }
   
-  # md depends on the two parameters
+  # md depends on parameters
   md <- par[sp] + par1[sp]
   
   # check that md is valid
   if (md < e | md > s) {
-    message("There is no TRI with md outside [s, e] interval")
-    return(rep(NaN, times = length(t)))
+   message("There is no TRI with md outside [s, e] interval")
+   return(rep(NaN, times = length(t)))
   }
   
   id1 <- which(t >= e & t < md)
@@ -557,107 +440,49 @@ dTRImod <- function(t, s, e, sp) {
   
   res <- vector()
   
-  res[id1] <- (2*(t[id1] - e)) / ((s - e)*(md - e))
+  res[id1] <- (2*(t[id1] - e)) / ((s - e) * (md - e))
   res[id2] <- 2 / (s - e)
-  res[id3] <- (2*(s - t[id3])) / ((s - e)*(s - md))
+  res[id3] <- (2*(s - t[id3])) / ((s - e) * (s - md))
   res[id4] <- 0
   
   return(res)
 }
 
-# the resolution of the fossil dataset:
-bins <- seq(from = 10, to = 0,
-            by = -0.1)
-# note that we will provide a very high resolution to test the function
+# plot for the first species
+plot(time, rev(dTRImod2(time, sim$TS[1], minsPar[1], 1)),
+    main = "Age-dependence distribution",
+    xlab = "Species age (My)", ylab = "Density",
+    xlim = c(0, 10), type = "l")
 
-dt <- sample.clade(sim, rho = rho, tMax = 10, bins = bins,
-                   adFun = dTRImod, returnTrue = FALSE)
+# simulate fossil occurrences data frame
+occs <- sample.clade(sim, rho, tMax = 10, adFun = dTRImod2, bins = bins, 
+                     returnTrue = FALSE)
 
-# extract species identity
-ids <- unique(dt$Species)
-
-# approximate sampling time (since it is a range)
-mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
-
-# for each species
-for (i in 1:length(ids)) {
-  # get the species number
-  sp <- unique(as.numeric(gsub("t", "", ids[i])))
-  
-  # check the histogram
-  hist(mids[dt$Species == ids[[i]]],
-       main = paste0("spp = ", sp, "; duration ~ ",
-                     round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
-       xlab = "Time (My)", probability = TRUE)
-  
-  # expected curve
-  tt <- seq(from = sim$TE[sp], to = sim$TS[sp], by = 0.01)
-  lines(x = tt, y = dTRImod(tt, s = sim$TS[sp], e = sim$TE[sp], sp = sp))
-  
-  # need tMax to invert rho
-  tMax <- 10
-  
-  # getting expected values from age + time dependences:
-  Pres_time_adpp <- function(t, s, e, sp, ...) {
-    # correction of scale
-    rhoMod <- function(t) {
-      return(rho(tMax - t))
-    }
-    return(rhoMod(t)*dTRImod(t = t, s = s, e = e, sp = sp, ...))
-  }
-  
-  # normalizing
-  Pres_time_adppNorm <- function(t, s, e, sp, ...) {
-    return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...)/integrate(
-      Pres_time_adpp, lower = e, upper = s, e = e, s = s,
-      sp = sp, ...)$value)
-  }
-  
-  lines(x = tt, 
-        y = Pres_time_adppNorm(tt, s = sim$TS[sp], e = sim$TE[sp], sp = sp),
-        col="red")
-}
-# we provide curves for comparison here, but remember the low sample sizes
-# (and bins) may affect the quality of the fit
-
-# we can also have a mix of age-independent and age-dependent
-# models in the same simulation
+# draw simulation with fossil occurrences as time ranges
+draw.sim(sim, fossils = occs)
 
 ###
-# let us have age-independent sampling before 5my and
-# age-dependent afterwards
+# we can also have a mix of age-independent and age-dependent
+# sampling in the same simulation
 
-# sampling rate
-rho <- function(t) {
-  return(2 + 0.1*t)
-}
-# note one can also vary the model used for sampling rate
-# see ?sample.time for examples
-
-# maximum simulation time
-tMax <- 10
+# set seed
+set.seed(1)
 
 # simulate a group
 sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
+              
+# sampling rate
+rho <- 7
 
-# in case first simulation is short-lived
-while ((sim$TS[1] - ifelse(is.na(sim$TE[1]), 0, sim$TE[1])) < 10) {
-  sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-}
+# define a uniform to represente age-independence
 
-# fixing the extinction times
-sim$TE[sim$EXTANT] <- 0
-
-# define uniform as above
-
-# preservation function in respect to age
-# occurrences are uniformly distributed
+# age-dependence distribution (a uniform density distribution in age) 
+# in the format that the function needs
 custom.uniform <- function(t, s, e, sp) {
-  
   # make sure it is a valid uniform
   if (e >= s) {
-    message("There is no uniform function with e >= s")
-    return(rep(NaN, times = length(t)))
+   message("There is no uniform function with e >= s")
+   return(rep(NaN, times = length(t)))
   }
   
   res <- dunif(x = t, min = e, max = s)
@@ -665,111 +490,71 @@ custom.uniform <- function(t, s, e, sp) {
   return(res)
 }
 
-# same for TRI
-
-# get the par and par1 vectors
-# a random quantity
-par <- runif(n = length(sim$TE), min = sim$TE, max = sim$TS)
-# its complement to the middle of the lineage's age.
-# Note that the interaction between these two parameters creates a
-# deterministic parameter, but inside the function one of them ("par")
-# is a random parameter
-par1 <- (((sim$TS - sim$TE)/2) + sim$TE) - par
-
-# preservation function in respect to age, with the "mode" of the triangle
-# being dependent on par and par1
-dTRImod <- function(t, s, e, sp) {
-  # make sure it is a valid TRI
+# PERT as above
+dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
+  # check if it is a valid PERT
   if (e >= s) {
-    message("There is no TRI with e >= s")
-    return(rep(NaN, times = length(t)))
+   message("There is no PERT with e >= s")
+   return(rep(NaN, times = length(t)))
   }
   
-  # here is the difference from the function in example 3 and 4
-  md <- par[sp] + par1[sp]
+  # find the valid and invalid times
+  id1 <- which(t <= e | t >= s)
+  id2 <- which(!(t <= e | t >= s))
+  t <- t[id2]
   
-  # check that md is valid
-  if (md < e | md > s) {
-    message("There is no TRI with md outside [s, e] interval")
-    return(rep(NaN, times = length(t)))
-  }
-  
-  id1 <- which(t >= e & t < md)
-  id2 <- which(t == md)
-  id3 <- which(t > md & t <= s)
-  id4 <- which(!(1:length(t) \%in\% c(id1,id2,id3)))
-  
+  # initialize result vector
   res <- vector()
   
-  res[id1] <- (2*(t[id1] - e)) / ((s - e)*(md - e))
-  res[id2] <- 2 / (s - e)
-  res[id3] <- (2*(s - t[id3])) / ((s - e)*(s - md))
-  res[id4] <- 0
+  # if user wants a log function
+  if (log) {
+   # invalid times get -Inf
+   res[id1] <- -Inf
+  
+   # valid times calculated with log
+   res[id2] <- log(((s - t) ^ 2) * ((-e + t) ^ 2) / 
+                 ((s - e) ^ 5 * beta(a, b)))
+  }
+  
+  # otherwise
+  else{
+   res[id1] <- 0
+  
+   res[id2] <- ((s - t) ^ 2) * ((-e + t) ^ 2) / ((s - e) ^ 5 * beta(a, b))
+  }
   
   return(res)
 }
 
 # actual age-dependency defined by a mix
-dTriAndUniform <- function(t, s, e, sp) {
+dPERTAndUniform <- function(t, s, e, sp) {
   return(
     ifelse(t > 5, custom.uniform(t, s, e, sp),
-           dTRImod(t, s, e, sp))
+           dPERT(t, s, e, sp))
   )
 }
+# starts out uniform, then becomes PERT 
+# after 5my (in absolute geological time)
 
-# the resolution of the fossil dataset:
-bins <- seq(from = 10, to = 0,
-            by = -0.1)
-# note that we will provide a very high resolution to test the function
+# plot it for an example species who lived from 10 to 0 million years ago
+plot(time, rev(dPERTAndUniform(time, 10, 0, 1)),
+    main = "Age-dependence distribution",
+    xlab = "Species age (My)", ylab = "Density",
+    xlim = c(0, 10), type = "l")
 
-dt <- sample.clade(sim, rho = rho, tMax = 10, bins = bins,
-                   adFun = dTriAndUniform, returnTrue = FALSE)
+# bins for fossil ranges
+bins <- seq(from = 10, to = 0, by = -1)
 
-# extract species identity
-ids <- unique(dt$Species)
+# simulate fossil occurrences data frame
+occs <- sample.clade(sim, rho, tMax = 10, adFun = dPERTAndUniform,
+                     bins = bins, returnTrue = FALSE)
 
-# approximate sampling time (since it is a range)
-mids <- (dt$MaxT - dt$MinT) / 2 + dt$MinT
+# draw simulation with fossil occurrences as ranges
+draw.sim(sim, fossils = occs)
 
-# for each species
-for (i in 1:length(ids)) {
-  # get the species number
-  sp <- unique(as.numeric(gsub("t", "", ids[i])))
-  
-  # check the histogram
-  hist(mids[dt$Species == ids[[i]]],
-       main = paste0("spp = ", sp, "; duration ~ ",
-                     round(sim$TS[sp] - sim$TE[sp], digits = 2), "my"),
-       xlab = "Time (My)", probability = TRUE)
-  
-  # expected curve
-  tt <- seq(from = sim$TE[sp], to = sim$TS[sp], by = 0.01)
-  lines(x = tt, y = dTRImod(tt, s = sim$TS[sp], e = sim$TE[sp], sp = sp))
-  
-  # need tMax to invert rho
-  
-  # getting expected values from age + time dependences:
-  Pres_time_adpp <- function(t, s, e, sp, ...) {
-    # correction of scale
-    rhoMod <- function(t) {
-      return(rho(tMax - t))
-    }
-    return(rhoMod(t)*dTRImod(t = t, s = s, e = e, sp = sp, ...))
-  }
-  
-  # normalizing
-  Pres_time_adppNorm <- function(t, s, e, sp, ...) {
-    return(Pres_time_adpp(t = t, s = s, e = e, sp = sp, ...)/integrate(
-      Pres_time_adpp, lower = e, upper = s, e = e, s = s,
-      sp = sp, ...)$value)
-  }
-  
-  lines(x = tt, 
-        y = Pres_time_adppNorm(tt, s = sim$TS[sp], e = sim$TE[sp], sp = sp),
-        col="red")
-}
-# we provide curves for comparison here, but remember the low sample sizes
-# (and bins) may affect the quality of the fit
+# note how occurrences cluster close to the speciation time of
+# species 1, but not its extinction time, since around 5mya
+# the PERT becomes the effective age-dependence distribution
 
 }
 \author{
