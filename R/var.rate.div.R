@@ -1,12 +1,12 @@
 #' Expected diversity for general exponential rates
 #'
-#' Calculates the expected species diversity on an interval given a (possibly time
-#' dependent) exponential rate.  Takes as the base rate (1) a constant, (2) a 
-#' function of time, (3) a function of time interacting with an environmental 
+#' Calculates the expected species diversity on an interval given a (possibly 
+#' time-dependent) exponential rate. Takes as the base rate (1) a constant, (2)
+#' a function of time, (3) a function of time interacting with an environmental 
 #' variable, or (4) a vector of numbers describing rates as a step function. 
 #' Requires information regarding the maximum simulation time, and allows for 
-#' optional extra parameters to tweak the baseline rate. For more information on
-#' the creation of the final rate, see \code{make.rate}.
+#' optional extra parameters to tweak the baseline rate. For more information 
+#' on the creation of the final rate, see \code{make.rate}.
 #'
 #' @inheritParams make.rate
 #' 
@@ -15,17 +15,17 @@
 #' @param n0 The initial number of species is by default 1, but one can change to
 #' any nonnegative number.
 #'
-#' Note: \code{var.rate.div} will find the expected number of daughters given a
+#' Note: \code{var.rate.div} will find the expected number of species given a
 #' rate \code{rate} and an initial number of parents \code{n0}, so in a
-#' biological context \code{rate} is diversification rate, not speciation (unless
-#' extinction is \code{0}).
+#' biological context \code{rate} is diversification rate, not speciation 
+#' (unless extinction is \code{0}).
 #'
 #' @return A vector of the expected number of species per time point supplied
 #' in \code{t}, which can then be used to plot vs. \code{t}.
 #'
 #' @examples
 #'
-#' # let us first create a vector of times to use in these examples.
+#' # let us first create a vector of times to use in these examples
 #' time <- seq(0, 50, 0.1)
 #' 
 #' ###
@@ -35,122 +35,131 @@
 #' # set this up so we see rates next to diversity
 #' par(mfrow = c(1,2))
 #' 
-#' # see how the rate looks
+#' # make the rate
 #' r <- make.rate(0.5)
-#' plot(time, rep(r, length(time)), type = 'l')
 #' 
-#' # get the diversity and plot it
+#' # plot it
+#' plot(time, rep(r, length(time)), ylab = "Diversification rate",
+#'      xlab = "Time (Mya)", xlim = c(50, 0), type = 'l')
+#' 
+#' # get expected diversity
 #' div <- var.rate.div(rate, time)
-#' plot(time, div, type = 'l')
+#' 
+#' # plot it
+#' plot(time, rev(div), ylab = "Expected number of species",
+#'      xlab = "Time (Mya)", xlim = c(50, 0), type = 'l')
 #' 
 #' ###
 #' # something a bit more complex: a linear rate
 #' rate <- function(t) {
-#'   return(0.1 - 0.005*t)
+#'   return(1 - 0.05*t)
 #' }
 #' 
-#' # visualize the rate
+#' # make the rate
 #' r <- make.rate(rate)
-#' plot(time, r(time), type = 'l')
 #' 
-#' # get the diversity and plot it
-#' div <- var.rate.div(rate, t = time)
-#' plot(time, div, type = 'l')
+#' # plot it
+#' plot(time, rev(r(time)), ylab = "Diversification rate",
+#'      xlab = "Time (Mya)", xlim = c(50, 0), type = 'l')
+#' # negative values are ok since this represents a diversification rate
+#' 
+#' # get expected diversity
+#' div <- var.rate.div(rate, time)
+#' 
+#' # plot it
+#' plot(time, rev(div), ylab = "Expected number of species",
+#'      xlab = "Time (Mya)", xlim = c(50, 0), type = 'l')
 #' 
 #' ###
-#' # remember: rate is diversity!
+#' # remember: rate is the diversification rate!
 #' 
 #' # we can create speciation...
-#' pp <- function(t) {
-#'   return(-0.01*t + 0.2)
+#' lambda <- function(t) {
+#'   return(0.5 - 0.01*t)
 #' }
 #' 
 #' # ...and extinction...
-#' qq <- function(t) {
+#' mu <- function(t) {
 #'   return(0.01*t)
 #' }
 #' 
-#' # ...and code rate as diversification
+#' # ...and get rate as diversification
 #' rate <- function(t) {
-#'   return(pp(t) - qq(t))
+#'   return(lambda(t) - mu(t))
 #' }
 #' 
-#' # visualize the rate
+#' # make the rate
 #' r <- make.rate(rate)
-#' plot(time, r(time), type = 'l')
 #' 
-#' # get diversity and plot it
-#' div <- var.rate.div(rate, time, n0 = 2)
-#' plot(time, div, type = 'l')
+#' # plot it
+#' plot(time, rev(r(time)), ylab = "Diversification rate",
+#'      xlab = "Time (Mya)", xlim = c(50, 0), type = 'l')
 #' 
-#' ###
-#' # remember: rate can be any time-varying function!
+#' # get expected diversity
+#' div <- var.rate.div(rate, time)
 #' 
-#' # such as a sine
-#' rate <- function(t) {
-#'   return(sin(t)*0.5)
-#' }
-#' 
-#' # visualize the rate
-#' r <- make.rate(rate)
-#' plot(time, r(time), type = 'l')
-#' 
-#' # we can have any number of starting species
-#' div <- var.rate.div(rate, time, n0 = 2)
-#' plot(time, div, type = 'l')
+#' # plot it
+#' plot(time, rev(div), ylab = "Expected number of species",
+#'      xlab = "Time (Mya)", xlim = c(50, 0), type = 'l')
 #' 
 #' ###
 #' # we can use ifelse() to make a step function like this
 #' rate <- function(t) {
-#'   return(ifelse(t < 2, 0.1,
-#'           ifelse(t < 3, 0.3,
-#'            ifelse(t < 5, -0.2, 0.05))))
+#'   return(ifelse(t < 2, 0.2,
+#'           ifelse(t < 3, 0.4,
+#'            ifelse(t < 5, -0.2, 0.5))))
 #' }
 #' 
-#' # change t so things are faster
+#' # change time so things are faster
 #' time <- seq(0, 10, 0.1)
 #' 
-#' # visualize the rate
+#' # make the rate
 #' r <- make.rate(rate)
-#' plot(time, r(time), type = 'l')
 #' 
-#' # get the diversity and plot it
+#' # plot it
+#' plot(time, rev(r(time)), ylab = "Diversification rate",
+#'      xlab = "Time (Mya)", xlim = c(10, 0), type = 'l')
+#' # negative rates is ok since this represents a diversification rate
+#' 
+#' # get expected diversity
 #' div <- var.rate.div(rate, time)
-#' plot(time, div, type = 'l')
 #' 
-#' # important note: this method of creating a step function might be annoying,
-#' # but when running thousands of simulations it will provide a much faster
-#' # integration than when using our method of transforming a rates and shifts
-#' # vector into a function of time
+#' # plot it
+#' plot(time, rev(div), ylab = "Expected number of species",
+#'      xlab = "Time (Mya)", xlim = c(10, 0), type = 'l')
+#' 
+#' # this method of creating a step function might be annoying, but when
+#' # running thousands of simulations it will provide a much faster
+#' # integration than when using our method of transforming
+#' # a rates and a shifts vector into a function of time
 #' 
 #' ###
 #' # ...which we can do as follows
 #' 
 #' # rates vector
-#' rate <- c(0.1, 0.3, -0.2, 0.05)
+#' rateList <- c(0.2, 0.4, -0.2, 0.5)
 #' 
 #' # rate shifts vector
 #' rateShifts <- c(0, 2, 3, 5)
 #' 
-#' # visualize the rate
-#' r <- make.rate(rate, tMax = 10, rateShifts = rateShifts)
-#' plot(time, r(time),type = 'l')
-#'  
+#' # make the rate
+#' r <- make.rate(rateList, tMax = 10, rateShifts = rateShifts)
+#' 
+#' # plot it
+#' plot(time, rev(r(time)), ylab = "Diversification rate",
+#'      xlab = "Time (Mya)", xlim = c(10, 0), type = 'l')
+#' # negative rates is ok since this represents a diversification rate
+#' 
 #' \dontrun{
-#' # get the diversity and plot it
-#' div <- var.rate.div(rate, time, tMax = 10, rateShifts = rateShifts)
-#' plot(time, div, type = 'l')
+#' # get expected diversity
+#' div <- var.rate.div(rateList, time, tMax = 10, rateShifts = rateShifts)
+#' 
+#' # plot it
+#' plot(time, rev(div), ylab = "Expected number of species",
+#'      xlab = "Time (Mya)", xlim = c(10, 0), type = 'l')
 #' }
-#' 
-#' # we set it to not run due to the time this method takes. integrating a step
-#' # function created using the methods in make.rate() is slow, as explained in
-#' # the make.rate documentation)
-#' 
-#' # it is also impractical to supply a rate and a shifts vector and
-#' # have an environmental dependency, so in cases where one looks to run
-#' # more than a couple dozen simulations, and when one is looking to have a
-#' # step function modified by an environmental variable, consider using ifelse()
-#' 
+#'  
+#' ###
 #' # finally let us see what we can do with environmental variables
 #' 
 #' # get the temperature data
@@ -158,53 +167,70 @@
 #' 
 #' # diversification
 #' rate <- function(t, env) {
-#'   return(0.002*env)
+#'   return(0.2 + 2*exp(-0.25*env))
 #' }
 #' 
-#' # visualize the rate
+#' # make the rate
 #' r <- make.rate(rate, tMax = tMax, envRate = temp)
-#' plot(time, r(time), type = 'l')
 #' 
+#' # plot it
+#' plot(time, rev(r(time)), ylab = "Diversification rate",
+#'      xlab = "Time (Mya)", xlim = c(10, 0), type = 'l')
 #' 
-#' # get diversity and plot it
+#' # get expected diversity
 #' div <- var.rate.div(rate, time, tMax = tMax, envRate = temp)
-#' plot(time, div, type = 'l')
+#' 
+#' # plot it
+#' plot(time, rev(div), ylab = "Expected number of species",
+#'      xlab = "Time (Mya)", xlim = c(10, 0), type = 'l')
 #' 
 #' ###
 #' # we can also have a function that depends on both time AND temperature
 #' 
 #' # diversification
 #' rate <- function(t, env) {
-#'   return(0.02 * env - 0.001 * t)
+#'   return(0.02 * env - 0.01 * t)
 #' }
 #' 
-#' # visualize the rate
+#' # make the rate
 #' r <- make.rate(rate, tMax = tMax, envRate = temp)
-#' plot(time, r(time), type = 'l')
 #' 
-#' # get diversity and plot it
+#' # plot it
+#' plot(time, rev(r(time)), ylab = "Diversification rate",
+#'      xlab = "Time (Mya)", xlim = c(10, 0), type = 'l')
+#' 
+#' # get expected diversity
 #' div <- var.rate.div(rate, time, tMax = tMax, envRate = temp)
-#' plot(time, div, type = 'l')
+#' 
+#' # plot it
+#' plot(time, rev(div), ylab = "Expected number of species",
+#'      xlab = "Time (Mya)", xlim = c(10, 0), type = 'l')
 #'   
 #' ###
-#' # as mentioned above, we could also use ifelse() to construct a step function
-#' # that is modulated by temperature
+#' # as mentioned above, we could also use ifelse() to construct a step 
+#' # function that is modulated by temperature
 #' 
 #' # diversification
 #' rate <- function(t, env) {
 #'   return(ifelse(t < 2, 0.1 + 0.01*env,
-#'           ifelse(t < 5, 0.2 - 0.005*env,
-#'            ifelse(t < 8, 0.1 + 0.005*env, 0.08))))
+#'           ifelse(t < 5, 0.2 - 0.05*env,
+#'            ifelse(t < 8, 0.1 + 0.1*env, 0.2))))
 #' }
 #' 
-#' # visualize the rate
+#' # make the rate
 #' r <- make.rate(rate, tMax = tMax, envRate = temp)
-#' plot(time, r(time), type = 'l')
+#' 
+#' # plot it
+#' plot(time, rev(r(time)), ylab = "Diversification rate",
+#'      xlab = "Time (Mya)", xlim = c(10, 0), type = 'l')
 #' 
 #' \dontrun{
-#' # get diversity and plot it
+#' # get expected diversity
 #' div <- var.rate.div(rate, time, tMax = tMax, envRate = temp)
-#' plot(time, div, type = 'l')
+#' 
+#' # plot it
+#' plot(time, rev(div), ylab = "Expected number of species",
+#'      xlab = "Time (Mya)", xlim = c(10, 0), type = 'l')
 #' }
 #' 
 #' # takes a bit long so we set it to not run, but the user
@@ -232,7 +258,8 @@ var.rate.div <- function(rate, t, n0 = 1, tMax = NULL,
   if (!is.numeric(r)) {
     # integrate the rate for each t
     integral <- lapply(t, function(x) {
-      integrate(Vectorize(r), 0, x, subdivisions = 2000)$value
+      integrate(Vectorize(r), 0, x, subdivisions = 2000, 
+                stop.on.error = FALSE)$value
       })
 
     # make the integral numerical so we can plot
