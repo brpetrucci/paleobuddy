@@ -23,8 +23,11 @@
 #' describing the variation in sampling over time following both time AND 
 #' an environmental variable (please see \code{envR} for details), or a 
 #' \code{vector} containing rates that correspond to each rate between sampling
-#' rate shift times times (please see \code{rShifts}). Note that \code{rho} 
-#' should always be greater than or equal to zero.
+#' rate shift times times (please see \code{rShifts}). If \code{adFun} is 
+#' supplied, it will be used to find the number of occurrences during the 
+#' species duration, and a normalized \code{rho*adFun} will determine their 
+#' distribution along the species duration. Note that \code{rho} should always 
+#' be greater than or equal to zero.
 #' 
 #' @param envR A data frame containing time points and values of an environmental
 #' variable, like temperature, for each time point. This will be used to create
@@ -201,6 +204,7 @@
 #' # Silvestro et al 2014
 #' 
 #' # age-dependence distribution
+#' # note that a and b define the beta distribution used, and can be modified
 #' dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
 #'   # check if it is a valid PERT
 #'   if (e >= s) {

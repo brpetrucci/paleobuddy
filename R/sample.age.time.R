@@ -15,9 +15,9 @@
 #' \code{function(t)} describing the variation in sampling over time. For more 
 #' flexibility on sampling, see \code{make.rate} to create more complex rates.
 #' If \code{adFun} is supplied, it will be used to find the number of 
-#' occurrences during the species duration, and \code{adFun} will determine 
-#' their distribution. Note that \code{rho} should always be greater than or 
-#' equal to zero.
+#' occurrences during the species duration, and a normalized \code{rho*adFun} 
+#' will determine their distribution along the species duration. Note that 
+#' \code{rho} should always be greater than or equal to zero.
 #'
 #' @param adFun A density function representing the age-dependent preservation
 #' model. It must be a density function, and consequently integrate to 1 
@@ -54,8 +54,7 @@
 #' 
 #' @inheritParams sample.time
 #'
-#' @return A list of occurrences for that species, given the time, age 
-#' and species-specific conditions assigned by the user.
+#' @return A list of vectors of occurrence times for each species in \code{S}.
 #'
 #' @author Matheus Januario
 #'
@@ -82,6 +81,7 @@
 #' # in Silvestro et al 2014
 #' 
 #' # age-dependence distribution
+#' # note that a and b define the beta distribution used, and can be modified
 #' dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
 #'   # check if it is a valid PERT
 #'   if (e >= s) {

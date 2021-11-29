@@ -16,9 +16,9 @@ time. It can be a \code{numeric} describing a constant rate or a
 \code{function(t)} describing the variation in sampling over time. For more 
 flexibility on sampling, see \code{make.rate} to create more complex rates.
 If \code{adFun} is supplied, it will be used to find the number of 
-occurrences during the species duration, and \code{adFun} will determine 
-their distribution. Note that \code{rho} should always be greater than or 
-equal to zero.}
+occurrences during the species duration, and a normalized \code{rho*adFun} 
+will determine their distribution along the species duration. Note that 
+\code{rho} should always be greater than or equal to zero.}
 
 \item{tMax}{The maximum simulation time, used by \code{rexp.var}. A sampling
 time greater than \code{tMax} would mean the occurrence is sampled after the
@@ -64,8 +64,7 @@ allowing for \code{dFun} to be species-inhomogeneous.
 \item{...}{Additional parameters used by \code{adFun}. See examples.}
 }
 \value{
-A list of occurrences for that species, given the time, age 
-and species-specific conditions assigned by the user.
+A list of vectors of occurrence times for each species in \code{S}.
 }
 \description{
 Generates a vector of occurrence times for a species in a simulation using 
@@ -101,6 +100,7 @@ sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
 # in Silvestro et al 2014
 
 # age-dependence distribution
+# note that a and b define the beta distribution used, and can be modified
 dPERT <- function(t, s, e, sp, a = 3, b = 3, log = FALSE) {
   # check if it is a valid PERT
   if (e >= s) {
