@@ -161,7 +161,11 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
   # make NAs 0
   sim$TE[is.na(sim$TE)] <- 0
   
-  # set default parameters for plot and par
+  # set default parameters for plot and par 
+  #(used only when user does not input values for 
+  #those arguments)
+  #for each argument, we basically create "fake defaults" for
+  #ploting functions
   args <- list(...)
   
   if (("yaxt" %in% names(args))) {
@@ -191,12 +195,13 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
     formals(plot.default)$frame.plot <- FALSE
   }
   
-  # check inputs
-
+  # checking inputs
+  #sim object
   if (!is.sim(sim)) {
     stop("sim must be a valid sim object")
   }
   
+  #fossil info
   if (!is.null(fossils)) {
     if (!((c("SampT") %in% colnames(fossils)) | all(c("MaxT", 
                                                       "MinT") %in% colnames(fossils)))) {
@@ -205,6 +210,7 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
     }
   }
   
+  #checking sortBy inputation
   if (!class(sortBy) %in% c("character", "integer", "numeric")) {
     stop("sortBy should be a character or a vector of integers.")
   }
@@ -217,6 +223,7 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
          should have unique indices.")
   }
   
+  #auxiliary function for drawing transparency 
   makeTransparent <- function(someColor, alpha = 25) {
     newColor <- col2rgb(someColor)
     
@@ -226,6 +233,7 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
     })
   }
   
+  #auxiliatory function for drawgin jittered rectangles
   jitter_foo <- function(x) {
     jit <- vector()
     
@@ -244,12 +252,14 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
   
   if (is.character(sortBy)) {
     test <- sortBy %in% c("PAR")
-    
+    #organizing elements by chosen "sortBy"
     ord <- order(unlist(sim[sortBy]), decreasing = test)
   }
   else {
     ord <- sortBy
   }
+  
+  #creating auxiliatory coyp of the sim object
   sim_mod <- sim
   
   sim_mod$TE <- sim_mod$TE[ord]
@@ -260,6 +270,7 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
   
   sim_mod$EXTANT <- sim_mod$EXTANT[ord]
   
+  #opening plot following user inputs + "fake defaults" above
   plot(NA, ...)
   segments(x0 = sim_mod$TS, x1 = sim_mod$TE, y1 = 1:length(sim_mod$TE), 
            y0 = 1:length(sim_mod$TE), lwd = lwdLin, col = "black")
@@ -274,23 +285,27 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
                                  ord)))
   }
   
+  #stablishing references for ploting
   luca <- which(is.na(sim_mod$PAR))
   
   aux_y <- unlist(lapply(sim$PAR, function(x) which(ord == x)[1]))
   
+  #adding elemnts of the plot
   segments(x0 = sim_mod$TS[-luca], x1 = sim_mod$TS[-luca], 
            y1 = (1:length(sim_mod$TE))[-luca], y0 = (aux_y[ord])[-luca], 
            lty = 2, lwd = lwdLin*0.25, col = "gray50")
   
+                         #adding fossils
   if (!(is.null(fossils))) {
     ids <- as.numeric(gsub("t", "", fossils$Species))
     
+    #true-timed fossils
     if ("SampT" %in% colnames(fossils)) {
       points(x = fossils$SampT, 
              y = unlist(lapply(ids, function(x) which(ord == x))), 
              col = "red", pch = 16, cex = lwdLin*0.25)
     }
-    
+    #fossils inputed as time intervals
     else if ("MaxT" %in% colnames(fossils) & "MinT" %in% 
              colnames(fossils)) {
       y_jittered <- jitter_foo(unlist(lapply(ids, 
