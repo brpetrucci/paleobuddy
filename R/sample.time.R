@@ -29,14 +29,14 @@
 #' @param S A vector of species numbers to be sampled. The default is all 
 #' species in \code{sim}. Species not included in \code{S} will not be sampled 
 #' by the function.
+#' 
+#' @inheritParams sample.clade
 #'
 #' @return A list of vectors of occurrence times for each species in \code{S}.
 #'
 #' @author Bruno do Rosario Petrucci and Matheus Januario.
 #' 
-#' @name sample.time
-#' @rdname sample.time
-#' @keywords Internal
+#' @noRd
 #' 
 
 sample.time <- function(sim, rho, tMax, S = NULL) {

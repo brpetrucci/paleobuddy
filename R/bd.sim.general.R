@@ -46,9 +46,7 @@
 #'
 #' @author Bruno do Rosario Petrucci.
 #'
-#' @name bd.sim.general
-#' @rdname bd.sim.general
-#' @keywords Internal
+#' @noRd
 #' 
 
 bd.sim.general <- function(n0, lambda, mu, tMax, 

@@ -52,15 +52,13 @@
 #'
 #' @param ... Additional parameters used by \code{adFun}. See examples.
 #' 
-#' @inheritParams sample.time
+#' @inheritParams sample.clade
 #'
 #' @return A list of vectors of occurrence times for each species in \code{S}.
 #'
 #' @author Matheus Januario
 #' 
-#' @name sample.age.time
-#' @rdname sample.age.time
-#' @keywords Internal
+#' @noRd
 
 sample.age.time <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
   # checking input

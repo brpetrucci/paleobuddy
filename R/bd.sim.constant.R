@@ -29,9 +29,7 @@
 #'
 #' @author Bruno do Rosario Petrucci.
 #' 
-#' @name bd.sim.constant
-#' @rdname bd.sim.constant
-#' @keywords Internal
+#' @noRd
 
 
 bd.sim.constant <- function(n0, lambda, mu, tMax, 

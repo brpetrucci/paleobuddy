@@ -23,17 +23,17 @@ sample.clade(
 times, parent, and status information (extant or extinct) for each species
 in the simulation. See \code{?sim}.}
 
-\item{rho}{Sampling rate (per species per million years) over time. It can be 
-a \code{numeric} describing a constant rate, a \code{function(t)} describing 
-the variation in sampling over time \code{t}, a \code{function(t, env)} 
-describing the variation in sampling over time following both time AND 
-an environmental variable (please see \code{envR} for details), or a 
-\code{vector} containing rates that correspond to each rate between sampling
-rate shift times times (please see \code{rShifts}). If \code{adFun} is 
-supplied, it will be used to find the number of occurrences during the 
-species duration, and a normalized \code{rho*adFun} will determine their 
-distribution along the species duration. Note that \code{rho} should always 
-be greater than or equal to zero.}
+\item{rho}{Sampling rate (per species per million years) over time. It can 
+be a \code{numeric} describing a constant rate, a \code{function(t)} 
+describing the variation in sampling over time \code{t}, a 
+\code{function(t, env)} describing the variation in sampling over time 
+following both time AND a time-series, usually an environmental variable 
+(see \code{envR}), or a \code{vector} containing rates that correspond to 
+each rate between sampling rate shift times times (see \code{rShifts}). If 
+\code{adFun} is supplied, it will be used to find the number of occurrences 
+during the species duration, and a normalized \code{rho*adFun} will 
+determine their distribution along the species duration. Note that 
+\code{rho} should always be greater than or equal to zero.}
 
 \item{tMax}{The maximum simulation time, used by \code{rexp.var}. A sampling
 time greater than \code{tMax} would mean the occurrence is sampled after the
@@ -45,24 +45,25 @@ in the output.}
 species in \code{sim}. Species not included in \code{S} will not be sampled 
 by the function.}
 
-\item{envR}{A data frame containing time points and values of an environmental
-variable, like temperature, for each time point. This will be used to create
-a sampling rate, so \code{rho} must be a function of time and said variable
-if \code{envR} is not \code{NULL}. Note \code{paleobuddy} has two 
-environmental data frames, \code{temp} and \code{co2}. See \code{RPANDA} for
-more examples.}
+\item{envR}{A data frame containing time points and values of an 
+environmental variable, like temperature, for each time point. This will be 
+used to create a sampling rate, so \code{rho} must be a function of time and
+said variable if \code{envR} is not \code{NULL}. Note \code{paleobuddy} has 
+two environmental data frames, \code{temp} and \code{co2}. See \code{RPANDA}
+for more examples.}
 
 \item{rShifts}{Vector of rate shifts. First element must be the starting
-time for the simulation (\code{0} or \code{tMax}). It must have the same length
-as \code{lambda}. \code{c(0, x, tMax)} is equivalent to 
+time for the simulation (\code{0} or \code{tMax}). It must have the same 
+length as \code{lambda}. \code{c(0, x, tMax)} is equivalent to 
 \code{c(tMax, tMax - x, 0)} for the purposes of \code{make.rate}.}
 
 \item{returnTrue}{If set to \code{FALSE}, it will contain the occurrence
 times as ranges. In this way, we simulate the granularity presented by
-empirical fossil records. If \code{returnTrue} is \code{TRUE}, this is ignored.}
+empirical fossil records. If \code{returnTrue} is \code{TRUE}, this is 
+ignored.}
 
-\item{returnAll}{If set to \code{TRUE}, returns both the true sampling time and
-age ranges. Default is \code{FALSE}}
+\item{returnAll}{If set to \code{TRUE}, returns both the true sampling time 
+and age ranges. Default is \code{FALSE}.}
 
 \item{bins}{A vector of time intervals corresponding to geological time 
 ranges. If it is not supplied, \code{seq(tMax, 0, -0.1)} is used.}

@@ -11,46 +11,92 @@
 #' Optionally takes a vector of time bins representing geologic periods, if the
 #' user wishes occurrence times to be represented as a range instead of true 
 #' points.
-#'
-#' @param bins A vector of time intervals corresponding to geological time 
-#' ranges. If it is not supplied, \code{seq(tMax, 0, -0.1)} is used.
-#'
-#' @param rho Sampling rate (per species per million years) over time. It can be 
-#' a \code{numeric} describing a constant rate, a \code{function(t)} describing 
-#' the variation in sampling over time \code{t}, a \code{function(t, env)} 
-#' describing the variation in sampling over time following both time AND 
-#' an environmental variable (please see \code{envR} for details), or a 
-#' \code{vector} containing rates that correspond to each rate between sampling
-#' rate shift times times (please see \code{rShifts}). If \code{adFun} is 
-#' supplied, it will be used to find the number of occurrences during the 
-#' species duration, and a normalized \code{rho*adFun} will determine their 
-#' distribution along the species duration. Note that \code{rho} should always 
-#' be greater than or equal to zero.
 #' 
-#' @param envR A data frame containing time points and values of an environmental
-#' variable, like temperature, for each time point. This will be used to create
-#' a sampling rate, so \code{rho} must be a function of time and said variable
-#' if \code{envR} is not \code{NULL}. Note \code{paleobuddy} has two 
-#' environmental data frames, \code{temp} and \code{co2}. See \code{RPANDA} for
-#' more examples.
+#' @param sim A \code{sim} object, containing extinction times, speciation 
+#' times, parent, and status information (extant or extinct) for each species
+#' in the simulation. See \code{?sim}.
+#'
+#' @param rho Sampling rate (per species per million years) over time. It can 
+#' be a \code{numeric} describing a constant rate, a \code{function(t)} 
+#' describing the variation in sampling over time \code{t}, a 
+#' \code{function(t, env)} describing the variation in sampling over time 
+#' following both time AND a time-series, usually an environmental variable 
+#' (see \code{envR}), or a \code{vector} containing rates that correspond to 
+#' each rate between sampling rate shift times times (see \code{rShifts}). If 
+#' \code{adFun} is supplied, it will be used to find the number of occurrences 
+#' during the species duration, and a normalized \code{rho*adFun} will 
+#' determine their distribution along the species duration. Note that 
+#' \code{rho} should always be greater than or equal to zero.
+#' 
+#' @param tMax The maximum simulation time, used by \code{rexp.var}. A sampling
+#' time greater than \code{tMax} would mean the occurrence is sampled after the
+#' present, so for consistency we require this argument. This is also required
+#' to ensure time follows the correct direction both in the Poisson process and
+#' in the output.
+#'
+#' @param S A vector of species numbers to be sampled. The default is all 
+#' species in \code{sim}. Species not included in \code{S} will not be sampled 
+#' by the function.
+#' 
+#' @param envR A data frame containing time points and values of an 
+#' environmental variable, like temperature, for each time point. This will be 
+#' used to create a sampling rate, so \code{rho} must be a function of time and
+#' said variable if \code{envR} is not \code{NULL}. Note \code{paleobuddy} has 
+#' two environmental data frames, \code{temp} and \code{co2}. See \code{RPANDA}
+#' for more examples.
 #'
 #' @param rShifts Vector of rate shifts. First element must be the starting
-#' time for the simulation (\code{0} or \code{tMax}). It must have the same length
-#' as \code{lambda}. \code{c(0, x, tMax)} is equivalent to 
+#' time for the simulation (\code{0} or \code{tMax}). It must have the same 
+#' length as \code{lambda}. \code{c(0, x, tMax)} is equivalent to 
 #' \code{c(tMax, tMax - x, 0)} for the purposes of \code{make.rate}.
 #'
 #' @param returnTrue If set to \code{FALSE}, it will contain the occurrence
 #' times as ranges. In this way, we simulate the granularity presented by
-#' empirical fossil records. If \code{returnTrue} is \code{TRUE}, this is ignored.
+#' empirical fossil records. If \code{returnTrue} is \code{TRUE}, this is 
+#' ignored.
 #' 
-#' @param returnAll If set to \code{TRUE}, returns both the true sampling time and
-#' age ranges. Default is \code{FALSE}
+#' @param returnAll If set to \code{TRUE}, returns both the true sampling time 
+#' and age ranges. Default is \code{FALSE}.
+#' 
+#' @param bins A vector of time intervals corresponding to geological time 
+#' ranges. If it is not supplied, \code{seq(tMax, 0, -0.1)} is used.
+#' 
+#' @param adFun A density function representing the age-dependent preservation
+#' model. It must be a density function, and consequently integrate to 1 
+#' (though this condition is not verified by the function). If not provided, a 
+#' uniform distribution will be used by default. The function must also 
+#' have the following properties:
+#'
+#' \itemize{
+#'
+#' \item Return a vector of preservation densities for each time in a given
+#' vector \code{t} in geological time. 
+#'
+#' \item Be parametrized in the absolute geological time associated to 
+#' each moment in age (i.e. age works relative to absolute geological 
+#' time, in Mya - in other words, the convention is TS > 0). The function 
+#' \emph{does not} directly use the lineage's age (which would mean that
+#' TS = 0 for all species whenever they are born). Because of this, it is
+#' assumed to go from \code{tMax} to \code{0}, as opposed to most functions 
+#' in the package.
+#'
+#' \item Should be limited between \code{s} (i.e. the lineage's 
+#' speciation/birth) and \code{e} (i.e. the lineage's extinction/death), 
+#' with \code{s} > \code{e}. It is possible to assign parameters in absolute 
+#' geological time (see third example) and relative to age as long as this 
+#' follows the convention of age expressed in absolute geological time (see 
+#' fourth example).
+#'
+#' \item Include the arguments \code{t}, \code{s}, \code{e} and \code{sp}. 
+#' The argument sp is used to pass species-specific parameters (see examples),
+#' allowing for \code{dFun} to be species-inhomogeneous.
+#' }
+#'
+#' @param ... Additional parameters used by \code{adFun}. See examples.
 #'
 #' @return A \code{data.frame} containing species names/numbers, whether each 
 #' species is extant or extinct, and the true occurrence times of each fossil, 
 #' a range of occurrence times based on \code{bins}, or both.
-#'
-#' @inheritParams sample.age.time
 #'
 #' @author Matheus Januario and Bruno do Rosario Petrucci.
 #'
