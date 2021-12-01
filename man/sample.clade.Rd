@@ -116,9 +116,7 @@ occurrence number over a species duration. Allows for further flexibility in
 rates by a shift times vector and environmental matrix parameters. 
 Optionally takes a vector of time bins representing geologic periods, if the
 user wishes occurrence times to be represented as a range instead of true 
-points. See \code{sample.time} - absolute time-dependent sampling only - 
-and \code{sample.age.time} - time and/or age-dependent sampling - for more 
-information.
+points.
 }
 \examples{
 
@@ -251,9 +249,11 @@ occs <- sample.clade(sim, rho = r_t, envR = envR, tMax = 10, bins = bins)
 # draw simulation with fossil occurrences as time points
 draw.sim(sim, fossils = occs)
 
+# note that any techniques used in examples for ?bd.sim to create more
+# complex mixed scenarios can be used here as well
+
 ###
 # sampling can also be age-dependent
-# for more examples, see ?sample.age.time
 
 # set seed
 set.seed(1)
@@ -321,7 +321,163 @@ occs <- sample.clade(sim, rho, tMax = 10, adFun = dPERT, bins = bins,
 draw.sim(sim, fossils = occs)
 
 ###
-# we can have adFun dependent on other parameters
+# we can have more parameters on adFun
+
+# sampling rate
+rho <- function(t) {
+ return(1 + 0.5*t)
+}
+# since here rho is time-dependent, the function finds the
+# number of occurrences using rho, and their distribution
+# using a normalized rho * adFun
+
+# set seed
+set.seed(1)
+
+# simulate a group
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
+
+# here we will use the triangular distribution
+
+# age-dependence distribution
+dTRI <- function(t, s, e, sp, md) {
+  # make sure it is a valid TRI
+  if (e >= s) {
+   message("There is no TRI with e >= s")
+   return(rep(NaN, times = length(t)))
+  }
+  
+  # another condition we must check
+  if (md < e | md > s) {
+   message("There is no TRI with md outside [s, e] interval")
+   return(rep(NaN, times = length(t)))
+  }
+  
+  # needed to vectorize the function:
+  id1 <- which(t >= e & t < md)
+  id2 <- which(t == md)
+  id3 <- which(t > md & t <= s)
+  id4 <- which( !(1:length(t) \%in\% c(id1,id2,id3)))
+  
+  # actually vetorizing function
+  res <- vector()
+  
+  # (t >= e & t < md)
+  res[id1] <- (2*(t[id1] - e)) / ((s - e) * (md - e))
+  
+  # (t == md)
+  res[id2] <- 2 / (s - e)
+  
+  # (md < t & t <= s)
+  res[id3] <- (2*(s - t[id3])) / ((s - e) * (s - md))
+  
+  # outside function's limits
+  res[id4] <- 0
+  
+  return(res)
+}
+
+# set mode at 8
+md <- 8
+    
+# plot it for an example species who lived from 10mya to the present
+plot(time, rev(dTRI(time, 10, 5, 1, md)),
+     main = "Age-dependence distribution",
+     xlab = "Species age (My)", ylab = "Density",
+     xlim = c(0, 5), type = "l")
+
+# bins for fossil ranges
+bins <- seq(from = 10, to = 0, by = -1)
+
+# simulate fossil occurrences for the first species
+occs <- sample.clade(sim, rho, tMax = 10, S = 1, adFun = dTRI, 
+                     bins = bins, returnTrue = FALSE, md = md)
+# note we provide the peak for the triangular sampling as an argument
+# here that peak is assigned in absolute geological, but
+# it usually makes more sense to express this in terms
+# of age (a given percentile of the age, for instance) - see below
+
+# draw simulation with fossil occurrences as ranges
+draw.sim(sim, fossils = occs)
+
+###
+# we can also have a hat-shaped increase through the duration of a species
+# with more parameters than TS and TE, but with the parameters relating to
+# the relative age of each lineage
+
+# sampling rate
+rho <- function(t) {
+ return(1 + 0.1*t)
+}
+
+# set seed
+set.seed(1)
+
+# simulate a group
+sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
+
+# age-dependence distribution, with the "mde" of the triangle
+# being exactly at the last quarter of the duration of EACH lineage
+dTRImod1 <- function(t, s, e, sp) {
+  # note that now we don't have the "md" parameter here,
+  # but it is calculated inside the function
+  
+  # check if it is a valid TRI
+  if (e >= s) {
+   message("There is no TRI with e >= s")
+   return(rep(NaN, times = length(t)))
+  }
+  
+  # calculate md
+  md <- ((s - e) / 4) + e
+  # md is at the last quarter of the duration of the lineage
+  
+  # please note that the same logic can be used to sample parameters
+  # internally in the function, running for instance:
+  # md <- runif (n = 1, min = e, max = s)
+  
+  # check it is a valid md
+  if (md < e | md > s) {
+   message("There is no TRI with md outside [s, e] interval")
+   return(rep(NaN, times = length(t)))
+  }
+  
+  # needed to vectorize function
+  id1 <- which(t >= e & t < md)
+  id2 <- which(t == md)
+  id3 <- which(t>md & t <= s)
+  id4 <- which( !(1:length(t) \%in\% c(id1,id2,id3)))
+  
+  # vectorize the function
+  res<-vector()
+  
+  res[id1] <- (2 * (t[id1] - e)) / ((s - e) * (md - e))
+  res[id2] <- 2 / (s - e)
+  res[id3] <- (2 * (s - t[id3])) / ((s - e) * (s - md))
+  res[id4] <- 0
+  
+  return(res)
+}
+
+# plot for a species living between 10 and 0 mya
+plot(time, rev(dTRImod1(time, 10, 0, 1)),
+    main = "Age-dependence distribution",
+    xlab = "Species age (My)", ylab = "Density",
+    xlim = c(0, 10), type = "l")
+
+# sample first two species
+occs <- sample.clade(sim = sim, rho = rho, tMax = 10, adFun = dTRImod1)
+
+# draw simulation with fossil occurrences as time points
+draw.sim(sim, fossils = occs)
+
+# here, we fix md at the last quarter
+# of the duration of the lineage
+
+###
+# the parameters of adFun can also relate to each specific lineage,
+# which is useful when using variable parameters for each species
+# to keep track of those parameters after the sampling is over
 
 # set seed
 set.seed(1)
@@ -379,81 +535,6 @@ dTRImod2 <- function(t, s, e, sp) {
 
 # plot for a species living between 10 and 0 mya
 plot(time, rev(dTRImod2(time, 10, 0, 1)),
-    main = "Age-dependence distribution",
-    xlab = "Species age (My)", ylab = "Density",
-    xlim = c(0, 10), type = "l")
-
-# simulate fossil occurrences data frame
-occs <- sample.clade(sim, rho, tMax = 10, adFun = dTRImod2, bins = bins, 
-                     returnTrue = FALSE)
-
-# draw simulation with fossil occurrences as time ranges
-draw.sim(sim, fossils = occs)
-
-###
-# let us keep everything from the last example, but
-# having a time-dependent sampling rate rho
-
-# in this case, the function finds the number of
-# occurrences using rho, and their distribution
-# using a normalized rho * adFun
-
-# simulate a group
-set.seed(1)
-sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10)
-
-# sampling rate
-rho <- function(t) {
-  return(2 + 0.1*t)
-}
-
-# get the par and par1 vectors
-
-# get mins vector
-minsPar <- ifelse(is.na(sim$TE), 0, sim$TE)
-
-# a random time inside each species' duration
-par <- runif(n = length(sim$TE), min = minsPar, max = sim$TS)
-             
-# its complement to the middle of the lineage's age.
-par1 <- (((sim$TS - minsPar) / 2) + minsPar) - par
-# note that the interaction between these two parameters creates a
-# deterministic parameter, but inside the function one of them ("par")
-# is a random parameter
-
-dTRImod2 <- function(t, s, e, sp) {
-  # make sure it is a valid TRI
-  if (e >= s) {
-   message("There is no TRI with e >= s")
-   return(rep(NaN, times = length(t)))
-  }
-  
-  # md depends on parameters
-  md <- par[sp] + par1[sp]
-  
-  # check that md is valid
-  if (md < e | md > s) {
-   message("There is no TRI with md outside [s, e] interval")
-   return(rep(NaN, times = length(t)))
-  }
-  
-  id1 <- which(t >= e & t < md)
-  id2 <- which(t == md)
-  id3 <- which(t > md & t <= s)
-  id4 <- which(!(1:length(t) \%in\% c(id1,id2,id3)))
-  
-  res <- vector()
-  
-  res[id1] <- (2*(t[id1] - e)) / ((s - e) * (md - e))
-  res[id2] <- 2 / (s - e)
-  res[id3] <- (2*(s - t[id3])) / ((s - e) * (s - md))
-  res[id4] <- 0
-  
-  return(res)
-}
-
-# plot for the first species
-plot(time, rev(dTRImod2(time, sim$TS[1], minsPar[1], 1)),
     main = "Age-dependence distribution",
     xlab = "Species age (My)", ylab = "Density",
     xlim = c(0, 10), type = "l")

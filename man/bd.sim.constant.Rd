@@ -63,111 +63,18 @@ parent, and status information for each species in the simulation. See
 \code{?sim}.
 }
 \description{
-Simulates a species birth-death process with constant rates for any number of
-starting species. Allows for constraining results on the number of species at 
-the end of the simulation, either total or extant. Returns a \code{sim} object 
-(see \code{?sim}). It may return true extinction times or simply information on
-whether species lived after the maximum simulation time, depending on input. 
-For time-varying and age-dependent simulations, see \code{bd.sim.general}. For a
-function that unites both scenarios, see \code{bd.sim}.
-Please note while time runs from \code{0} to \code{tMax} in the simulation, it 
-returns speciation/extinction times as \code{tMax} (origin of the group) to 
-\code{0} (the "present" and end of simulation), so as to conform to other
-packages in the literature.
-}
-\examples{
-
-###
-# first, let us try no extinction
-
-# initial number of species
-n0 <- 1
-
-# maximum simulation time
-tMax <- 40
-
-# speciation
-lambda <- 0.1
-
-# extinction
-mu <- 0
-
-# set seed
-set.seed(1)
-
-# run the simulation
-sim <- bd.sim.constant(n0, lambda, mu, tMax, nFinal = c(2, Inf))
-
-# we can plot the phylogeny to take a look
-if (requireNamespace("ape", quietly = TRUE)) {
-  phy <- make.phylo(sim)
-  ape::plot.phylo(phy)
-}
-
-###
-# now let us try to add a bit extinction
-
-# initial number of species
-n0 <- 1
-
-# maximum simulation time
-tMax <- 40
-
-# speciation
-lambda <- 0.1
-
-# extinction
-mu <- 0.04
-
-# set seed
-set.seed(1)
-
-# run the simulation
-sim <- bd.sim.constant(n0, lambda, mu, tMax, nFinal = c(2, Inf))
-
-# we can plot the phylogeny to take a look
-if (requireNamespace("ape", quietly = TRUE)) {
-  phy <- make.phylo(sim)
-  ape::plot.phylo(phy)
-}
-
-###
-# we can also try a pure-death process
-
-# initial number of species - note the high number, so we get an appreciable
-# sample size
-n0 <- 100
-
-# maximum simulation time
-tMax <- 40
-
-# speciation
-lambda <- 0
-
-# extinction
-mu <- 0.02
-
-# set seed
-set.seed(1)
-
-# run the simulation
-sim <- bd.sim.constant(n0, lambda, mu, tMax)
-
-# because we started this simulation with 100 independent
-# species and no speciation, in this case there is no
-# phylogeny to plot, though we can look at a summary of longevities
-summary(sim)
-
-###
-# note nFinal has to be sensible
-\dontrun{
-# this would return a warning, since it is virtually impossible to get 100
-# species at a process with diversification rate -0.09 starting at n0 = 1
-sim <- bd.sim.constant(1, lambda = 0.01, mu = 1, tMax = 100, 
-                      nFinal = c(100, Inf))
-}
-
+Simulates a species birth-death process with constant rates for any number 
+of starting species. Allows for constraining results on the number of 
+species at the end of the simulation, either total or extant. Returns a 
+\code{sim} object (see \code{?sim}). It may return true extinction times or 
+simply information on whether species lived after the maximum simulation 
+time, depending on input. For time-varying and age-dependent simulations, 
+see \code{bd.sim}. Please note while time runs from \code{0} to \code{tMax} 
+in the simulation, it returns speciation/extinction times as \code{tMax} 
+(origin of the group) to \code{0} (the "present" and end of simulation), so 
+as to conform to other packages in the literature.
 }
 \author{
 Bruno do Rosario Petrucci.
 }
+\keyword{Internal}

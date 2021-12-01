@@ -142,10 +142,7 @@ optional shape argument to generate age-dependence on speciation and/or
 extinction, assuming a Weibull distribution as a model of  age-dependence. 
 Returns a \code{sim} object (see \code{?sim}). It may return true extinction 
 times or simply information on whether species lived after the  maximum 
-simulation time, depending on simulation settings \code{bd.sim} calls 
-\code{bd.sim.constant} or \code{bd.sim.general} depending on the nature of 
-the birth and death rates supplied. For more information on the code used 
-for the birth-death process, see those corresponding functions.
+simulation time, depending on simulation settings.
 }
 \details{
 Please note while time runs from \code{0} to \code{tMax} in the simulation, 
@@ -519,8 +516,9 @@ if (requireNamespace("ape", quietly = TRUE)) {
 # we can also change the environmental variable
 # halfway into the simulation
 
-# note below that for this complex scenario we need make.rate, 
-# so that the usage of bd.sim here is equivalent to bd.sim.general
+# note below that for this scenario we need make.rate, which
+# in general can aid users looking for more complex scenarios
+# than those available directly with bd.sim arguments
 
 # get the temperature data - see ?temp for information on the data set
 data(temp)

@@ -17,8 +17,7 @@
 #' simulations into monophyletic clades so one can generate fossil records and 
 #' phylogenies (see below) for clades with a specific mother species. This is
 #' particularly useful for simulations with multiple starting species. See 
-#' \code{?bd.sim}, \code{?bd.sim.constant}, \code{?bd.sim.general}, and
-#' \code{?find.lineages} for more information.
+#' \code{?bd.sim} and \code{?find.lineages} for more information.
 #' 
 #' All birth-death simulation functions return a \code{sim} object, which is a 
 #' list of vectors containing speciation times, extinction times, status
@@ -33,8 +32,8 @@
 #' simulations. The function \code{sample.clade} accepts constant, 
 #' time-varying, and environmentally dependent rates. Users might also supply a
 #' model describing the distribution of fossil occurrences over a species 
-#' duration to simulate age-dependent sampling. See \code{?sample.clade}, 
-#' \code{?sample.time}, and \code{?sample.age.time} for more information.
+#' duration to simulate age-dependent sampling. See \code{?sample.clade} for 
+#' more information.
 #' 
 #' @section Phylogeny generation:
 #' We believe it is imperative to be able to generate fossil records and
