@@ -155,62 +155,69 @@
 #' @name draw.sim
 #' @rdname draw.sim
 #' @export
+#' 
 
 draw.sim <- function (sim, fossils = NULL, sortBy = "TS", 
                       lwdLin = 4, showLabel = TRUE, ...) {
   # make NAs 0
   sim$TE[is.na(sim$TE)] <- 0
   
-  # set default parameters for plot and par 
-  #(used only when user does not input values for 
-  #those arguments)
-  #for each argument, we basically create "fake defaults" for
-  #ploting functions
+  # set default parameters for plot and par   
+  # will only be used if user does not input parameters (...)
   args <- list(...)
   
+  # suppress y axis
   if (("yaxt" %in% names(args))) {
     par(yaxt = "n")
   }
   
+  # y axis name
   if (!("ylab" %in% names(args))) {
     formals(plot.default)$ylab <- "Simulated lineages"
   }
   
+  # x axis name
   if (!("xlab" %in% names(args))) {
     formals(plot.default)$xlab <- "Time (Mya)"
   }
   
+  # limits in x axis (to enclose all species' durations)
   if (!("xlim" %in% names(args))) {
     formals(plot.default)$xlim <- 
       c(max(sim$TS, na.rm = TRUE), min(sim$TE, na.rm = TRUE) - 1)
   }
   
+  # limits in y axis
   if (!("ylim" %in% names(args))) {
+    # if sort by par, have to create order decreasing
     test <- sortBy %in% c("PAR")
     ord <- order(unlist(sim[sortBy]), decreasing = test)
+    
+    # since we use the max for the limits
     formals(plot.default)$ylim <- c(1, max(ord))
   }
   
+  # no frame
   if (!("frame.plot" %in% names(args))) {
     formals(plot.default)$frame.plot <- FALSE
   }
   
-  # checking inputs
-  #sim object
+  # check inputs
+  # sim object
   if (!is.sim(sim)) {
     stop("sim must be a valid sim object")
   }
   
-  #fossil info
+  # fossil data frame
   if (!is.null(fossils)) {
-    if (!((c("SampT") %in% colnames(fossils)) | all(c("MaxT", 
-                                                      "MinT") %in% colnames(fossils)))) {
+    if (!((c("SampT") %in% colnames(fossils)) | 
+          all(c("MaxT", "MinT") %in% colnames(fossils)))) {
       stop("fossils must contain either a SampT or both a MinT and MaxT
            columns. See ?draw.sim and ?sample.clade.")
     }
   }
   
-  #checking sortBy inputation
+  # check sortBy
   if (!class(sortBy) %in% c("character", "integer", "numeric")) {
     stop("sortBy should be a character or a vector of integers.")
   }
@@ -223,43 +230,53 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
          should have unique indices.")
   }
   
-  #auxiliary function for drawing transparency 
+  # function for drawing transparency 
   makeTransparent <- function(someColor, alpha = 25) {
+    # make color
     newColor <- col2rgb(someColor)
     
+    # apply transparency to color
     apply(newColor, 2, function(curcoldata) {
       rgb(red = curcoldata[1], green = curcoldata[2], blue = curcoldata[3], 
           alpha = alpha, maxColorValue = 255)
     })
   }
   
-  #auxiliatory function for drawgin jittered rectangles
+  # function for drawing jittered rectangles
   jitter_foo <- function(x) {
+    # create return
     jit <- vector()
     
+    # jitter each rectangle
     while (length(jit) < length(x)) {
-      r <- 1.2
+      # get a jitter amount
+      r <- rnorm(1, sd = 2)
       
+      # if too high, repeat
       while (r > 0.25 | r < (-0.25)) {
         r <- rnorm(1, sd = 2)
       }
   
+      # append to result
       jit <- c(jit, r)
     }
     
+    # return jittered rectangles
     return(x + jit)
   }
   
+  # organize elements based on sortBy
   if (is.character(sortBy)) {
+    # if it is PAR, need to be decreasing
     test <- sortBy %in% c("PAR")
-    #organizing elements by chosen "sortBy"
     ord <- order(unlist(sim[sortBy]), decreasing = test)
   }
   else {
+    # if it isn't a string, it's a vector of numbers
     ord <- sortBy
   }
   
-  #creating auxiliatory coyp of the sim object
+  # copy of  sim object in the correct order
   sim_mod <- sim
   
   sim_mod$TE <- sim_mod$TE[ord]
@@ -270,8 +287,12 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
   
   sim_mod$EXTANT <- sim_mod$EXTANT[ord]
   
-  #opening plot following user inputs + "fake defaults" above
+  class(sim_mod) <- "sim"
+  
+  # open plot following user inputs + defaults above
   plot(NA, ...)
+  
+  # plot durations
   segments(x0 = sim_mod$TS, x1 = sim_mod$TE, y1 = 1:length(sim_mod$TE), 
            y0 = 1:length(sim_mod$TE), lwd = lwdLin, col = "black")
   
@@ -285,32 +306,39 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
                                  ord)))
   }
   
-  #stablishing references for ploting
+  # establish references for plotting
+  
+  # find original species in the new sim object
   luca <- which(is.na(sim_mod$PAR))
   
+  # find parents of each species in order
   aux_y <- unlist(lapply(sim$PAR, function(x) which(ord == x)[1]))
   
-  #adding elemnts of the plot
+  # dashed lines between parent and daughter species
   segments(x0 = sim_mod$TS[-luca], x1 = sim_mod$TS[-luca], 
            y1 = (1:length(sim_mod$TE))[-luca], y0 = (aux_y[ord])[-luca], 
            lty = 2, lwd = lwdLin*0.25, col = "gray50")
   
-                         #adding fossils
+  # add fossils
   if (!(is.null(fossils))) {
+    # find number ID of each species' fossils
     ids <- as.numeric(gsub("t", "", fossils$Species))
     
-    #true-timed fossils
+    # if SampT is in the data frame, have true occurrence times
     if ("SampT" %in% colnames(fossils)) {
+      # draw fossil occurrences as time points
       points(x = fossils$SampT, 
              y = unlist(lapply(ids, function(x) which(ord == x))), 
              col = "red", pch = 16, cex = lwdLin*0.25)
     }
-    #fossils inputed as time intervals
+    # if MaxT and MinT are in the data frame, have occurrence time ranges
     else if ("MaxT" %in% colnames(fossils) & "MinT" %in% 
              colnames(fossils)) {
+      # jitter lines for drawing fossil ranges
       y_jittered <- jitter_foo(unlist(lapply(ids, 
                                              function(x) which(ord == x))))
       
+      # draw fossil ranges a bit transparent
       segments(x1 = fossils$MaxT, x0 = fossils$MinT, y1 = y_jittered, 
                y0 = y_jittered, col = makeTransparent("red", 100), 
                lwd = lwdLin * 0.75)
