@@ -189,12 +189,7 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
   
   # limits in y axis
   if (!("ylim" %in% names(args))) {
-    # if sort by par, have to create order decreasing
-    test <- sortBy %in% c("PAR")
-    ord <- order(unlist(sim[sortBy]), decreasing = test)
-    
-    # since we use the max for the limits
-    formals(plot.default)$ylim <- c(1, max(ord))
+    formals(plot.default)$ylim <- c(0, (length(sim$TE)+1))
   }
   
   # no frame
@@ -218,13 +213,10 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
   }
   
   # check sortBy
-  if (!class(sortBy) %in% c("character", "integer", "numeric")) {
+  if (!class(sortBy) %in% c("character", "integer")) {
     stop("sortBy should be a character or a vector of integers.")
   }
-  else if (class(sortBy) == "integer" & length(sortBy) != length(sim$TE)) {
-    stop("sortBy must have the same length as elements of sim.")
-  }
-  else if ((class(sortBy) == "numeric") & !(all(1:length(sim$TE) %in% 
+  else if ((class(sortBy) == "integer") & !(all(1:length(sim$TE) %in% 
                                                 unique(sortBy)))) {
     stop("sortBy must skip no lineage, and all lineages
          should have unique indices.")
@@ -256,7 +248,7 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
       while (r > 0.25 | r < (-0.25)) {
         r <- rnorm(1, sd = 2)
       }
-  
+      
       # append to result
       jit <- c(jit, r)
     }
@@ -268,7 +260,7 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
   # organize elements based on sortBy
   if (is.character(sortBy)) {
     # if it is PAR, need to be decreasing
-    test <- sortBy %in% c("PAR")
+    test <- c("PAR") %in% sortBy
     ord <- order(unlist(sim[sortBy]), decreasing = test)
   }
   else {
