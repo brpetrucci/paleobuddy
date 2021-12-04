@@ -16,10 +16,11 @@
 #' should be sorted in the plot. If it is a string (see example 3), it 
 #' indicates which element in the \code{sim} object that should be used to sort
 #' lineages in the plot. If it is a vector of integers, it directly specifies
-#' the order in which lineages should be drawn (from the bottom 
-#' (i.e. integer = 1)) to the upper side (integer = length of the \code{sim} 
-#' elements) of the figure). Default value of this parameter is "TS", so by
-#' default species will be sorted by order of origination in the simulation.
+#' the order in which lineages should be drawn, from the bottom 
+#' (i.e. the first integer) to the upper side (#th integer, with # = number of
+#' linegaes in the \code{sim}) of the figure. Default value of this parameter
+#' is "TS", so by default species will be sorted by order of origination in 
+#' the simulation.
 #' 
 #' @param showLabel A \code{logical} on whether to draw species labels (i.e. 
 #' species 1 being t1, species 2 t2 etc.). Default is \code{TRUE}.
