@@ -19,10 +19,11 @@ format of this argument will define the way fossils are drawn (see below).}
 should be sorted in the plot. If it is a string (see example 3), it 
 indicates which element in the \code{sim} object that should be used to sort
 lineages in the plot. If it is a vector of integers, it directly specifies
-the order in which lineages should be drawn (from the bottom 
-(i.e. integer = 1)) to the upper side (integer = length of the \code{sim} 
-elements) of the figure). Default value of this parameter is "TS", so by
-default species will be sorted by order of origination in the simulation.}
+the order in which lineages should be drawn, from the bottom 
+(i.e. the first integer) to the upper side (#th integer, with # = number of
+linegaes in the \code{sim}) of the figure. Default value of this parameter
+is "TS", so by default species will be sorted by order of origination in 
+the simulation.}
 
 \item{lwdLin}{The relative thickness/size of all elements (i.e., lines and 
 points in the plot. Default value is 4 (i.e. equal to \code{lwd = 4} for 

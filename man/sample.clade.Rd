@@ -66,7 +66,8 @@ ignored.}
 and age ranges. Default is \code{FALSE}.}
 
 \item{bins}{A vector of time intervals corresponding to geological time 
-ranges. If it is not supplied, \code{seq(tMax, 0, -0.1)} is used.}
+ranges. It must be supplied if \code{returnTrue} or \code{returnAll} is
+\code{TRUE}.}
 
 \item{adFun}{A density function representing the age-dependent preservation
 model. It must be a density function, and consequently integrate to 1 

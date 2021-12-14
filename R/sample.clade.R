@@ -59,7 +59,8 @@
 #' and age ranges. Default is \code{FALSE}.
 #' 
 #' @param bins A vector of time intervals corresponding to geological time 
-#' ranges. If it is not supplied, \code{seq(tMax, 0, -0.1)} is used.
+#' ranges. It must be supplied if \code{returnTrue} or \code{returnAll} is
+#' \code{TRUE}.
 #' 
 #' @param adFun A density function representing the age-dependent preservation
 #' model. It must be a density function, and consequently integrate to 1 
@@ -639,13 +640,28 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
   if (is.null(S)) {
     S <- 1:length(sim$TE)
   }
-
-  # set a default bin
-  if (is.null(bins)) {
-    bins <- seq(tMax, 0, -0.1)
-  } else if (max(bins) < tMax) {
-    stop("Bins must include maximum time of simulation")
+  
+  # if returnTrue is false and returnAll is true, the user is probably confused
+  if (!returnTrue && returnAll) {
+    stop("returnTrue is false and returnAll is true. 
+         That behavior is undefined")
   }
+  
+  # test whether we return ranges
+  returnRanges <- !returnTrue || returnAll
+
+  # adjust bins and check it exists if it needs to
+  if (!is.null(bins)) {
+    # adjust it
+    bins <- sort(bins, decreasing = TRUE)
+    
+    # if it doesn't include tMax
+    if (max(bins) < tMax) {
+      stop("Bins must include maximum time of simulation")
+    }
+  } else if (returnRanges) {
+    stop("If returnTrue if false or returnAll is true, bins must be supplied")
+  } 
   
   # if rho is not a constant, apply make.rate to it
   if (!is.numeric(rho) || length(rho) > 1) {
@@ -654,10 +670,7 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
   
   # make TE
   sim$TE[sim$EXTANT] <- 0
-
-  # adjusting bins
-  bins <- sort(bins, decreasing = TRUE)
-
+  
   # sample using Poisson process
   
   # independent of age (i.e. occurrences uniformly distributed through the 
@@ -681,38 +694,74 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
                                  adFun = adFun, ...)
   }
 
-  # create data frame containing both ranges and time points
-  res <- data.frame(matrix(nrow = 0, ncol = 5))
+  # names res will have regardless of what to return
+  baseNames <- c("Species", "Extant")
+  
+  # rest will depend on the returns
+  resNames <- c(baseNames, if (returnTrue) "SampT",
+                if (returnRanges) c("MaxT", "MinT"))
+  
+  # create data frame
+  res <- data.frame(matrix(nrow = 0, ncol = length(resNames)))
   
   # name the columns
-  colnames(res) <- c("Species", "Extant", "SampT", "MaxT", "MinT")
+  colnames(res) <- resNames
   
-  # for each occurrence
-  for (i in 1:length(pointEstimates)) {
+  # for each species
+  for (sp in S) {
+    # get the occurrences for this species
+    occs <- pointEstimates[[paste0("t", sp)]]
     
-    if (length(pointEstimates[[i]]) > 0) {
-      # bin it
-      binned_occs <- binner(pointEstimates[[i]], bins = bins)
+    # only matters if there are occurrences for sp
+    if (length(occs) > 0) {
+      # if we want true occurrence times, only SampT matters
+      if (!returnRanges) {
+        # create auxiliary data frame
+        aux <- data.frame(Species = rep(sp, length(occs)),
+                          Extant = NA, 
+                          SampT = occs)
+        
+        # add it to res
+        res <- rbind(res, aux)
+      } 
       
-      # counter for point estimates
-      counter <- 1
-      
-      # for each bin
-      for (k in 1:(length(bins) - 1)) {
-        # if there are occurrences in that bin
-        if (binned_occs[k] > 0) {
-          # make a row of the data frame
-          aux <- data.frame(Species = rep(i, times = binned_occs[k]),
-                            Extant = NA, 
-                            SampT = pointEstimates[[i]][counter:(counter + binned_occs[k] - 1)],
-                            MinT = rep(bins[k + 1], times = binned_occs[k]),
-                            MaxT = rep(bins[k], times = binned_occs[k]))
+      # otherwise, we need to bin it
+      else {
+        # bin it
+        binnedOccs <- binner(occs, bins = bins)
+        
+        # counter for point estimates
+        counter <- 1
+        
+        # for each bin
+        for (k in 1:(length(bins) - 1)) {
+          # create aux data frame
+          aux <- data.frame(matrix(nrow = binnedOccs[k], 
+                                   ncol = length(resNames)))
+          colnames(aux) <- colnames(res)
           
-          # add row to data frame
-          res <- rbind(res, aux)
-          
-          # increase counter
-          counter <- counter + binned_occs[k]
+          # if there are occurrences in that bin
+          if (binnedOccs[k] > 0) {
+            # indices that matter for aux
+            ind <- 
+            # add species and extant to aux
+            aux$Species <- rep(sp, times = binnedOccs[k])
+            
+            # if returnTrue is true, add SampT
+            if (returnTrue) {
+              aux$SampT <- occs[counter:(counter + binnedOccs[k] - 1)]
+            }
+            
+            # add MaxT and MinT
+            aux$MaxT <- rep(bins[k], times = binnedOccs[k])
+            aux$MinT <- rep(bins[k + 1], times = binnedOccs[k])
+            
+            # add row to data frame
+            res <- rbind(res, aux)
+            
+            # increase counter
+            counter <- counter + binnedOccs[k]
+          }
         }
       }
     }
@@ -728,15 +777,7 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
     # and the species column
     res$Species <- paste0("t", res$Species)
   }
-
-  if (returnAll) {
-    # if returnAll is true, return res as is
-    return(res)
-  } else if (returnTrue) {
-    # if returnTrue is true and returnAll is not, delete age ranges
-    return(res[, c("Species", "Extant", "SampT")])
-  } else {
-    # if neither are true, delete true time
-    return(res[, c("Species", "Extant", "MinT", "MaxT")])
-  }
+  
+  # return
+  return(res)
 }

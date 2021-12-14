@@ -168,7 +168,7 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
   args <- list(...)
   
   # suppress y axis
-  if (("yaxt" %in% names(args))) {
+  if (!("yaxt" %in% names(args))) {
     par(yaxt = "n")
   }
   
@@ -323,6 +323,13 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
       points(x = fossils$SampT, 
              y = unlist(lapply(ids, function(x) which(ord == x))), 
              col = "red", pch = 16, cex = lwdLin*0.25)
+      
+      # if MaxT and MinT are also in the columns, message
+      if ("MaxT" %in% colnames(fossils) & "MinT" %in% 
+          colnames(fossils)) {
+        message("fossils contains both SampT and MaxT/MinT columns. Only
+                true fossil occurrences will be drawn.")
+      }
     }
     # if MaxT and MinT are in the data frame, have occurrence time ranges
     else if ("MaxT" %in% colnames(fossils) & "MinT" %in% 
