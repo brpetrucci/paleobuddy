@@ -19,7 +19,10 @@ jobs:
     # install packages needed
     - name: install required packages
       run: Rscript -e 'install.packages(c("rmarkdown","ape","devtools"))'
-      run: Rscript -e 'devtools::install_github("brpetrucci/paleobuddy")'
+    
+    # install paleobuddy from github
+    - name: install paleobuddy      
+    run: Rscript -e 'devtools::install_github("brpetrucci/paleobuddy")'
 
     # Render READEME.md using rmarkdown
     - name: render README
