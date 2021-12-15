@@ -32,10 +32,12 @@ install.packages("paleobuddy")
 
 And the development version from [GitHub](https://github.com/) with:
 
-```{r message=FALSE}
+```{r eval=FALSE}
 library(devtools)
 devtools::install_github("brpetrucci/paleobuddy")
+```
 
+```{r include=FALSE}
 library(paleobuddy)
 ```
 
