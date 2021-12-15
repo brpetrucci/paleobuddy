@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 # paleobuddy
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/brpetrucci/paleobuddy/workflows/R-CMD-check/badge.svg)](https://github.com/brpetrucci/paleobuddy/actions)
+[![R-CMD-check](https://github.com/brpetrucci/paleobuddy/workflows/R-CMD-check/badge.svg)](https://github.com/brpetrucci/paleobuddy/actions/workflows/R-CMD-check.yaml)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/paleobuddy)](https://cran.r-project.org/package=paleobuddy)
 <!-- badges: end -->
 
@@ -59,7 +59,7 @@ sim <- bd.sim(n0, lambda, mu, tMax)
 
 We can then generate fossil records, and visualize the results
 
-```{r message=FALSE}
+```{r message=FALSE, out.width="50%"}
 set.seed(1)
 
 rho <- 1 # sampling rate
@@ -71,9 +71,10 @@ fossils <- sample.clade(sim = sim, rho = rho, tMax = tMax, bins = bins)
 # visualize simulation and fossil occurrences
 draw.sim(sim, fossils)
 ```
+
 And generate phylogenies as well
 
-```{r}
+```{r out.width="50%"}
 phy <- make.phylo(sim) # make a phylogenetic tree with the simulated group
 ape::plot.phylo(phy, root.edge = TRUE) # plot it with a stem (requires APE)
 ape::axisPhylo() # add axis

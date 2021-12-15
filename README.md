@@ -5,7 +5,7 @@
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/brpetrucci/paleobuddy/workflows/R-CMD-check/badge.svg)](https://github.com/brpetrucci/paleobuddy/actions)
+[![R-CMD-check](https://github.com/brpetrucci/paleobuddy/workflows/R-CMD-check/badge.svg)](https://github.com/brpetrucci/paleobuddy/actions/workflows/R-CMD-check.yaml)
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/paleobuddy)](https://cran.r-project.org/package=paleobuddy)
 <!-- badges: end -->
 
@@ -70,8 +70,9 @@ fossils <- sample.clade(sim = sim, rho = rho, tMax = tMax, bins = bins)
 draw.sim(sim, fossils)
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" /> And
-generate phylogenies as well
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="50%" />
+
+And generate phylogenies as well
 
 ``` r
 phy <- make.phylo(sim) # make a phylogenetic tree with the simulated group
@@ -79,7 +80,7 @@ ape::plot.phylo(phy, root.edge = TRUE) # plot it with a stem (requires APE)
 ape::axisPhylo() # add axis
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="50%" />
 
 ## Important functions
 

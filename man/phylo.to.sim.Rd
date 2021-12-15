@@ -80,7 +80,7 @@ because the set of "impossible" ways to assign motherhood is vast, and
 therefore has not allowed for a test of every possibility. If the function 
 crashes when all lineages have reasonable motherhood, users should submit an
 issue report at 
-\url{https://https://github.com/brpetrucci/paleobuddy/issues}.
+\url{https://github.com/brpetrucci/paleobuddy/issues}.
 
 Dating:
 
