@@ -22,7 +22,7 @@ jobs:
     
     # install paleobuddy from github
     - name: install paleobuddy      
-    run: Rscript -e 'devtools::install_github("brpetrucci/paleobuddy")'
+      run: Rscript -e 'devtools::install_github("brpetrucci/paleobuddy")'
 
     # Render READEME.md using rmarkdown
     - name: render README
