@@ -37,8 +37,6 @@ And the development version from [GitHub](https://github.com/) with:
 ``` r
 library(devtools)
 devtools::install_github("brpetrucci/paleobuddy")
-
-library(paleobuddy)
 ```
 
 ## Example
@@ -47,10 +45,13 @@ We run a simple birth-death simulation as follows
 
 ``` r
 set.seed(1)
+
 n0 <- 1 # initial number of species
 lambda <- 0.1 # speciation rate
 mu <- 0.05 # extinction rate
 tMax <- 30 # maximum simulation time
+
+# run simulation
 sim <- bd.sim(n0, lambda, mu, tMax)
 ```
 
@@ -58,13 +59,18 @@ We can then generate fossil records, and visualize the results
 
 ``` r
 set.seed(1)
+
 rho <- 1 # sampling rate
 bins <- seq(tMax, 0, -1) # something to simulate geologic intervals
-fossils <- sample.clade(sim = sim, rho = rho, tMax = tMax, bins = bins) # get a data frame with min and max ages of fossil occurrences
+
+# get a data frame with fossil occurrence times
+fossils <- sample.clade(sim = sim, rho = rho, tMax = tMax, bins = bins)
+
+# visualize simulation and fossil occurrences
 draw.sim(sim, fossils)
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" /> And
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" /> And
 generate phylogenies as well
 
 ``` r
@@ -73,7 +79,7 @@ ape::plot.phylo(phy, root.edge = TRUE) # plot it with a stem (requires APE)
 ape::axisPhylo() # add axis
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
 
 ## Important functions
 
