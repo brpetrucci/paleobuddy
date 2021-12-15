@@ -1,11 +1,11 @@
 ## Test environments
-* local Windows 10.0.19041, R 3.5.3
-* local macOS High Sierra 10.13.2, R 3.5.1
-* check_win (devel and release)
-* ubuntu xenian 18.04 (on travis-ci; devel and release)
+* local macOS Big Sur 11.6, R 4.1.1
+* devtools::check_win (devel, release)
+* rhub::check (Ubuntu 20.04.1 R-devel, Oracle Solaris 10 x86 32-bit R-release)
+* GitHub actions (
 
 ## R CMD check results
-There were no ERRORs, WARNINGs or NOTEs
+There were no ERRORs, WARNINGs, or NOTEs
 
 This is the first submission of this package, so there may be a first submission NOTE.
 In some machines (e.g. win_builder()) total example time in some functions might be 

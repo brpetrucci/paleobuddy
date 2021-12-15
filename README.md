@@ -17,7 +17,7 @@ install_github("brpetrucci/paleobuddy")
 
 `make.phylo` closes the trio of most important functions of the package, taking a PB simulation and returning a `phylo` object from the APE package (see above).
 
-Besides its main species diversification-simulating functions, `PaleoBuddy` also supplies the user with a few interesting statistical tools, such as `rexp.var`, a generalization of the `rexp` function in BaseR that allows for time-varying exponential rates and a `shape` parameter, in which case it generalizes the `rweibull` function.
+Besides its main species diversification-simulating functions, `paleobuddy` also supplies the user with a few interesting statistical tools, such as `rexp.var`, a generalization of the `rexp` function in BaseR that allows for time-varying exponential rates and a `shape` parameter, in which case it generalizes the `rweibull` function.
 
 ## Getting started
 
@@ -25,21 +25,21 @@ The user can simulate a group as follows
 
 ```
 n0 <- 1 # initial number of species
-pp <- 0.1 # speciation rate
-qq <- 0.05 # extinction rate
+lambda <- 0.1 # speciation rate
+mu <- 0.05 # extinction rate
 tMax <- 10 # maximum simulation time
-sim <- bd.sim(n0, pp, qq, tMax)
+sim <- bd.sim(n0, lambda, mu, tMax)
 ```
 
 One can generate more complex simulations with time-varying or age-dependent rates as well
 
 ```
 n0 <- 1 # initial number of species
-pp <- function(t) 0.1 + 0.025*t # speciation rate
-qq <- 10 # extinction rate scale
-qShape <- 2 # extinction rate shape
+lambda <- function(t) 0.1 + 0.025*t # speciation rate
+mu <- 10 # extinction rate scale
+mShape <- 2 # extinction rate shape
 tMax <- 10 # maximum simulation time
-sim <- bd.sim(n0, pp, qq, tMax, qShape = qShape)
+sim <- bd.sim(n0, lambda, mu, tMax, mShape = mShape)
 ```
 
 For details of further flexibility in rates, check `?bd.sim`.
@@ -47,9 +47,9 @@ For details of further flexibility in rates, check `?bd.sim`.
 The user can then use the simulated clade to generate fossil records or phylogenetic trees
 
 ```
-rr <- 1 # sampling rate
+rho <- 1 # sampling rate
 bins <- seq(10, 0, -1) # something to simulate geologic intervals
-samp <- sample.clade(sim = sim, rr = rr, tMax = tMax, bins = bins) # get a data frame with min and max ages of fossil occurrences
+samp <- sample.clade(sim = sim, rho = rho, tMax = tMax, bins = bins) # get a data frame with min and max ages of fossil occurrences
 phy <- make.phylo(sim) # make a phylogenetic tree with the simulated group
 ape::plot.phylo(phy) # plot it (requires APE)
 ape::plot.phylo(ape::drop.fossil(phy)) # plot the molecular phylogeny
@@ -67,15 +67,19 @@ plot(temp, type = 'l') # visualize
 
 # simulate
 n0 <- 1 # initial number of species
-pp <- function(t, env) {
+lambda <- function(t, env) {
     0.1 * exp(0.01*env)
 } # speciation as a function of env, in this case temperature
-envPP <- temp # vector to tell bd.sim what is the environmental dependency
-qq <- 0.05 # speciation
+envL <- temp # vector to tell bd.sim what is the environmental dependency
+mu <- 0.05 # speciation
 tMax <- 10 # maximum simulation time
-sim <- bd.sim(n0, pp, qq, tMax, envPP = temp)
+sim <- bd.sim(n0, lambda, mu, tMax, envL = envL)
 ```
 
 ## Authors
 
-`paleobuddy` was idealized by Bruno do Rosario Petrucci and Tiago Bosisio Quental. The birth-death, statistical and part of the sampling functions were written by Bruno. Most of the sampling functions were written by Matheus Januário.
+`paleobuddy` was idealized by Bruno do Rosario Petrucci and Tiago Bosisio Quental. The birth-death, statistical, and part of the sampling functions were written by Bruno. The phylogeny and most of the sampling functions were written by Matheus Januário.
+
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/brpetrucci/paleobuddy/workflows/R-CMD-check/badge.svg)](https://github.com/brpetrucci/paleobuddy/actions)
+<!-- badges: end -->
