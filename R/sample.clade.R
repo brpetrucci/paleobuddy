@@ -122,10 +122,11 @@
 #' bins <- seq(from = 10, to = 0, by = -1)
 #' 
 #' # simulate fossil occurrences data frame
-#' occs <- sample.clade(sim, rho, tMax = 10, bins = bins, returnTrue = FALSE)
+#' fossils <- sample.clade(sim, rho, tMax = 10, 
+#'                         bins = bins, returnTrue = FALSE)
 #' 
 #' # draw simulation with fossil occurrences as ranges
-#' draw.sim(sim, fossils = occs)
+#' draw.sim(sim, fossils = fossils)
 #' 
 #' ###
 #' # sampling can be any function of time 
@@ -152,10 +153,11 @@
 #' bins <- seq(from = 10, to = 0, by = -1)
 #' 
 #' # simulate fossil occurrences data frame
-#' occs <- sample.clade(sim, rho, tMax = 10, bins = bins, returnTrue = FALSE)
+#' fossils <- sample.clade(sim, rho, tMax = 10, 
+#'                         bins = bins, returnTrue = FALSE)
 #' 
 #' # draw simulation with fossil occurrences as ranges
-#' draw.sim(sim, fossils = occs)
+#' draw.sim(sim, fossils = fossils)
 #' 
 #' ###
 #' # now we can try a step function rate
@@ -188,12 +190,12 @@
 #' 
 #' \dontrun{
 #' # simulate fossil occurrences data frame
-#' occs <- sample.clade(sim, rho = rList, rShifts = rShifts, tMax = 10, 
-#'                      bins = bins, returnTrue = FALSE)
-#' }
+#' fossils <- sample.clade(sim, rho = rList, rShifts = rShifts, tMax = 10, 
+#'                         bins = bins, returnTrue = FALSE)
 #' 
 #' # draw simulation with fossil occurrences as ranges
-#' draw.sim(sim, fossils = occs)
+#' draw.sim(sim, fossils = fossils)
+#' }
 #' 
 #' ###
 #' # finally, sample.clade also accepts an environmental variable
@@ -225,12 +227,12 @@
 #' 
 #' \dontrun{
 #' # simulate fossil occurrences data frame
-#' occs <- sample.clade(sim, rho = r_t, envR = envR, tMax = 10, bins = bins)
+#' fossils <- sample.clade(sim, rho = r_t, envR = envR, tMax = 10, bins = bins)
 #' # now we record the true time of fossil occurrences 
-#' }
 #' 
 #' # draw simulation with fossil occurrences as time points
-#' draw.sim(sim, fossils = occs)
+#' draw.sim(sim, fossils = fossils)
+#' }
 #' 
 #' # note that any techniques used in examples for ?bd.sim to create more
 #' # complex mixed scenarios can be used here as well
@@ -297,11 +299,16 @@
 #' bins <- seq(from = 10, to = 0, by = -1)
 #' 
 #' # simulate fossil occurrences data frame
-#' occs <- sample.clade(sim, rho, tMax = 10, adFun = dPERT, bins = bins, 
-#'                      returnTrue = FALSE)
+#' fossils <- sample.clade(sim, rho, tMax = 10, adFun = dPERT, bins = bins, 
+#'                         returnAll = TRUE)
+#' # can use returnAll to get occurrences as both time points and ranges
 #' 
-#' # draw simulation with fossil occurrences as ranges
-#' draw.sim(sim, fossils = occs)
+#' # draw simulation with fossil occurrences as time points
+#' draw.sim(sim, fossils = fossils)
+#' # the warning is to let you know the ranges won't be used
+#' 
+#' # and also as ranges - we take out the column with true time points
+#' draw.sim(sim, fossils = fossils[-3])
 #' 
 #' ###
 #' # we can have more parameters on adFun
@@ -373,15 +380,15 @@
 #' bins <- seq(from = 10, to = 0, by = -1)
 #' 
 #' # simulate fossil occurrences for the first species
-#' occs <- sample.clade(sim, rho, tMax = 10, S = 1, adFun = dTRI, 
-#'                      bins = bins, returnTrue = FALSE, md = md)
+#' fossils <- sample.clade(sim, rho, tMax = 10, S = 1, adFun = dTRI, 
+#'                         bins = bins, returnTrue = FALSE, md = md)
 #' # note we provide the peak for the triangular sampling as an argument
 #' # here that peak is assigned in absolute geological, but
 #' # it usually makes more sense to express this in terms
 #' # of age (a given percentile of the age, for instance) - see below
 #' 
 #' # draw simulation with fossil occurrences as ranges
-#' draw.sim(sim, fossils = occs)
+#' draw.sim(sim, fossils = fossils)
 #' 
 #' ###
 #' # we can also have a hat-shaped increase through the duration of a species
@@ -449,10 +456,10 @@
 #'     xlim = c(0, 10), type = "l")
 #' 
 #' # sample first two species
-#' occs <- sample.clade(sim = sim, rho = rho, tMax = 10, adFun = dTRImod1)
+#' fossils <- sample.clade(sim = sim, rho = rho, tMax = 10, adFun = dTRImod1)
 #' 
 #' # draw simulation with fossil occurrences as time points
-#' draw.sim(sim, fossils = occs)
+#' draw.sim(sim, fossils = fossils)
 #' 
 #' # here, we fix md at the last quarter
 #' # of the duration of the lineage
@@ -523,11 +530,11 @@
 #'     xlim = c(0, 10), type = "l")
 #' 
 #' # simulate fossil occurrences data frame
-#' occs <- sample.clade(sim, rho, tMax = 10, adFun = dTRImod2, bins = bins, 
-#'                      returnTrue = FALSE)
+#' fossils <- sample.clade(sim, rho, tMax = 10, adFun = dTRImod2, bins = bins, 
+#'                         returnTrue = FALSE)
 #' 
 #' # draw simulation with fossil occurrences as time ranges
-#' draw.sim(sim, fossils = occs)
+#' draw.sim(sim, fossils = fossils)
 #' 
 #' ###
 #' # we can also have a mix of age-independent and age-dependent
@@ -614,11 +621,11 @@
 #' bins <- seq(from = 10, to = 0, by = -1)
 #' 
 #' # simulate fossil occurrences data frame
-#' occs <- sample.clade(sim, rho, tMax = 10, adFun = dPERTAndUniform,
-#'                      bins = bins, returnTrue = FALSE)
+#' fossils <- sample.clade(sim, rho, tMax = 10, adFun = dPERTAndUniform,
+#'                         bins = bins, returnTrue = FALSE)
 #' 
 #' # draw simulation with fossil occurrences as ranges
-#' draw.sim(sim, fossils = occs)
+#' draw.sim(sim, fossils = fossils)
 #' 
 #' # note how occurrences cluster close to the speciation time of
 #' # species 1, but not its extinction time, since around 5mya
