@@ -1,6 +1,6 @@
 Package: paleobuddy
 Title: Simulating Diversification Dynamics
-Version: 0.0.0.900
+Version: 1.0.0.0
 Authors@R: c(
     person(given = "Bruno",
            family = "Do Rosario Petrucci",
@@ -21,7 +21,7 @@ Suggests:
     fitdistrplus,
     knitr,
     rmarkdown
-License: MIT + file LICENSE
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
