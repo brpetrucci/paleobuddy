@@ -45,10 +45,13 @@ We run a simple birth-death simulation as follows
 
 ```{r}
 set.seed(1)
+
 n0 <- 1 # initial number of species
 lambda <- 0.1 # speciation rate
 mu <- 0.05 # extinction rate
 tMax <- 30 # maximum simulation time
+
+# run simulation
 sim <- bd.sim(n0, lambda, mu, tMax)
 ```
 
@@ -56,9 +59,14 @@ We can then generate fossil records, and visualize the results
 
 ```{r message=FALSE}
 set.seed(1)
+
 rho <- 1 # sampling rate
 bins <- seq(tMax, 0, -1) # something to simulate geologic intervals
-fossils <- sample.clade(sim = sim, rho = rho, tMax = tMax, bins = bins) # get a data frame with min and max ages of fossil occurrences
+
+# get a data frame with fossil occurrence times
+fossils <- sample.clade(sim = sim, rho = rho, tMax = tMax, bins = bins)
+
+# visualize simulation and fossil occurrences
 draw.sim(sim, fossils)
 ```
 And generate phylogenies as well
