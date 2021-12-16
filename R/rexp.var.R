@@ -231,6 +231,7 @@ rexp.var <- function(n, rate,
     stop("Need a valid tMax for fast computation")
   }
   
+  # TS must be greater than current time
   if (now < TS) {
     stop("TS must be greater than the current time")
   }
@@ -241,21 +242,41 @@ rexp.var <- function(n, rate,
   # default is not age dependent, will change this later
   AD <- FALSE
 
-  # call rexp if rate is a constant and shape is null
-  if (is.numeric(rate) & is.null(shape)) {
-    return(rexp(n, rate))
+  # if rate is numeric, check error and call rexp if shape is null
+  if (is.numeric(rate)) {
+    # check that it is one number
+    if (length(rate) != 1) {
+      stop("If rate is numeric, it must be one number")
+    }
+    
+    # if shape is null, we could call rexp
+    if (is.null(shape)) {
+      return(rexp(n, rate))
+    }
   }
   
   # if shape is a constant, make it a function
   if (!is.null(shape)) {
+    # it is AD
     AD <- TRUE
-    if (is.numeric(shape)) {
+    
+    # test whether scale and shape are numeric
+    scaleNumeric <- is.numeric(rate)
+    shapeNumeric <- is.numeric(shape)
+    
+    # if both are numeric, we can call Weibull
+    if (scaleNumeric && shapeNumeric) {
+      return(rweibull(n, shape, rate))
+    }
+    
+    # if one of them isn't, make the other a function as well
+    if (shapeNumeric) {
       s <- shape
       shape <- Vectorize(function(t) s)
     }
     
     # and the rate
-    if (is.numeric(rate)) {
+    if (scaleNumeric) {
       r <- rate
       rate <- Vectorize(function(t) r)
     }
