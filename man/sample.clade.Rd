@@ -327,7 +327,7 @@ draw.sim(sim, fossils = fossils)
 # the warning is to let you know the ranges won't be used
 
 # and also as ranges - we take out the column with true time points
-draw.sim(sim, fossils = fossils[-3])
+draw.sim(sim, fossils = fossils[, -3])
 
 ###
 # we can have more parameters on adFun
