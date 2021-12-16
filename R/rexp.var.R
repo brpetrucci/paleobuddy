@@ -271,6 +271,10 @@ rexp.var <- function(n, rate,
     
     # if one of them isn't, make the other a function as well
     if (shapeNumeric) {
+      # make sure it is of length one
+      if (length(shape) != 1) {
+        stop("If shape is numeric, it must be one number")
+      }
       s <- shape
       shape <- Vectorize(function(t) s)
     }
