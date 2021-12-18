@@ -1,6 +1,6 @@
 ## Test environments
 * local macOS Big Sur 11.6, R 4.1.1
-* devtools::check_win (devel, release)
+* devtools::check_win (devel, release, oldrelease)
 * rhub::check (all available platforms)
 * GitHub actions (macOS latest, windows latest release; ubuntu latest release, devel and oldrel-1)
 
