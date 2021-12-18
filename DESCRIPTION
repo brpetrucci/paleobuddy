@@ -1,6 +1,6 @@
 Package: paleobuddy
 Title: Simulating Diversification Dynamics
-Version: 1.0.0.0
+Version: 1.0.0
 Authors@R: c(
     person(given = "Bruno",
            family = "do Rosario Petrucci",
