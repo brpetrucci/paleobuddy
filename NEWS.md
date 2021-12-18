@@ -50,7 +50,7 @@ will be filled as new features and fixes are implemented.
     It contains the following methods: \*\* `print` gives some quick
     details about number of extant and total species, and the first few
     members of each vector. \*\* `head` and `tail` return the `sim`
-    object containing only a given number of sepecies from the beginning
+    object containing only a given number of species from the beginning
     and end of its vectors, respectively. \*\* `summary` gives
     quantitative details, e.g. quantiles of durations and speciation
     waiting times. \*\* `plot` plots lineages through time (LTT) plots

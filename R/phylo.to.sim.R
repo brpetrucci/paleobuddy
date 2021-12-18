@@ -22,7 +22,7 @@
 #' @param mothers Vector containing the mother of each tip in the phylogeny. 
 #' First species' mother should be \code{NA}. See details below.
 #' 
-#' @param extant Logical vetor indicating which lineages are extant and 
+#' @param extant Logical vector indicating which lineages are extant and 
 #' extinct.
 #' 
 #' @param dateFromPresent Logical vector indicating if speciation/extinction 

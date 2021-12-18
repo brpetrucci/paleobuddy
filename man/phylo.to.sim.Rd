@@ -20,7 +20,7 @@ and extinct lineages.}
 \item{mothers}{Vector containing the mother of each tip in the phylogeny. 
 First species' mother should be \code{NA}. See details below.}
 
-\item{extant}{Logical vetor indicating which lineages are extant and 
+\item{extant}{Logical vector indicating which lineages are extant and 
 extinct.}
 
 \item{dateFromPresent}{Logical vector indicating if speciation/extinction 

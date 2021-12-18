@@ -64,14 +64,14 @@
 #' much (e.g. \code{0.5 + 0.5*t}), it can be biased for higher waiting times 
 #' due to computational error. A degree of time dependence of the order of 
 #' 0.01 events/my^2 are advisable. It might, although rarely, exhibit a small 
-#' bias when using shape functions with abrupt time variationsIn both cases,
+#' bias when using shape functions with abrupt time variations. In both cases,
 #' error is still quite low for the purposes of the package.
 #' 
 #' Note: Shape must be greater than 0. We arbitrarily chose 0.01 as the minimum
 #' accepted value, so if shape is under 0.01 for any reasonable time in the 
 #' simulation, it returns an error.
 #' 
-#' @param envL A \code{data.frame} describin a time series that represents the 
+#' @param envL A \code{data.frame} describing a time series that represents the 
 #' variation of an environmental variable (e.g. CO2, temperature, available 
 #' niches, etc) with time. The first column of this \code{data.frame} must be 
 #' time, and the second column must be the values of the variable. This will be

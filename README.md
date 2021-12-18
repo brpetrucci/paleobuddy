@@ -15,9 +15,9 @@ birth-death simulators is extensive, including important software like
 [paleotree](https://github.com/dwbapst/paleotree) and
 [APE](https://github.com/cran/ape), we concluded there were interesting
 gaps to be filled regarding possible diversification scenarios.
-Differently from most simulators in the field, we strived for
-flexibility over focus, implementing a large array of regimens for users
-to experiment with and combine, and structuring the package on a general
+Differently from most simulators in the field, we strove for flexibility
+over focus, implementing a large array of regimens for users to
+experiment with and combine, and structuring the package on a general
 framework to allow for straightforward expansion of available scenarios.
 In this way, `paleobuddy` can be used as a complement to other
 simulators or, in the case of scenarios implemented only here, can allow
@@ -99,8 +99,8 @@ creating a myriad of possible scenarios.
 frame with occurrence times - or occurrence time ranges, provided the
 user supplies the respective interval vector. It allows for a sampling
 rate `rho` that can be as flexible as `lambda` and `mu` above, with the
-exception of a `shape` parameter, since we ommitted that option given
-the absence of the use of Weibull distributions to model age-dependent
+exception of a `shape` parameter, since we omitted that option given the
+absence of the use of Weibull distributions to model age-dependent
 fossil sampling in the literature. Instead, we allow for the user to
 supply a function they wish to use as age-dependent sampling, `adFun`,
 such as the PERT distribution used in

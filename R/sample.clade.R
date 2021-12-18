@@ -73,7 +73,7 @@
 #' \item Return a vector of preservation densities for each time in a given
 #' vector \code{t} in geological time. 
 #'
-#' \item Be parametrized in the absolute geological time associated to 
+#' \item Be parameterized in the absolute geological time associated to 
 #' each moment in age (i.e. age works relative to absolute geological 
 #' time, in Mya - in other words, the convention is TS > 0). The function 
 #' \emph{does not} directly use the lineage's age (which would mean that
