@@ -3,9 +3,10 @@ Title: Simulating Diversification Dynamics
 Version: 1.0.0.0
 Authors@R: c(
     person(given = "Bruno",
-           family = "Do Rosario Petrucci",
+           family = "do Rosario Petrucci",
            role = c("aut", "cre"),
-           email = "petrucci@iastate.edu"),
+           email = "petrucci@iastate.edu",
+	   comment = c(ORCID = "0000-0001-6334-8483")),
     person(given = "Matheus",
 	   family = "Januario",
            role = "aut",

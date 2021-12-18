@@ -1,7 +1,7 @@
 ## Test environments
 * local macOS Big Sur 11.6, R 4.1.1
 * devtools::check_win (devel, release)
-* rhub::check (Ubuntu 20.04.1 R-devel, Oracle Solaris 10 x86 32-bit R-release)
+* rhub::check (all available platforms)
 * GitHub actions (macOS latest, windows latest release; ubuntu latest release, devel and oldrel-1)
 
 ## R CMD check results
