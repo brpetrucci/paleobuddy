@@ -19,9 +19,8 @@ will be filled as new features and fixes are implemented.
 -   `sample.clade` simulates fossil sampling. Similar flexibility to
     `bd.sim`, though even more so in the case of age-dependent rates.
 -   `make.phylo` creates a bifurcating phylogenetic tree as a`phylo`
-    object (see
-    [APE](https://cran.r-project.org/web/packages/ape/index.html)) from
-    a `sim` object. Can take fossils to be added as length `0` branches.
+    object (see [APE](https://CRAN.R-project.org/package=ape)) from a
+    `sim` object. Can take fossils to be added as length `0` branches.
 -   `draw.sim` plots a `sim` by drawing species durations and
     relationships, and optionally adding fossils as time points or
     ranges.
@@ -63,9 +62,9 @@ will be filled as new features and fixes are implemented.
 ## Data
 
 -   `temp` temperature data during the Cenozoic. Modified from
-    [RPANDA](https://cran.r-project.org/web/packages/RPANDA/index.html).
+    [RPANDA](https://CRAN.R-project.org/package=RPANDA).
 -   `co2` CO2 data during the Jurassic. Modified from
-    [RPANDA](https://cran.r-project.org/web/packages/RPANDA/index.html).
+    [RPANDA](https://CRAN.R-project.org/package=RPANDA).
 
 ## Vignettes
 
