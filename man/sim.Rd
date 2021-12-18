@@ -38,17 +38,17 @@ The \code{sim} class is a frequent return and input argument for functions in
 paleobuddy. It contains the following four elements.
 
 \describe{
-\item{\code{TE}}{List of extinction times, with \code{NA} as the time of
+\item{\code{TE}}{Vector of extinction times, with \code{NA} as the time of
 extinction for extant species.}
 
-\item{\code{TS}}{List of speciation times, with \code{tMax} as the time of
+\item{\code{TS}}{Vector of speciation times, with \code{tMax} as the time of
 speciation for species that started the simulation.}
 
-\item{\code{PAR}}{List of parents. Species that started the simulation have
+\item{\code{PAR}}{Vector of parents. Species that started the simulation have
 \code{NA}, while species that were generated during the simulation have their
 parent's number. Species are numbered as they are born.}
 
-\item{\code{EXTANT}}{List of booleans representing whether each species is
+\item{\code{EXTANT}}{Vector of logicals representing whether each species is
 extant.}}
 
 Here we declare useful generics and methods for \code{sim} objects.

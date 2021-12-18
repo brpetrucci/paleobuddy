@@ -56,8 +56,8 @@
 #' 
 #' @section Visualization:
 #' \code{paleobuddy} provides the user with a number of options for visualizing
-#' a \code{sim} object. The \code{sim} object returned by birth-death
-#' simulation functions (see above) has summary and plot methods. 
+#' a \code{sim} object besides phylogenies. The \code{sim} object returned by 
+#' birth-death simulation functions (see above) has summary and plot methods. 
 #' \code{summary(sim)} gives quantitative details of a \code{sim} objective, 
 #' namely the total and extant number of species, and summaries of species
 #' durations and speciation times. \code{plot(sim)} plots births, deaths, and
