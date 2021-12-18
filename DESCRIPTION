@@ -10,11 +10,13 @@ Authors@R: c(
     person(given = "Matheus",
 	   family = "Januario",
            role = "aut",
-	   email = "januarioml.eco@gmail.com"),
+	   email = "januarioml.eco@gmail.com",
+	   comment = c(ORCID = "0000-0002-6480-7095")),
     person(given = "Tiago",
 	   family = "Quental",
 	   role = "aut",
-	   email = "tbquental@usp.br"))
+	   email = "tbquental@usp.br",
+	   comment = c(ORCID = "0000-0002-4832-9468")))
 Description: This is an R package to simulate species diversification and generate fossil records and phylogenies. While the literature on species birth-death simulators is extensive, including important software like paleotree and APE, we concluded there were interesting gaps to be filled regarding possible diversification scenarios. Here we strove for flexibility over focus, implementing a large array of regimens for users to experiment with and combine. In this way, paleobuddy can be used in complement to other simulators as a flexible jack of all trades, or, in the case of scenarios implemented only here, can allow for robust and easy simulations for novel situations. Environmental data modified from that in RPANDA: Morlon H. et al (2016) RPANDA: an R package for macroevolutionary analyses on phylogenetic trees. Methods in Ecology and Evolution 7: 589-597.
 URL: https://github.com/brpetrucci/paleobuddy
 Suggests:
