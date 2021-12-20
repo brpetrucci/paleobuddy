@@ -168,6 +168,7 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
   
   # suppress y axis
   if (!("yaxt" %in% names(args))) {
+    oldpar <- par(no.readonly = TRUE)
     par(yaxt = "n")
   }
   
@@ -343,4 +344,10 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
                lwd = lwdLin * 0.75)
     }
   }
+ 
+#returning par to pre-function settings
+if (!("yaxt" %in% names(args))){
+  on.exit(par(oldpar))
+ }
+      
 }
