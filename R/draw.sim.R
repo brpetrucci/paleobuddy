@@ -159,6 +159,10 @@
 
 draw.sim <- function (sim, fossils = NULL, sortBy = "TS", 
                       lwdLin = 4, showLabel = TRUE, ...) {
+  
+  #store pre-function settings
+  oldPar <- par(no.readonly = TRUE) 
+  
   # make NAs 0
   sim$TE[is.na(sim$TE)] <- 0
   
@@ -168,8 +172,6 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
   
   # suppress y axis
   if (!("yaxt" %in% names(args))) {
-    #store pre-function settings
-    oldpar <- par(no.readonly = TRUE) 
     #change par
     par(yaxt = "n")
   }
@@ -347,9 +349,7 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
     }
   }
  
-#returning par to pre-function settings
-if (!("yaxt" %in% names(args))){
-  on.exit(par(oldpar))
- }
+  #returning par to pre-function settings
+  on.exit(par(oldPar))
       
 }
