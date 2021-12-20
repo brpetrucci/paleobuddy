@@ -264,6 +264,10 @@ plot.sim <- function(x, ...) {
     stop("Invalid sim object, see ?sim")
   }
   
+  # make sure to reset par options after functions
+  oldPar <- par(no.readonly = TRUE)
+  on.exit(par(oldPar))
+  
   # set up three plots
   par(mfrow = c(3, 1))
   

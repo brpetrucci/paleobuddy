@@ -96,16 +96,18 @@
 #' 
 #' # plot it
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   #storing old par settings
+#'   # store old par settings
 #'   oldPar <- par(no.readonly = TRUE) 
-#'   #changing par to show phylogenies:
+#'   
+#'   # change par to show phylogenies
 #'   par(mfrow = c(1, 2))
 #'   
 #'   ape::plot.phylo(phy)
 #'   
 #'   # we can also plot only the molecular phylogeny
 #'   ape::plot.phylo(ape::drop.fossil(phy))
-#'   # resetting par to before example:
+#'   
+#'   # reset par
 #'   par(oldPar)
 #' }
 #' 
@@ -125,16 +127,21 @@
 #' 
 #' # plot it
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   #storing old par settings
+#'   # store old par settings
 #'   oldPar <- par(no.readonly = TRUE) 
-#'   #changing par to show phylogenies:
+#'   
+#'   # change par to show phylogenies
 #'   par(mfrow = c(1, 2))
 #'   
+#'   # plot phylogeny
 #'   ape::plot.phylo(phy)
+#'   ape::axisPhylo()
 #'   
 #'   # we can also plot only the molecular phylogeny
 #'   ape::plot.phylo(ape::drop.fossil(phy))
-#'   # resetting par to before example:
+#'   ape::axisPhylo()
+#'   
+#'   # reset par 
 #'   par(oldPar)
 #' }
 #' 
@@ -151,9 +158,6 @@
 #' # make the traditional phylogeny
 #' phy <- make.phylo(sim)
 #' 
-#' # set another seed
-#' 
-#' 
 #' # sample fossils
 #' fossils <- sample.clade(sim, 0.1, 10)
 #' 
@@ -162,13 +166,14 @@
 #' 
 #' # plot them
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   #storing old par settings
+#'   # store old par settings
 #'   oldPar <- par(no.readonly = TRUE) 
-#'   #changing par to show phylogenies:
-#'   par(mfrow = c(1, 3))
-#' 
-#'   # visualizing longevities and fossil occurrences
+#'   
+#'   # visualize longevities and fossil occurrences
 #'   draw.sim(sim, fossils)
+#'   
+#'   # change par to show phylogenies
+#'   par(mfrow = c(1, 2))
 #' 
 #'   # phylogeny
 #'   ape::plot.phylo(phy, main = "Phylogenetic tree")
@@ -177,7 +182,8 @@
 #'   # sampled ancestor tree
 #'   ape::plot.phylo(saTree, main = "Sampled Ancestor tree")
 #'   ape::axisPhylo()
-#'   # resetting par to before example:
+#'   
+#'   # reset par
 #'   par(oldPar)
 #' }
 #' 
@@ -189,7 +195,7 @@
 #' 
 #' # simulate a simple birth-death process with more than one
 #' # species and completely extinct:
-#' sim <- bd.sim(n0 = 1, lambda = 0.5, mu = 0.5, tMax = 10, nExtant = c(0,0))
+#' sim <- bd.sim(n0 = 1, lambda = 0.5, mu = 0.5, tMax = 10, nExtant = c(0, 0))
 #' 
 #' # make a phylogeny using default values
 #' phy <- make.phylo(sim)
@@ -199,9 +205,10 @@
 #' 
 #' # plot them
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   #storing old par settings
+#'   # store old par settings
 #'   oldPar <- par(no.readonly = TRUE) 
-#'   #changing par to show phylogenies:
+#'   
+#'   # change par to show phylogenies
 #'   par(mfrow = c(1, 3))
 #'   
 #'   # if we use the default value, axisPhylo works as intended
@@ -218,7 +225,8 @@
 #'   ape::plot.phylo(phy_rootless, main = "root.time forced as FALSE")
 #'   ape::axisPhylo()
 #'   # note time scale in axis
-#'   # resetting par to before example:
+#'   
+#'   # reset par
 #'   par(oldPar)
 #' }
 #' 

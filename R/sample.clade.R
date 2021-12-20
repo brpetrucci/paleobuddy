@@ -188,14 +188,12 @@
 #' # bins for fossil ranges
 #' bins <- seq(from = 10, to = 0, by = -1)
 #' 
-#' \dontrun{
 #' # simulate fossil occurrences data frame
 #' fossils <- sample.clade(sim, rho = rList, rShifts = rShifts, tMax = 10, 
 #'                         bins = bins, returnTrue = FALSE)
 #' 
 #' # draw simulation with fossil occurrences as ranges
 #' draw.sim(sim, fossils = fossils)
-#' }
 #' 
 #' ###
 #' # finally, sample.clade also accepts an environmental variable
@@ -225,14 +223,12 @@
 #'      ylab = "Preservation rate", 
 #'      xlab = "Time since the start of the simulation (My)")
 #' 
-#' \dontrun{
 #' # simulate fossil occurrences data frame
 #' fossils <- sample.clade(sim, rho = r_t, envR = envR, tMax = 10, bins = bins)
 #' # now we record the true time of fossil occurrences 
 #' 
 #' # draw simulation with fossil occurrences as time points
 #' draw.sim(sim, fossils = fossils)
-#' }
 #' 
 #' # note that any techniques used in examples for ?bd.sim to create more
 #' # complex mixed scenarios can be used here as well

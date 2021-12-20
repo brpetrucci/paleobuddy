@@ -159,9 +159,9 @@
 
 draw.sim <- function (sim, fossils = NULL, sortBy = "TS", 
                       lwdLin = 4, showLabel = TRUE, ...) {
-  
-  #store pre-function settings
+  # set up to return par to pre-function settings
   oldPar <- par(no.readonly = TRUE) 
+  on.exit(par(oldPar))
   
   # make NAs 0
   sim$TE[is.na(sim$TE)] <- 0
@@ -348,8 +348,4 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
                lwd = lwdLin * 0.75)
     }
   }
- 
-  #returning par to pre-function settings
-  on.exit(par(oldPar))
-      
 }

@@ -87,6 +87,9 @@
 #' # get subclades descended from original species
 #' clades <- find.lineages(sim)
 #' 
+#' # get current par options so we can reset later
+#' oldPar <- par(no.readonly = TRUE)
+#' 
 #' # set up for plotting side by side
 #' par(mfrow = c(1, length(clades)))
 #' 
@@ -134,6 +137,9 @@
 #'     }
 #'   }
 #' }
+#' 
+#' # reset par
+#' par(oldPar)
 #'
 #' ###
 #' # we can also have an example with more non-starting species in S
@@ -144,10 +150,14 @@
 #' # run simulation
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.1, tMax = 10, 
 #'               nFinal = c(10, Inf))
+#'               
+#' # get current par options so we can reset later
+#' oldPar <- par(no.readonly = TRUE)
+#' 
+#' # set up for plotting side by side
+#' par(mfrow = c(1, 2))
 #' 
 #' if (requireNamespace("ape", quietly = TRUE)) {
-#'   # set up for plotting side by side
-#'   par(mfrow = c(1, 2))
 #'   
 #'   # first we plot the clade started by 1
 #'   ape::plot.phylo(make.phylo(sim), main = "original")
@@ -170,6 +180,10 @@
 #'                   main = "Daughters of sp 3")
 #'   ape::axisPhylo()
 #' }
+#' 
+#' # reset par
+#' par(oldPar)
+#' 
 #' ###
 #' # if there is only one clade and we use the default for 
 #' # S, we get back the original simulation object
@@ -180,6 +194,9 @@
 #' # run simulation
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.08, tMax = 10, 
 #'               nFinal = c(5, Inf))
+#'               
+#' # get current par options so we can reset later
+#' oldPar <- par(no.readonly = TRUE)
 #'               
 #' # set up for plotting side by side
 #' par(mfrow = c(1, 2))
@@ -193,6 +210,9 @@
 #'                   main="after find.lineages()")
 #'   ape::axisPhylo()
 #' }
+#' 
+#' # reset par
+#' par(oldPar)
 #' 
 #' @name find.lineages
 #' @rdname find.lineages

@@ -91,12 +91,19 @@ phy <- make.phylo(sim)
 
 # plot it
 if (requireNamespace("ape", quietly = TRUE)) {
+  # store old par settings
+  oldPar <- par(no.readonly = TRUE) 
+  
+  # change par to show phylogenies
   par(mfrow = c(1, 2))
   
   ape::plot.phylo(phy)
   
   # we can also plot only the molecular phylogeny
   ape::plot.phylo(ape::drop.fossil(phy))
+  
+  # reset par
+  par(oldPar)
 }
 
 ###
@@ -115,12 +122,22 @@ phy <- make.phylo(sim)
 
 # plot it
 if (requireNamespace("ape", quietly = TRUE)) {
+  # store old par settings
+  oldPar <- par(no.readonly = TRUE) 
+  
+  # change par to show phylogenies
   par(mfrow = c(1, 2))
   
+  # plot phylogeny
   ape::plot.phylo(phy)
+  ape::axisPhylo()
   
   # we can also plot only the molecular phylogeny
   ape::plot.phylo(ape::drop.fossil(phy))
+  ape::axisPhylo()
+  
+  # reset par 
+  par(oldPar)
 }
 
 ### 
@@ -136,9 +153,6 @@ sim <- bd.sim(n0 = 1, lambda = 0.2, mu = 0.05, tMax = 10,
 # make the traditional phylogeny
 phy <- make.phylo(sim)
 
-# set another seed
-
-
 # sample fossils
 fossils <- sample.clade(sim, 0.1, 10)
 
@@ -147,10 +161,14 @@ saTree <- make.phylo(sim, fossils)
 
 # plot them
 if (requireNamespace("ape", quietly = TRUE)) {
-  par(mfrow = c(1, 3))
-
-  # visualizing longevities and fossil occurrences
+  # store old par settings
+  oldPar <- par(no.readonly = TRUE) 
+  
+  # visualize longevities and fossil occurrences
   draw.sim(sim, fossils)
+  
+  # change par to show phylogenies
+  par(mfrow = c(1, 2))
 
   # phylogeny
   ape::plot.phylo(phy, main = "Phylogenetic tree")
@@ -159,6 +177,9 @@ if (requireNamespace("ape", quietly = TRUE)) {
   # sampled ancestor tree
   ape::plot.phylo(saTree, main = "Sampled Ancestor tree")
   ape::axisPhylo()
+  
+  # reset par
+  par(oldPar)
 }
 
 ### 
@@ -169,7 +190,7 @@ set.seed(1)
 
 # simulate a simple birth-death process with more than one
 # species and completely extinct:
-sim <- bd.sim(n0 = 1, lambda = 0.5, mu = 0.5, tMax = 10, nExtant = c(0,0))
+sim <- bd.sim(n0 = 1, lambda = 0.5, mu = 0.5, tMax = 10, nExtant = c(0, 0))
 
 # make a phylogeny using default values
 phy <- make.phylo(sim)
@@ -179,6 +200,10 @@ phy_rootless <- make.phylo(sim, returnRootTime = FALSE)
 
 # plot them
 if (requireNamespace("ape", quietly = TRUE)) {
+  # store old par settings
+  oldPar <- par(no.readonly = TRUE) 
+  
+  # change par to show phylogenies
   par(mfrow = c(1, 3))
   
   # if we use the default value, axisPhylo works as intended
@@ -195,6 +220,9 @@ if (requireNamespace("ape", quietly = TRUE)) {
   ape::plot.phylo(phy_rootless, main = "root.time forced as FALSE")
   ape::axisPhylo()
   # note time scale in axis
+  
+  # reset par
+  par(oldPar)
 }
 
 }

@@ -32,9 +32,6 @@
 #' # we can start simple: create a constant rate
 #' rate <- 0.1
 #' 
-#' # set this up so we see rates next to diversity
-#' par(mfrow = c(1,2))
-#' 
 #' # make the rate
 #' r <- make.rate(0.5)
 #' 
@@ -150,14 +147,12 @@
 #'      xlab = "Time (Mya)", xlim = c(10, 0), type = 'l')
 #' # negative rates is ok since this represents a diversification rate
 #' 
-#' \dontrun{
 #' # get expected diversity
 #' div <- var.rate.div(rateList, time, tMax = 10, rateShifts = rateShifts)
 #' 
 #' # plot it
 #' plot(time, rev(div), ylab = "Expected number of species",
 #'      xlab = "Time (Mya)", xlim = c(10, 0), type = 'l')
-#' }
 #'  
 #' ###
 #' # finally let us see what we can do with environmental variables
@@ -224,7 +219,7 @@
 #' plot(time, rev(r(time)), ylab = "Diversification rate",
 #'      xlab = "Time (Mya)", xlim = c(10, 0), type = 'l')
 #' 
-#' \dontrun{
+#' \donttest{
 #' # get expected diversity
 #' div <- var.rate.div(rate, time, tMax = tMax, envRate = temp)
 #' 

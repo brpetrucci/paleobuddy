@@ -404,6 +404,9 @@
 #' # initial number of species
 #' n0 <- 1
 #' 
+#' # maximum simulation time
+#' tMax <- 40
+#' 
 #' # speciation - a step function of temperature built using ifelse()
 #' # note that this creates two shifts for lambda, for a total of 3 values
 #' # throughout the simulation
@@ -437,7 +440,7 @@
 #' # set seed
 #' set.seed(1)
 #' 
-#' \dontrun{
+#' \donttest{
 #' # run the simulation
 #' sim <- bd.sim(n0, lambda, mu, tMax, lShape = lShape, envL = envL,
 #'               nFinal = c(2, Inf))
@@ -447,6 +450,7 @@
 #'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
+#' time2 <- Sys.time()
 #' }
 #' 
 #' # after presenting the possible models, we can consider how to
@@ -478,8 +482,7 @@
 #' 
 #' # set seed
 #' set.seed(4)
-#' 
-#' \dontrun{
+#'
 #' # run simulation
 #' sim <- bd.sim(n0, lambda, mu, tMax, envL = temp, nFinal = c(2, Inf))
 #' 
@@ -487,7 +490,6 @@
 #' if (requireNamespace("ape", quietly = TRUE)) {
 #'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
-#' }
 #' }
 #' 
 #' ###
@@ -593,7 +595,7 @@
 #' ###
 #' # note nFinal has to be sensible
 #' \dontrun{
-#' # this would return a warning, since it is virtually impossible to get 100
+#' # this would return an error, since it is virtually impossible to get 100
 #' # species at a process with diversification rate -0.09 starting at n0 = 1
 #' sim <- bd.sim(1, lambda = 0.01, mu = 1, tMax = 100, nFinal = c(100, Inf))
 #' }
