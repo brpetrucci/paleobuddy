@@ -97,7 +97,7 @@
 #' # plot it
 #' if (requireNamespace("ape", quietly = TRUE)) {
 #'   #storing old par settings
-#'   oldpar <- par(no.readonly = TRUE) 
+#'   oldPar <- par(no.readonly = TRUE) 
 #'   #changing par to show phylogenies:
 #'   par(mfrow = c(1, 2))
 #'   
@@ -106,7 +106,7 @@
 #'   # we can also plot only the molecular phylogeny
 #'   ape::plot.phylo(ape::drop.fossil(phy))
 #'   # resetting par to before example:
-#'   on.exit(par(oldpar))
+#'   par(oldPar)
 #' }
 #' 
 #' ###
@@ -126,7 +126,7 @@
 #' # plot it
 #' if (requireNamespace("ape", quietly = TRUE)) {
 #'   #storing old par settings
-#'   oldpar <- par(no.readonly = TRUE) 
+#'   oldPar <- par(no.readonly = TRUE) 
 #'   #changing par to show phylogenies:
 #'   par(mfrow = c(1, 2))
 #'   
@@ -135,7 +135,7 @@
 #'   # we can also plot only the molecular phylogeny
 #'   ape::plot.phylo(ape::drop.fossil(phy))
 #'   # resetting par to before example:
-#'   on.exit(par(oldpar))
+#'   par(oldPar)
 #' }
 #' 
 #' ### 
@@ -163,7 +163,7 @@
 #' # plot them
 #' if (requireNamespace("ape", quietly = TRUE)) {
 #'   #storing old par settings
-#'   oldpar <- par(no.readonly = TRUE) 
+#'   oldPar <- par(no.readonly = TRUE) 
 #'   #changing par to show phylogenies:
 #'   par(mfrow = c(1, 3))
 #' 
@@ -178,7 +178,7 @@
 #'   ape::plot.phylo(saTree, main = "Sampled Ancestor tree")
 #'   ape::axisPhylo()
 #'   # resetting par to before example:
-#'   on.exit(par(oldpar))
+#'   par(oldPar)
 #' }
 #' 
 #' ### 
@@ -200,7 +200,7 @@
 #' # plot them
 #' if (requireNamespace("ape", quietly = TRUE)) {
 #'   #storing old par settings
-#'   oldpar <- par(no.readonly = TRUE) 
+#'   oldPar <- par(no.readonly = TRUE) 
 #'   #changing par to show phylogenies:
 #'   par(mfrow = c(1, 3))
 #'   
@@ -219,7 +219,7 @@
 #'   ape::axisPhylo()
 #'   # note time scale in axis
 #'   # resetting par to before example:
-#'   on.exit(par(oldpar))
+#'   par(oldPar)
 #' }
 #' 
 #' @name make.phylo
