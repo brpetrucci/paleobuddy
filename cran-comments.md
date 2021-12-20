@@ -11,3 +11,10 @@ This is the first submission of this package, so there may be a first submission
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package
+
+# Resubmission
+This is a resubmission. In this version I have:
+
+* Removed "+ file LICENSE" from DESCRIPTION License field
+
+* Deleted file LICENSE
