@@ -4,8 +4,10 @@
 \alias{sim}
 \alias{is.sim}
 \alias{print.sim}
+\alias{head.sim}
+\alias{tail.sim}
 \alias{summary.sim}
-\alias{plot.sim.ltt}
+\alias{plot.sim}
 \alias{sim.counts}
 \title{Details, generics, and methods for the \code{sim} class}
 \usage{
@@ -13,9 +15,13 @@ is.sim(sim)
 
 \method{print}{sim}(x, ...)
 
+\method{head}{sim}(x, ...)
+
+\method{tail}{sim}(x, ...)
+
 \method{summary}{sim}(object, ...)
 
-\method{plot}{sim.ltt}(x, ...)
+\method{plot}{sim}(x, ...)
 
 sim.counts(sim, t)
 }
@@ -32,17 +38,17 @@ The \code{sim} class is a frequent return and input argument for functions in
 paleobuddy. It contains the following four elements.
 
 \describe{
-\item{\code{TE}}{List of extinction times, with \code{NA} as the time of
+\item{\code{TE}}{Vector of extinction times, with \code{NA} as the time of
 extinction for extant species.}
 
-\item{\code{TS}}{List of speciation times, with \code{tMax} as the time of
+\item{\code{TS}}{Vector of speciation times, with \code{tMax} as the time of
 speciation for species that started the simulation.}
 
-\item{\code{PAR}}{List of parents. Species that started the simulation have
+\item{\code{PAR}}{Vector of parents. Species that started the simulation have
 \code{NA}, while species that were generated during the simulation have their
 parent's number. Species are numbered as they are born.}
 
-\item{\code{EXTANT}}{List of booleans representing whether each species is
+\item{\code{EXTANT}}{Vector of logicals representing whether each species is
 extant.}}
 
 Here we declare useful generics and methods for \code{sim} objects.
@@ -60,11 +66,17 @@ straightforward and informative sequence manner. We provide details only for
 the first few species, since otherwise this print could be overwhelming for 
 simulations with 10+ species.
 
+\code{head.sim} Selects only a number of species from the beginning
+of a \code{sim} object.
+
+\code{tail.sim} Selects only a number of species from the end of a
+\code{sim} object.
+
 \code{summary.sim} Quantitative details on the \code{sim} object. 
 Prints the number of species, number of extant species, summary of durations
 and speciation waiting times, in case there are more than one species.
 
-\code{plot.sim.ltt} Plots births, deaths, and diversity through time for
+\code{plot.sim} Plots births, deaths, and diversity through time for
 the sim object.
 
 \code{sim.counts} Calculates the births, deaths, and diversity for a 

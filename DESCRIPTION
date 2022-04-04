@@ -1,27 +1,30 @@
 Package: paleobuddy
 Title: Simulating Diversification Dynamics
-Version: 0.0.0.900
+Version: 1.0.0.9000
 Authors@R: c(
     person(given = "Bruno",
-           family = "Do Rosario Petrucci",
+           family = "do Rosario Petrucci",
            role = c("aut", "cre"),
-           email = "petrucci@iastate.edu"),
+           email = "petrucci@iastate.edu",
+	   comment = c(ORCID = "0000-0001-6334-8483")),
     person(given = "Matheus",
 	   family = "Januario",
            role = "aut",
-	   email = "januarioml.eco@gmail.com"),
+	   email = "januarioml.eco@gmail.com",
+	   comment = c(ORCID = "0000-0002-6480-7095")),
     person(given = "Tiago",
 	   family = "Quental",
 	   role = "aut",
-	   email = "tbquental@usp.br"))
-Description: This is an R package to simulate species diversification and generate fossil records and phylogenies. While the literature on species birth-death simulators is extensive, including important software like paleotree and APE, we concluded there were interesting gaps to be filled regarding possible diversification scenarios. Here we strove for flexibility over focus, implementing a large array of regimens for users to experiment with and combine. In this way, paleobuddy can be used in complement to other simulators as a flexible jack of all trades, or, in the case of scenarios implemented only here, can allow for robust and easy simulations for novel situations. Environmental data modified from that in RPANDA: Morlon H. et al (2016) RPANDA: an R package for macroevolutionary analyses on phylogenetic trees. Methods in Ecology and Evolution 7: 589-597.
+	   email = "tbquental@usp.br",
+	   comment = c(ORCID = "0000-0002-4832-9468")))
+Description: Simulation of species diversification, fossil records, and phylogenies. While the literature on species birth-death simulators is extensive, including important software like 'paleotree' and 'APE', we concluded there were interesting gaps to be filled regarding possible diversification scenarios. Here we strove for flexibility over focus, implementing a large array of regimens for users to experiment with and combine. In this way, 'paleobuddy' can be used in complement to other simulators as a flexible jack of all trades, or, in the case of scenarios implemented only here, can allow for robust and easy simulations for novel situations. Environmental data modified from that in 'RPANDA': Morlon H. et al (2016) <doi:10.1111/2041-210X.12526>.
 URL: https://github.com/brpetrucci/paleobuddy
 Suggests:
     ape,
     fitdistrplus,
     knitr,
     rmarkdown
-License: MIT + file LICENSE
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1

@@ -1,11 +1,12 @@
 #' Create a flexible rate for birth-death or sampling simulations
 #' 
-#' Generates a rate to be used on birth-death or sampling functions. Takes as the 
-#' base rate (1) a constant, (2) a function of time, (3) a function of time 
-#' interacting with an environmental variable, or (4) a vector of numbers 
-#' describing rates as a step function. Requires information regarding the maximum
-#' simulation time, and allows for optional extra parameters to tweak the baseline
-#' rate.
+#' Generates a function determining the variation of a rate (speciation,
+#' extinction, sampling) with respect to time. To be used on birth-death or 
+#' sampling functions, it takes as the base rate (1) a constant, (2) a function
+#' of time, (3) a function of time and a time-series (usually an environmental
+#' variable), or (4) a vector of numbers describing rates as a step function. 
+#' Requires information regarding the maximum simulation time, and allows for 
+#' optional extra parameters to tweak the baseline rate.
 #'
 #' @param rate The baseline function with which to make the rate.
 #' It can be a
@@ -13,40 +14,48 @@
 #' \describe{
 #' \item{A number}{For constant birth-death rates.}
 #'
-#' \item{A function of time}{For rates that vary with time. Note that this can be
-#' any function of time.} 
+#' \item{A function of time}{For rates that vary with time. Note that this can 
+#' be any function of time.} 
 #' 
-#' \item{A function of time and an environmental variable}{For rates varying with
-#' time and an environmental variable, such as temperature. Note that supplying a
-#' function on more than one variable without an accompanying \code{envRate} will
-#' result in an error.}
+#' \item{A function of time and an environmental variable}{For rates varying 
+#' with time and an environmental variable, such as temperature. Note that 
+#' supplying a function on more than one variable without an accompanying 
+#' \code{envRate} will result in an error.}
 #'
 #' \item{A numeric vector}{To create step function rates. Note this must be
-#'  accompanied by a corresponding vector of shifts \code{rateShifts}.}}
+#'  accompanied by a corresponding vector of rate shift times, 
+#'  \code{rateShifts}.}}
 #'
 #' @param tMax Ending time of simulation, in million years after the clade's 
 #' origin. Needed to ensure \code{rateShifts} runs the correct way.
 #'
-#' @param envRate A \code{data.frame} representing the variation of an 
-#' environmental variable (e.g. CO2, temperature, available niches, etc) with 
-#' time. The first column of this \code{data.frame} must be time, and the second 
-#' column must be the values of the variable. The function will return an error if
-#' supplying \code{envRate} without \code{rate} being a function of two variables.
-#' Note \code{paleobuddy} has two environmental data frames, \code{temp} and 
-#' \code{co2}. One can check \code{RPANDA} for more examples.
+#' @param envRate A \code{data.frame} representing a time-series, usually an 
+#' environmental variable (e.g. CO2, temperature, etc) varying with time. The 
+#' first column of this \code{data.frame} must be time, and the second column 
+#' must be the values of the variable. The function will return an error if 
+#' the user supplies \code{envRate} without \code{rate} being a function of two
+#' variables. \code{paleobuddy} has two environmental data frames, \code{temp}
+#' and \code{co2}. One can check \code{RPANDA} for more examples.
+#' 
+#' Note that, since simulation functions are run in forward-time (i.e. with 
+#' \code{0} being the origin time of the simulation), the time column of
+#' \code{envRate} is assumed to do so as well, so that the row corresponding to
+#' \code{t = 0} is assumed to be the value of the time-series when the 
+#' simulation starts, and \code{t = tMax} is assumed to be its value when the
+#' simulation ends (the present).
 #' 
 #' Acknowledgements: The strategy to transform a function of \code{t} and 
-#' \code{env} into a function of \code{t} only using \code{envRate} was adapted 
-#' from RPANDA.
+#' \code{envRate} into a function of \code{t} only using \code{envRate} was 
+#' adapted from \code{RPANDA}.
 #'
-#' @param rateShifts A vector indicating the time placement of rate shifts in a 
-#' step function. The first element must be the first time point for the 
-#' simulation. This may be \code{0} or \code{tMax}. Since functions in paleobuddy 
-#' run from \code{0} to \code{tMax}, if \code{rateShifts} runs from past to 
-#' present (\code{rateShifts[2] < rateShifts[1]}), we take 
+#' @param rateShifts A vector indicating the time of rate shifts in a step 
+#' function. The first element must be the first or last time point for the 
+#' simulation, i.e. \code{0} or \code{tMax}. Since functions in paleobuddy run
+#' from \code{0} to \code{tMax}, if \code{rateShifts} runs from past to present
+#' (meaning \code{rateShifts[2] < rateShifts[1]}), we take 
 #' \code{tMax - rateShifts} as the shifts vector. Note that supplying 
-#' \code{rateShifts} when \code{rate} is not a numeric vector of the same length 
-#' will result in an error.
+#' \code{rateShifts} when \code{rate} is not a numeric vector of the same 
+#' length will result in an error.
 #'
 #' @return A constant or time-varying function (depending on input) that can
 #' then be used as a rate in the other \code{paleobuddy} functions. 
@@ -63,70 +72,8 @@
 #' # first we need a time vector to use on plots
 #' time <- seq(0, 50, 0.1)
 #' 
-#' # make.rate will leave some types of functions unaltered, like the following
-#' 
 #' ###
-#' # let us start simple: create a constant rate
-#' r <- make.rate(0.5)
-#' 
-#' # plot it
-#' plot(time, rep(r, length(time)), type = 'l')
-#' 
-#' ###
-#' # something a bit more complex: a linear rate
-#' 
-#' # function
-#' rate <- function(t) {
-#'   return(0.01*t)
-#' }
-#' 
-#' # create rate
-#' r <- make.rate(rate)
-#' 
-#' # plot it
-#' plot(time, r(time), type = 'l')
-#' 
-#' ###
-#' # remember: this can be any time-varying function!
-#' 
-#' # function
-#' rate <- function(t) {
-#'   return(sin(t)*0.01)
-#' }
-#' 
-#' # create rate
-#' r <- make.rate(rate)
-#' 
-#' # plot it
-#' plot(time, r(time), type = 'l')
-#' 
-#' ###
-#' # we can use ifelse() to make a step function like this
-#' rate <- function(t) {
-#'   return(ifelse(t < 10, 0.1,
-#'                 ifelse(t < 20, 0.3,
-#'                        ifelse(t < 30, 0.2,
-#'                               ifelse(t < 40, 0.05, 0)))))
-#' }
-#' 
-#' # and make it into a rate - in this case, as the previous, it does not alter
-#' # rate. We put it here as a contrast to the other way to make a step function
-#' r <- make.rate(rate)
-#' 
-#' # plot it
-#' plot(time, r(time), type = 'l')
-#' 
-#' # important note: this method of creating a step function might be annoying,
-#' # but when running thousands of simulations it will provide a much faster
-#' # integration than when using our method of transforming a rates and shifts
-#' # vector into a function of time
-#' 
-#' # this is a good segway into the cases where make.rate actually makes a rate!
-#' # note that while the previous ones seemed useless, we need that implementation
-#' # so that the birth-death functions work
-#' 
-#' ###
-#' # now we can demonstrate the other way of making a step function
+#' # we can have a step function rate
 #' 
 #' # vector of rates
 #' rate <- c(0.1, 0.2, 0.3, 0.2)
@@ -139,16 +86,18 @@
 #' r <- make.rate(rate, tMax = 50, rateShifts = rateShifts)
 #' 
 #' # plot it
-#' plot(time, r(time),type = 'l')
+#' plot(time, rev(r(time)),type = 'l', xlim = c(max(time), min(time)))
 #' 
-#' # as mentioned above, while this works well it will be a pain to integrate.
-#' # Furthermore, it is impractical to supply a rate and a shifts vector and
-#' # have an environmental dependency, so in cases where one looks to run
-#' # more than a couple dozen simulations, or when one is looking to have a
-#' # step function modified by an environmental variable, consider using ifelse()
+#' # note that this method of generating a step function rate is slower to
+#' # numerically integrate
+#' 
+#' # it is also not possible a rate and a shifts vector and a time-series 
+#' # dependency, so in cases where one looks to run many simulations, or have a
+#' # step function modified by an environmental variable, consider 
+#' # using ifelse() (see below)
 #' 
 #' ###
-#' # finally let us see what we can do with environmental variables
+#' # we can have an environmental variable (or any time-series)
 #' 
 #' # temperature data
 #' data(temp)
@@ -162,10 +111,13 @@
 #' r <- make.rate(rate, envRate = temp)
 #' 
 #' # plot it
-#' plot(time, r(time), type = 'l')
+#' plot(time, rev(r(time)), type = 'l', xlim = c(max(time), min(time)))
 #' 
 #' ###
-#' # we can also have a function that depends on both time AND temperature
+#' # we can have a rate that depends on time AND temperature
+#' 
+#' # temperature data
+#' data(temp)
 #' 
 #' # function
 #' rate <- function(t, env) {
@@ -176,11 +128,14 @@
 #' r <- make.rate(rate, envRate = temp)
 #' 
 #' # plot it
-#' plot(time, r(time), type = 'l')
+#' plot(time, rev(r(time)), type = 'l', xlim = c(max(time), min(time)))
 #' 
 #' ###
-#' # as mentioned above, we could also use ifelse() to construct a step function
-#' # that is modulated by temperature
+#' # as mentioned above, we could also use ifelse() to 
+#' # construct a step function that is modulated by temperature
+#' 
+#' # temperature data
+#' data(temp)
 #' 
 #' # function
 #' rate <- function(t, env) {
@@ -191,6 +146,49 @@
 #' 
 #' # rate
 #' r <- make.rate(rate, envRate = temp)
+#' 
+#' # plot it
+#' plot(time, rev(r(time)), type = 'l', xlim = c(max(time), min(time)))
+#' 
+#' # while using ifelse() to construct a step function is more
+#' # cumbersome, it leads to much faster numerical integration,
+#' # so in cases where the method above is proving too slow,
+#' # consider using ifelse() even if there is no time-series dependence
+#' 
+#' ###
+#' # make.rate will leave some types of functions unaltered
+#' 
+#' # constant rates
+#' r <- make.rate(0.5)
+#' 
+#' # plot it
+#' plot(time, rep(r, length(time)), type = 'l', 
+#'      xlim = c(max(time), min(time)))
+#' 
+#' ###
+#' # linear rates
+#' 
+#' # function
+#' rate <- function(t) {
+#'   return(0.01*t)
+#' }
+#' 
+#' # create rate
+#' r <- make.rate(rate)
+#' 
+#' # plot it
+#' plot(time, rev(r(time)), type = 'l', xlim = c(max(time), min(time)))
+#' 
+#' ###
+#' # any time-varying function, really
+#' 
+#' # function
+#' rate <- function(t) {
+#'   return(abs(sin(t))*0.1 + 0.05)
+#' }
+#' 
+#' # create rate
+#' r <- make.rate(rate)
 #' 
 #' # plot it
 #' plot(time, r(time), type = 'l')
@@ -282,7 +280,7 @@ make.rate <- function(rate, tMax = NULL, envRate = NULL, rateShifts = NULL) {
     }
     
     if (min(rateShifts) != 0) {
-      rateShifts[which(rateShifts == min(rateShifts))] = 0
+      rateShifts[which(rateShifts == min(rateShifts))] <- 0
     }
 
     # create the step function

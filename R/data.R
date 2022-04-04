@@ -2,7 +2,9 @@
 #' 
 #' Temperature data during the Cenozoic. Modified from the \code{InfTemp} data
 #' set in \href{https://github.com/hmorlon/PANDA}{RPANDA}, originally inferred 
-#' from delta O18 measurements.
+#' from delta O18 measurements. Inverted so lower times represent time since
+#' first measurement, to be in line with the past-to-present convention of most
+#' time-dependent functions in paleobuddy.
 #' 
 #' @usage 
 #' 
@@ -10,10 +12,12 @@
 #' 
 #' @format A data frame with 17632 rows and 2 variables:
 #' \describe{
-#'   \item{t}{A numeric vector representing time since the beginning of the data 
-#'   frame age, approximately 67 million years ago, in million years. We set this
-#'   from past to present as opposed to present to past since birth-death 
-#'   functions in \code{paleobuddy} consider time going in the former direction.}
+#'   \item{t}{A numeric vector representing time since the beginning of the 
+#'   data frame age, approximately 67 million years ago, in million years. We 
+#'   set this from past to present as opposed to present to past since 
+#'   birth-death functions in \code{paleobuddy} consider time going in the 
+#'   former direction. Hence \code{t = 0} represents the time point at 
+#'   67.5173mya, while \code{t = 67.5173} represents the present.}
 #'   
 #'   \item{temperature}{A numeric vector representing temperature in degrees 
 #'   celsius corresponding to time \code{t}. Note there might be more than one 
@@ -41,7 +45,9 @@
 #' 
 #' CO2 data during the Jurassic. Modified from the \code{co2} set in 
 #' \href{https://github.com/hmorlon/PANDA}{RPANDA}, originally taken from Mayhew 
-#' et al (2008, 2012). 
+#' et al (2008, 2012). Inverted so lower times represent time since first 
+#' measurement, to be in line with the past-to-present convention of most
+#' time-dependent functions in paleobuddy.
 #' 
 #' @usage 
 #' 
@@ -52,7 +58,9 @@
 #'   \item{t}{A numeric vector representing time since the beginning of the data 
 #'   frame age, 520 million years ago, in million years. We set this from past to 
 #'   present as opposed to present to past since birth-death functions in 
-#'   \code{paleobuddy} consider time going in the former direction.}
+#'   \code{paleobuddy} consider time going in the former direction. Hence 
+#'   \code{t = 0} represents the time point at 520mya, while \code{t = 520} 
+#'   represents the present.}
 #'   
 #'   \item{co2}{A numeric vector representing CO2 concentration as the ratio of
 #'   CO2 mass at \code{t} over the present.}

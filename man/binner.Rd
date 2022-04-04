@@ -7,16 +7,26 @@
 binner(x, bins)
 }
 \arguments{
-\item{x}{The vector containing occurrence times for a given species.}
+\item{x}{The vector containing occurrence times for one given species.}
 
-\item{bins}{A vector of time intervals corresponding to geological time ranges.}
+\item{bins}{A vector of time intervals corresponding to geological time 
+ranges.}
 }
 \value{
-A vector of occurrence counts for each interval.
+A vector of occurrence counts for each interval, sorted from 
+furthest to closest to zero.
 }
 \description{
 Given a vector of fossil occurrences and time bins to represent geological
 ranges, returns the occurrence counts in each bin.
+}
+\details{
+The convention for couting occurrences inside a bin is to count
+all occurrences exactly in the boundary furthest from zero and exclude
+bins exactly in the boundary closest to zero. Then, in the bin closest 
+to zero (i.e., the "last", or "most recent" bin), include all occurrence 
+on each of the two boundaries. So occurrences that fall on a boundary are
+placed on the most recent bin possible
 }
 \examples{
 
@@ -40,7 +50,7 @@ binnedSamp
 x <- c(6.7, 5.03, 4.2, 3.4, 1.2, 0.4)
 
 # bins vector
-bins <- c(7.2, 6.1, 5.6, 4.3, 3.2, sqrt(2), 1, 0)
+bins <- c(7.2, 6.7, 5.6, 4.3, 3.2, sqrt(2), 1, 0)
 
 # result
 binnedSamp <- binner(x, bins)
@@ -49,29 +59,14 @@ binnedSamp
 ###
 # let us try with a real simulated species fossil record
 
+# set seed
+set.seed(1)
+
 # run the simulation
 sim <- bd.sim(1, lambda = 0.1, mu = 0.05, tMax = 15)
 
 # sample it
-sampled <- sample.species(sim = sim, rho = 1, tMax = 15, S = 1)
-
-# bins vector
-bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)
-
-# result
-binnedsample <- binner(sampled, bins)
-binnedsample
-
-### 
-# just one more
-
-# run the simulation
-sim <- bd.sim(1, lambda = function(t) {
-  return(0.05 + 0.005*t)
-}, mu = 0.05, tMax = 20)
-
-# sample it
-sampled <- sample.species(sim = sim, rho = 1, tMax = 20, S = 1)
+sampled <- sample.clade(sim = sim, rho = 1, tMax = 15, S = 1)$SampT
 
 # bins vector
 bins <- c(15.1, 12.3, 10, 7.1, 5.8, 3.4, 2.2, 0)

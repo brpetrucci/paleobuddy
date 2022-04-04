@@ -10,10 +10,7 @@
 #' extinction, assuming a Weibull distribution as a model of  age-dependence. 
 #' Returns a \code{sim} object (see \code{?sim}). It may return true extinction 
 #' times or simply information on whether species lived after the  maximum 
-#' simulation time, depending on simulation settings \code{bd.sim} calls 
-#' \code{bd.sim.constant} or \code{bd.sim.general} depending on the nature of 
-#' the birth and death rates supplied. For more information on the code used 
-#' for the birth-death process, see those corresponding functions.
+#' simulation time, depending on simulation settings.
 #' 
 #' Please note while time runs from \code{0} to \code{tMax} in the simulation, 
 #' it returns speciation/extinction times as \code{tMax} (origin of the group) 
@@ -40,8 +37,8 @@
 #' @param mu Similar to \code{lambda}, but for the extinction rate.
 #' 
 #' Note: rates should be considered as running from \code{0} to \code{tMax}, as
-#' the simulation runs in that direction even though the function inverts times
-#' before returning in the end.
+#' the simulation runs in that direction even though the function inverts 
+#' speciation and extinction times before returning.
 #'
 #' @param tMax Ending time of simulation, in million years after the clade 
 #' origin. Any species still living after \code{tMax} is considered extant, and 
@@ -67,14 +64,14 @@
 #' much (e.g. \code{0.5 + 0.5*t}), it can be biased for higher waiting times 
 #' due to computational error. A degree of time dependence of the order of 
 #' 0.01 events/my^2 are advisable. It might, although rarely, exhibit a small 
-#' bias when using shape functions with abrupt time variationsIn both cases,
+#' bias when using shape functions with abrupt time variations. In both cases,
 #' error is still quite low for the purposes of the package.
 #' 
 #' Note: Shape must be greater than 0. We arbitrarily chose 0.01 as the minimum
 #' accepted value, so if shape is under 0.01 for any reasonable time in the 
 #' simulation, it returns an error.
 #' 
-#' @param envL A \code{data.frame} describin a time series that represents the 
+#' @param envL A \code{data.frame} describing a time series that represents the 
 #' variation of an environmental variable (e.g. CO2, temperature, available 
 #' niches, etc) with time. The first column of this \code{data.frame} must be 
 #' time, and the second column must be the values of the variable. This will be
@@ -98,7 +95,9 @@
 #' \code{c(0, Inf)}, so that any number of species (including zero, the
 #' extinction of the whole clade) is accepted. If different from default value,
 #' simulation will restart until the number of total species at \code{tMax}
-#' is in the \code{nFinal} interval.
+#' is in the \code{nFinal} interval. Note that \code{nFinal} must be a sensible
+#' vector. The function will error if its maximum is lower than \code{1}, or if
+#' its length is not \code{2}.
 #' 
 #' @param nExtant A \code{vector} of length \code{2}, indicating an interval of
 #' acceptable number of extant species at the end of the simulation. Equal to
@@ -197,6 +196,17 @@
 #' ###
 #' # what if we want mu to be a step function?
 #' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 40
+#' 
+#' # speciation
+#' lambda <- function(t) {
+#'   return(0.02 + 0.005*t)
+#' }
+#' 
 #' # vector of extinction rates
 #' mList <- c(0.09, 0.08, 0.1)
 #' 
@@ -209,21 +219,10 @@
 #' 
 #' # and plot it
 #' plot(seq(0, tMax, 0.1), rev(mu(seq(0, tMax, 0.1))), type = 'l',
-#'      main = "Extintion rate as a step function", xlab = "Time (My)",
-#'      ylab = "Rate (species/My)", xlim = c(tMax, 0))
+#'      main = "Extintion rate as a step function", xlab = "Time (Mya)",
+#'      ylab = "Rate (events/species/My)", xlim = c(tMax, 0))
 #' 
 #' # looking good, we will keep everything else the same
-#' 
-#' # maximum simulation time
-#' tMax <- 40
-#' 
-#' # initial number of species
-#' n0 <- 1
-#' 
-#' # speciation
-#' lambda <- function(t) {
-#'   return(0.02 + 0.005*t)
-#' }
 #' 
 #' # a different way to define the same extinction function
 #' mu <- function(t) {
@@ -253,7 +252,8 @@
 #' # maximum simulation time
 #' tMax <- 40
 #' 
-#' # speciation - here note it is a Weibull scale
+#' # speciation - note that since this is a Weibull scale,
+#' # the unites are my/events/lineage, not events/lineage/my
 #' lambda <- 10
 #' 
 #' # speciation shape
@@ -283,7 +283,8 @@
 #' # maximum simulation time
 #' tMax <- 40
 #' 
-#' # speciation - here note it is a Weibull scale
+#' # speciation - note that since this is a Weibull scale,
+#' # the unites are my/events/lineage, not events/lineage/my
 #' lambda <- function(t) {
 #'   return(2 + 0.25*t)
 #' }
@@ -315,7 +316,8 @@
 #' # maximum simulation time
 #' tMax <- 40
 #' 
-#' # speciation - here note it is a Weibull scale
+#' # speciation - note that since this is a Weibull scale,
+#' # the unites are my/events/lineage, not events/lineage/my
 #' lambda <- function(t) {
 #'   return(2 + 0.25*t)
 #' }
@@ -355,8 +357,7 @@
 #' 
 #' # speciation - a scale
 #' lambda <- 10
-#' 
-#' # note the scale for the age-dependency can be a time-varying function
+#' # note the scale for the age-dependency could be a time-varying function
 #' 
 #' # speciation shape
 #' lShape <- 2
@@ -375,8 +376,8 @@
 #' 
 #' # take a look at how the rate itself will be
 #' plot(seq(0, tMax, 0.1), rev(mFunc(seq(0, tMax, 0.1))),
-#'      main = "Extinction rate varying with temperature", xlab = "Time (My)",
-#'      ylab = "Rate", type = 'l', xlim = c(tMax, 0))
+#'      main = "Extinction rate varying with temperature", xlab = "Time (Mya)",
+#'      ylab = "Rate (events/species/My)", type = 'l', xlim = c(tMax, 0))
 #' 
 #' # set seed
 #' set.seed(2)
@@ -393,12 +394,18 @@
 #' 
 #' ###
 #' # one can mix and match all of these scenarios as they wish - age-dependency
-#' # and constant rates, age-dependent and temperature-dependent rates, etc. The
-#' # only combination that is not allowed is a vector rate and environmental
-#' # data, but one can get around that as follows
+#' # and constant rates, age-dependent and temperature-dependent rates, etc. 
+#' # the only combination that is not allowed is a step function rate and 
+#' # environmental data, but one can get around that as follows
+#' 
+#' # get the temperature data - see ?temp for information on the data set
+#' data(temp)
 #' 
 #' # initial number of species
 #' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 40
 #' 
 #' # speciation - a step function of temperature built using ifelse()
 #' # note that this creates two shifts for lambda, for a total of 3 values
@@ -413,7 +420,7 @@
 #' 
 #' # environment variable to use - temperature
 #' envL <- temp
-#' 
+#'
 #' # this is kind of a complicated scale, let us take a look
 #' 
 #' # make it a function of time
@@ -421,8 +428,8 @@
 #' 
 #' # plot it
 #' plot(seq(0, tMax, 0.1), rev(lFunc(seq(0, tMax, 0.1))),
-#'      main = "Speciation scale varying with temperature", xlab = "Time (My)",
-#'      ylab = "Scale", type = 'l', xlim = c(tMax, 0))
+#'      main = "Speciation scale varying with temperature", xlab = "Time (Mya)",
+#'      ylab = "Scale (1/(events/species/My))", type = 'l', xlim = c(tMax, 0))
 #' 
 #' # extinction
 #' mu <- 0.1
@@ -433,7 +440,7 @@
 #' # set seed
 #' set.seed(1)
 #' 
-#' \dontrun{
+#' \donttest{
 #' # run the simulation
 #' sim <- bd.sim(n0, lambda, mu, tMax, lShape = lShape, envL = envL,
 #'               nFinal = c(2, Inf))
@@ -443,6 +450,7 @@
 #'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
+#' time2 <- Sys.time()
 #' }
 #' 
 #' # after presenting the possible models, we can consider how to
@@ -451,6 +459,9 @@
 #' ###
 #' # consider speciation that becomes environment dependent
 #' # in the middle of the simulation
+#' 
+#' # get the temperature data - see ?temp for information on the data set
+#' data(temp)
 #' 
 #' # initial number of species
 #' n0 <- 1
@@ -469,13 +480,9 @@
 #' # extinction
 #' mu <- 0.11
 #' 
-#' # get the temperature data
-#' data(temp)
-#' 
 #' # set seed
-#' set.seed(1)
-#' 
-#' \dontrun{
+#' set.seed(4)
+#'
 #' # run simulation
 #' sim <- bd.sim(n0, lambda, mu, tMax, envL = temp, nFinal = c(2, Inf))
 #' 
@@ -484,11 +491,20 @@
 #'   phy <- make.phylo(sim)
 #'   ape::plot.phylo(phy)
 #' }
-#' }
 #' 
 #' ###
 #' # we can also change the environmental variable
 #' # halfway into the simulation
+#' 
+#' # note below that for this scenario we need make.rate, which
+#' # in general can aid users looking for more complex scenarios
+#' # than those available directly with bd.sim arguments
+#' 
+#' # get the temperature data - see ?temp for information on the data set
+#' data(temp)
+#' 
+#' # same for co2 data (and ?co2)
+#' data(co2)
 #' 
 #' # initial number of species
 #' n0 <- 1
@@ -504,9 +520,6 @@
 #'   return(0.05 + 0.1*exp(0.02*temp))
 #' }
 #' 
-#' # get the temperature data
-#' data(temp)
-#' 
 #' # make first function
 #' mu1 <- make.rate(m_t1, tMax = tMax, envRate = temp)
 #' 
@@ -514,9 +527,6 @@
 #' m_t2 <- function(t, co2) {
 #'   return(0.02 + 0.14*exp(0.01*co2))
 #' }
-#' 
-#' # get the co2 data
-#' data(co2)
 #' 
 #' # make second function
 #' mu2 <- make.rate(m_t2, tMax = tMax, envRate = co2)
@@ -544,7 +554,7 @@
 #' # together
 #' 
 #' ###
-#' # finally, note one could create an extinction rate that turns age-dependent
+#' # finally, one could create an extinction rate that turns age-dependent
 #' # in the middle, by making shape time-dependent
 #'
 #' # initial number of species
@@ -556,12 +566,13 @@
 #' # speciation
 #' lambda <- 0.15
 #' 
-#' # extinction - a Weibull scale
+#' # extinction - note that since this is a Weibull scale,
+#' # the unites are my/events/lineage, not events/lineage/my
 #' mu <- function(t) {
 #'   return(8 + 0.05*t)
 #' }
 #' 
-#' # speciation shape
+#' # extinction shape
 #' mShape <- function(t) {
 #'   return(
 #'     ifelse(t < 30, 1, 2)
@@ -584,7 +595,7 @@
 #' ###
 #' # note nFinal has to be sensible
 #' \dontrun{
-#' # this would return a warning, since it is virtually impossible to get 100
+#' # this would return an error, since it is virtually impossible to get 100
 #' # species at a process with diversification rate -0.09 starting at n0 = 1
 #' sim <- bd.sim(1, lambda = 0.01, mu = 1, tMax = 100, nFinal = c(100, Inf))
 #' }

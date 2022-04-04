@@ -9,3 +9,8 @@
 ^\.Rprofile$
 ^doc$
 ^Meta$
+^\.github$
+^README\.Rmd$
+^NEWS\.Rmd$
+^checks\.R$
+^CRAN-RELEASE$

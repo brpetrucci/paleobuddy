@@ -10,7 +10,9 @@ A data frame with 53 rows and 2 variables:
   \item{t}{A numeric vector representing time since the beginning of the data 
   frame age, 520 million years ago, in million years. We set this from past to 
   present as opposed to present to past since birth-death functions in 
-  \code{paleobuddy} consider time going in the former direction.}
+  \code{paleobuddy} consider time going in the former direction. Hence 
+  \code{t = 0} represents the time point at 520mya, while \code{t = 520} 
+  represents the present.}
   
   \item{co2}{A numeric vector representing CO2 concentration as the ratio of
   CO2 mass at \code{t} over the present.}
@@ -25,7 +27,9 @@ data(co2)
 \description{
 CO2 data during the Jurassic. Modified from the \code{co2} set in 
 \href{https://github.com/hmorlon/PANDA}{RPANDA}, originally taken from Mayhew 
-et al (2008, 2012).
+et al (2008, 2012). Inverted so lower times represent time since first 
+measurement, to be in line with the past-to-present convention of most
+time-dependent functions in paleobuddy.
 }
 \references{
 Morlon H. et al (2016) RPANDA: an R package for macroevolutionary analyses on 

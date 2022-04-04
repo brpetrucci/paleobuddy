@@ -4,17 +4,17 @@
 #' paleobuddy. It contains the following four elements.
 #' 
 #' \describe{
-#' \item{\code{TE}}{List of extinction times, with \code{NA} as the time of
+#' \item{\code{TE}}{Vector of extinction times, with \code{NA} as the time of
 #' extinction for extant species.}
 #'
-#' \item{\code{TS}}{List of speciation times, with \code{tMax} as the time of
+#' \item{\code{TS}}{Vector of speciation times, with \code{tMax} as the time of
 #' speciation for species that started the simulation.}
 #'
-#' \item{\code{PAR}}{List of parents. Species that started the simulation have
+#' \item{\code{PAR}}{Vector of parents. Species that started the simulation have
 #' \code{NA}, while species that were generated during the simulation have their
 #' parent's number. Species are numbered as they are born.}
 #'
-#' \item{\code{EXTANT}}{List of booleans representing whether each species is
+#' \item{\code{EXTANT}}{Vector of logicals representing whether each species is
 #' extant.}}
 #' 
 #' Here we declare useful generics and methods for \code{sim} objects.
@@ -29,7 +29,7 @@
 #' @name sim
 #' 
 #' @importFrom graphics plot par
-#' @importFrom utils head
+#' @importFrom utils head tail
 #' 
 NULL
 
@@ -66,13 +66,15 @@ is.sim <- function(sim) {
   siz <- (length(unique(c(length(sim[[1]]), length(sim[[2]]), length(sim[[3]]),
                     length(sim[[4]])))) == 1)
   
-  # checks that there are three double vectors and one logical, or two of each
-  # when there is only one species
-  types <- unlist(lapply(1:4, function(x) typeof(sim[[x]])))
-  typ <- (sum(types == "double") == 3 && sum(types == "logical") == 1) ||
-    (sum(types == "double") == 2 && sum(types == "logical") == 2 &&
-       length(sim[[1]]) == 1)
+  # check how many vectors in sim are all NA
+  allNA <- sum(unlist(lapply(1:length(sim), function(x) !any(!is.na(sim[[x]])))))
   
+  # checks that there either are 3 double vectors and 1 logical, or
+  # 2 doubles and 2 logicals when PAR is all NA
+  types <- unlist(lapply(1:4, function(x) typeof(sim[[x]])))
+  typ <- (sum(types == "logical") == 1 && sum(types == "double") == 3) ||
+    (sum(types == "logical") == 2 && sum(types == "double") == 2 && 
+       (length(sim[[1]] == 1) || allNA > 0))
 
   # check that, if typ is false, it is because there are NA-only 
   return(siz && typ)
@@ -108,20 +110,83 @@ print.sim <- function(x, ...) {
   
   # and then some details for first five
   cat("\nExtinction times (NA means extant)\n")
-  print(utils::head(sim$TE))
+  print(head(sim$TE))
   
   cat("\n\nSpeciation times \n")
-  print(utils::head(sim$TS))
+  print(head(sim$TS))
   
   cat("\n\nSpecies parents (NA for initial)\n")
-  print(utils::head(sim$PAR))
+  print(head(sim$PAR))
   
   cat("\n\nSpecies status (extinct or extant)\n")
-  print(utils::head(status))
+  print(head(status))
   
   # to see the whole vector
   cat("\n\nFor more details on vector y, try sim$y, with y one of\n")
   cat(names(sim))
+}
+
+#' @rdname sim
+#' @details \code{head.sim} Selects only a number of species from the beginning
+#' of a \code{sim} object.
+#' 
+#' @export
+
+head.sim <- function(x, ...) {
+  # change name for clarity
+  sim <- x
+  
+  # first check that it is a valid sim
+  if (!is.sim(sim)) {
+    stop("Invalid sim object, see ?sim")
+  }
+  
+  # create new object
+  res <- list()
+  
+  # fill it
+  res$TS <- head(sim$TS, ...)
+  res$TE <- head(sim$TE, ...)
+  res$PAR <- head(sim$PAR, ...)
+  res$EXTANT <- head(sim$EXTANT, ...)
+  
+  # make it a sim
+  class(res) <- "sim"
+  
+  # return it
+  return(res)
+}
+
+#' @rdname sim
+#' @details \code{tail.sim} Selects only a number of species from the end of a
+#' \code{sim} object.
+#' 
+#' @export
+#' 
+
+tail.sim <- function(x, ...) {
+  # change name for clarity
+  sim <- x
+  
+  # first check that it is a valid sim
+  if (!is.sim(sim)) {
+    stop("Invalid sim object, see ?sim")
+  }
+  
+  # create new object
+  res <- list()
+  
+  # fill it
+  res$TS <- tail(sim$TS, ...)
+  res$TE <- tail(sim$TE, ...)
+  res$PAR <- tail(sim$PAR, ...)
+  res$EXTANT <- tail(sim$EXTANT, ...)
+  
+  # make it a sim
+  class(res) <- "sim"
+  
+  # return it
+  return(res)
 }
 
 #' @rdname sim
@@ -184,13 +249,13 @@ summary.sim <- function(object, ...) {
 
 #' @rdname sim
 #' 
-#' @details \code{plot.sim.ltt} Plots births, deaths, and diversity through time for
+#' @details \code{plot.sim} Plots births, deaths, and diversity through time for
 #' the sim object.
 #' 
 #' @export
 #' 
 
-plot.sim.ltt <- function(x, ...) {
+plot.sim <- function(x, ...) {
   # change name just for clarity of the object
   sim <- x
   
@@ -198,6 +263,10 @@ plot.sim.ltt <- function(x, ...) {
   if (!is.sim(sim)) {
     stop("Invalid sim object, see ?sim")
   }
+  
+  # make sure to reset par options after functions
+  oldPar <- par(no.readonly = TRUE)
+  on.exit(par(oldPar))
   
   # set up three plots
   par(mfrow = c(3, 1))
