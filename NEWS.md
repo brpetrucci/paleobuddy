@@ -1,7 +1,23 @@
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
 
-# paleobuddy 1.0.0.0
+# paleobuddy 1.0.0.9000
+
+## Trait-dependent dynamics
+
+Added functions to simulate trait evolution and trait-dependent birth
+death models, in particular State Speciation and Extinction (SSE)
+models.
+
+-   `rexp.traits` is a particular case of `rexp.var` when the rate
+    varies with a discrete trait. Implemented to make the search for a
+    waiting time in this simpler case (i.e. when the rate is a step
+    function) more efficient.
+-   `bd.sim.musse` simulates species diversification following a MuSSE
+    model, where traits evolve from an Mk model and change speciation
+    and/or extinction in a discrete fashion.
+
+# paleobuddy 1.0.0
 
 This is the first release of `paleobuddy`, an R package dedicated to
 flexible simulations of diversification, fossil records, and
