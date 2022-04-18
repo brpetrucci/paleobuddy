@@ -107,9 +107,8 @@ rexp.traits <- function(n, rate, traits,
     # (computationally speaking), uniroot substitutes it for a really
     # high/low value instead. Since this does not change our results, we 
     # accept it and simply suppress the warning
-    vars[i] <- max(suppressWarnings(uniroot(f, c(now, upper), 
-                                            extendInt = "yes"))$root - now,
-                   1e-6)
+    vars[i] <- suppressWarnings(uniroot(f, c(now, now + 100), 
+                                            extendInt = "yes"))$root - now
     # max so that we never have a 0 due to numerical issues when p is small
   }
   return(vars)

@@ -26,6 +26,22 @@
 #'
 #' @param mu Similar to above, but for the extinction rate.
 #' 
+#' @param condition Whether to condition tree by total simulation running time,
+#' or the number of species alive at the end of the simulation. If set to 
+#' \code{"time"}, simulation will run for \code{tMax} million years. If set
+#' to \code{"number"}, simulation will run until there are \code{N} species
+#' alive at a given time. 
+#' 
+#' Note: this manner of conditioning for a number of tips conditions the 
+#' phylogeny to have shorter terminal branches. While this might not be an 
+#' issue for low values of extinction fraction \code{mu/lambda}, future 
+#' implementation of the correct conditioning is planned.
+#' 
+#' @param N Number of species at the end of the simulation, if \code{condition}
+#' equals \code{"number"}. End of the simulation will be set for the first time
+#' a species alive at a period where \code{N} species are alive would go 
+#' extinct.
+#' 
 #' @param nTraits The number of traits to be considered. \code{lambda} and 
 #' \code{mu} need not reference every trait simulated.
 #' 
@@ -72,7 +88,8 @@
 #' @rdname bd.sim.musse
 #' @export
 
-bd.sim.musse <- function(n0, lambda, mu, tMax, 
+bd.sim.musse <- function(n0, lambda, mu, condition = "time",
+                         tMax = Inf, N = Inf,
                          nTraits = 1, nFocus = 1, nStates = 2, X0 = 0,
                          Q = list(matrix(c(0, 0.1, 0.1, 0), 
                                          ncol = 2, nrow = 2)),
@@ -99,13 +116,13 @@ bd.sim.musse <- function(n0, lambda, mu, tMax,
     tdLambda <- length(lambda) == nStates
     tdMu <- length(mu) == nStates
   }
-  
-  # if nFocus is just one number, make it a vector
-  if (length(nFocus) == 1) {
-    nFocus <- rep(nFocus, 2)
-  }
-  
-  ### HAVE TO write error tests
+  # 
+  # # if nFocus is just one number, make it a vector
+  # if (length(nFocus) == 1) {
+  #   nFocus <- rep(nFocus, 2)
+  # }
+  # 
+  ### HAVE TO write error tests, including for type + tMax and N
   
   # # error checks for each trait
   # for (i in 1:nTraits) {
@@ -127,13 +144,17 @@ bd.sim.musse <- function(n0, lambda, mu, tMax,
   #   diag(Qn) <- rep(0, nrow(Qn))
   # }
   
-  # initialize test making sure while loop runs
-  inBounds <- FALSE
+  # do we condition on the number of species?
+  condN <- condition == "number"
+  
+  # whether our condition is met - rejection sampling for
+  # time, or exactly number of species at the end for number
+  condMet <- FALSE
   
   # counter to make sure the nFinal is achievable
   counter <- 1
   
-  while (!inBounds) {
+  while (!condMet) {
     # create vectors to hold times of speciation, extinction, 
     # parents and status
     TS <- rep(0, n0)
@@ -151,7 +172,7 @@ bd.sim.musse <- function(n0, lambda, mu, tMax,
     while (length(TE) >= sCount) {
       # if sCount > nFinal[2], no reason to continue
       if (sCount > nFinal[2]) {
-        # so we fail the inBounds test
+        # so we fail the condMet test
         sCount <- Inf
         
         # leave while
@@ -179,24 +200,26 @@ bd.sim.musse <- function(n0, lambda, mu, tMax,
         # if it started this simulation, set X to X0
         X <- X0
       }
-      
+
       # run trait evolution and append it to list
       traits[[paste0("t", sCount)]] <- 
-        traits.musse(tMax = tMax, tStart = tNow, nTraits = nTraits,
-                     nStates = nStates, X0 = X[sCount], Q = Q)
+        traits.musse(tMax = min(tMax, tNow + 100), tStart = tNow, 
+                     nTraits = nTraits, nStates = nStates,
+                     X0 = X[sCount], Q = Q)
       
       # find the waiting time using rexp.var if lambda is not constant
       waitTimeS <- ifelse(tdLambda, 
                           ifelse(sum(lambda) > 0,
                                  rexp.traits(1, lambda, 
-                                             traits[[sCount]][[nFocus[1]]], 
+                                             traits[[sCount]][[nFocus]], 
                                              tNow, tMax), Inf),
                           ifelse(lambda > 0, 
                                  rexp(1, lambda), Inf))
-      waitTimeE <- ifelse(tdMu, 
+      
+      waitTimeE <- ifelse(tdMu,
                           ifelse(sum(mu) > 0,
                                  rexp.traits(1, mu, 
-                                             traits[[sCount]][[nFocus[2]]], 
+                                             traits[[sCount]][[nFocus]], 
                                              tNow, tMax), Inf),
                           ifelse(mu > 0, 
                                  rexp(1, mu), Inf))
@@ -216,11 +239,23 @@ bd.sim.musse <- function(n0, lambda, mu, tMax,
         parent <- c(parent, sCount)
         isExtant <- c(isExtant, TRUE)
         
+        # check whether we reached the species limit, if condition is number
+        if (condN && sum(TE[!is.na(TE)] > tNow) + sum(is.na(TE)) == N) {
+          # set tMax to the first extinction time after tNow
+          tMax <- max(c(tExp, TE[!is.na(TE) & TE > tNow]))
+          
+          # set condMet to true
+          condMet <- TRUE
+          
+          # get out of the while
+          break
+        }
+        
         # get a new speciation waiting time
         waitTimeS <- ifelse(tdLambda, 
                             ifelse(sum(lambda) > 0,
                                    rexp.traits(1, lambda, 
-                                               traits[[sCount]][[nFocus[1]]], 
+                                               traits[[sCount]][[nFocus]], 
                                                tNow, tMax), Inf),
                             ifelse(lambda > 0, 
                                    rexp(1, lambda), Inf))
@@ -233,8 +268,19 @@ bd.sim.musse <- function(n0, lambda, mu, tMax,
       # record it. If both are false record it as NA
       TE[sCount] <- ifelse(tNow < tMax | trueExt, tNow, NA)
       
-      # record the extinction -
+      # record the extinction
       isExtant[sCount] <- is.na(TE[sCount]) | TE[sCount] > tMax
+      
+      # if condition is number and tMax is tExp, we are done
+      if (condN && condMet) {
+        # adjust isExtant to TRUE for those alive at tMax
+        isExtant[TE >= tMax] <- TRUE
+        
+        # adjust TE to NA for those alive at tMax
+        TE[isExtant] <- NA
+
+        break
+      }
       
       # next species
       sCount <- sCount + 1
@@ -244,11 +290,13 @@ bd.sim.musse <- function(n0, lambda, mu, tMax,
     TE <- tMax - TE
     TS <- tMax - TS
     
-    # check whether we are in bounds
-    inBounds <- (length(TE) >= nFinal[1]) &&
+    # check whether we are in bounds if rejection sampling is the thing
+    if (!condN) {
+      condMet <- (length(TE) >= nFinal[1]) &&
       (length(TE) <= nFinal[2]) &&
       (sum(isExtant) >= nExtant[1]) &&
       (sum(isExtant) <= nExtant[2])
+    }
     
     # if we have ran for too long, stop
     counter <- counter + 1
