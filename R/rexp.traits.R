@@ -71,16 +71,27 @@ rexp.traits <- function(n, rate, traits,
   upper <- ifelse(tMax == Inf, now + 100, tMax)
   # time will still be truncated without tMax, but only if fast = TRUE
   
-  # delete the rows in traits that are lower than now
-  traits <- traits[traits$max > now, ]
-  
-  # substitute the first min by now
-  traits$min[1] <- now
-  
-  # if rates are equal, return rexp
-  if (length(unique(rate)) == 1) {
-    return(rexp(n, rate[1]))
+  # manipulate traits to include only relevant portion
+  if (now < max(traits$max)) {
+    # delete the rows in traits that are lower than now
+    traits <- traits[traits$max > now, ]
+    
+    # substitute the first min by now
+    traits$min[1] <- now
+  } else {
+    # make last max now
+    traits$max[length(traits$max)] <- now
+    
+    # delete all other rows
+    traits <- traits[nrow(traits), ]
   }
+  
+  # if only one rate is to be considered, return rexp
+  if (length(unique(rate)) == 1 || nrow(traits) == 1) {
+    return(rexp(n, rate[traits$value[1] + 1]))
+  }
+  # this happens when rates are all the same, or 
+  # when there are no rate shifts after now
   
   # make a rates data frame
   rates <- data.frame(rate[traits$value + 1], traits$min, traits$max)
@@ -103,13 +114,18 @@ rexp.traits <- function(n, rate, traits,
       next
     }
     
-    # if rate is really high and the integral goes to +-infinity 
-    # (computationally speaking), uniroot substitutes it for a really
-    # high/low value instead. Since this does not change our results, we 
-    # accept it and simply suppress the warning
-    vars[i] <- suppressWarnings(uniroot(f, c(now, now + 100), 
-                                            extendInt = "yes"))$root - now
-    # max so that we never have a 0 due to numerical issues when p is small
+    # change tolerance if p is really small
+    tol <- ifelse(p < 1e-5, .Machine$double.eps^0.5, .Machine$double.eps^0.25)
+    
+    # find the root and subtract now
+    vars[i] <- uniroot(f, c(now, now + 100), extendInt = "yes", 
+                       tol = tol)$root - now
+    
+    # when p is really small, uniroot might find now as the root since
+    # the real root is 
+    if (vars[i] == 0) {
+      return(list(f = f, p = p, traits = traits))
+    }
   }
   return(vars)
 }

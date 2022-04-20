@@ -17,8 +17,7 @@ bd.sim.musse(
   X0 = 0,
   Q = list(matrix(c(0, 0.1, 0.1, 0), ncol = 2, nrow = 2)),
   nFinal = c(0, Inf),
-  nExtant = c(0, Inf),
-  trueExt = FALSE
+  nExtant = c(0, Inf)
 )
 }
 \arguments{
@@ -100,18 +99,6 @@ iterations without fulfilling the requirements of \code{nFinal} and
 
 Note: Using values other than the default for \code{nFinal} and
 \code{nExtant} will condition simulation results.}
-
-\item{trueExt}{A \code{logical} indicating whether the function should return
-true or truncated extinction times. When \code{TRUE}, time of extinction of 
-extant species will be the true time, otherwise it will be \code{NA} if a 
-species is alive at the end of the simulation.
-
-Note: This is interesting to use to test age-dependent extinction. 
-Age-dependent speciation would require all speciation times (including
-the ones after extinction) to be recorded, so we do not attempt to add an
-option to account for that. Since age-dependent extinction and speciation
-use the same underlying process, however, if one is tested to satisfaction
-the other should also be in expectations.}
 }
 \value{
 A \code{sim} object, containing extinction times, speciation times,

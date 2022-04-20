@@ -349,8 +349,14 @@ make.phylo <- function(sim, fossils = NULL, returnRootTime = NULL) {
       # find original species number
       nSpOrig <- numbers[numbers$cur == nSp, 2]
       
+      # number of fossils for this species
+      nFossilsSp <- sum(fossils$Species == numbers[numbers[, 2] == nSpOrig, 1])
+      
       # add new name
-      newName <- paste0("t", nSpOrig, ".", count)
+      newName <- paste0("t", nSpOrig, ".", 
+                        sprintf(paste0("%0", 
+                                       ceiling(log(nFossilsSp + 1, 10)), "d"), 
+                                count))
       names <- c(names[before], newName, names[after])
       
       # add to sampled names

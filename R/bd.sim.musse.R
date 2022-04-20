@@ -93,8 +93,7 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
                          nTraits = 1, nFocus = 1, nStates = 2, X0 = 0,
                          Q = list(matrix(c(0, 0.1, 0.1, 0), 
                                          ncol = 2, nrow = 2)),
-                         nFinal = c(0, Inf), nExtant = c(0, Inf),
-                         trueExt = FALSE) {
+                         nFinal = c(0, Inf), nExtant = c(0, Inf)) {
   # check that n0 is not negative
   if (n0 <= 0) {
     stop("initial number of species must be positive")
@@ -161,12 +160,14 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
     TE <- rep(NA, n0)
     parent <- rep(NA, n0)
     isExtant <- rep(TRUE, n0)
-    
+
     # initialize species count
     sCount <- 1
     
-    # initialize list of traits
-    traits <- list()
+    # initialize list of traits for first species' traits
+    traits <- list(traits.musse(tMax = min(tMax, 100), tStart = 0, 
+                                nTraits = nTraits, nStates = nStates,
+                                X0 = X0, Q = Q))
     
     # while we have species to be analyzed still
     while (length(TE) >= sCount) {
@@ -179,39 +180,21 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
         break
       }
       
-      # start at the time of speciation of sCount
-      tNow <- TS[sCount]
+      # get argument for the next species
+      # it will be the oldest one that hasn't lived yet
+      sp <- which(TS == sort(TS)[sCount])
       
-      # get parent of sCount
-      sPar <- parent[sCount]
+      # start at the time of speciation of sp
+      tNow <- TS[sp]
       
-      # if species has a parent, it starts with the trait
-      # value its parent had at the time of speciation
-      if (!is.na(sPar)) {
-        # get traits df from parent
-        traitsPar <- traits[[sPar]][[nFocus]]
-        
-        # find trait value for parent at the speciation time
-        X0Par <- traitsPar$value[traitsPar$max > tNow & traitsPar$min < tNow]
-        
-        # set sCount's X0 to that
-        X <- c(X, X0Par)
-      } else {
-        # if it started this simulation, set X to X0
-        X <- X0
-      }
-
-      # run trait evolution and append it to list
-      traits[[paste0("t", sCount)]] <- 
-        traits.musse(tMax = min(tMax, tNow + 100), tStart = tNow, 
-                     nTraits = nTraits, nStates = nStates,
-                     X0 = X[sCount], Q = Q)
+      # get traits data set
+      traitsSp <- traits[[sp]][[nFocus]]
       
       # find the waiting time using rexp.var if lambda is not constant
       waitTimeS <- ifelse(tdLambda, 
                           ifelse(sum(lambda) > 0,
                                  rexp.traits(1, lambda, 
-                                             traits[[sCount]][[nFocus]], 
+                                             traitsSp,
                                              tNow, tMax), Inf),
                           ifelse(lambda > 0, 
                                  rexp(1, lambda), Inf))
@@ -219,7 +202,7 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
       waitTimeE <- ifelse(tdMu,
                           ifelse(sum(mu) > 0,
                                  rexp.traits(1, mu, 
-                                             traits[[sCount]][[nFocus]], 
+                                             traitsSp,
                                              tNow, tMax), Inf),
                           ifelse(mu > 0, 
                                  rexp(1, mu), Inf))
@@ -229,20 +212,29 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
       # while there are fast enough speciations before the species 
       # goes extinct,
       while ((tNow + waitTimeS) < min(tExp, tMax)) {
-        
         # advance to the time of speciation
         tNow <- tNow + waitTimeS
         
         # add new times to the vectors
         TS <- c(TS, tNow)
         TE <- c(TE, NA)
-        parent <- c(parent, sCount)
+        parent <- c(parent, sp)
         isExtant <- c(isExtant, TRUE)
         
+        # get trait value at tNow
+        XPar <- tail(traitsSp$value[traitsSp$min < tNow], 1)
+        
+        # run trait evolution and append it to list
+        traits[[length(traits) + 1]] <- 
+          traits.musse(tMax = min(tMax, tNow + 100), tStart = tNow, 
+                       nTraits = nTraits, nStates = nStates,
+                       X0 = XPar, Q = Q)
+        
         # check whether we reached the species limit, if condition is number
-        if (condN && sum(TE[!is.na(TE)] > tNow) + sum(is.na(TE)) == N) {
-          # set tMax to the first extinction time after tNow
-          tMax <- max(c(tExp, TE[!is.na(TE) & TE > tNow]))
+        if (condN && (sum(TS <= tNow & (is.na(TE) | TE >= tNow)) == N)) {
+          # set tMax to the first event time after tNow
+          tMax <- min(c(tExp, TE[!is.na(TE) & TE > tNow], 
+                        TS[TS > tNow]))
           
           # set condMet to true
           condMet <- TRUE
@@ -255,7 +247,7 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
         waitTimeS <- ifelse(tdLambda, 
                             ifelse(sum(lambda) > 0,
                                    rexp.traits(1, lambda, 
-                                               traits[[sCount]][[nFocus]], 
+                                               traitsSp, 
                                                tNow, tMax), Inf),
                             ifelse(lambda > 0, 
                                    rexp(1, lambda), Inf))
@@ -264,15 +256,22 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
       # reached the time of extinction
       tNow <- tExp
       
-      # if trueExt is true or the species went extinct before tMax,
-      # record it. If both are false record it as NA
-      TE[sCount] <- ifelse(tNow < tMax | trueExt, tNow, NA)
+      # if the species went extinct before tMax,
+      # record it, otherwise, record NA
+      TE[sp] <- ifelse(tNow < tMax, tNow, NA)
       
       # record the extinction
-      isExtant[sCount] <- is.na(TE[sCount]) | TE[sCount] > tMax
+      isExtant[sp] <- is.na(TE[sp]) | TE[sp] > tMax
       
-      # if condition is number and tMax is tExp, we are done
-      if (condN && condMet) {
+      # check whether we reached the species limit
+      if (condN && (sum(TS <= tNow & (is.na(TE) | TE >= tNow)) == N)) {
+        # if condMet is false, this is the first time the condition is met
+        if (!condMet) {
+          # set tMax to the first event time after tNow
+          tMax <- min(c(tExp, TE[!is.na(TE) & TE > tNow], 
+                        TS[TS > tNow]))
+        }
+        
         # adjust isExtant to TRUE for those alive at tMax
         isExtant[TE >= tMax] <- TRUE
         
@@ -280,15 +279,64 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
         TE[isExtant] <- NA
 
         break
+      } else if (condMet) {
+        # if reached condition before, need to do just the latter two things
+        isExtant[TE >= tMax] <- TRUE
+        
+        # adjust TE to NA for those alive at tMax
+        TE[isExtant] <- NA
+        
+        break
       }
       
       # next species
       sCount <- sCount + 1
+      
+      if (sCount > N) print(sCount)
+    }
+    
+    # truncate traits so we only go up to tMax
+    for (i in 1:length(traits)) {
+      for (j in 1:nTraits) {
+        # df in question
+        traitsSp <- traits[[i]][[j]]
+        
+        # eliminate rows with min greater than tMax
+        traitsSp <- traitsSp[traitsSp$min < tMax, ]
+        
+        # set max of last row to tMax
+        traitsSp$max[nrow(traitsSp)] <- tMax
+        
+        # invert time for max and min
+        traitsSp$max <- tMax - traitsSp$max
+        traitsSp$min <- tMax - traitsSp$min
+        
+        # invert columns
+        colnames(traitsSp) <- c("value", "max", "min")
+        
+        # set traits back to it
+        traits[[i]][[j]] <- traitsSp
+      }
     }
     
     # now we invert TE and TS so time goes from tMax to 0
     TE <- tMax - TE
     TS <- tMax - TS
+    
+    # if there are species that are born after tMax, prune them
+    nPrune <- which(TS <= 0)
+    
+    if (length(nPrune) > 0) {
+      TE <- TE[-nPrune]
+      TS <- TS[-nPrune]
+      isExtant <- isExtant[-nPrune]
+      traits <- traits[-nPrune]
+      
+      # need to be careful with parent
+      parent <- c(NA, unlist(lapply(parent[-nPrune][-1], function(x)
+        x - sum(nPrune < x))))
+      # each species pruned lowers the parent numbering before them by 1
+    }
     
     # check whether we are in bounds if rejection sampling is the thing
     if (!condN) {
@@ -297,7 +345,7 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
       (sum(isExtant) >= nExtant[1]) &&
       (sum(isExtant) <= nExtant[2])
     }
-    
+
     # if we have ran for too long, stop
     counter <- counter + 1
     if (counter > 100000) {
@@ -312,7 +360,7 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
   class(sim) <- "sim"
   
   res <- list("TRAITS" = traits, "SIM" = sim)
-  
+
   return(res)
 }
 
@@ -362,7 +410,7 @@ trait.musse <- function(tMax, tStart = 0, nStates = 2, X0 = 0,
   states <- 0:(nStates - 1)
 
   # create traits data frame
-  traits <- data.frame(value = X0, min = 0, max = NA)
+  traits <- data.frame(value = X0, min = tStart, max = NA)
   
   # start a time counter
   tNow <- tStart
