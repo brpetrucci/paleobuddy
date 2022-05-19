@@ -146,6 +146,14 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
   # do we condition on the number of species?
   condN <- condition == "number"
   
+  # if conditioning on number, need to set some 
+  # tMax for the trait evolution
+  if (condN) {
+    # thrice the average time it will take to get to 10*N species
+    # under the slowest diversification rate parameters
+    trTMax <- max(log(10*N) / (lambda - mu))
+  } else trTMax <- Inf
+  
   # whether our condition is met - rejection sampling for
   # time, or exactly number of species at the end for number
   condMet <- FALSE
@@ -160,12 +168,13 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
     TE <- rep(NA, n0)
     parent <- rep(NA, n0)
     isExtant <- rep(TRUE, n0)
+    now <- c()
 
     # initialize species count
     sCount <- 1
     
     # initialize list of traits for first species' traits
-    traits <- list(traits.musse(tMax = min(tMax, 100), tStart = 0, 
+    traits <- list(traits.musse(tMax = min(tMax, trTMax), tStart = 0, 
                                 nTraits = nTraits, nStates = nStates,
                                 X0 = X0, Q = Q))
     
@@ -186,7 +195,7 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
       
       # start at the time of speciation of sp
       tNow <- TS[sp]
-      
+
       # get traits data set
       traitsSp <- traits[[sp]][[nFocus]]
       
@@ -214,6 +223,7 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
       while ((tNow + waitTimeS) < min(tExp, tMax)) {
         # advance to the time of speciation
         tNow <- tNow + waitTimeS
+        now <- c(now, tNow)
         
         # add new times to the vectors
         TS <- c(TS, tNow)
@@ -223,25 +233,13 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
         
         # get trait value at tNow
         XPar <- tail(traitsSp$value[traitsSp$min < tNow], 1)
-        
+
         # run trait evolution and append it to list
         traits[[length(traits) + 1]] <- 
-          traits.musse(tMax = min(tMax, tNow + 100), tStart = tNow, 
+          traits.musse(tMax = min(tMax, max(trTMax, tNow + 100)), 
+                       tStart = tNow, 
                        nTraits = nTraits, nStates = nStates,
                        X0 = XPar, Q = Q)
-        
-        # check whether we reached the species limit, if condition is number
-        if (condN && (sum(TS <= tNow & (is.na(TE) | TE >= tNow)) == N)) {
-          # set tMax to the first event time after tNow
-          tMax <- min(c(tExp, TE[!is.na(TE) & TE > tNow], 
-                        TS[TS > tNow]))
-          
-          # set condMet to true
-          condMet <- TRUE
-          
-          # get out of the while
-          break
-        }
         
         # get a new speciation waiting time
         waitTimeS <- ifelse(tdLambda, 
@@ -255,7 +253,7 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
       
       # reached the time of extinction
       tNow <- tExp
-      
+
       # if the species went extinct before tMax,
       # record it, otherwise, record NA
       TE[sp] <- ifelse(tNow < tMax, tNow, NA)
@@ -263,36 +261,44 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
       # record the extinction
       isExtant[sp] <- is.na(TE[sp]) | TE[sp] > tMax
       
-      # check whether we reached the species limit
-      if (condN && (sum(TS <= tNow & (is.na(TE) | TE >= tNow)) == N)) {
-        # if condMet is false, this is the first time the condition is met
-        if (!condMet) {
-          # set tMax to the first event time after tNow
-          tMax <- min(c(tExp, TE[!is.na(TE) & TE > tNow], 
-                        TS[TS > tNow]))
-        }
+      # next species
+      sCount <- sCount + 1
+      
+      # if we passed the limit
+      if (condN && (sum(TS < tNow & (is.na(TE) | TE > tNow)) > 10*N)) {
+        # function to find the excess at t
+        nAlive <- Vectorize(function(t) {
+          sum(TS <= t & (is.na(TE) | TE > t)) - N
+        })
         
+        # vector of all events
+        events <- sort(c(TS, TE))
+        
+        # find times when we were at N
+        nAliveT <- events[which(nAlive(events) == 0)]
+        
+        # find the times where the next event happened for each
+        nextEvent <- unlist(lapply(nAliveT, function(t) events[events > t][1]))
+        
+        # get chosen event index
+        eventChosen <- sample(1:length(nextEvent), 1, 
+                              prob = (nextEvent - nAliveT))
+        
+        # draw uniform as above
+        tMax <- runif(1, nAliveT[eventChosen], nextEvent[eventChosen])
+
         # adjust isExtant to TRUE for those alive at tMax
         isExtant[TE >= tMax] <- TRUE
         
         # adjust TE to NA for those alive at tMax
         TE[isExtant] <- NA
-
-        break
-      } else if (condMet) {
-        # if reached condition before, need to do just the latter two things
-        isExtant[TE >= tMax] <- TRUE
         
-        # adjust TE to NA for those alive at tMax
-        TE[isExtant] <- NA
+        # set condMet to true
+        condMet <- TRUE
         
+        # leave while
         break
       }
-      
-      # next species
-      sCount <- sCount + 1
-      
-      if (sCount > N) print(sCount)
     }
     
     # truncate traits so we only go up to tMax
@@ -323,9 +329,10 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
     TE <- tMax - TE
     TS <- tMax - TS
     
-    # if there are species that are born after tMax, prune them
+    # check which species are born after tMax
     nPrune <- which(TS <= 0)
     
+    # if any, prune them
     if (length(nPrune) > 0) {
       TE <- TE[-nPrune]
       TS <- TS[-nPrune]
@@ -345,7 +352,7 @@ bd.sim.musse <- function(n0, lambda, mu, condition = "time",
       (sum(isExtant) >= nExtant[1]) &&
       (sum(isExtant) <= nExtant[2])
     }
-
+    
     # if we have ran for too long, stop
     counter <- counter + 1
     if (counter > 100000) {
@@ -395,7 +402,7 @@ trait.musse <- function(tMax, tStart = 0, nStates = 2, X0 = 0,
   } else if (length(tMax) > 1 || length(tStart) > 1) {
     stop("tMax and tStart must be one number")
   }
-  
+
   # make sure tMax > tStart
   if (tStart >= tMax) {
     stop("tMax must be greater than tStart")
@@ -408,6 +415,11 @@ trait.musse <- function(tMax, tStart = 0, nStates = 2, X0 = 0,
   
   # create states vector from number
   states <- 0:(nStates - 1)
+  
+  if (length(X0) != 1 || length(tStart) != 1) {
+    print(X0)
+    print(tStart)
+  }
 
   # create traits data frame
   traits <- data.frame(value = X0, min = tStart, max = NA)
@@ -417,6 +429,9 @@ trait.musse <- function(tMax, tStart = 0, nStates = 2, X0 = 0,
   
   # and a shifts counter
   shifts <- 0
+  
+  # make diagonals of Q 0 
+  diag(Q) <- 0
   
   # while we have not reached the end
   while (tNow < tMax) {

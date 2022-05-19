@@ -8,7 +8,9 @@ bd.sim(
   n0,
   lambda,
   mu,
-  tMax,
+  tMax = Inf,
+  N = Inf,
+  condition = "time",
   lShape = NULL,
   mShape = NULL,
   envL = NULL,
@@ -48,6 +50,17 @@ speciation and extinction times before returning.}
 origin. Any species still living after \code{tMax} is considered extant, and 
 any species that would be generated after \code{tMax} is not present in the
 return.}
+
+\item{N}{Number of species at the end of the simulation, if \code{condition}
+equals \code{"number"}. End of the simulation will be set for the first time
+a species alive at a period where \code{N} species are alive would go 
+extinct.}
+
+\item{condition}{Whether to condition tree by total simulation running time,
+or the number of species alive at the end of the simulation. If set to 
+\code{"time"}, simulation will run for \code{tMax} million years. If set
+to \code{"number"}, simulation will run until there are \code{N} species
+alive at a given time.}
 
 \item{lShape}{Shape parameter defining the degree of age-dependency in 
 speciation rate. This will be equal to the shape parameter in a Weibull 

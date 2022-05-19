@@ -48,7 +48,7 @@ mu <- 0.15
 tMax <- 50
 
 # run the simulation
-sim <- bd.sim(n0, lambda, mu, tMax)
+sim <- bd.sim(n0, lambda, mu, tMax = tMax)
 
 # take a look at the way the result is organized
 sim
@@ -95,7 +95,7 @@ set.seed(3)
 
 # create simulation
 # note nExtant, defining we want 200 or more extant species at the end
-sim <- bd.sim(n0, lambda, mu, tMax, nExtant = c(200, Inf))
+sim <- bd.sim(n0, lambda, mu, tMax = tMax, nExtant = c(200, Inf))
 
 # check the number of extant species
 paste0("Number of species alive at the end of the simulation: ", 
@@ -138,7 +138,7 @@ mu <- function(t) {
 tMax <- 50
 
 # run the simulation
-sim <- bd.sim(n0, lambda, mu, tMax)
+sim <- bd.sim(n0, lambda, mu, tMax = tMax)
 
 # check the resulting clade out
 ape::plot.phylo(make.phylo(sim), show.tip.label = FALSE)
@@ -302,7 +302,7 @@ mShape <- 0.5
 
 # run the simulation
 # we pass the shape and environmental parameters
-sim <- suppressMessages(bd.sim(n0, lambda, mu, tMax, 
+sim <- suppressMessages(bd.sim(n0, lambda, mu, tMax = tMax, 
                                mShape = mShape, envL = temp))
 # note that lShape and envM also exist
 # the defaults for all of these customization options is NULL
@@ -367,7 +367,7 @@ mShape <- function(t) {
 }
 
 # run the simulation
-sim <- suppressMessages(bd.sim(n0, lList, q, tMax, lShape = lShape, 
+sim <- suppressMessages(bd.sim(n0, lList, q, tMax = tMax, lShape = lShape, 
                                mShape = mShape, 
                                envM = temp, lShifts = lShifts))
 

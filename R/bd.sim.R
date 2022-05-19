@@ -44,6 +44,17 @@
 #' origin. Any species still living after \code{tMax} is considered extant, and 
 #' any species that would be generated after \code{tMax} is not present in the
 #' return.
+#' 
+#' @param condition Whether to condition tree by total simulation running time,
+#' or the number of species alive at the end of the simulation. If set to 
+#' \code{"time"}, simulation will run for \code{tMax} million years. If set
+#' to \code{"number"}, simulation will run until there are \code{N} species
+#' alive at a given time. 
+#' 
+#' @param N Number of species at the end of the simulation, if \code{condition}
+#' equals \code{"number"}. End of the simulation will be set for the first time
+#' a species alive at a period where \code{N} species are alive would go 
+#' extinct.
 #'
 #' @param lShape Shape parameter defining the degree of age-dependency in 
 #' speciation rate. This will be equal to the shape parameter in a Weibull 
@@ -604,12 +615,13 @@
 #' @rdname bd.sim
 #' @export
 
-bd.sim <- function(n0, lambda, mu, tMax, 
-                  lShape = NULL, mShape = NULL, 
-                  envL = NULL, envM = NULL, 
-                  lShifts = NULL, mShifts = NULL, 
-                  nFinal = c(0, Inf), nExtant = c(0, Inf),
-                  trueExt = FALSE) {
+bd.sim <- function(n0, lambda, mu,
+                   tMax = Inf, N = Inf, condition = "time", 
+                   lShape = NULL, mShape = NULL, 
+                   envL = NULL, envM = NULL, 
+                   lShifts = NULL, mShifts = NULL, 
+                   nFinal = c(0, Inf), nExtant = c(0, Inf),
+                   trueExt = FALSE) {
   
   # if we have ONLY numbers for lambda and mu, it is constant
   if ((is.numeric(lambda) & length(lambda) == 1) &
@@ -619,7 +631,7 @@ bd.sim <- function(n0, lambda, mu, tMax,
     m <- mu
     
     # call bd.sim.constant
-    return(bd.sim.constant(n0, l, m, tMax, nFinal, nExtant, trueExt))
+    return(bd.sim.constant(n0, l, m, condition, tMax, N, nFinal, nExtant, trueExt))
   }
 
   # else it is not constant
