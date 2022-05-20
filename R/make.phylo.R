@@ -558,7 +558,7 @@ make.phylo <- function(sim, fossils = NULL, returnRootTime = NULL) {
   
   
   phy$node.label <- seq(from = length(sim$TE) + 1, 
-                        to = length(sim$TE) + 1 + nNode)
+                        to = length(sim$TE) + nNode)
   
   # if fossils are provided
   if(!is.null(fossils)){
