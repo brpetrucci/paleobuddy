@@ -18,8 +18,8 @@ constant rates, rates varying as a function of time, or time and/or an
 environmental variable, as well as age-dependent rates by using a shape 
 parameter from a Weibull distribution (which can itself also be 
 time-dependent). Extinction and speciation rates can be supplied 
-independently, so that one can combine any types of scenarios for birth and 
-death rates. The function \code{find.lineages} separates birth-death 
+independently, so that one can combine multiple types of scenarios for birth 
+and death rates. The function \code{find.lineages} separates birth-death 
 simulations into monophyletic clades so one can generate fossil records and 
 phylogenies (see below) for clades with a specific mother species. This is
 particularly useful for simulations with multiple starting species. See 

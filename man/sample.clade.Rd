@@ -120,6 +120,16 @@ Optionally takes a vector of time bins representing geologic periods, if the
 user wishes occurrence times to be represented as a range instead of true 
 points.
 }
+\details{
+The age-dependent preservation function assumes that all extant
+species at the end of the simulations have \code{TE = 0} (i.e., the function
+assumes all extant species got extinct exaclty when the simulation ended.
+This might create distortion for some \code{adFun} - especially in the case
+of bell-shaped functions. As interpretations of what age-dependent
+preservation mean to species alive at the end of the simulation, we
+recommend users to implement their own preservation functions for the
+species that are extant at the end of the simulation.
+}
 \examples{
 
 # vector of times
