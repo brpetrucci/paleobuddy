@@ -259,7 +259,7 @@ faBins <- unlist(lapply(ids, function(i) max(fossils$MaxT[fossils$Species == i])
 laBins <- unlist(lapply(ids, function(i) min(fossils$MinT[fossils$Species == i])))
 
 # create the bins vector we have been using
-bins <- seq(tMax, 0, -0.1)
+bins <- seq(tMax, 0, -1)
 # note this has a high resolution, the actual stratigraphic ranges are much coarser
 
 # get the estimates
