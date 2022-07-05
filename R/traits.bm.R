@@ -22,6 +22,8 @@
 #' process starting from \code{0} and sum \code{X0} at the end, but we add this
 #' for simplicity.
 #' 
+#' @param drift ((TOOOODOOOOO))
+#' 
 #' @param tStart The starting time of the simulation. Standard Brownian Motion 
 #' starts at \code{0}, so we set the default value as such, but this argument is
 #' required to accurately return a function based on the trait evolution of a
@@ -143,7 +145,8 @@
 #' @export
 
 traits.bm <- function(tMax, tStart = 0, nTraits = 1, 
-                      sigma2 = 1, X0 = 0, bounds = NULL, nPoints = 100) {
+                      sigma2 = 1, X0 = 0, drift = 0,
+                      bounds = NULL, nPoints = 100) {
   # make sure tMax > tStart
   if (tStart >= tMax) {
     stop("tMax must be greater than tStart")
@@ -208,6 +211,9 @@ traits.bm <- function(tMax, tStart = 0, nTraits = 1,
       bm <- ifelse(bm < bounds[1], bounds[1], bm)
       bm <- ifelse(bm > bounds[2], bounds[2], bm)
     }
+    
+    # insert drift, if necessary
+    #bm <- bm + drift * times
 
     # make it a function using linear interpolation
     bmFunc <- approxfun(times, bm, rule = 2)

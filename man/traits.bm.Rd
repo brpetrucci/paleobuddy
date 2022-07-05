@@ -10,6 +10,7 @@ traits.bm(
   nTraits = 1,
   sigma2 = 1,
   X0 = 0,
+  drift = 0,
   bounds = NULL,
   nPoints = 100
 )
@@ -37,6 +38,8 @@ trait will have a different variance.}
 \item{X0}{The initial trait value. For a BM process, one can simply run the
 process starting from \code{0} and sum \code{X0} at the end, but we add this
 for simplicity.}
+
+\item{drift}{((TOOOODOOOOO))}
 
 \item{bounds}{A numeric vector with length two containing minimum and maximum
 trait values. If trait values fall under \code{bounds[1]} or over 

@@ -397,8 +397,8 @@ traits.species <- function(tMax, tStart, nTraits, traitModel, pars) {
     for (i in 1:length(modPars)) {
       if (length(modPars[[i]]) != sum(traitModel == x)) {
         if (length(modPars[[i]]) != 1) {
-          stop("parameter vectors must be of length 1 or length equal
-               to the number of traits under the corresponding model")
+          #stop("parameter vectors must be of length 1 or length equal
+          #    to the number of traits under the corresponding model")
         } else {
           modPars[[i]] <- rep(modPars[[i]], sum(traitModel == x))
         }
@@ -409,7 +409,7 @@ traits.species <- function(tMax, tStart, nTraits, traitModel, pars) {
   
   # redo names
   names(pars) <- c("BM", "OU", "EB", "ST")
-  
+
   # take each of them
   bmPars <- pars[["BM"]]
   ouPars <- pars[["OU"]]
@@ -429,8 +429,9 @@ traits.species <- function(tMax, tStart, nTraits, traitModel, pars) {
         traits.bm(tMax = tMax, nTraits = 1, tStart = tStart, 
                   X0 = bmPars[["X0"]][bmCount],
                   sigma2 = bmPars[["sigma2"]][bmCount],
-                  bounds = bmPars[["bounds"]][[bmCount]])
-      
+                  bounds = c(bmPars[["bounds0"]][bmCount],
+                             bmPars[["bounds1"]][bmCount]))
+
       # increase the count
       bmCount <- bmCount + 1
     }
