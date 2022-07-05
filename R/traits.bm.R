@@ -213,7 +213,7 @@ traits.bm <- function(tMax, tStart = 0, nTraits = 1,
     }
     
     # insert drift, if necessary
-    #bm <- bm + drift * times
+    bm <- bm + drift * times
 
     # make it a function using linear interpolation
     bmFunc <- approxfun(times, bm, rule = 2)
