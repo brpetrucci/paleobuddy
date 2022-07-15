@@ -203,7 +203,7 @@ This fossil record's data frame organization allows for easy evaluation of its c
 
 ```{r}
 # make a copy
-pFossils <- fossils
+pFossils <- fossils[, -3]
 
 # change the extant column
 pFossils["Extant"][pFossils["Extant"] == FALSE] = "extant"
@@ -246,6 +246,22 @@ per.capita <- function(faBins, laBins, bins) {
 }
 ```
 
+Let us first run simulations with more species
+
+```{r}
+set.seed(1)
+
+# constant lambda and mu
+lambda = 0.15
+mu = 0.05
+
+# nFinal means there will be at least 100 species in the simulation
+sim <- bd.sim(n0, lambda, mu, tMax, nFinal = c(100, Inf))
+
+# sample--note the higher rho, since this method relies strongly on perfect sampling
+fossils <- suppressMessages(sample.clade(sim, rho = 10, tMax, bins = bins, returnTrue = FALSE))
+```
+
 To apply this function, we need to manipulate `fossils` a little bit
 
 ```{r}
@@ -258,15 +274,22 @@ faBins <- unlist(lapply(ids, function(i) max(fossils$MaxT[fossils$Species == i])
 # get the last appearance bins - last time in bins where the fossil was seen (upper bound)
 laBins <- unlist(lapply(ids, function(i) min(fossils$MinT[fossils$Species == i])))
 
-# create the bins vector we have been using
-bins <- seq(tMax, 0, -0.1)
-# note this has a high resolution, the actual stratigraphic ranges are much coarser
-
 # get the estimates
 pc <- per.capita(faBins, laBins, bins)
+
+# get a mean for each rate
+print(paste0("Speciation estimate: ", mean(pc$p[is.finite(pc$p)], na.rm = TRUE)))
+print(paste0("Extinction estimate: ", mean(pc$q[is.finite(pc$q)], na.rm = TRUE)))
+
+# and plots
+plot(x = rev(bins), y = pc$p, type = "l", xlab = "Time (Mya)", ylab = "Speciation rate")
+abline(h = lambda)
+
+plot(x = rev(bins), y = pc$q, type = "l", xlab = "Time (Mya)", ylab = "Extinction rate")
+abline(h = mu)
 ```
 
-This method assumes perfect sampling, so it will not be a good estimate, but it is nevertheless a good example of `sample.clade` use. One could then clean up `pc` and plot the rates, but for sampling as imperfect as we have here it will not be a good estimate.
+This method assumes perfect sampling, so estimaates are not perfect. But one can clearly see the trend towards the correct values.
 
 Other examples of methods using only the fossil record are Capture-Mark-Recapture (Liow & Nichols 2010) and the Alroy 3-timer (Alroy 2014). One could also use `paleobuddy` to test methods that integrate fossil records and phylogenies, such as the Fossilized birth-death model (Stadler et al 2010, Heath et al 2014). While a thorough test of these methods is not in the scope of this vignette, we believe to have shown the workflow required for such tests.
 
