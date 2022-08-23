@@ -461,7 +461,77 @@ draw.sim(sim, fossils = fossils)
 
 Note how occurrences cluster in the middle of a species' duration, as expected since the PERT is a hat-shaped distribution.
 
-For more details and examples of age-dependent models, check out `?sample.clade`. Even if an `adFun` argument is supplied for age dependency, the average sampling rate `rho` may have the same flexibility as speciation and extinction rates in the birth-death functions. We omit examples of other sampling rate options since they are just the same as above, excluding shape parameters.
+For more details and examples of age-dependent models, check out `?sample.clade`. Even if an `adFun` argument is supplied for age dependency, the average sampling rate `rho` may have the same flexibility as speciation and extinction rates in the birth-death functions. 
+
+We provide below a final example containing a lot of complexity on both birth-death and fossil sampling rates. While set not to run due to its long runtime, users are encouraged to run it on their own time, and use it as a basis for the exploration of other sources of variation for rates (e.g. try using the PERT to make fossil sampling age-dependent, as above). It is completely self-contained, as long as paleobuddy is attached.
+
+```{r eval=FALSE}
+## setup
+# set seed
+set.seed(6)
+
+# initial number of species
+n0 <- 1
+
+# maximum simulation time
+tMax <- 30
+
+# lambda varies with absolute time (exponential decay)
+lambda <- function(t) {
+  1 + exp(-t/2)
+}
+
+# mu will vary with species age and environmental variables
+data(co2)
+data(temp)
+
+# its scale will depend on CO2, except for a mass extinction event
+scale <- function(t, env) {
+  ifelse(t < 10, env/20,
+         ifelse(t < 11, 1/1.9, env/30))
+  # ME between 10 and 11my from simulation start
+  # step function-like dependence on CO2 otherwise
+}
+mu <- make.rate(scale, tMax = tMax, envRate = co2)
+
+# its shape will vary with time and temperature
+shape <- function(t, env) {
+  0.5 + 2.5 * log(t + 1) / env
+}
+mu_shape <- make.rate(shape, tMax = tMax, envRate = temp)
+
+# finally, fossil sampling will vary linearly with absolute time
+rho <- function(t) {
+  0.1 + 0.1 * t
+}
+
+## plot diversification rates to visualize
+# time vector
+time <- seq(0, tMax, by = 0.01)
+
+# plotting lambda, mu scale, and mu shape
+plot(time, rev(lambda(time)), type = "l", xlim = c(tMax, 0), ylim = c(0, 2),
+     xlab = "Time (Mya)", ylab = "Rate value", col = "orange")
+lines(time, rev(1/mu(time)), col = "red")
+lines(time, rev(mu_shape(time)), col = "blue")
+legend(x = 15, y = 0.7, lty = 1, col = c("orange", "red", "blue", "green"),
+       legend = c("lambda", "1/(mu scale)", "mu shape", "rho"))
+# note we plotted the inverse of scale, since Weibull scales are
+# equivalent to exponential rates when shape is equal to 1
+
+## simulate
+# birth-death simulation
+sim <- suppressMessages(bd.sim(n0, lambda, mu, tMax, mShape = mu_shape))
+
+# fossil record simulation - returning true sampling times
+fossils <- suppressMessages(sample.clade(sim, rho, tMax, returnTrue = TRUE))
+
+# draw BD simulation with fossils
+draw.sim(sim, fossils = fossils)
+
+# draw phylogenetic tree
+ape::plot.phylo(make.phylo(sim))
+```
 
 ## Conclusion
 
