@@ -511,11 +511,13 @@ time <- seq(0, tMax, by = 0.01)
 
 # plotting lambda, mu scale, and mu shape
 plot(time, rev(lambda(time)), type = "l", xlim = c(tMax, 0), ylim = c(0, 2),
-     xlab = "Time (Mya)", ylab = "Rate value", col = "orange")
+     xlab = "Time (Mya)", ylab = "Rate value", 
+     main = "Speciation rate, extinction scale and shape through time",
+     col = "orange")
 lines(time, rev(1/mu(time)), col = "red")
 lines(time, rev(mu_shape(time)), col = "blue")
-legend(x = 15, y = 0.7, lty = 1, col = c("orange", "red", "blue", "green"),
-       legend = c("lambda", "1/(mu scale)", "mu shape", "rho"))
+legend(x = 15, y = 0.7, lty = 1, col = c("orange", "red", "blue"),
+       legend = c("lambda", "1/(mu scale)", "mu shape"))
 # note we plotted the inverse of scale, since Weibull scales are
 # equivalent to exponential rates when shape is equal to 1
 
