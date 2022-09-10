@@ -138,6 +138,7 @@
 #' abline(v = bins, lty = 2, col = "blue", lwd = 0.5)
 #' 
 #' #alternatively, one can draw lineages varying colors and tip labels:
+#' #(note how they are sorted)
 #' draw.sim(sim, tipLabels = paste0("spp_", 1:10), 
 #'      lineageColors = rep(c("red", "green", "blue"), times=5))
 #' 
