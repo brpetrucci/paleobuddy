@@ -4,13 +4,13 @@
 #' paleobuddy. It contains the following four elements.
 #' 
 #' \describe{
-#' \item{\code{TE}}{Vector of extinction times, with \code{NA} as the time of
+#' \item{\code{TE}}{Numeric vector of extinction times, with \code{NA} as the time of
 #' extinction for extant species.}
 #'
-#' \item{\code{TS}}{Vector of speciation times, with \code{tMax} as the time of
+#' \item{\code{TS}}{Numeric vector of speciation times, with \code{tMax} as the time of
 #' speciation for species that started the simulation.}
 #'
-#' \item{\code{PAR}}{Vector of parents. Species that started the simulation have
+#' \item{\code{PAR}}{Numeric vector of parents. Species that started the simulation have
 #' \code{NA}, while species that were generated during the simulation have their
 #' parent's number. Species are numbered as they are born.}
 #'
@@ -72,8 +72,10 @@ is.sim <- function(sim) {
   # checks that there either are 3 double vectors and 1 logical, or
   # 2 doubles and 2 logicals when PAR is all NA
   types <- unlist(lapply(1:4, function(x) typeof(sim[[x]])))
-  typ <- (sum(types == "logical") == 1 && sum(types == "double") == 3) ||
-    (sum(types == "logical") == 2 && sum(types == "double") == 2 && 
+  typ <- (sum(types == "logical") == 1 && 
+            sum(types == "double" | types == "integer") == 3) ||
+    (sum(types == "logical") == 2 && 
+       sum(types == "double" | types == "integer") == 2 && 
        (length(sim[[1]] == 1) || allNA > 0))
 
   # check that, if typ is false, it is because there are NA-only 
