@@ -3,6 +3,16 @@
 
 # paleobuddy 1.0.0.9000
 
+<<<<<<< HEAD
+=======
+## Changes to vignettes
+
+-   `overview`: the Per Capita method estimation was changed to have a
+    more accurate estimate.
+-   `overview`: a complex example was added to the end to respond to
+    comments from a reviewer in the manuscript.
+
+>>>>>>> development
 ## Trait-dependent dynamics
 
 Added functions to simulate trait evolution and trait-dependent birth
@@ -15,7 +25,19 @@ models.
     function) more efficient.
 -   `bd.sim.musse` simulates species diversification following a MuSSE
     model, where traits evolve from an Mk model and change speciation
+<<<<<<< HEAD
     and/or extinction in a discrete fashion.
+=======
+    and/or extinction in a discrete fashion. Allows for the simulation
+    of multiple traits, though currently the rates can only depend on
+    one of them.
+
+## Simple fixes
+
+-   `sample.clade.R`: added a small bit on help page to explain the
+    complication of using `adFun` with extant species.
+-   `make.phylo.R`: corrected bug in node labels.
+>>>>>>> development
 
 # paleobuddy 1.0.0
 

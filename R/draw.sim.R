@@ -28,6 +28,17 @@
 #' points in the plot. Default value is 4 (i.e. equal to \code{lwd = 4} for 
 #' the black horizontal lines).
 #' 
+#' @param lineageColors Character vector giving the colors of all lineages, 
+#' sorted by the original lineage order (the one in the \code{sim} object). 
+#' Must have same length as the number of lineages in the \code{sim} object. 
+#' If NULL (default value) all lineages are plotted as black.
+#' 
+#' @param tipLabels Character vector manually assigning the tip labels of all 
+#' lineages, sorted by the original lineage order (the one in the \code{sim} 
+#' object). Must have same length as the number of lineages in the \code{sim} 
+#' object. If NULL (default value) all lineages are plotted as "t#", with "#" 
+#' being the position of that lineage in the \code{sim} object.
+#' 
 #' @param ... Further arguments to be passed to \code{plot}
 #' 
 #' @return A plot of the simulation in the graphics window. If the 
@@ -126,6 +137,11 @@
 #' # adding the bounds of the simulated bins
 #' abline(v = bins, lty = 2, col = "blue", lwd = 0.5)
 #' 
+#' #alternatively, one can draw lineages varying colors and tip labels:
+#' #(note how they are sorted)
+#' draw.sim(sim, tipLabels = paste0("spp_", 1:10), 
+#'      lineageColors = rep(c("red", "green", "blue"), times=5))
+#' 
 #' ###
 #' # we can control how to sort displayed species exactly
 #' 
@@ -158,7 +174,8 @@
 #' 
 
 draw.sim <- function (sim, fossils = NULL, sortBy = "TS", 
-                      lwdLin = 4, showLabel = TRUE, ...) {
+                      lwdLin = 4, lineageColors=NULL, 
+                      tipLabels=NULL, showLabel = TRUE, ...) {
   # set up to return par to pre-function settings
   oldPar <- par(no.readonly = TRUE) 
   on.exit(par(oldPar))
@@ -290,17 +307,29 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
   plot(NA, ...)
   
   # plot durations
+  if(is.null(lineageColors)){
+    lincols <- "black"
+  }else{
+    lincols <- lineageColors[ord]
+  }
+  
   segments(x0 = sim_mod$TS, x1 = sim_mod$TE, y1 = 1:length(sim_mod$TE), 
-           y0 = 1:length(sim_mod$TE), lwd = lwdLin, col = "black")
+           y0 = 1:length(sim_mod$TE), lwd = lwdLin, col = lincols)
   
   # show species labels if user wants
   if (showLabel) {
+    if(is.null(tipLabels)){
+      tiplabels <- paste0("t", sprintf(paste0("%0", 
+         ceiling(log(length(sim$TE), 10)), "d"), ord))
+    }else{
+      tiplabels <- tipLabels[ord]
+    }
+    
+    
+    
     text(y = 1:length(sim_mod$TE), 
          x = sim_mod$TE - ((max(sim$TS) - min(sim$TE)) * 0.035), 
-         labels = paste0("t", 
-                         sprintf(paste0("%0", 
-                                        ceiling(log(length(sim$TE), 10)), "d"), 
-                                 ord)))
+         labels = tiplabels)
   }
   
   # establish references for plotting
