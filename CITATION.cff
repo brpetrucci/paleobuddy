@@ -1,15 +1,17 @@
 cff-version: 1.0.0.1
 message: "If you use this software, please cite it as below."
 authors:
-  - family-names: do Rosario Petrucci
-    given-names: Bruno
-    orcid: https://orcid.org/0000-0001-6334-8483
-  - family-names: Januario
-    given-names: Matheus
-    orcid: https://orcid.org/0000-0002-6480-7095
-  - family-names: Quental
-    given-names: Tiago B.
-    orcid: https://orcid.org/0000-0002-4832-9468
-title: brpetrucci/paleobuddy: v1.0.0.1: Origins (Manuscript version)
-version: v1.0.0.1
+- family-names: "do Rosario Petrucci"
+  given-names: "Bruno"
+  orcid: "https://orcid.org/0000-0001-6334-8483"
+- family-names: "Januario"
+  given-names: "Matheus"
+  orcid: "https://orcid.org/0000-0002-6480-7095"
+- family-names: "Quental"
+  given-names: "Tiago B."
+  orcid: "https://orcid.org/0000-0002-4832-9468"
+title: "paleobuddy: an R package for simulating diversification dynamics, fossil records and phylogenies in R"
+version: 1.0.0.1
 doi: 10.5281/zenodo.7102353
+date-released: 2017-12-18
+url: "https://github.com/brpetrucci/paleobuddy"
