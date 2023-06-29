@@ -32,7 +32,7 @@
 #' @noRd
 
 
-bd.sim.constant <- function(n0, lambda, mu, condition = "time", 
+bd.sim.constant <- function(n0, lambda, mu, 
                             tMax = Inf, N = Inf, 
                             nFinal = c(0, Inf), nExtant = c(0, Inf),
                             trueExt = FALSE) {
@@ -75,6 +75,18 @@ bd.sim.constant <- function(n0, lambda, mu, condition = "time",
     nExtant <- sort(nExtant)
   }
   
+  # check which of N or tMax is not Inf, and condition as needed
+  if ((N == Inf) && (tMax == Inf)) {
+    stop("Either tMax or N must not be Inf.")
+  } else if ((N != Inf) && (tMax != Inf)) {
+    stop("Only one condition can be set, 
+         so only one of N or tMax can be non-Inf")
+  } else if (N != Inf) {
+    condition = "number"
+  } else {
+    condition = "time"
+  }
+
   # do we condition on the number of species?
   condN <- condition == "number"
   
@@ -98,6 +110,15 @@ bd.sim.constant <- function(n0, lambda, mu, condition = "time",
   
     # while we have more species in a vector than we have analyzed,
     while (length(TE) >= sCount) {
+      # if sCount > nFinal[2], no reason to continue
+      if (sCount > nFinal[2]) {
+        # so we fail the condMet test
+        sCount <- Inf
+        
+        # leave while
+        break
+      }
+      
       # start at the time of speciation of sCount
       tNow <- TS[sCount]
   
@@ -175,8 +196,7 @@ bd.sim.constant <- function(n0, lambda, mu, condition = "time",
       }
     }
   
-    # finally, we invert both TE and TS to attain to the convention that time
-    # runs from 0 to tMax
+    # now we invert TE and TS so time goes from tMax to 0
     TE <- tMax - TE
     TS <- tMax - TS
   
@@ -188,8 +208,7 @@ bd.sim.constant <- function(n0, lambda, mu, condition = "time",
       TE <- TE[-nPrune]
       TS <- TS[-nPrune]
       isExtant <- isExtant[-nPrune]
-      traits <- traits[-nPrune]
-      
+
       # need to be careful with parent
       parent <- c(NA, unlist(lapply(parent[-nPrune][-1], function(x)
         x - sum(nPrune < x))))

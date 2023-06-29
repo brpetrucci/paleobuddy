@@ -50,8 +50,6 @@
 #' with the given parameters.
 #'
 #' @author Bruno do Rosario Petrucci.
-#' 
-#' @examples
 #'
 #' @import stats
 #'
@@ -75,6 +73,9 @@ rexp.traits <- function(n, rate, traits,
   
   # manipulate traits to include only relevant portion
   if (now < max(traits$max)) {
+    # if rate is continuous, do the same
+    if (length(unique(rate)) == length(rate)) rate <- rate[traits$max > now]
+    
     # delete the rows in traits that are lower than now
     traits <- traits[traits$max > now, ]
     
@@ -86,6 +87,9 @@ rexp.traits <- function(n, rate, traits,
     
     # delete all other rows
     traits <- traits[nrow(traits), ]
+    
+    # if rate is continuous, do the same
+    if (length(unique(rate)) == length(rate)) rate <- rate[length(rate)]
   }
   
   # if only one rate is to be considered, return rexp
@@ -96,7 +100,9 @@ rexp.traits <- function(n, rate, traits,
   # when there are no rate shifts after now
   
   # make a rates data frame
-  rates <- data.frame(rate[traits$value + 1], traits$min, traits$max)
+  rates <- if(length(unique(traits$value)) == length(rate)) 
+    data.frame(rate, traits$min, traits$max) else 
+                  data.frame(rate[traits$value + 1], traits$min, traits$max)
   colnames(rates) <- colnames(traits)
   
   for (i in 1:n) {

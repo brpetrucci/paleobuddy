@@ -1,10 +1,10 @@
-#' MuSSE simulation
+#' QuaSSE simulation
 #'
-#' Simulates a species birth-death process following the Multiple State 
-#' Speciation and Extinction (MuSSE) model for any number of starting species. 
+#' Simulates a species birth-death process following the Quantitative State 
+#' Speciation and Extinction (QuaSSE) model for any number of starting species. 
 #' Allows for the speciation/extinction rate to be (1) a constant, or (2) a 
-#' list of values for each trait state. Traits are simulated to evolve under a
-#' simple Mk model (see references). Allows for constraining results on the 
+#' function of trait values. Traits are simulated to evolve under a Brownian
+#' motion model (see references). Allows for constraining results on the 
 #' number of species at the end of the simulation, either total or extant, 
 #' using rejection sampling. Returns a \code{sim} object (see \code{?sim}), and
 #' a list of data frames describing trait values for each interval. It may
@@ -16,43 +16,26 @@
 #' to \code{0} (the "present" and end of simulation), so as to conform to other
 #' packages in the literature.
 #'
-#' @inheritParams bd.sim
+#' @inheritParams bd.sim.musse
 #' 
 #' @param lambda Function to hold the speciation rate over time. It should
-#' either be a constant, or a list of size \code{nStates}. For each species a 
+#' either be a constant, or a function of one argument. For each species a 
 #' trait evolution simulation will be run, and then used to calculate the final 
 #' speciation rate. Note that \code{lambda} should always be greater than or 
 #' equal to zero.
 #'
 #' @param mu Similar to above, but for the extinction rate.
 #' 
-#' @param nTraits The number of traits to be considered. \code{lambda} and 
-#' \code{mu} need not reference every trait simulated.
+#' @param X0 Initial trait value for original species. Can be a constant or a 
+#' vector of length \code{nTraits}.
 #' 
-#' @param nFocus Trait of focus, i.e. the one that rates depend on. If it is 
-#' one number, that will be the trait of focus for both speciation and 
-#' extinction rates. If it is of length 2, the first will be the focus for
-#' the former, the second for the latter.
-#' 
-#' @param nStates Number of possible states for categorical trait. The range
-#' of values will be assumed to be \code{(0, nStates - 1)}. Can be a constant
-#' or a vector of length \code{nTraits}, if traits are intended to have 
-#' different numbers of states.
-#' 
-#' @param X0 Initial trait value for original species. Must be within 
-#' \code{(0, nStates - 1)}. Can be a constant or a vector of length 
-#' \code{nTraits}.
-#' 
-#' @param Q Transition rate matrix for continuous-time trait evolution. For
-#' different states \code{i} and \code{j}, the rate at which a species at
-#' \code{i} transitions to \code{j} is \code{Q[i + 1, j + 1]}. Must be within
-#' a list, so as to allow for different \code{Q} matrices when
-#' \code{nTraits > 1}.
+#' @param sigma Brownian motion parameter. The variance at time \code{t} after
+#' the start of the simulation will be \code{sigma^2*t}
 #'
 #' @return A \code{sim} object, containing extinction times, speciation times,
 #' parent, and status information for each species in the simulation, and a 
-#' list object with the trait data frames describing the trait value for each
-#' species at each specified interval.
+#' list object with the trait functions describing the trait value for each
+#' species at each time.
 #'
 #' @author Bruno do Rosario Petrucci.
 #' 
@@ -68,15 +51,15 @@
 #'
 #' ###
 #' 
-#' @name bd.sim.musse
-#' @rdname bd.sim.musse
+#' @name bd.sim.quasse
+#' @rdname bd.sim.quasse
 #' @export
 
-bd.sim.musse <- function(n0, lambda, mu,
+bd.sim.quasse <- function(n0, lambda, mu, condition = "time",
                          tMax = Inf, N = Inf,
-                         nTraits = 1, nFocus = 1, nStates = 2, X0 = 0,
-                         Q = list(matrix(c(0, 0.1, 0.1, 0), 
-                                         ncol = 2, nrow = 2)),
+                         nTraits = 1, nFocus = 1, 
+                         X0 = 0, sigma = list(1),
+                         drift = 0, bounds = NULL,
                          nFinal = c(0, Inf), nExtant = c(0, Inf)) {
   # check that n0 is not negative
   if (n0 <= 0) {
@@ -89,81 +72,11 @@ bd.sim.musse <- function(n0, lambda, mu,
          of species")
   }
   
-  # check that rates are numeric
-  if (!is.numeric(c(lambda, mu))) {
-    stop("lambda and mu must be numeric")
-  } else if (any(!(c(length(lambda), length(mu)) %in% c(1, nStates)))) {
-    stop("lambda and mu must be of length either one or equal to nStates")
-  } else {
-    # if everything is good, we set flags on whether each are TD
-    tdLambda <- length(lambda) == nStates
-    tdMu <- length(mu) == nStates
-  }
+  ### HAVE TO write error tests, including for type + tMax and N
   
-  # check that rates are non-negative
-  if (any(lambda < 0) || any(mu < 0)) {
-    stop("rates cannot be negative")
-  }
-  
-  # check nFinal is sensible - two numbers, maximum >=1
-  if ((length(nFinal) != 2) || (typeof(nFinal) != "double")) {
-    stop("nFinal must be a vector with a minimum and maximum number 
-         of species")
-  } else if (max(nFinal) < 1) {
-    stop("nFinal must have a maximum number of species greater than 0")
-  } else {
-    # if everything is good, make sure it's sorted
-    nFinal <- sort(nFinal)
-  }
-  
-  # similarly for nExtant
-  if ((length(nExtant) != 2) || (typeof(nExtant) != "double")) {
-    stop("nExtant must be a vector with a minimum and maximum number 
-         of species")
-  } else if (max(nExtant) < 0) {
-    stop("nExtant must have a maximum number of species greater 
-         than or equal to 0")
-  } else {
-    # if everything is good, make sure it's sorted
-    nExtant <- sort(nExtant)
-  }
-
-  # if nFocus is just one number, make it a vector
-  if (length(nFocus) == 1) {
-    nFocus <- rep(nFocus, 2)
-  }
-
-  # error checks for each trait
-  for (i in 1:nTraits) {
-    # take the Q for this trait
-    Qn <- Q[[i]]
-
-    # check that Qn is square
-    if (ncol(Qn) != nrow(Qn)) {
-      stop("Q must be a square matrix")
-    }
-
-    # check that Qn has row number (and therefore column number)
-    # equal to the number of traits
-    if (nrow(Qn) != nStates) {
-      stop("Q must have transition rates for all trait combinations")
-    }
-
-    # set the diagonal of Q to 0
-    diag(Qn) <- rep(0, nrow(Qn))
-  }
-  
-  # check which of N or tMax is not Inf, and condition as needed
-  if ((N == Inf) && (tMax == Inf)) {
-    stop("Either tMax or N must not be Inf.")
-  } else if ((N != Inf) && (tMax != Inf)) {
-    stop("Only one condition can be set, 
-         so only one of N or tMax can be non-Inf")
-  } else if (N != Inf) {
-    condition = "number"
-  } else {
-    condition = "time"
-  }
+  # check whether rates are trait-dependent
+  tdLambda <- !is.numeric(lambda)
+  tdMu <- !is.numeric(mu)
   
   # do we condition on the number of species?
   condN <- condition == "number"
@@ -171,9 +84,10 @@ bd.sim.musse <- function(n0, lambda, mu,
   # if conditioning on number, need to set some 
   # tMax for the trait evolution
   if (condN) {
-    # thrice the average time it will take to get to 10*N species
-    # under the slowest diversification rate parameters
-    trTMax <- max(log(10*N) / (lambda - mu))
+    # the average time it will take to get to 10*N species
+    # under the average diversification rate parameters
+    trTMax <- log(10*N) / (ifelse(is.numeric(lambda), lambda, lambda(X0)) -
+                             ifelse(is.numeric(mu), mu, mu(X0)))
   } else trTMax <- Inf
   
   # whether our condition is met - rejection sampling for
@@ -191,14 +105,14 @@ bd.sim.musse <- function(n0, lambda, mu,
     parent <- rep(NA, n0)
     isExtant <- rep(TRUE, n0)
     now <- c()
-
+    
     # initialize species count
     sCount <- 1
     
     # initialize list of traits for first species' traits
-    traits <- list(traits.musse(tMax = min(tMax, trTMax), tStart = 0, 
-                                nTraits = nTraits, nStates = nStates,
-                                X0 = X0, Q = Q))
+    traits <- list(traits.quasse(tMax = min(tMax, trTMax), tStart = 0, 
+                                 nTraits = nTraits, X0 = X0, sigma = sigma,
+                                 bounds = bounds, drift = drift))
     
     # while we have species to be analyzed still
     while (length(TE) >= sCount) {
@@ -210,31 +124,30 @@ bd.sim.musse <- function(n0, lambda, mu,
         # leave while
         break
       }
-
+      
       # get argument for the next species
       # it will be the oldest one that hasn't lived yet
       sp <- which(TS == sort(TS)[sCount])
       
       # start at the time of speciation of sp
       tNow <- TS[sp]
-
-      # get traits data set for each rate
-      traitsSpLambda <- traits[[sp]][[nFocus[1]]]
-      traitsSpMu <- traits[[sp]][[nFocus[2]]]
+      
+      # get traits data set
+      traitsSp <- traits[[sp]][[nFocus]]
       
       # find the waiting time using rexp.var if lambda is not constant
       waitTimeS <- ifelse(tdLambda, 
-                          ifelse(sum(lambda) > 0,
-                                 rexp.traits(1, lambda, 
-                                             traitsSpLambda,
+                          ifelse(sum(lambda(traitsSp$value)) > 0,
+                                 rexp.traits(1, lambda(traitsSp$value), 
+                                             traitsSp,
                                              tNow, tMax), Inf),
                           ifelse(lambda > 0, 
                                  rexp(1, lambda), Inf))
       
       waitTimeE <- ifelse(tdMu,
-                          ifelse(sum(mu) > 0,
-                                 rexp.traits(1, mu, 
-                                             traitsSpMu,
+                          ifelse(sum(mu(traitsSp$value)) > 0,
+                                 rexp.traits(1, mu(traitsSp$value), 
+                                             traitsSp,
                                              tNow, tMax), Inf),
                           ifelse(mu > 0, 
                                  rexp(1, mu), Inf))
@@ -255,21 +168,20 @@ bd.sim.musse <- function(n0, lambda, mu,
         isExtant <- c(isExtant, TRUE)
         
         # get trait value at tNow
-        XPar <- unlist(lapply(traits[[sp]], function(x) 
-          tail(x$value[x$min < tNow], 1)))
-
+        XPar <- tail(traitsSp$value[traitsSp$min < tNow], 1)
+        
         # run trait evolution and append it to list
         traits[[length(traits) + 1]] <- 
-          traits.musse(tMax = min(tMax, max(trTMax, tNow + 100)), 
-                       tStart = tNow, 
-                       nTraits = nTraits, nStates = nStates,
-                       X0 = XPar, Q = Q)
+          traits.quasse(tMax = min(tMax, max(trTMax, tNow + 100)), 
+                        tStart = tNow, 
+                        nTraits = nTraits, X0 = XPar, 
+                        sigma = sigma, bounds = bounds, drift = drift)
         
         # get a new speciation waiting time
         waitTimeS <- ifelse(tdLambda, 
-                            ifelse(sum(lambda) > 0,
-                                   rexp.traits(1, lambda, 
-                                               traitsSpLambda, 
+                            ifelse(sum(lambda(traitsSp$value)) > 0,
+                                   rexp.traits(1, lambda(traitsSp$value), 
+                                               traitsSp, 
                                                tNow, tMax), Inf),
                             ifelse(lambda > 0, 
                                    rexp(1, lambda), Inf))
@@ -277,7 +189,7 @@ bd.sim.musse <- function(n0, lambda, mu,
       
       # reached the time of extinction
       tNow <- tExp
-
+      
       # if the species went extinct before tMax,
       # record it, otherwise, record NA
       TE[sp] <- ifelse(tNow < tMax, tNow, NA)
@@ -310,7 +222,7 @@ bd.sim.musse <- function(n0, lambda, mu,
         
         # draw uniform as above
         tMax <- runif(1, nAliveT[eventChosen], nextEvent[eventChosen])
-
+        
         # adjust isExtant to TRUE for those alive at tMax
         isExtant[TE >= tMax] <- TRUE
         
@@ -372,9 +284,9 @@ bd.sim.musse <- function(n0, lambda, mu,
     # check whether we are in bounds if rejection sampling is the thing
     if (!condN) {
       condMet <- (length(TE) >= nFinal[1]) &&
-      (length(TE) <= nFinal[2]) &&
-      (sum(isExtant) >= nExtant[1]) &&
-      (sum(isExtant) <= nExtant[2])
+        (length(TE) <= nFinal[2]) &&
+        (sum(isExtant) >= nExtant[1]) &&
+        (sum(isExtant) <= nExtant[2])
     }
     
     # if we have ran for too long, stop
@@ -391,101 +303,91 @@ bd.sim.musse <- function(n0, lambda, mu,
   class(sim) <- "sim"
   
   res <- list("TRAITS" = traits, "SIM" = sim)
-
+  
   return(res)
 }
 
 ###
 # function to run trait evolution for a given species
-traits.musse <- function(tMax, tStart = 0, nTraits = 1, nStates = 2, X0 = 0,
-                         Q = list(matrix(c(0, 0.1, 0.1, 0), 2, 2))) {
+traits.quasse <- function(tMax, tStart = 0, nTraits = 1, 
+                          X0 = 0, sigma = list(1),
+                          drift = 0, bounds = NULL) {
   # create a return list
   traits <- vector(mode = "list", length = nTraits)
   
   # for each trait
   for (i in 1:nTraits) {
-    # get number of states and initial states
-    nStatesI <- ifelse(length(nStates) > 1, nStates[i], nStates)
+    # get initial state
     X0I <- ifelse(length(X0) > 1, X0[i], X0)
     
-    # get Q matrix
-    if (length(Q) > 1) QI <- Q[[i]] else QI <- Q[[1]]
+    # get drift
+    driftI <- ifelse(length(drift) > 1, drift[i], drift)
+    
+    # get sigma
+    if (length(sigma) > 1) sigmaI <- sigma[[i]] else sigmaI <- sigma[[1]]
+    
+    # get bounds
+    if (length(bounds) > 1) boundsI <- bounds[[i]] else boundsI <- bounds[[1]]
     
     # append traits data frame to traits
-    traits[[i]] <- trait.musse(tMax, tStart, nStatesI, X0I, QI)
+    traits[[i]] <- trait.quasse(tMax, tStart, X0I, sigmaI, drift, bounds)
   }
   
   return(traits)
 }
 
-trait.musse <- function(tMax, tStart = 0, nStates = 2, X0 = 0,
-                         Q = matrix(c(0, 0.1, 0.1, 0), 2, 2)) {
+trait.quasse <- function(tMax, tStart = 0, 
+                         X0 = 0, sigma = 1,
+                         drift = 0, bounds = NULL,
+                         nPoints = 100) {
   # make sure tMax and tStart are numbers
   if (!is.numeric(c(tMax, tStart))) {
     stop("tMax and tStart must be numeric")
   } else if (length(tMax) > 1 || length(tStart) > 1) {
     stop("tMax and tStart must be one number")
   }
-
+  
   # make sure tMax > tStart
   if (tStart >= tMax) {
     stop("tMax must be greater than tStart")
   }
   
-  # make sure X0 is a possible state
-  if (X0 > nStates - 1) {
-    stop("X0 must be an achievable state (i.e. in c(0, nStates - 1))")
-  }
-  
-  # create states vector from number
-  states <- 0:(nStates - 1)
-  
-  if (length(X0) != 1 || length(tStart) != 1) {
-    print(X0)
-    print(tStart)
-  }
+  # update nPoints based on the time range
+  nPoints <- nPoints * (tMax - tStart)
 
-  # create traits data frame
-  traits <- data.frame(value = X0, min = tStart, max = NA)
+  # calculate vector of times
+  times <- seq(tStart, tMax, (tMax - tStart) / (nPoints - 1))
   
-  # start a time counter
-  tNow <- tStart
+  # calculate nPoints - 1 randomly distributed normal
+  # variates with variance sigma2*t
+  jumps <- rnorm(nPoints - 1, mean = 0, 
+                 sd = sigma*sqrt((tMax - tStart) / (nPoints - 1)))
   
-  # and a shifts counter
-  shifts <- 0
+  # calculate the bm vector being X0 and the cumulative sum of jumps
+  bm <- c(X0, X0 + cumsum(jumps))
   
-  # make diagonals of Q 0 
-  diag(Q) <- 0
-  
-  # while we have not reached the end
-  while (tNow < tMax) {
-    # current state
-    curState <- traits$value[shifts + 1]
-    
-    # get the total rate of transition from the current state
-    rTotal <- sum(Q[curState + 1, ])
-    
-    # get the time until the next transition
-    waitTime <- ifelse(rTotal > 0, rexp(1, rTotal), Inf)
-    
-    # increase time
-    tNow <- tNow + waitTime
-    
-    # add max to traits
-    traits$max[shifts + 1] <- min(tNow, tMax)
-    
-    # break if needed
-    if (tNow >= tMax) break
-    
-    # increase shifts counter
-    shifts <- shifts + 1
-    
-    # sample to find target state
-    newState <- sample(states, 1, prob = Q[curState + 1, ])
-    
-    # add it to traits data frame
-    traits[shifts + 1, ] <- c(newState, tNow, NA)
+  # bound it, if bounds exists
+  if (!is.null(bounds)) {
+    bm <- ifelse(bm < bounds[1], bounds[1], bm)
+    bm <- ifelse(bm > bounds[2], bounds[2], bm)
   }
   
-  return(traits)
+  # insert drift, if necessary
+  bm <- bm + drift * times
+  
+  # create traits data frame
+  trait <- data.frame(value = bm, min = times, 
+                      max = c(times[2:length(times)], Inf))
+  
+  return(trait)
+}
+
+values <- function(bmList, t) {
+  vals <- c()
+  
+  for (i in 1:length(bmList)) {
+    vals <- c(vals, bmList[[i]]$value[t])
+  }
+  
+  return(vals)
 }

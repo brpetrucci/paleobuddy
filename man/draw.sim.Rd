@@ -4,7 +4,16 @@
 \alias{draw.sim}
 \title{Draw a sim object}
 \usage{
-draw.sim(sim, fossils = NULL, sortBy = "TS", lwdLin = 4, showLabel = TRUE, ...)
+draw.sim(
+  sim,
+  fossils = NULL,
+  sortBy = "TS",
+  lwdLin = 4,
+  lineageColors = NULL,
+  tipLabels = NULL,
+  showLabel = TRUE,
+  ...
+)
 }
 \arguments{
 \item{sim}{A \code{sim} object, containing extinction times, speciation 
@@ -27,6 +36,17 @@ default species will be sorted by order of origination in the simulation.}
 \item{lwdLin}{The relative thickness/size of all elements (i.e., lines and 
 points in the plot. Default value is 4 (i.e. equal to \code{lwd = 4} for 
 the black horizontal lines).}
+
+\item{lineageColors}{Character vector giving the colors of all lineages, 
+sorted by the original lineage order (the one in the \code{sim} object). 
+Must have same length as the number of lineages in the \code{sim} object. 
+If NULL (default value) all lineages are plotted as black.}
+
+\item{tipLabels}{Character vector manually assigning the tip labels of all 
+lineages, sorted by the original lineage order (the one in the \code{sim} 
+object). Must have same length as the number of lineages in the \code{sim} 
+object. If NULL (default value) all lineages are plotted as "t#", with "#" 
+being the position of that lineage in the \code{sim} object.}
 
 \item{showLabel}{A \code{logical} on whether to draw species labels (i.e. 
 species 1 being t1, species 2 t2 etc.). Default is \code{TRUE}.}
@@ -132,6 +152,11 @@ draw.sim(sim, fossils = fossils, sortBy = "PAR")
 
 # adding the bounds of the simulated bins
 abline(v = bins, lty = 2, col = "blue", lwd = 0.5)
+
+#alternatively, one can draw lineages varying colors and tip labels:
+#(note how they are sorted)
+draw.sim(sim, tipLabels = paste0("spp_", 1:10), 
+     lineageColors = rep(c("red", "green", "blue"), times=5))
 
 ###
 # we can control how to sort displayed species exactly

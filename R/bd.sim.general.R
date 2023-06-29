@@ -49,7 +49,7 @@
 #' @noRd
 #' 
 
-bd.sim.general <- function(n0, lambda, mu, tMax, 
+bd.sim.general <- function(n0, lambda, mu, tMax = Inf, N = Inf,
                          lShape = NULL, mShape = NULL,
                          nFinal = c(0, Inf), nExtant = c(0, Inf),
                          trueExt = FALSE) {
@@ -104,6 +104,7 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
     # if everything is good, make sure it's sorted
     nExtant <- sort(nExtant)
   }
+  
   # if shape is not null, make scale a function to facilitate checking
   if (!is.null(lShape)) {
     message("since lShape is not null, lambda will be a Weibull scale and
@@ -150,14 +151,30 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
       }
     }
   }
- 
-  # initialize test making sure while loop runs
-  inBounds <- FALSE
+  
+  # check which of N or tMax is not Inf, and condition as needed
+  if ((N == Inf) && (tMax == Inf)) {
+    stop("Either tMax or N must not be Inf.")
+  } else if ((N != Inf) && (tMax != Inf)) {
+    stop("Only one condition can be set, 
+         so only one of N or tMax can be non-Inf")
+  } else if (N != Inf) {
+    condition = "number"
+  } else {
+    condition = "time"
+  }
+  
+  # do we condition on the number of species?
+  condN <- condition == "number"
+  
+  # whether our condition is met - rejection sampling for
+  # time, or exactly number of species at the end for number
+  condMet <- FALSE
   
   # counter to make sure the nFinal is achievable
   counter <- 1
 
-  while (!inBounds) {
+  while (!condMet) {
     # create vectors to hold times of speciation, extinction, 
     # parents and status
     TS <- rep(0, n0)
@@ -170,6 +187,15 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
   
     # while we have species to be analyzed still
     while (length(TE) >= sCount) {
+      # if sCount > nFinal[2], no reason to continue
+      if (sCount > nFinal[2]) {
+        # so we fail the condMet test
+        sCount <- Inf
+        
+        # leave while
+        break
+      }
+      
       # start at the time of speciation of sCount
       tNow <- TS[sCount]
 
@@ -178,14 +204,14 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
         is.numeric(lambda), ifelse(lambda > 0, rexp(1, lambda), Inf),
         ifelse(lambda(tNow) > 0, 
                rexp.var(1, lambda, tNow, tMax, lShape, TS[sCount],
-                        fast = TRUE), Inf))
+                        fast = !condN), Inf))
       waitTimeE <- ifelse(
         is.numeric(mu), ifelse(mu > 0, rexp(1, mu), Inf),
         ifelse(mu(tNow) > 0,
                rexp.var(1, mu, tNow, tMax, mShape, TS[sCount],
-                        fast = !trueExt), Inf))
-      # fast is true since we do not record speciations after
-      # the extinction anyway
+                        fast = !(trueExt || condN), Inf)))
+      # fast for extinction depends on whether we want to record
+      # true values when they are higher than tMax
   
       tExp <- tNow + waitTimeE
   
@@ -207,7 +233,7 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
           is.numeric(lambda), ifelse(lambda > 0, rexp(1, lambda), Inf),
           ifelse(lambda(tNow) > 0, 
                  rexp.var(1, lambda, tNow, tMax, lShape, TS[sCount],
-                          fast = TRUE), Inf))
+                          fast = !condN), Inf))
         # fast is true since we do not record speciations after
         # the extinction anyway
       }
@@ -225,17 +251,70 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
   
       # next species
       sCount <- sCount + 1
+      
+      # if we passed the limit
+      if (condN && (sum(TS < tNow & (is.na(TE) | TE > tNow)) > 10*N)) {
+        # function to find the excess at t
+        nAlive <- Vectorize(function(t) {
+          sum(TS <= t & (is.na(TE) | TE > t)) - N
+        })
+        
+        # vector of all events
+        events <- sort(c(TS, TE))
+        
+        # find times when we were at N
+        nAliveT <- events[which(nAlive(events) == 0)]
+        
+        # find the times where the next event happened for each
+        nextEvent <- unlist(lapply(nAliveT, function(t) events[events > t][1]))
+        
+        # get chosen event index
+        eventChosen <- sample(1:length(nextEvent), 1, 
+                              prob = (nextEvent - nAliveT))
+        
+        # draw uniform as above
+        tMax <- runif(1, nAliveT[eventChosen], nextEvent[eventChosen])
+        
+        # adjust isExtant to TRUE for those alive at tMax
+        isExtant[TE >= tMax] <- TRUE
+        
+        # adjust TE to NA for those alive at tMax
+        TE[isExtant] <- NA
+        
+        # set condMet to true
+        condMet <- TRUE
+        
+        # leave while
+        break
+      }
     }
   
     # now we invert TE and TS so time goes from tMax to 0
     TE <- tMax - TE
     TS <- tMax - TS
+    
+    # check which species are born after tMax
+    nPrune <- which(TS <= 0)
+    
+    # if any, prune them
+    if (length(nPrune) > 0) {
+      TE <- TE[-nPrune]
+      TS <- TS[-nPrune]
+      isExtant <- isExtant[-nPrune]
+      
+      # need to be careful with parent
+      parent <- c(NA, unlist(lapply(parent[-nPrune][-1], function(x)
+        x - sum(nPrune < x))))
+      # each species pruned lowers the parent numbering before them by 1
+    }
 
     # check whether we are in bounds
-    inBounds <- (length(TE) >= nFinal[1]) &&
-      (length(TE) <= nFinal[2]) &&
-      (sum(isExtant) >= nExtant[1]) &&
-      (sum(isExtant) <= nExtant[2])
+    if (!condN) {
+      condMet <- (length(TE) >= nFinal[1]) &&
+        (length(TE) <= nFinal[2]) &&
+        (sum(isExtant) >= nExtant[1]) &&
+        (sum(isExtant) <= nExtant[2])
+    }
     
     # if we have ran for too long, stop
     counter <- counter + 1
