@@ -39,6 +39,17 @@
 #' or a vector of length \code{nTraits}, if traits are intended to have 
 #' different numbers of states.
 #' 
+#' @param nHidden Number of hidden states for categorical trait. Default is 
+#' \code{1}, in which case there are no added hidden traits. Total number of
+#' states is then \code{nStates * nHidden}. States will then be set to a value
+#' in the range of \code{(0, nStates - 1)} to simulate that hidden states are
+#' hidden. This is done by setting the value of a state to the remainder of
+#' \code{state / nStates}. E.g. if \code{nStates = 2} and \code{nHidden = 3},
+#' possible states during simulation will be in the range \code{(0, 5)}, but
+#' states \code{(2, 4)} (corresponding to \code{(0B, 0C)} in the nomenclature
+#' of the original HiSSE reference) will be set to \code{0}, and states 
+#' \code{(3, 5)} (corresponding to \code{(1B, 1C)}) to \code{1}.
+#' 
 #' @param X0 Initial trait value for original species. Must be within 
 #' \code{(0, nStates - 1)}. Can be a constant or a vector of length 
 #' \code{nTraits}.
@@ -494,15 +505,35 @@ trait.musse <- function(tMax, tStart = 0, nStates = 2, nHidden = 1, X0 = 0,
     # duplicate rows
     dup <- c()
     
-    # iterate through rows to make sure there are no duplicates
+    # counting how many duplicates in a row
+    count <- 0
+    
+    #iterate through rows to make sure there are no duplicates
     for (i in 2:nrow(traits)) {
       if (traits$value[i] == traits$value[i - 1]) {
         # add to dup
         dup <- c(dup, i)
-        
-        # switch max of previous to 
+
+        # increase count of dups
+        count <- count + 1
+      } else {
+        # if count > 0, change the max of count rows ago to max of last row
+        if (count > 0) {
+          traits$max[i - 1 - count] <- traits$max[i - 1]
+        }
+
+        # return count to 0
+        count <- 0
       }
     }
+
+    # need to do a last check in case the last row is a duplicate
+    if (count > 0) {
+      traits$max[i - count] <- traits$max[i]
+    }
+
+    # delete duplicates
+    traits <- traits[-dup, ]
   }
   
   return(traits)

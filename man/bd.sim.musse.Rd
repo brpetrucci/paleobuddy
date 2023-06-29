@@ -13,6 +13,7 @@ bd.sim.musse(
   nTraits = 1,
   nFocus = 1,
   nStates = 2,
+  nHidden = 1,
   X0 = 0,
   Q = list(matrix(c(0, 0.1, 0.1, 0), ncol = 2, nrow = 2)),
   nFinal = c(0, Inf),
@@ -58,6 +59,17 @@ the former, the second for the latter.}
 of values will be assumed to be \code{(0, nStates - 1)}. Can be a constant
 or a vector of length \code{nTraits}, if traits are intended to have 
 different numbers of states.}
+
+\item{nHidden}{Number of hidden states for categorical trait. Default is 
+\code{1}, in which case there are no added hidden traits. Total number of
+states is then \code{nStates * nHidden}. States will then be set to a value
+in the range of \code{(0, nStates - 1)} to simulate that hidden states are
+hidden. This is done by setting the value of a state to the remainder of
+\code{state / nStates}. E.g. if \code{nStates = 2} and \code{nHidden = 3},
+possible states during simulation will be in the range \code{(0, 5)}, but
+states \code{(2, 4)} (corresponding to \code{(0B, 0C)} in the nomenclature
+of the original HiSSE reference) will be set to \code{0}, and states 
+\code{(3, 5)} (corresponding to \code{(1B, 1C)}) to \code{1}.}
 
 \item{X0}{Initial trait value for original species. Must be within 
 \code{(0, nStates - 1)}. Can be a constant or a vector of length 
@@ -124,6 +136,10 @@ effect on speciation and extinction. Systematic Biology. 56(5):701.
 
 FitzJohn R.G. 2012. Diversitree: Comparative Phylogenetic Analyses of 
 Diversification in R. Methods in Ecology and Evolution. 3:1084–1092.
+
+Beaulieu J.M., O'Meara, B.C. 2016. Detecting Hidden Diversification Shifts 
+in Models of Trait-Dependent Speciation and Extinction. Systematic Biology.
+65(4):583-601.
 }
 \author{
 Bruno do Rosario Petrucci.
