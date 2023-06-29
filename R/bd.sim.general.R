@@ -61,7 +61,7 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
   }
   
   else {
-    if (optimize(lambda, interval = c(0, tMax))$objective < 0) {
+    if (optimize(lambda, interval = c(0, 1e10))$objective < 0) {
       stop("speciation rate cannot be negative at any point in time")
     }
   }
@@ -73,7 +73,7 @@ bd.sim.general <- function(n0, lambda, mu, tMax,
   }
   
   else {
-    if (optimize(mu, interval = c(0, tMax))$objective < 0) {
+    if (optimize(mu, interval = c(0, 1e10))$objective < 0) {
       stop("extinction rate cannot be negative at any point in time")
     }
   }
