@@ -63,6 +63,10 @@
 #' 
 #' FitzJohn R.G. 2012. Diversitree: Comparative Phylogenetic Analyses of 
 #' Diversification in R. Methods in Ecology and Evolution. 3:1084–1092.
+#' 
+#' Beaulieu J.M., O'Meara, B.C. 2016. Detecting Hidden Diversification Shifts 
+#' in Models of Trait-Dependent Speciation and Extinction. Systematic Biology.
+#' 65(4):583-601.
 #'
 #' @examples
 #'
@@ -74,9 +78,9 @@
 
 bd.sim.musse <- function(n0, lambda, mu,
                          tMax = Inf, N = Inf,
-                         nTraits = 1, nFocus = 1, nStates = 2, X0 = 0,
-                         Q = list(matrix(c(0, 0.1, 0.1, 0), 
-                                         ncol = 2, nrow = 2)),
+                         nTraits = 1, nFocus = 1, nStates = 2, nHidden = 1,
+                         X0 = 0, Q = list(matrix(c(0, 0.1, 0.1, 0), 
+                                                 ncol = 2, nrow = 2)),
                          nFinal = c(0, Inf), nExtant = c(0, Inf)) {
   # check that n0 is not negative
   if (n0 <= 0) {
@@ -145,12 +149,9 @@ bd.sim.musse <- function(n0, lambda, mu,
 
     # check that Qn has row number (and therefore column number)
     # equal to the number of traits
-    if (nrow(Qn) != nStates) {
+    if (nrow(Qn) != nStates * nHidden) {
       stop("Q must have transition rates for all trait combinations")
     }
-
-    # set the diagonal of Q to 0
-    diag(Qn) <- rep(0, nrow(Qn))
   }
   
   # check which of N or tMax is not Inf, and condition as needed
@@ -198,6 +199,7 @@ bd.sim.musse <- function(n0, lambda, mu,
     # initialize list of traits for first species' traits
     traits <- list(traits.musse(tMax = min(tMax, trTMax), tStart = 0, 
                                 nTraits = nTraits, nStates = nStates,
+                                nHidden = nHidden,
                                 X0 = X0, Q = Q))
     
     # while we have species to be analyzed still
@@ -262,7 +264,7 @@ bd.sim.musse <- function(n0, lambda, mu,
         traits[[length(traits) + 1]] <- 
           traits.musse(tMax = min(tMax, max(trTMax, tNow + 100)), 
                        tStart = tNow, 
-                       nTraits = nTraits, nStates = nStates,
+                       nTraits = nTraits, nStates = nStates, nHidden = nHidden,
                        X0 = XPar, Q = Q)
         
         # get a new speciation waiting time
@@ -397,7 +399,8 @@ bd.sim.musse <- function(n0, lambda, mu,
 
 ###
 # function to run trait evolution for a given species
-traits.musse <- function(tMax, tStart = 0, nTraits = 1, nStates = 2, X0 = 0,
+traits.musse <- function(tMax, tStart = 0, nTraits = 1, nStates = 2, 
+                         nHidden = 1, X0 = 0,
                          Q = list(matrix(c(0, 0.1, 0.1, 0), 2, 2))) {
   # create a return list
   traits <- vector(mode = "list", length = nTraits)
@@ -406,19 +409,20 @@ traits.musse <- function(tMax, tStart = 0, nTraits = 1, nStates = 2, X0 = 0,
   for (i in 1:nTraits) {
     # get number of states and initial states
     nStatesI <- ifelse(length(nStates) > 1, nStates[i], nStates)
+    nHiddenI <- ifelse(length(nHidden) > 1, nHidden[i], nHidden)
     X0I <- ifelse(length(X0) > 1, X0[i], X0)
     
     # get Q matrix
     if (length(Q) > 1) QI <- Q[[i]] else QI <- Q[[1]]
     
     # append traits data frame to traits
-    traits[[i]] <- trait.musse(tMax, tStart, nStatesI, X0I, QI)
+    traits[[i]] <- trait.musse(tMax, tStart, nStatesI, nHiddenI, X0I, QI)
   }
   
   return(traits)
 }
 
-trait.musse <- function(tMax, tStart = 0, nStates = 2, X0 = 0,
+trait.musse <- function(tMax, tStart = 0, nStates = 2, nHidden = 1, X0 = 0,
                          Q = matrix(c(0, 0.1, 0.1, 0), 2, 2)) {
   # make sure tMax and tStart are numbers
   if (!is.numeric(c(tMax, tStart))) {
@@ -433,17 +437,12 @@ trait.musse <- function(tMax, tStart = 0, nStates = 2, X0 = 0,
   }
   
   # make sure X0 is a possible state
-  if (X0 > nStates - 1) {
-    stop("X0 must be an achievable state (i.e. in c(0, nStates - 1))")
+  if (X0 > nStates * nHidden - 1) {
+    stop("X0 must be an achievable state (i.e. in 0:(nStates * nHidden - 1)")
   }
   
   # create states vector from number
-  states <- 0:(nStates - 1)
-  
-  if (length(X0) != 1 || length(tStart) != 1) {
-    print(X0)
-    print(tStart)
-  }
+  states <- 0:(nStates * nHidden - 1)
 
   # create traits data frame
   traits <- data.frame(value = X0, min = tStart, max = NA)
@@ -485,6 +484,25 @@ trait.musse <- function(tMax, tStart = 0, nStates = 2, X0 = 0,
     
     # add it to traits data frame
     traits[shifts + 1, ] <- c(newState, tNow, NA)
+  }
+  
+  # if there are hidden states
+  if (nHidden > 1) {
+    # set them to normal states
+    traits$value <- traits$value %% nStates
+    
+    # duplicate rows
+    dup <- c()
+    
+    # iterate through rows to make sure there are no duplicates
+    for (i in 2:nrow(traits)) {
+      if (traits$value[i] == traits$value[i - 1]) {
+        # add to dup
+        dup <- c(dup, i)
+        
+        # switch max of previous to 
+      }
+    }
   }
   
   return(traits)
