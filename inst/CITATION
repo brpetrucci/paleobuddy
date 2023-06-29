@@ -1,0 +1,11 @@
+## R package reference generated from DESCRIPTION metadata
+citation(auto = meta)
+
+## paleobuddy paper
+bibentry(bibtype = "Article",
+         title = "paleobuddy: an R package for simulating diversification dynamics, fossil records and phylogenies in R",
+         author = c(person("Bruno", "do Rosario Petrucci"),
+                    person("Matheus", "Januario"),
+                    person(c("Tiago", "B."), "Quental")),
+         year = "2022", journal = "Methods in Ecology and Evolution", volume = 13, issue = 12, pages = 2692:2698,
+         doi = "10.1111/2041-210X.13996")

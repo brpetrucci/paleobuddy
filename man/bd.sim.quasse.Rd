@@ -37,26 +37,16 @@ equal to zero.}
 
 \item{mu}{Similar to above, but for the extinction rate.}
 
-\item{condition}{Whether to condition tree by total simulation running time,
-or the number of species alive at the end of the simulation. If set to 
-\code{"time"}, simulation will run for \code{tMax} million years. If set
-to \code{"number"}, simulation will run until there are \code{N} species
-alive at a given time. 
-
-Note: this manner of conditioning for a number of tips conditions the 
-phylogeny to have shorter terminal branches. While this might not be an 
-issue for low values of extinction fraction \code{mu/lambda}, future 
-implementation of the correct conditioning is planned.}
-
 \item{tMax}{Ending time of simulation, in million years after the clade 
 origin. Any species still living after \code{tMax} is considered extant, and 
 any species that would be generated after \code{tMax} is not present in the
 return.}
 
-\item{N}{Number of species at the end of the simulation, if \code{condition}
-equals \code{"number"}. End of the simulation will be set for the first time
-a species alive at a period where \code{N} species are alive would go 
-extinct.}
+\item{N}{Number of species at the end of the simulation. End of the 
+simulation will be set for one of the times where \code{N} species are
+alive, chosen from all the times there were \code{N} species alive weighted
+by how long the simulation was in that situation. Exactly one of \code{tMax}
+and \code{N} must be non-\code{Inf}.}
 
 \item{nTraits}{The number of traits to be considered. \code{lambda} and 
 \code{mu} need not reference every trait simulated.}

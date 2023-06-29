@@ -52,14 +52,84 @@
 #' @author Bruno do Rosario Petrucci.
 #' 
 #' @examples
+#' 
+#' ###
+#' # this function, similarly to rexp.var, can also work as rexp
+#' 
+#' # rate
+#' rate <- 0.1
+#' 
+#' # traits
+#' traits <- data.frame(value = 0, min = 0, max = 100)
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # find the waiting time
+#' t <- rexp.musse(1, rate, traits)
+#' t
+#' # this is the same as t <- rexp(1, rate)
+#' 
+#' ###
+#' # we can also use it as intended, though, and use trait-dependent rates
+#' 
+#' # rates
+#' rate <- c(0.1, 0.2)
+#' 
+#' # traits
+#' traits <- data.frame(value = c(0, 1, 0), min = c(0, 10, 20), 
+#'                      max = c(10, 20, 30))
+#'                      
+#' # set seed
+#' set.seed(1)
+#' 
+#' # find waiting time
+#' t <- rexp.musse(1, rate, traits)
+#' t
+#' 
+#' ###
+#' # traits can have more states of course
+#' 
+#' # rates
+#' rate <- c(0.1, 0.2, 0.15)
+#' 
+#' # traits
+#' traits <- data.frame(value = c(0, 1, 2, 0),
+#'                      min = c(0, 5, 10, 15),
+#'                      max = c(5, 10, 15, 20))
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # find waiting time
+#' t <- rexp.musse(1, rate, traits)
+#' t
+#' 
+#' ###
+#' # sometimes the traits data frame doesn't include all traits
+#' 
+#' # rates
+#' rate <- c(0.1, 0.2, 0.15)
+#' 
+#' # traits
+#' traits <- data.frame(value = c(0, 1),
+#'                      min = c(0, 5),
+#'                      max = c(5, 10))
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # find waiting time
+#' t <- rexp.musse(1, rate, traits)
+#' t
 #'
 #' @import stats
 #'
-#' @name rexp.traits
-#' @rdname rexp.traits
+#' @name rexp.musse
+#' @rdname rexp.musse
 #' @export
 
-rexp.traits <- function(n, rate, traits,
+rexp.musse <- function(n, rate, traits,
                         now = 0, tMax = Inf, fast = FALSE) {
   # some error checking
   if (tMax == Inf & fast) {

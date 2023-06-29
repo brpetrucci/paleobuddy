@@ -209,7 +209,7 @@ bd.sim.general <- function(n0, lambda, mu, tMax = Inf, N = Inf,
         is.numeric(mu), ifelse(mu > 0, rexp(1, mu), Inf),
         ifelse(mu(tNow) > 0,
                rexp.var(1, mu, tNow, tMax, mShape, TS[sCount],
-                        fast = !(trueExt || condN), Inf)))
+                        fast = !(trueExt || condN)), Inf))
       # fast for extinction depends on whether we want to record
       # true values when they are higher than tMax
   
