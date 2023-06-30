@@ -82,6 +82,437 @@
 #' @examples
 #'
 #' ###
+#' # first, it's good to check that it can work with constant rates
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 40
+#' 
+#' # speciation
+#' lambda <- 0.1
+#' 
+#' # extinction
+#' mu <- 0.03
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # run the simulation, making sure we have more than one species in the end
+#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nFinal = c(2, Inf))
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- make.phylo(sim$SIM)
+#'   ape::plot.phylo(phy)
+#' }
+#' 
+#' ###
+#' # now let's actually make it trait-dependent, a simple BiSSE model
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 40
+#' 
+#' # speciation, higher for state 1
+#' lambda <- c(0.1, 0.2)
+#' 
+#' # extinction, trait-independent
+#' mu <- 0.03
+#' 
+#' # number of traits and states (1 binary trait)
+#' nTraits <- 1
+#' nStates <- 2
+#' 
+#' # initial value of the trait
+#' X0 <- 0
+#' 
+#' # transition matrix, with symmetrical transition rates
+#' Q <- list(matrix(c(0, 0.1,
+#'                    0.1, 0), ncol = 2, nrow = 2))
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # run the simulation
+#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, nStates = nStates,
+#'                     X0 = X0, Q = Q, nFinal = c(2, Inf))
+#' 
+#' # get trait values for all tips
+#' traits <- unlist(lapply(sim$TRAITS, function(x) tail(x[[1]]$value, 1)))
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- make.phylo(sim$SIM)
+#'   
+#'   # color 0 valued tips red and 1 valued tips blue
+#'   ape::plot.phylo(phy, tip.color = c("red", "blue")[traits + 1])
+#' }
+#' 
+#' ###
+#' # extinction can be trait-dependent too, of course
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # number of species at the end of the simulation
+#' N <- 20
+#' 
+#' # speciation, higher for state 1
+#' lambda <- c(0.1, 0.2)
+#' 
+#' # extinction, highe for state 0
+#' mu <- c(0.06, 0.03)
+#' 
+#' # number of traits and states (1 binary trait)
+#' nTraits <- 1
+#' nStates <- 2
+#' 
+#' # initial value of the trait
+#' X0 <- 0
+#' 
+#' # transition matrix, with symmetrical transition rates
+#' Q <- list(matrix(c(0, 0.1,
+#'                    0.1, 0), ncol = 2, nrow = 2))
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # run the simulation
+#' sim <- bd.sim.musse(n0, lambda, mu, N = N, nTraits = nTraits,
+#'                     nStates = nStates, X0 = X0, Q = Q, nFinal = c(2, Inf))
+#' 
+#' # get trait values for all tips
+#' traits <- unlist(lapply(sim$TRAITS, function(x) tail(x[[1]]$value, 1)))
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- make.phylo(sim$SIM)
+#'   
+#'   # color 0 valued tips red and 1 valued tips blue
+#'   ape::plot.phylo(phy, tip.color = c("red", "blue")[traits + 1])
+#' }
+#' 
+#' ###
+#' # we can complicate the model further by making transition rates asymmetric
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 20
+#' 
+#' # speciation, higher for state 1
+#' lambda <- c(0.1, 0.2)
+#' 
+#' # extinction, lower for state 1
+#' mu <- c(0.03, 0.01)
+#' 
+#' # number of traits and states (1 binary trait)
+#' nTraits <- 1
+#' nStates <- 2
+#' 
+#' # initial value of the trait
+#' X0 <- 0
+#' 
+#' # transition matrix, with q01 higher than q10
+#' Q <- list(matrix(c(0, 0.25,
+#'                    0.1, 0), ncol = 2, nrow = 2))
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # run the simulation
+#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, nStates = nStates,
+#'                     X0 = X0, Q = Q, nFinal = c(2, Inf))
+#' 
+#' # get trait values for all tips
+#' traits <- unlist(lapply(sim$TRAITS, function(x) tail(x[[1]]$value, 1)))
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- make.phylo(sim$SIM)
+#'   
+#'   # color 0 valued tips red and 1 valued tips blue
+#'   ape::plot.phylo(phy, tip.color = c("red", "blue")[traits + 1])
+#' }
+#' 
+#' ###
+#' # MuSSE is BiSSE but with higher numbers of states
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # number of species at the end of the simulation
+#' N <- 20
+#' 
+#' # speciation, higher for state 1, highest for state 2
+#' lambda <- c(0.1, 0.2, 0.3)
+#' 
+#' # extinction, higher for state 2
+#' mu <- c(0.03, 0.03, 0.06)
+#' 
+#' # number of traits and states (1 trinary trait)
+#' nTraits <- 1
+#' nStates <- 3
+#' 
+#' # initial value of the trait
+#' X0 <- 0
+#' 
+#' # transition matrix, with symmetrical, fully reversible transition rates
+#' Q <- list(matrix(c(0, 0.1, 0.1,
+#'                    0.1, 0, 0.1,
+#'                    0.1, 0.1, 0), ncol = 3, nrow = 3))
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # run the simulation
+#' sim <- bd.sim.musse(n0, lambda, mu, N = N, nTraits = nTraits, 
+#'                     nStates = nStates, X0 = X0, Q = Q, nFinal = c(2, Inf))
+#' 
+#' # get trait values for all tips
+#' traits <- unlist(lapply(sim$TRAITS, function(x) tail(x[[1]]$value, 1)))
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- make.phylo(sim$SIM)
+#'   
+#'   # 0 tips = red, 1 tips = blue, 2 tips = green
+#'   ape::plot.phylo(phy, tip.color = c("red", "blue", "green")[traits + 1])
+#' }
+#' 
+#' ###
+#' # HiSSE is like BiSSE, but with the possibility of hidden traits
+#' # here we have 4 states, representing two states for the observed trait
+#' # (0 and 1) and two for the hidden trait (A and B), i.e. 0A, 1A, 0B, 1B
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 40
+#' 
+#' # speciation, higher for state 1A, highest for 1B
+#' lambda <- c(0.1, 0.2, 0.1, 0.3)
+#' 
+#' # extinction, lowest for 0B
+#' mu <- c(0.03, 0.03, 0.01, 0.03)
+#' 
+#' # number of traits and states (1 binary observed trait, 1 binary hidden trait)
+#' nTraits <- 1
+#' nStates <- 2
+#' nHidden <- 2
+#' 
+#' # initial value of the trait
+#' X0 <- 0
+#' 
+#' # transition matrix, with symmetrical transition rates. Only one transition
+#' # is allowed at a time, i.e. 0A can go to 0B and 1A,
+#' # but not to 1B, and similarly for others
+#' Q <- list(matrix(c(0, 0.1, 0.1, 0,
+#'                    0.1, 0, 0, 0.1,
+#'                    0.1, 0, 0, 0.1,
+#'                    0, 0.1, 0.1, 0), ncol = 4, nrow = 4))
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # run the simulation
+#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits,
+#'                     nStates = nStates, nHidden = nHidden,
+#'                     X0 = X0, Q = Q, nFinal = c(2, Inf))
+#' 
+#' # get trait values for all tips
+#' traits <- unlist(lapply(sim$TRAITS, function(x) tail(x[[1]]$value, 1)))
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- make.phylo(sim$SIM)
+#' 
+#'   # color 0 valued tips red and 1 valued tips blue
+#'   ape::plot.phylo(phy, tip.color = c("red", "blue")[traits + 1])
+#' }
+#' 
+#' ###
+#' # we can also increase the number of traits, e.g. to have a neutral trait 
+#' # evolving with the real one to compare the estimates of the model for each
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 20
+#' 
+#' # speciation, higher for state 1
+#' lambda <- c(0.1, 0.2)
+#' 
+#' # extinction, lowest for state 0
+#' mu <- c(0.01, 0.03)
+#' 
+#' # number of traits and states (2 binary traits)
+#' nTraits <- 2
+#' nStates <- 2
+#' 
+#' # initial value of both traits
+#' X0 <- 0
+#' 
+#' # transition matrix, with symmetrical transition rates for trait 1,
+#' # and asymmetrical (and higher) for trait 2
+#' Q <- list(matrix(c(0, 0.1,
+#'                    0.1, 0), ncol = 2, nrow = 2),
+#'           matrix(c(0, 1,
+#'                    0.5, 0), ncol = 2, nrow = 2))
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # run the simulation
+#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, nStates = nStates,
+#'                     X0 = X0, Q = Q, nFinal = c(2, Inf))
+#' 
+#' # get trait values for all tips
+#' traits1 <- unlist(lapply(sim$TRAITS, function(x) tail(x[[1]]$value, 1)))
+#' traits2 <- unlist(lapply(sim$TRAITS, function(x) tail(x[[2]]$value, 1)))
+#' 
+#' # make index for coloring tips
+#' index <- ifelse(!(traits1 | traits2), "red", 
+#'                 ifelse(traits1 & !traits2, "purple",
+#'                        ifelse(!traits1 & traits2, "magenta", "blue")))
+#' # 00 = red, 10 = purple, 01 = magenta, 11 = blue
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- make.phylo(sim$SIM)
+#'   
+#'   # color 0 valued tips red and 1 valued tips blue
+#'   ape::plot.phylo(phy, tip.color = index)
+#' }
+#' 
+#' ###
+#' # we can then do the same thing, but with the s
+#' # econd trait controlling extinction
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 20
+#' 
+#' # speciation, higher for state 10 and 11
+#' lambda <- c(0.1, 0.2)
+#' 
+#' # extinction, lowest for state 00 and 01
+#' mu <- c(0.01, 0.03)
+#' 
+#' # number of traits and states (2 binary traits)
+#' nTraits <- 2
+#' nStates <- 2
+#' nFocus <- c(1, 2)
+#' 
+#' # initial value of both traits
+#' X0 <- 0
+#' 
+#' # transition matrix, with symmetrical transition rates for trait 1,
+#' # and asymmetrical (and higher) for trait 2
+#' Q <- list(matrix(c(0, 0.1,
+#'                    0.1, 0), ncol = 2, nrow = 2),
+#'           matrix(c(0, 1,
+#'                    0.5, 0), ncol = 2, nrow = 2))
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # run the simulation
+#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, 
+#'                     nStates = nStates, nFocus = nFocus,
+#'                     X0 = X0, Q = Q, nFinal = c(2, Inf))
+#' 
+#' # get trait values for all tips
+#' traits1 <- unlist(lapply(sim$TRAITS, function(x) tail(x[[1]]$value, 1)))
+#' traits2 <- unlist(lapply(sim$TRAITS, function(x) tail(x[[2]]$value, 1)))
+#' 
+#' # make index for coloring tips
+#' index <- ifelse(!(traits1 | traits2), "red", 
+#'                 ifelse(traits1 & !traits2, "purple",
+#'                        ifelse(!traits1 & traits2, "magenta", "blue")))
+#' # 00 = red, 10 = purple, 01 = magenta, 11 = blue
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- make.phylo(sim$SIM)
+#'   
+#'   # color 0 valued tips red and 1 valued tips blue
+#'   ape::plot.phylo(phy, tip.color = index)
+#' }
+#' 
+#' ###
+#' # as a final level of complexity, let us change the X0
+#' # and number of states of the trait controlling extinction
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' tMax <- 20
+#' 
+#' # speciation, higher for state 10 and 11
+#' lambda <- c(0.1, 0.2)
+#' 
+#' # extinction, lowest for state 00, 01, and 02
+#' mu <- c(0.01, 0.03, 0.03)
+#' 
+#' # number of traits and states (2 binary traits)
+#' nTraits <- 2
+#' nStates <- c(2, 3)
+#' nFocus <- c(1, 2)
+#' 
+#' # initial value of both traits
+#' X0 <- c(0, 2)
+#' 
+#' # transition matrix, with symmetrical transition rates for trait 1,
+#' # and asymmetrical, directed, and higher rates for trait 2
+#' Q <- list(matrix(c(0, 0.1,
+#'                    0.1, 0), ncol = 2, nrow = 2),
+#'           matrix(c(0, 1, 0,
+#'                    0.5, 0, 0.75,
+#'                    0, 1, 0), ncol = 3, nrow = 3))
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # run the simulation
+#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, 
+#'                     nStates = nStates, nFocus = nFocus,
+#'                     X0 = X0, Q = Q, nFinal = c(2, Inf))
+#' 
+#' # get trait values for all tips
+#' traits1 <- unlist(lapply(sim$TRAITS, function(x) tail(x[[1]]$value, 1)))
+#' traits2 <- unlist(lapply(sim$TRAITS, function(x) tail(x[[2]]$value, 1)))
+#' 
+#' # make index for coloring tips
+#' index <- ifelse(!(traits1 | (traits2 != 0)), "red", 
+#'                 ifelse(traits1 & (traits2 == 0), "purple",
+#'                        ifelse(!traits1 & (traits2 == 1), "magenta", 
+#'                               ifelse(traits1 & (traits2 == 1), "blue",
+#'                                      ifelse(!traits1 & (traits2 == 2), 
+#'                                             "orange", "green")))))
+#'                                      
+#' # 00 = red, 10 = purple, 01 = magenta, 11 = blue, 02 = orange, 12 = green
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- make.phylo(sim$SIM)
+#'   
+#'   # color 0 valued tips red and 1 valued tips blue
+#'   ape::plot.phylo(phy, tip.color = index)
+#' }
+#' # one could further complicate the model by adding hidden states
+#' # to each trait, each with its own number etc, but these examples
+#' # include all the tools necessary to make these or further extensions
 #' 
 #' @name bd.sim.musse
 #' @rdname bd.sim.musse
@@ -104,15 +535,29 @@ bd.sim.musse <- function(n0, lambda, mu,
          of species")
   }
   
+  # if nFocus is just one number, make it a vector
+  if (length(nFocus) == 1) {
+    nFocus <- rep(nFocus, 2)
+  }
+  
+  # if nStates and nHidden is just one number, make them vectors
+  if (length(nStates) == 1) {
+    nStates <- rep(nStates, nTraits)
+  }
+  if (length(nHidden) == 1) {
+    nHidden <- rep(nHidden, nTraits)
+  }
+  
   # check that rates are numeric
   if (!is.numeric(c(lambda, mu))) {
     stop("lambda and mu must be numeric")
-  } else if (any(!(c(length(lambda), length(mu)) %in% c(1, nStates)))) {
+  } else if (any(!(c(length(lambda), length(mu)) %in% 
+                   c(1, nStates * nHidden)))) {
     stop("lambda and mu must be of length either one or equal to nStates")
   } else {
     # if everything is good, we set flags on whether each are TD
-    tdLambda <- length(lambda) == nStates
-    tdMu <- length(mu) == nStates
+    tdLambda <- length(lambda) == nStates[nFocus[1]] * nHidden[nFocus[1]]
+    tdMu <- length(mu) == nStates[nFocus[2]] * nHidden[nFocus[2]]
   }
   
   # check that rates are non-negative
@@ -143,11 +588,6 @@ bd.sim.musse <- function(n0, lambda, mu,
     nExtant <- sort(nExtant)
   }
 
-  # if nFocus is just one number, make it a vector
-  if (length(nFocus) == 1) {
-    nFocus <- rep(nFocus, 2)
-  }
-
   # error checks for each trait
   for (i in 1:nTraits) {
     # take the Q for this trait
@@ -160,7 +600,7 @@ bd.sim.musse <- function(n0, lambda, mu,
 
     # check that Qn has row number (and therefore column number)
     # equal to the number of traits
-    if (nrow(Qn) != nStates * nHidden) {
+    if (nrow(Qn) != nStates[i] * nHidden[i]) {
       stop("Q must have transition rates for all trait combinations")
     }
   }
@@ -419,8 +859,8 @@ traits.musse <- function(tMax, tStart = 0, nTraits = 1, nStates = 2,
   # for each trait
   for (i in 1:nTraits) {
     # get number of states and initial states
-    nStatesI <- ifelse(length(nStates) > 1, nStates[i], nStates)
-    nHiddenI <- ifelse(length(nHidden) > 1, nHidden[i], nHidden)
+    nStatesI <- nStates[i]
+    nHiddenI <- nHidden[i]
     X0I <- ifelse(length(X0) > 1, X0[i], X0)
     
     # get Q matrix
@@ -502,38 +942,40 @@ trait.musse <- function(tMax, tStart = 0, nStates = 2, nHidden = 1, X0 = 0,
     # set them to normal states
     traits$value <- traits$value %% nStates
     
-    # duplicate rows
-    dup <- c()
-    
-    # counting how many duplicates in a row
-    count <- 0
-    
-    #iterate through rows to make sure there are no duplicates
-    for (i in 2:nrow(traits)) {
-      if (traits$value[i] == traits$value[i - 1]) {
-        # add to dup
-        dup <- c(dup, i)
-
-        # increase count of dups
-        count <- count + 1
-      } else {
-        # if count > 0, change the max of count rows ago to max of last row
-        if (count > 0) {
-          traits$max[i - 1 - count] <- traits$max[i - 1]
+    if (nrow(traits) > 1) {
+      # duplicate rows
+      dup <- c()
+      
+      # counting how many duplicates in a row
+      count <- 0
+      
+      #iterate through rows to make sure there are no duplicates
+      for (i in 2:nrow(traits)) {
+        if (traits$value[i] == traits$value[i - 1]) {
+          # add to dup
+          dup <- c(dup, i)
+          
+          # increase count of dups
+          count <- count + 1
+        } else {
+          # if count > 0, change the max of count rows ago to max of last row
+          if (count > 0) {
+            traits$max[i - 1 - count] <- traits$max[i - 1]
+          }
+          
+          # return count to 0
+          count <- 0
         }
-
-        # return count to 0
-        count <- 0
       }
+      
+      # need to do a last check in case the last row is a duplicate
+      if (count > 0) {
+        traits$max[i - count] <- traits$max[i]
+      }
+      
+      # delete duplicates
+      if (!is.null(dup)) traits <- traits[-dup, ]
     }
-
-    # need to do a last check in case the last row is a duplicate
-    if (count > 0) {
-      traits$max[i - count] <- traits$max[i]
-    }
-
-    # delete duplicates
-    traits <- traits[-dup, ]
   }
   
   return(traits)
