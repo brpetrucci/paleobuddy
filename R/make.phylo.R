@@ -23,6 +23,22 @@
 #' \code{SampT} column, usually an output of the \code{sample.clade}
 #' function. Species names must contain only one number each, corresponding
 #' to the order of the \code{sim} vectors.
+#' 
+#' @param saFormat A string indicating which form sampled ancestors should take
+#' in the tree. If set to \code{"branch"} (default), SAs are returned as 
+#' 0-length branches. If set to \code{"node"}, they are returned as degree-2 
+#' nodes. Note that some software prefer the former (e.g. Beast) and some the
+#' latter (e.g. RevBayes). 
+#' 
+#' @param returnTrueExt A logical indicating whether to include in tree the
+#' tips representing the true extinction time of extinct species. If set to
+#' \code{FALSE}, the returned tree will include those tips. If \code{TRUE} 
+#' (default), they will be dropped and instead the last sampled fossil of
+#' a given species will be the last sampled tip of that species. Note that if
+#' a species was not sampled it will then not appear in the tree. If no fossils
+#' have been added to the tree with the parameter \code{fossils}, this will
+#' have the same effect as the ape function \code{drop.fossil}, returning an
+#' ultrametric tree. 
 #'
 #' @param returnRootTime Logical indicating if phylo should have information
 #' regarding \code{root.time}. If set to \code{NULL} (default), returned 
@@ -72,8 +88,8 @@
 #' birth and death (in macroevolutionary birth-death models). Biology letters, 
 #' 8(1), 139-142.
 #' 
-#' Paradis, E., Claude, J., Strimmer, & K. (2004). APE: Analyses of Phylogenetics
-#' and Evolution in R language. Bioinformatics, 20(2), 289-290.
+#' Paradis, E., Claude, J., Strimmer, & K. (2004). APE: Analyses of 
+#' Phylogenetics and Evolution in R language. Bioinformatics, 20(2), 289-290.
 #' 
 #' Heath, T. A., Huelsenbeck, J. P., & Stadler, T. (2014). The fossilized 
 #' birth–death process for coherent calibration of divergence-time estimates. 
@@ -188,6 +204,98 @@
 #' }
 #' 
 #' ### 
+#' # we can instead have the sampled ancestors as degree-2 nodes
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # simulate a simple birth-death process
+#' sim <- bd.sim(n0 = 1, lambda = 0.2, mu = 0.05, tMax = 10, 
+#'               nExtant = c(2, Inf))
+#' 
+#' # make the traditional phylogeny
+#' phy <- make.phylo(sim)
+#' 
+#' # sample fossils
+#' fossils <- sample.clade(sim, 0.1, 10)
+#' 
+#' # make the sampled ancestor tree
+#' saTree <- make.phylo(sim, fossils, saFormat = "node")
+#' 
+#' # plot them
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   # store old par settings
+#'   oldPar <- par(no.readonly = TRUE) 
+#'   
+#'   # visualize longevities and fossil occurrences
+#'   draw.sim(sim, fossils)
+#'   
+#'   # change par to show phylogenies
+#'   par(mfrow = c(1, 2))
+#' 
+#'   # phylogeny
+#'   ape::plot.phylo(phy, main = "Phylogenetic tree")
+#'   ape::axisPhylo()
+#'   
+#'   # sampled ancestor tree, need show.node.label parameter to see SAs
+#'   ape::plot.phylo(saTree, main = "Sampled Ancestor tree", 
+#'                   show.node.label = TRUE)
+#'   ape::axisPhylo()
+#'   
+#'   # reset par
+#'   par(oldPar)
+#' }
+#'
+#' ### 
+#' # we can use the returnTrueExt argument to delete the extinct tips and
+#' # have the last sampled fossil of a species as the fossil tip instead
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # simulate a simple birth-death process
+#' sim <- bd.sim(n0 = 1, lambda = 0.2, mu = 0.05, tMax = 10, 
+#'               nExtant = c(2, Inf))
+#' 
+#' # make the traditional phylogeny
+#' phy <- make.phylo(sim)
+#' 
+#' # sample fossils
+#' fossils <- sample.clade(sim, 0.1, 10)
+#' 
+#' # make the sampled ancestor tree
+#' saTree <- make.phylo(sim, fossils, saFormat = "node", returnTrueExt = FALSE)
+#' # returnTrueExt = FALSE means the extinct tips will be removed, 
+#' # so we will only see the last sampled fossil (see tree below)
+#'
+#' # plot them
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   # store old par settings
+#'   oldPar <- par(no.readonly = TRUE) 
+#'   
+#'   # visualize longevities and fossil occurrences
+#'   draw.sim(sim, fossils)
+#'   
+#'   # change par to show phylogenies
+#'   par(mfrow = c(1, 2))
+#' 
+#'   # phylogeny
+#'   ape::plot.phylo(phy, main = "Phylogenetic tree")
+#'   ape::axisPhylo()
+#'   
+#'   # sampled ancestor tree, need show.node.label parameter to see SAs
+#'   ape::plot.phylo(saTree, main = "Sampled Ancestor tree", 
+#'                   show.node.label = TRUE)
+#'   ape::axisPhylo()
+#'   # note how t1.1 is an extinct tip now, as opposed to t1, since 
+#'   # we would not know the exact extinction time for t1,
+#'   # rather just see the last sampled fossil
+#'   
+#'   # reset par
+#'   par(oldPar)
+#' }
+#'
+#' ### 
 #' # finally, we can test the usage of returnRootTime
 #' 
 #' # set seed
@@ -234,7 +342,8 @@
 #' @rdname make.phylo
 #' @export
 
-make.phylo <- function(sim, fossils = NULL, returnRootTime = NULL) {
+make.phylo <- function(sim, fossils = NULL, saFormat = "branch",
+                       returnTrueExt = TRUE, returnRootTime = NULL) {
   # check that sim is a valid sim object
   if (!is.sim(sim)) {
     stop("Invalid argument, must be a sim object. See ?sim")
@@ -242,15 +351,23 @@ make.phylo <- function(sim, fossils = NULL, returnRootTime = NULL) {
   
   # simulations with just one species do not have a phylogeny
   if (length(sim$TE) < 2) {
-    message("There is no phylogeny for a simulation with only one lineage")
-    return(NA)
+    stop("There is no phylogeny for a simulation with only one lineage")
   }
 
   # simulations with more than one starting species have multiple phylogenies
   if (sum(is.na(sim$PAR)) > 1) {
-    message("Multiple starting species. Use function find.lineages")
-    return(NA)
+    stop("Multiple starting species. Use function find.lineages")
   }
+  
+  # saFormat must be either branch or node
+  if (saFormat != "branch" && saFormat != "node") {
+    stop("saFormat must either be set to branch or node, indicating whether
+         sampled ancestors should be returned as 0-length branches or
+         degree-2 nodes")
+  }
+  
+  # make a backup of sim to use later
+  backupSim <- sim
   
   # if fossils are provided, make a sampled ancestor tree instead
   if (!is.null(fossils)) {
@@ -373,7 +490,7 @@ make.phylo <- function(sim, fossils = NULL, returnRootTime = NULL) {
     
   }
   
-  #construct the phylogeny:
+  # construct the phylogeny
   
   # make TE sensible
   sim$TE[sim$EXTANT] <- 0
@@ -562,7 +679,6 @@ make.phylo <- function(sim, fossils = NULL, returnRootTime = NULL) {
     }
   }
   
-  
   phy$node.label <- seq(from = length(sim$TE) + 1, 
                         to = length(sim$TE) + nNode)
   
@@ -574,5 +690,160 @@ make.phylo <- function(sim, fossils = NULL, returnRootTime = NULL) {
   
   class(phy) <- "phylo"
   
+  # collect tip names of extinction time tips
+  extinctTips <- paste0("t", which(!backupSim$EXTANT))
+  
+  # drop true extinction time tips if the parameter is set
+  if (!returnTrueExt) phy <- drop.tip(phy, extinctTips)
+  
+  # make 0-length branches degree-2 nodes if saFormat is "node"
+  if (!is.null(fossils) && saFormat == "node") {
+    # number of tips in the original tree
+    nTips <- length(phy$tip.label)
+    
+    # indices to delete - edges with length 0
+    delInd <- phy$edge.length == 0
+    
+    # tips to delete
+    deletedTips<- phy$edge[delInd, 2]
+    
+    # get the labels of the deleted tips
+    internalLabels <- phy$tip.label[deletedTips]
+    
+    # node numbers for the tips we are deleting
+    nodeNumbers <- phy$edge[delInd, 1]
+    
+    # drop tips, but keep them as nodes
+    phy <- drop.tip(phy, deletedTips)
+    
+    # reset node labels
+    phy$node.label <- rep("", rep(phy$Nnode))
+    
+    # add previous deleted tips' labels to the new nodes
+    phy$node.label[nodeNumbers - nTips] <- internalLabels
+  }
+  
   return(phy)
 }
+
+drop.tip <- function(phy, tip, ...) UseMethod("drop.tip")
+
+drop.tip.phylo <- function(phy, tip, trim.internal = TRUE, root.edge = 0, 
+                           rooted = TRUE)
+{
+  ###    if (!inherits(phy, "phylo"))
+  ###        stop('object "phy" is not of class "phylo"')
+  Ntip <- length(phy$tip.label)
+  ## find the tips to drop:
+  if (is.character(tip))
+    tip <- which(phy$tip.label %in% tip)
+  
+  out.of.range <- tip > Ntip
+  if (any(out.of.range)) {
+    warning("some tip numbers were larger than the number of tips: they were ignored")
+    tip <- tip[!out.of.range]
+  }
+  
+  if (!length(tip)) return(phy)
+  
+  if (length(tip) == Ntip) {
+    if (Nnode(phy) < 3 || trim.internal) { # by Klaus (2018-06-21)
+      warning("drop all tips of the tree: returning NULL")
+      return(NULL)
+    }
+  }
+  
+  wbl <- !is.null(phy$edge.length)
+  
+  if (length(tip) == Ntip - 1 && trim.internal) {
+    i <- which(phy$edge[, 2] == (1:Ntip)[-tip])
+    res <- list(edge = matrix(2:1, 1, 2),
+                tip.label = phy$tip.label[phy$edge[i, 2]],
+                Nnode = 1L)
+    class(res) <- "phylo"
+    if (wbl) res$edge.length <- phy$edge.length[i]
+    if (!is.null(phy$node.label))
+      res$node.label <- phy$node.label[phy$edge[i, 1] - Ntip]
+    return(res)
+  }
+  
+  phy <- reorder(phy)
+  NEWROOT <- ROOT <- Ntip + 1
+  Nnode <- phy$Nnode
+  Nedge <- dim(phy$edge)[1]
+  
+  edge1 <- phy$edge[, 1] # local copies
+  edge2 <- phy$edge[, 2] #
+  keep <- !logical(Nedge)
+  
+  ## delete the terminal edges given by `tip':
+  keep[match(tip, edge2)] <- FALSE
+  
+  if (trim.internal) {
+    ints <- edge2 > Ntip
+    ## delete the internal edges that do not have anymore
+    ## descendants (ie, they are in the 2nd col of `edge' but
+    ## not in the 1st one)
+    repeat {
+      sel <- !(edge2 %in% edge1[keep]) & ints & keep
+      if (!sum(sel)) break
+      keep[sel] <- FALSE
+    }
+    if (root.edge && wbl) {
+      degree <- tabulate(edge1[keep])
+      if (degree[ROOT] == 1) {
+        j <- integer(0) # will store the indices of the edges below the new root
+        repeat {
+          i <- which(edge1 == NEWROOT & keep)
+          j <- c(i, j)
+          NEWROOT <- edge2[i]
+          ## degree <- tabulate(edge1[keep]) # utile ?
+          if (degree[NEWROOT] > 1) break
+        }
+        keep[j] <- FALSE
+        ## if (length(j) > root.edge) j <- 1:root.edge
+        j <- j[1:root.edge]
+        NewRootEdge <- sum(phy$edge.length[j])
+        if (length(j) < root.edge && !is.null(phy$root.edge))
+          NewRootEdge <- NewRootEdge + phy$root.edge
+        phy$root.edge <- NewRootEdge
+      }
+    }
+  }
+  
+  ##if (!root.edge) phy$root.edge <- NULL # moved above (2021-09-29)
+  
+  ## drop the edges
+  phy$edge <- phy$edge[keep, ]
+  if (wbl) phy$edge.length <- phy$edge.length[keep]
+  
+  ## find the new terminal edges (works whatever 'subtree' and 'trim.internal'):
+  TERMS <- !(phy$edge[, 2] %in% phy$edge[, 1])
+  
+  ## get the old No. of the nodes and tips that become tips:
+  oldNo.ofNewTips <- phy$edge[TERMS, 2]
+  
+  n <- length(oldNo.ofNewTips) # the new number of tips in the tree
+  
+  ## the tips may not be sorted in increasing order in the
+  ## 2nd col of edge, so no need to reorder $tip.label
+  phy$edge[TERMS, 2] <- rank(phy$edge[TERMS, 2])
+  ## fix by Thomas Sibley (2017-10-28):
+  if (length(tip)) phy$tip.label <- phy$tip.label[-tip]
+  
+  phy$Nnode <- dim(phy$edge)[1] - n + 1L # update phy$Nnode
+  
+  ## The block below renumbers the nodes so that they conform
+  ## to the "phylo" format
+  newNb <- integer(Ntip + Nnode)
+  newNb[NEWROOT] <- n + 1L
+  sndcol <- phy$edge[, 2] > n
+  newNb[sort(phy$edge[sndcol, 2])] <- (n + 2):(n + phy$Nnode)
+  phy$edge[sndcol, 2] <- newNb[phy$edge[sndcol, 2]]
+  phy$edge[, 1] <- newNb[phy$edge[, 1]]
+  storage.mode(phy$edge) <- "integer"
+  if (!is.null(phy$node.label)) # update node.label if needed
+    phy$node.label <- phy$node.label[which(newNb > 0) - Ntip]
+  phy
+}
+

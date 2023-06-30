@@ -4,7 +4,13 @@
 \alias{make.phylo}
 \title{Phylogeny generating}
 \usage{
-make.phylo(sim, fossils = NULL, returnRootTime = NULL)
+make.phylo(
+  sim,
+  fossils = NULL,
+  saFormat = "branch",
+  returnTrueExt = TRUE,
+  returnRootTime = NULL
+)
 }
 \arguments{
 \item{sim}{A \code{sim} object, containing extinction times, speciation times,
@@ -15,6 +21,22 @@ parent, and status information for each species in the simulation. See
 \code{SampT} column, usually an output of the \code{sample.clade}
 function. Species names must contain only one number each, corresponding
 to the order of the \code{sim} vectors.}
+
+\item{saFormat}{A string indicating which form sampled ancestors should take
+in the tree. If set to \code{"branch"} (default), SAs are returned as 
+0-length branches. If set to \code{"node"}, they are returned as degree-2 
+nodes. Note that some software prefer the former (e.g. Beast) and some the
+latter (e.g. RevBayes).}
+
+\item{returnTrueExt}{A logical indicating whether to include in tree the
+tips representing the true extinction time of extinct species. If set to
+\code{FALSE}, the returned tree will include those tips. If \code{TRUE} 
+(default), they will be dropped and instead the last sampled fossil of
+a given species will be the last sampled tip of that species. Note that if
+a species was not sampled it will then not appear in the tree. If no fossils
+have been added to the tree with the parameter \code{fossils}, this will
+have the same effect as the ape function \code{drop.fossil}, returning an
+ultrametric tree.}
 
 \item{returnRootTime}{Logical indicating if phylo should have information
 regarding \code{root.time}. If set to \code{NULL} (default), returned 
@@ -183,6 +205,98 @@ if (requireNamespace("ape", quietly = TRUE)) {
 }
 
 ### 
+# we can instead have the sampled ancestors as degree-2 nodes
+
+# set seed
+set.seed(1)
+
+# simulate a simple birth-death process
+sim <- bd.sim(n0 = 1, lambda = 0.2, mu = 0.05, tMax = 10, 
+              nExtant = c(2, Inf))
+
+# make the traditional phylogeny
+phy <- make.phylo(sim)
+
+# sample fossils
+fossils <- sample.clade(sim, 0.1, 10)
+
+# make the sampled ancestor tree
+saTree <- make.phylo(sim, fossils, saFormat = "node")
+
+# plot them
+if (requireNamespace("ape", quietly = TRUE)) {
+  # store old par settings
+  oldPar <- par(no.readonly = TRUE) 
+  
+  # visualize longevities and fossil occurrences
+  draw.sim(sim, fossils)
+  
+  # change par to show phylogenies
+  par(mfrow = c(1, 2))
+
+  # phylogeny
+  ape::plot.phylo(phy, main = "Phylogenetic tree")
+  ape::axisPhylo()
+  
+  # sampled ancestor tree, need show.node.label parameter to see SAs
+  ape::plot.phylo(saTree, main = "Sampled Ancestor tree", 
+                  show.node.label = TRUE)
+  ape::axisPhylo()
+  
+  # reset par
+  par(oldPar)
+}
+
+### 
+# we can use the returnTrueExt argument to delete the extinct tips and
+# have the last sampled fossil of a species as the fossil tip instead
+
+# set seed
+set.seed(1)
+
+# simulate a simple birth-death process
+sim <- bd.sim(n0 = 1, lambda = 0.2, mu = 0.05, tMax = 10, 
+              nExtant = c(2, Inf))
+
+# make the traditional phylogeny
+phy <- make.phylo(sim)
+
+# sample fossils
+fossils <- sample.clade(sim, 0.1, 10)
+
+# make the sampled ancestor tree
+saTree <- make.phylo(sim, fossils, saFormat = "node", returnTrueExt = FALSE)
+# returnTrueExt = FALSE means the extinct tips will be removed, 
+# so we will only see the last sampled fossil (see tree below)
+
+# plot them
+if (requireNamespace("ape", quietly = TRUE)) {
+  # store old par settings
+  oldPar <- par(no.readonly = TRUE) 
+  
+  # visualize longevities and fossil occurrences
+  draw.sim(sim, fossils)
+  
+  # change par to show phylogenies
+  par(mfrow = c(1, 2))
+
+  # phylogeny
+  ape::plot.phylo(phy, main = "Phylogenetic tree")
+  ape::axisPhylo()
+  
+  # sampled ancestor tree, need show.node.label parameter to see SAs
+  ape::plot.phylo(saTree, main = "Sampled Ancestor tree", 
+                  show.node.label = TRUE)
+  ape::axisPhylo()
+  # note how t1.1 is an extinct tip now, as opposed to t1, since 
+  # we would not know the exact extinction time for t1,
+  # rather just see the last sampled fossil
+  
+  # reset par
+  par(oldPar)
+}
+
+### 
 # finally, we can test the usage of returnRootTime
 
 # set seed
@@ -231,8 +345,8 @@ Ezard, T. H., Pearson, P. N., Aze, T., & Purvis, A. (2012). The meaning of
 birth and death (in macroevolutionary birth-death models). Biology letters, 
 8(1), 139-142.
 
-Paradis, E., Claude, J., Strimmer, & K. (2004). APE: Analyses of Phylogenetics
-and Evolution in R language. Bioinformatics, 20(2), 289-290.
+Paradis, E., Claude, J., Strimmer, & K. (2004). APE: Analyses of 
+Phylogenetics and Evolution in R language. Bioinformatics, 20(2), 289-290.
 
 Heath, T. A., Huelsenbeck, J. P., & Stadler, T. (2014). The fossilized 
 birth–death process for coherent calibration of divergence-time estimates. 

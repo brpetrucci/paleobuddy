@@ -1,15 +1,20 @@
 #' MuSSE simulation
 #'
-#' Simulates a species birth-death process following the Multiple State 
-#' Speciation and Extinction (MuSSE) model for any number of starting species. 
-#' Allows for the speciation/extinction rate to be (1) a constant, or (2) a 
-#' list of values for each trait state. Traits are simulated to evolve under a
-#' simple Mk model (see references). Allows for constraining results on the 
-#' number of species at the end of the simulation, either total or extant, 
-#' using rejection sampling. Returns a \code{sim} object (see \code{?sim}), and
-#' a list of data frames describing trait values for each interval. It may
-#' return true extinction times or simply information on whether species lived
-#' after the maximum simulation time, depending on input.
+#' Simulates a species birth-death process following the Multiple 
+#' State-dependent Speciation and Extinction (MuSSE) or the Hidden 
+#' State-dependent Speciation and Extinction (HiSSE) model for any number of 
+#' starting species. Allows for the speciation/extinction rate to be (1) a 
+#' constant, or (2) a list of values for each trait state. Traits are simulated 
+#' to evolve under a simple Mk model (see references). Results can be 
+#' conditioned on either total simulation time, or total number of extant 
+#' species at the end of the simulation. Also allows for constraining results 
+#' on a range of number of species at the end of the simulation, either total 
+#' or extant, using rejection sampling. Returns a \code{sim} object 
+#' (see \code{?sim}), and a list of data frames describing trait values for 
+#' each interval. It may  return true extinction times or simply information 
+#' on whether species lived after the maximum simulation time, depending on 
+#' input. Can simulate any number of traits, but rates need to depend on only
+#' one (each, so speciation and extinction can depend on different traits). 
 #' 
 #' Please note while time runs from \code{0} to \code{tMax} in the simulation, 
 #' it returns speciation/extinction times as \code{tMax} (origin of the group) 
@@ -138,8 +143,8 @@
 #' set.seed(1)
 #' 
 #' # run the simulation
-#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, nStates = nStates,
-#'                     X0 = X0, Q = Q, nFinal = c(2, Inf))
+#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, 
+#'                     nStates = nStates, X0 = X0, Q = Q, nFinal = c(2, Inf))
 #' 
 #' # get trait values for all tips
 #' traits <- unlist(lapply(sim$TRAITS, function(x) tail(x[[1]]$value, 1)))
@@ -226,8 +231,8 @@
 #' set.seed(1)
 #' 
 #' # run the simulation
-#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, nStates = nStates,
-#'                     X0 = X0, Q = Q, nFinal = c(2, Inf))
+#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, 
+#'                     nStates = nStates, X0 = X0, Q = Q, nFinal = c(2, Inf))
 #' 
 #' # get trait values for all tips
 #' traits <- unlist(lapply(sim$TRAITS, function(x) tail(x[[1]]$value, 1)))
@@ -302,7 +307,8 @@
 #' # extinction, lowest for 0B
 #' mu <- c(0.03, 0.03, 0.01, 0.03)
 #' 
-#' # number of traits and states (1 binary observed trait, 1 binary hidden trait)
+#' # number of traits and states (1 binary observed trait, 
+#' # 1 binary hidden trait)
 #' nTraits <- 1
 #' nStates <- 2
 #' nHidden <- 2
@@ -371,8 +377,8 @@
 #' set.seed(1)
 #' 
 #' # run the simulation
-#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, nStates = nStates,
-#'                     X0 = X0, Q = Q, nFinal = c(2, Inf))
+#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, 
+#'                     nStates = nStates, X0 = X0, Q = Q, nFinal = c(2, Inf))
 #' 
 #' # get trait values for all tips
 #' traits1 <- unlist(lapply(sim$TRAITS, function(x) tail(x[[1]]$value, 1)))
