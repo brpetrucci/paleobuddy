@@ -845,6 +845,33 @@ bd.sim.musse <- function(n0, lambda, mu,
     }
   }
   
+  # truncate traits so that last min time is extinction time
+  for (sp in 1:length(TE)) {
+    # check if it is extinct
+    if (!is.na(TE[sp])) {
+      # iterate through number of traits
+      for (i in 1:length(traits[[sp]])) {
+        # if so, find last row with maximum higher than TE
+        lastRow <- max(which(traits[[sp]][[i]]$max > TE[sp]))
+        
+        # set min of last row to TE
+        traits[[sp]][[i]]$min[lastRow] <- TE[sp]
+        
+        # delete other rows
+        if (lastRow < nrow(traits[[sp]][[i]])) {
+          # row(s) to delete
+          if (lastRow + 1 < nrow(traits[[sp]][[i]])) {
+            delRow <- (lastRow + 1):nrow(traits[[sp]][[i]])
+          } else {
+            delRow <- lastRow + 1
+          }
+          traits[[sp]][[i]] <- traits[[sp]][[i]][-delRow, ]
+          
+        }
+      }
+    }
+  }
+  
   # create the return
   sim <- list(TE = TE, TS = TS, PAR = parent, EXTANT = isExtant)
   class(sim) <- "sim"

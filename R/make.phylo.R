@@ -473,7 +473,7 @@ make.phylo <- function(sim, fossils = NULL, saFormat = "branch",
       numName <- nSpOrig + count/10^ceiling(log(nFossilsSp + 1, 10))
       
       # add new name
-      newName <- paste0("t", numName)
+      newName <- paste0("t", numName, ifelse(count %% 10 == 0, "0", ""))
       names <- c(names[before], newName, names[after])
       
       # add to sampled names
