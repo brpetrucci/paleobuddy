@@ -57,13 +57,19 @@
 #' 
 #' @param X0 Initial trait value for original species. Must be within 
 #' \code{(0, nStates - 1)}. Can be a constant or a vector of length 
-#' \code{nTraits}.
+#' \code{nTraits}. 
 #' 
 #' @param Q Transition rate matrix for continuous-time trait evolution. For
 #' different states \code{i} and \code{j}, the rate at which a species at
 #' \code{i} transitions to \code{j} is \code{Q[i + 1, j + 1]}. Must be within
 #' a list, so as to allow for different \code{Q} matrices when
 #' \code{nTraits > 1}.
+#' 
+#' Note that for all of \code{nStates}, \code{nHidden}, \code{X0} and \code{Q},
+#' if \code{nTraits > 1} and any of those is of length \code{1}, they will be
+#' considered to apply to all traits equally. This might lead to problems if,
+#' e.g., two traits have different states but the same \code{Q}, so double
+#' check that you are providing all parameters for the required traits.
 #'
 #' @return A \code{sim} object, containing extinction times, speciation times,
 #' parent, and status information for each species in the simulation, and a 
@@ -554,6 +560,11 @@ bd.sim.musse <- function(n0, lambda, mu,
     nHidden <- rep(nHidden, nTraits)
   }
   
+  # finally, same for Q
+  if (length(Q) == 1) {
+    Q <- rep(list(Q[[1]]), nTraits)
+  }
+
   # check that rates are numeric
   if (!is.numeric(c(lambda, mu))) {
     stop("lambda and mu must be numeric")

@@ -13,9 +13,9 @@ make.phylo(
 )
 }
 \arguments{
-\item{sim}{A \code{sim} object, containing extinction times, speciation times,
-parent, and status information for each species in the simulation. See 
-\code{?sim}.}
+\item{sim}{A \code{sim} object, containing extinction times, speciation 
+times, parent, and status information for each species in the simulation. 
+See \code{?sim}.}
 
 \item{fossils}{A data frame with a \code{"Species"} column and a
 \code{SampT} column, usually an output of the \code{sample.clade}

@@ -15,9 +15,9 @@
 #' as parent (i.e. there is no single common ancestor in the simulation). In 
 #' the latter case, please use \code{find.lineages} first. 
 #'
-#' @param sim A \code{sim} object, containing extinction times, speciation times,
-#' parent, and status information for each species in the simulation. See 
-#' \code{?sim}.
+#' @param sim A \code{sim} object, containing extinction times, speciation 
+#' times, parent, and status information for each species in the simulation. 
+#' See \code{?sim}.
 #' 
 #' @param fossils A data frame with a \code{"Species"} column and a
 #' \code{SampT} column, usually an output of the \code{sample.clade}

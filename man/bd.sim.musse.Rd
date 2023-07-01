@@ -79,7 +79,13 @@ of the original HiSSE reference) will be set to \code{0}, and states
 different states \code{i} and \code{j}, the rate at which a species at
 \code{i} transitions to \code{j} is \code{Q[i + 1, j + 1]}. Must be within
 a list, so as to allow for different \code{Q} matrices when
-\code{nTraits > 1}.}
+\code{nTraits > 1}.
+
+Note that for all of \code{nStates}, \code{nHidden}, \code{X0} and \code{Q},
+if \code{nTraits > 1} and any of those is of length \code{1}, they will be
+considered to apply to all traits equally. This might lead to problems if,
+e.g., two traits have different states but the same \code{Q}, so double
+check that you are providing all parameters for the required traits.}
 
 \item{nFinal}{A \code{vector} of length \code{2}, indicating an interval of
 acceptable number of species at the end of the simulation. Default value is
