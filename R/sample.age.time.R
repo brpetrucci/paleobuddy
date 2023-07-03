@@ -60,7 +60,9 @@
 #' 
 #' @noRd
 
-sample.age.time <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
+sample.age.time <- function(sim, rho, tMax,
+                            traits = NULL, nFocus = 1,
+                            S = NULL, adFun = NULL, ...){
   # checking input
   # check that sim is a valid sim object
   if (!is.sim(sim)) {
@@ -97,7 +99,11 @@ sample.age.time <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
     message("Preservation will be age-independent \n")
     
     # run sample.time
-    occs <- sample.time(sim, rho, tMax, S)
+    if (is.null(traits)) {
+      occs <- sample.time(sim, rho, tMax, S)
+    } else {
+      occs <- sample.traits(sim, rho, tMax, traits, nFocus, S)
+    }
     
     # check how many species left no occurrences
     zeroOccs <- which(lapply(occs, length) == 0)
@@ -124,8 +130,14 @@ sample.age.time <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
   
   # get the number of occurrences following a time-varying poisson process
   Noccs <- vector(length = length(sim$TE))
-  Noccs <- unlist(lapply(sample.time(sim = sim, rho = rho, tMax = tMax,
-                                     S = S), FUN = length))
+  if (is.null(traits)) {
+    Noccs <- unlist(lapply(sample.time(sim = sim, rho = rho, tMax = tMax,
+                                       S = S), FUN = length))
+  } else {
+    Noccs <- unlist(lapply(sample.traits(sim = sim, rho = rho, tMax = tMax,
+                                         traits = traits, nFocus = nFocus,
+                                         S = S), FUN = length))
+  }
   
   occs <- list()
   

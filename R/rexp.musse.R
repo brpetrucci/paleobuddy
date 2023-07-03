@@ -158,9 +158,19 @@ rexp.musse <- function(n, rate, traits,
     traits <- traits[nrow(traits), ]
   }
   
+  
+  # if rate has length 1, make it a vector
+  if (length(rate) == 1) {
+    rate <- rep(rate, max(traits$value) + 1)
+  }
+  
   # if only one rate is to be considered, return rexp
   if (length(unique(rate)) == 1 || nrow(traits) == 1) {
-    return(rexp(n, rate[traits$value[1] + 1]))
+    if (rate[traits$value[1] + 1] == 0) {
+      return(Inf)
+    } else {
+      return(rexp(n, rate[traits$value[1] + 1]))
+    }
   }
   # this happens when rates are all the same, or 
   # when there are no rate shifts after now
@@ -194,9 +204,11 @@ rexp.musse <- function(n, rate, traits,
                        tol = tol)$root - now
     
     # when p is really small, uniroot might find now as the root since
-    # the real root is 
-    if (vars[i] == 0) {
-      return(list(f = f, p = p, traits = traits))
+    # the real root is really small, so we increase the tolerance
+    while (vars[i] == 0) {
+      tol <- tol / 2
+      vars[i] <- uniroot(f, c(now, now + 100), extendInt = "yes", 
+                         tol = tol)$root - now
     }
   }
   return(vars)

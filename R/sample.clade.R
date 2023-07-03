@@ -1,4 +1,4 @@
-#' General rate species sampling
+#' General rate fossil sampling
 #' 
 #' Generates occurrence times or time ranges (as most empirical fossil 
 #' occurrences) for each of the desired species using a Poisson process. Allows
@@ -7,7 +7,10 @@
 #' a vector of numbers (rates in a step function). Allows for age-dependent 
 #' sampling with a parameter for a distribution representing the expected 
 #' occurrence number over a species duration. Allows for further flexibility in
-#' rates by a shift times vector and environmental matrix parameters. 
+#' rates by a shift times vector and environmental matrix parameters. Finally,
+#' allows for the simulation of trait-dependent fossil sampling when trait
+#' value information is supplied.
+#' 
 #' Optionally takes a vector of time bins representing geologic periods, if the
 #' user wishes occurrence times to be represented as a range instead of true 
 #' points.
@@ -21,22 +24,45 @@
 #' describing the variation in sampling over time \code{t}, a 
 #' \code{function(t, env)} describing the variation in sampling over time 
 #' following both time AND a time-series, usually an environmental variable 
-#' (see \code{envR}), or a \code{vector} containing rates that correspond to 
-#' each rate between sampling rate shift times times (see \code{rShifts}). If 
-#' \code{adFun} is supplied, it will be used to find the number of occurrences 
-#' during the species duration, and a normalized \code{rho*adFun} will 
-#' determine their distribution along the species duration. Note that 
-#' \code{rho} should always be greater than or equal to zero.
+#' (see \code{envR}), or a \code{vector} of rates. These might correspond to 
+#' each rate between sampling rate shift times times (see \code{rShifts}), 
+#' describing an episodic model of fossil sampling, or the rate for each trait
+#' value of a given trait (see \code{traits}). If \code{adFun} is supplied, it 
+#' will be used to find the number of occurrences during the species duration, 
+#' and a normalized \code{rho*adFun} will determine their distribution along 
+#' the species duration. Note that \code{rho} should always be greater than or 
+#' equal to zero.
 #' 
 #' @param tMax The maximum simulation time, used by \code{rexp.var}. A sampling
 #' time greater than \code{tMax} would mean the occurrence is sampled after the
 #' present, so for consistency we require this argument. This is also required
 #' to ensure time follows the correct direction both in the Poisson process and
 #' in the output.
-#'
+#' 
 #' @param S A vector of species numbers to be sampled. The default is all 
 #' species in \code{sim}. Species not included in \code{S} will not be sampled 
 #' by the function.
+#' 
+#' @param traits List of trait data frames, usually one of the returns of 
+#' \code{bd.sim}. \code{traits[[i]][[j]]} should correspond to the \code{j}th
+#' trait data frame for species \code{i}. The data frames contain the following
+#' columns
+#' 
+#' \describe{
+#' \item{\code{value}}{A vector of trait values the species took at specific
+#' intervals of time.}
+#' 
+#' \item{\code{max}}{A vector of time values corresponding to the upper bound
+#' of each interval.}
+#' 
+#' \item{\code{min}}{A vector of time values corresponding to the lower bound
+#' of each interval}}
+#' 
+#' @param nFocus Trait of focus, i.e. the one that rates depend on. Note that 
+#' \code{traits} can have multiple trait data frames per species, but only one
+#' of the simulated traits can affect fossil sampling rates. E.g. if
+#' \code{nFocus = 1}, then the first trait data frame per species will be used
+#' to simulate fossil occurrences.
 #' 
 #' @param envR A data frame containing time points and values of an 
 #' environmental variable, like temperature, for each time point. This will be 
@@ -639,7 +665,9 @@
 #' @rdname sample.clade
 #' @export
 
-sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
+sample.clade <- function(sim, rho, tMax, S = NULL, 
+                         traits = NULL, nFocus = 1,
+                         envR = NULL, rShifts = NULL,
                          returnTrue = TRUE, returnAll = FALSE, bins = NULL, 
                          adFun = NULL, ...) {
   # check that sim is a valid sim object
@@ -675,7 +703,7 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
   } 
   
   # if rho is not a constant, apply make.rate to it
-  if (!is.numeric(rho) || length(rho) > 1) {
+  if ((!is.numeric(rho) || length(rho) > 1) && is.null(traits)) {
     rho <- make.rate(rho, tMax, envR, rShifts)
   }
   
@@ -688,7 +716,11 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
   # lineage's age)
   if (is.null(adFun)) { 
     # find occurrences times
-    pointEstimates <- sample.time(sim, rho, tMax, S)
+    if (is.null(traits)) {
+      pointEstimates <- sample.time(sim, rho, tMax, S)
+    } else {
+      pointEstimates <- sample.traits(sim, rho, tMax, traits, nFocus, S)
+    }
     
     # which species left no occurrences
     zeroOccs <- which(lapply(pointEstimates, length) == 0)
@@ -701,8 +733,9 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
   # according to adFun)
   else { 
     # find occurrence times
-    pointEstimates <- sample.age.time(sim = sim, rho = rho, tMax = tMax, S = S,
-                                 adFun = adFun, ...)
+    pointEstimates <- sample.age.time(sim = sim, rho = rho, tMax = tMax, 
+                                      traits, nFocus, S = S,
+                                      adFun = adFun, ...)
   }
 
   # names res will have regardless of what to return

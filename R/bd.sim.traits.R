@@ -800,6 +800,7 @@ bd.sim.traits <- function(n0, lambda, mu,
       for (j in 1:nTraits) {
         # df in question
         traitsSp <- traits[[i]][[j]]
+        print(traitsSp)
         
         # eliminate rows with min greater than tMax
         traitsSp <- traitsSp[traitsSp$min < tMax, ]
@@ -814,6 +815,7 @@ bd.sim.traits <- function(n0, lambda, mu,
         # invert columns
         colnames(traitsSp) <- c("value", "max", "min")
         
+        print(traitsSp)
         # set traits back to it
         traits[[i]][[j]] <- traitsSp
       }
