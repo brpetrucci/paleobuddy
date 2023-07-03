@@ -111,7 +111,7 @@
 #' set.seed(1)
 #' 
 #' # run the simulation, making sure we have more than one species in the end
-#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nFinal = c(2, Inf))
+#' sim <- bd.sim.traits(n0, lambda, mu, tMax, nFinal = c(2, Inf))
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -149,7 +149,7 @@
 #' set.seed(1)
 #' 
 #' # run the simulation
-#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, 
+#' sim <- bd.sim.traits(n0, lambda, mu, tMax, nTraits = nTraits, 
 #'                     nStates = nStates, X0 = X0, Q = Q, nFinal = c(2, Inf))
 #' 
 #' # get trait values for all tips
@@ -193,7 +193,7 @@
 #' set.seed(1)
 #' 
 #' # run the simulation
-#' sim <- bd.sim.musse(n0, lambda, mu, N = N, nTraits = nTraits,
+#' sim <- bd.sim.traits(n0, lambda, mu, N = N, nTraits = nTraits,
 #'                     nStates = nStates, X0 = X0, Q = Q, nFinal = c(2, Inf))
 #' 
 #' # get trait values for all tips
@@ -237,7 +237,7 @@
 #' set.seed(1)
 #' 
 #' # run the simulation
-#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, 
+#' sim <- bd.sim.traits(n0, lambda, mu, tMax, nTraits = nTraits, 
 #'                     nStates = nStates, X0 = X0, Q = Q, nFinal = c(2, Inf))
 #' 
 #' # get trait values for all tips
@@ -282,7 +282,7 @@
 #' set.seed(1)
 #' 
 #' # run the simulation
-#' sim <- bd.sim.musse(n0, lambda, mu, N = N, nTraits = nTraits, 
+#' sim <- bd.sim.traits(n0, lambda, mu, N = N, nTraits = nTraits, 
 #'                     nStates = nStates, X0 = X0, Q = Q, nFinal = c(2, Inf))
 #' 
 #' # get trait values for all tips
@@ -334,7 +334,7 @@
 #' set.seed(1)
 #' 
 #' # run the simulation
-#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits,
+#' sim <- bd.sim.traits(n0, lambda, mu, tMax, nTraits = nTraits,
 #'                     nStates = nStates, nHidden = nHidden,
 #'                     X0 = X0, Q = Q, nFinal = c(2, Inf))
 #' 
@@ -383,7 +383,7 @@
 #' set.seed(1)
 #' 
 #' # run the simulation
-#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, 
+#' sim <- bd.sim.traits(n0, lambda, mu, tMax, nTraits = nTraits, 
 #'                     nStates = nStates, X0 = X0, Q = Q, nFinal = c(2, Inf))
 #' 
 #' # get trait values for all tips
@@ -439,7 +439,7 @@
 #' set.seed(1)
 #' 
 #' # run the simulation
-#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, 
+#' sim <- bd.sim.traits(n0, lambda, mu, tMax, nTraits = nTraits, 
 #'                     nStates = nStates, nFocus = nFocus,
 #'                     X0 = X0, Q = Q, nFinal = c(2, Inf))
 #' 
@@ -497,7 +497,7 @@
 #' set.seed(1)
 #' 
 #' # run the simulation
-#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, 
+#' sim <- bd.sim.traits(n0, lambda, mu, tMax, nTraits = nTraits, 
 #'                     nStates = nStates, nFocus = nFocus,
 #'                     X0 = X0, Q = Q, nFinal = c(2, Inf))
 #' 
@@ -526,11 +526,11 @@
 #' # to each trait, each with its own number etc, but these examples
 #' # include all the tools necessary to make these or further extensions
 #' 
-#' @name bd.sim.musse
-#' @rdname bd.sim.musse
+#' @name bd.sim.traits
+#' @rdname bd.sim.traits
 #' @export
 
-bd.sim.musse <- function(n0, lambda, mu,
+bd.sim.traits <- function(n0, lambda, mu,
                          tMax = Inf, N = Inf,
                          nTraits = 1, nFocus = 1, nStates = 2, nHidden = 1,
                          X0 = 0, Q = list(matrix(c(0, 0.1, 0.1, 0), 

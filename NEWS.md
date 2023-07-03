@@ -23,7 +23,7 @@ models.
     varies with a discrete trait. Implemented to make the search for a
     waiting time in this simpler case (i.e. when the rate is a step
     function) more efficient.
--   `bd.sim.musse` simulates species diversification following a MuSSE
+-   `bd.sim.traits` simulates species diversification following a MuSSE
     model, where traits evolve from an Mk model and change speciation
 <<<<<<< HEAD
     and/or extinction in a discrete fashion.

@@ -80,7 +80,7 @@
 #' set.seed(1)
 #' 
 #' # run the simulation
-#' sim <- bd.sim.musse(n0, lambda, mu, tMax, nTraits = nTraits, 
+#' sim <- bd.sim.traits(n0, lambda, mu, tMax, nTraits = nTraits, 
 #'                     nStates = nStates, X0 = X0, Q = Q, nFinal = c(2, Inf))
 #'                     
 #' # get all trait values
