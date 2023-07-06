@@ -3,55 +3,71 @@
 #' Given the output of \code{sample.clade(..., returnTrue = FALSE)}, returns 
 #' the occurrence counts in each bin (i.e., the same as 
 #' \code{sample.clade(..., returnTrue = TRUE)}). This helps to trace 
-#' perfect parallels between both output formats of \code{sample.clade()}.
+#' perfect parallels between both output formats of \code{sample.clade}.
 #'
-#' @param fossil A \code{data.frame} exactly as returned 
-#' by sample.clade(..., returnTrue = FALSE). See \code{help(sample.clade)} 
+#' @param fossils A \code{data.frame} exactly as returned 
+#' by sample.clade(..., returnTrue = FALSE). See \code{?sample.clade)} 
 #' for details.
 #'
 #' @param bins A vector of time intervals corresponding to geological time 
 #' ranges.
 #'
-#' @return A \code{data.frame} exactly as returned 
-#' by sample.clade(..., returnTrue = TRUE). See \code{help(sample.clade)} 
-#' for details.
+#' @return A \code{data.frame} exactly as returned by
+#' \code{sample.clade(..., returnTrue = TRUE)}. See \code{?sample.clade)} for
+#' details.
 #'
-#' @author Matheus Januario and Bruno do Rosario Petrucci
+#' @author Matheus Januario.
 #'
-#' @details This function helps a user to bins "true occurrences" directly into
-#'  binned occurrences, allowing for comparisons among "perfectly known" fossils
-#'  records and records that have a certain resolution (given by the \code{bins}
-#'    inputted).
+#' @details This function helps a user bin "true occurrences" directly into
+#'  binned occurrences, allowing for comparisons among "perfectly known" 
+#'  fossil records and records that have a certain resolution (given by the 
+#'  \code{bins} parameter).
 #'
 #' @examples
 #'
+#' ###
 #' # run a birth-death simulation:
-#' sim= bd.sim(n0 = 1, lambda = .1, mu = .05, tMax = 50)
+#' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.05, tMax = 50)
 #' 
 #' # choose bins
-#' bins = seq(0,50,by=1)
+#' bins <- seq(0, 50, by = 1)
 #' 
 #' # generate "true" fossil occurrences
-#' fsls1 = sample.clade(sim, rho = 1, tMax=50, returnTrue = T)
+#' fossils_true <- sample.clade(sim, rho = 1, tMax = 50, returnTrue = TRUE)
 #' 
-#' # bin the true occurrences:
-#' fsls2 = binarize(fsls1, bins)
+#' # bin the true occurrences
+#' fossils_binned <- binarize(fossils_true, bins)
+#' 
+#' # compare
+#' fossils_true
+#' fossils_binned
 #' 
 #' @name binarize
 #' @rdname binarize
 #' @export
+#' 
 
-binarize=function(fossil, bins){
+binarize <- function(fossils, bins) {
+  # sort bins in decreasing order
+  bins <- sort(bins, decreasing = TRUE)
 
-  bins = sort(bins, decreasing = T)
-
-  res=fossil[-ncol(fossil)]
-  res$MaxT=NA
-  res$MinT=NA
-  for(i in 1:nrow(fossil)){
-    id = hist(fossil$SampT[i], breaks=bins, plot=FALSE)$counts
-    res$MaxT[i]= bins[which(id==1)+1]
-    res$MinT[i]= bins[which(id==1)]
+  # start results data frame
+  res <- fossils[-ncol(fossils)]
+  
+  # initialize max and min columns
+  res$MaxT <- NA
+  res$MinT <- NA
+  
+  # iterate through all fossils
+  for (i in 1:nrow(fossils)) {
+    # find the lowest bin with higher value
+    id <- max(which(bins >= fossils$SampT[i])) 
+    
+    # set max to that bin
+    res$MaxT[i] <- bins[id]
+    
+    # and min to the one right after
+    res$MinT[i] <- bins[id + 1]
   }
   return(res) 
 }

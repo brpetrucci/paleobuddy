@@ -155,7 +155,7 @@
 #' 
 #' # run the simulation
 #' sim <- bd.sim.traits(n0, lambda, mu, tMax, nTraits = nTraits,
-#'                     nStates = nStates,,
+#'                     nStates = nStates,
 #'                     X0 = X0, Q = Q, nFinal = c(2, Inf))
 #' # note how sim$TRAITS contains states 2 and 3, even though this
 #' # is a HiSSE model, because we need that information to run hidden states
@@ -276,7 +276,7 @@ sample.clade.traits <- function(sim, rho, tMax, traits,
     traitsSp$max <- tMax - maxT
     traitsSp$min <- tMax - minT
     names(traitsSp) <- c("value", "min", "max")
-    
+
     # initialize vector
     sampled <- c()
     
@@ -305,7 +305,7 @@ sample.clade.traits <- function(sim, rho, tMax, traits,
     if (nHidden > 1) {
       # set them to normal states
       traitsSp$value <- traitsSp$value %% nStates
-      
+
       if (nrow(traitsSp) > 1) {
         # duplicate rows
         dup <- c()
@@ -324,7 +324,7 @@ sample.clade.traits <- function(sim, rho, tMax, traits,
           } else {
             # if count > 0, change the max of count rows ago to max of last row
             if (count > 0) {
-              traitsSp$min[i - 1 - count] <- traitsSp$min[i - 1]
+              traitsSp$max[i - 1 - count] <- traitsSp$max[i - 1]
               
               # return count to 0
               count <- 0
@@ -334,13 +334,13 @@ sample.clade.traits <- function(sim, rho, tMax, traits,
         
         # need to do a last check in case the last row is a duplicate
         if (count > 0) {
-          traitsSp$min[i - count] <- traitsSp$min[i]
+          traitsSp$max[i - count] <- traitsSp$max[i]
         }
         
         # delete duplicates
         if (!is.null(dup)) traitsSp <- traitsSp[-dup, ]
       }
-      
+
       # invert time for max and min
       traitsSp$max <- tMax - traitsSp$max
       traitsSp$min <- tMax - traitsSp$min

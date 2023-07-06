@@ -199,7 +199,7 @@ set.seed(1)
 
 # run the simulation
 sim <- bd.sim.traits(n0, lambda, mu, tMax, nTraits = nTraits,
-                    nStates = nStates,,
+                    nStates = nStates,
                     X0 = X0, Q = Q, nFinal = c(2, Inf))
 # note how sim$TRAITS contains states 2 and 3, even though this
 # is a HiSSE model, because we need that information to run hidden states
