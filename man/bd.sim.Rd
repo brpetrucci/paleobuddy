@@ -8,7 +8,8 @@ bd.sim(
   n0,
   lambda,
   mu,
-  tMax,
+  tMax = Inf,
+  N = Inf,
   lShape = NULL,
   mShape = NULL,
   envL = NULL,
@@ -48,6 +49,12 @@ speciation and extinction times before returning.}
 origin. Any species still living after \code{tMax} is considered extant, and 
 any species that would be generated after \code{tMax} is not present in the
 return.}
+
+\item{N}{Number of species at the end of the simulation. End of the 
+simulation will be set for one of the times where \code{N} species are
+alive, chosen from all the times there were \code{N} species alive weighted
+by how long the simulation was in that situation. Exactly one of \code{tMax}
+and \code{N} must be non-\code{Inf}.}
 
 \item{lShape}{Shape parameter defining the degree of age-dependency in 
 speciation rate. This will be equal to the shape parameter in a Weibull 
@@ -175,6 +182,33 @@ set.seed(1)
 
 # run the simulation, making sure we have more than 1 species in the end
 sim <- bd.sim(n0, lambda, mu, tMax, nFinal = c(2, Inf))
+
+# we can plot the phylogeny to take a look
+if (requireNamespace("ape", quietly = TRUE)) {
+  phy <- make.phylo(sim)
+  ape::plot.phylo(phy)
+}
+
+###
+# if we want, we can simulate up to a number of species instead
+
+# initial number of species
+n0 <- 1
+
+# maximum simulation time
+N <- 10
+
+# speciation
+lambda <- 0.11
+
+# extinction
+mu <- 0.08
+
+# set a seed
+set.seed(1)
+
+# run the simulation, making sure we have more than 1 species in the end
+sim <- bd.sim(n0, lambda, mu, N = N)
 
 # we can plot the phylogeny to take a look
 if (requireNamespace("ape", quietly = TRUE)) {
@@ -622,6 +656,10 @@ if (requireNamespace("ape", quietly = TRUE)) {
 sim <- bd.sim(1, lambda = 0.01, mu = 1, tMax = 100, nFinal = c(100, Inf))
 }
 
+}
+\references{
+Stadler T. 2011. Simulating Trees with a Fixed Number of Extant Species. 
+Systematic Biology. 60(5):676-684.
 }
 \author{
 Bruno do Rosario Petrucci.

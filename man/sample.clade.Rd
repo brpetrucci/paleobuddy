@@ -2,7 +2,7 @@
 % Please edit documentation in R/sample.clade.R
 \name{sample.clade}
 \alias{sample.clade}
-\title{General rate species sampling}
+\title{General rate fossil sampling}
 \usage{
 sample.clade(
   sim,
@@ -28,12 +28,13 @@ be a \code{numeric} describing a constant rate, a \code{function(t)}
 describing the variation in sampling over time \code{t}, a 
 \code{function(t, env)} describing the variation in sampling over time 
 following both time AND a time-series, usually an environmental variable 
-(see \code{envR}), or a \code{vector} containing rates that correspond to 
-each rate between sampling rate shift times times (see \code{rShifts}). If 
-\code{adFun} is supplied, it will be used to find the number of occurrences 
-during the species duration, and a normalized \code{rho*adFun} will 
-determine their distribution along the species duration. Note that 
-\code{rho} should always be greater than or equal to zero.}
+(see \code{envR}), or a \code{vector} of rates, corresponding to each rate
+between sampling rate shift times times (see \code{rShifts}), describing an 
+episodic model of fossil sampling. If \code{adFun} is supplied, it will be 
+used to find the number of occurrences during the species duration, and a 
+normalized \code{rho*adFun} will determine their distribution along the 
+species duration. Note that \code{rho} should always be greater than or 
+equal to zero.}
 
 \item{tMax}{The maximum simulation time, used by \code{rexp.var}. A sampling
 time greater than \code{tMax} would mean the occurrence is sampled after the
@@ -115,12 +116,15 @@ function of time and a time-series (usually environmental) variable, or (4)
 a vector of numbers (rates in a step function). Allows for age-dependent 
 sampling with a parameter for a distribution representing the expected 
 occurrence number over a species duration. Allows for further flexibility in
-rates by a shift times vector and environmental matrix parameters. 
+rates by a shift times vector and environmental matrix parameters. Finally,
+allows for the simulation of trait-dependent fossil sampling when trait
+value information is supplied.
+}
+\details{
 Optionally takes a vector of time bins representing geologic periods, if the
 user wishes occurrence times to be represented as a range instead of true 
 points.
-}
-\details{
+
 The age-dependent preservation function assumes that all extant
 species at the end of the simulations have \code{TE = 0} (i.e., the function
 assumes all extant species got extinct exaclty when the simulation ended.

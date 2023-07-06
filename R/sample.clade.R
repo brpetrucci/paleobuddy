@@ -1,4 +1,4 @@
-#' General rate species sampling
+#' General rate fossil sampling
 #' 
 #' Generates occurrence times or time ranges (as most empirical fossil 
 #' occurrences) for each of the desired species using a Poisson process. Allows
@@ -7,7 +7,10 @@
 #' a vector of numbers (rates in a step function). Allows for age-dependent 
 #' sampling with a parameter for a distribution representing the expected 
 #' occurrence number over a species duration. Allows for further flexibility in
-#' rates by a shift times vector and environmental matrix parameters. 
+#' rates by a shift times vector and environmental matrix parameters. Finally,
+#' allows for the simulation of trait-dependent fossil sampling when trait
+#' value information is supplied.
+#' 
 #' Optionally takes a vector of time bins representing geologic periods, if the
 #' user wishes occurrence times to be represented as a range instead of true 
 #' points.
@@ -21,19 +24,20 @@
 #' describing the variation in sampling over time \code{t}, a 
 #' \code{function(t, env)} describing the variation in sampling over time 
 #' following both time AND a time-series, usually an environmental variable 
-#' (see \code{envR}), or a \code{vector} containing rates that correspond to 
-#' each rate between sampling rate shift times times (see \code{rShifts}). If 
-#' \code{adFun} is supplied, it will be used to find the number of occurrences 
-#' during the species duration, and a normalized \code{rho*adFun} will 
-#' determine their distribution along the species duration. Note that 
-#' \code{rho} should always be greater than or equal to zero.
+#' (see \code{envR}), or a \code{vector} of rates, corresponding to each rate
+#' between sampling rate shift times times (see \code{rShifts}), describing an 
+#' episodic model of fossil sampling. If \code{adFun} is supplied, it will be 
+#' used to find the number of occurrences during the species duration, and a 
+#' normalized \code{rho*adFun} will determine their distribution along the 
+#' species duration. Note that \code{rho} should always be greater than or 
+#' equal to zero.
 #' 
 #' @param tMax The maximum simulation time, used by \code{rexp.var}. A sampling
 #' time greater than \code{tMax} would mean the occurrence is sampled after the
 #' present, so for consistency we require this argument. This is also required
 #' to ensure time follows the correct direction both in the Poisson process and
 #' in the output.
-#'
+#' 
 #' @param S A vector of species numbers to be sampled. The default is all 
 #' species in \code{sim}. Species not included in \code{S} will not be sampled 
 #' by the function.
@@ -103,6 +107,7 @@
 #' preservation mean to species alive at the end of the simulation, we
 #' recommend users to implement their own preservation functions for the
 #' species that are extant at the end of the simulation.
+#' 
 #' @return A \code{data.frame} containing species names/numbers, whether each 
 #' species is extant or extinct, and the true occurrence times of each fossil, 
 #' a range of occurrence times based on \code{bins}, or both.
@@ -639,7 +644,8 @@
 #' @rdname sample.clade
 #' @export
 
-sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
+sample.clade <- function(sim, rho, tMax, S = NULL, 
+                         envR = NULL, rShifts = NULL,
                          returnTrue = TRUE, returnAll = FALSE, bins = NULL, 
                          adFun = NULL, ...) {
   # check that sim is a valid sim object
@@ -701,8 +707,8 @@ sample.clade <- function(sim, rho, tMax, S = NULL, envR = NULL, rShifts = NULL,
   # according to adFun)
   else { 
     # find occurrence times
-    pointEstimates <- sample.age.time(sim = sim, rho = rho, tMax = tMax, S = S,
-                                 adFun = adFun, ...)
+    pointEstimates <- sample.age.time(sim = sim, rho = rho, tMax = tMax, 
+                                      S = S, adFun = adFun, ...)
   }
 
   # names res will have regardless of what to return

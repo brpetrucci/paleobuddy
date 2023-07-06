@@ -44,6 +44,12 @@
 #' origin. Any species still living after \code{tMax} is considered extant, and 
 #' any species that would be generated after \code{tMax} is not present in the
 #' return.
+#' 
+#' @param N Number of species at the end of the simulation. End of the 
+#' simulation will be set for one of the times where \code{N} species are
+#' alive, chosen from all the times there were \code{N} species alive weighted
+#' by how long the simulation was in that situation. Exactly one of \code{tMax}
+#' and \code{N} must be non-\code{Inf}.
 #'
 #' @param lShape Shape parameter defining the degree of age-dependency in 
 #' speciation rate. This will be equal to the shape parameter in a Weibull 
@@ -127,6 +133,11 @@
 #' \code{?sim}.
 #'
 #' @author Bruno do Rosario Petrucci.
+#' 
+#' @references 
+#' 
+#' Stadler T. 2011. Simulating Trees with a Fixed Number of Extant Species. 
+#' Systematic Biology. 60(5):676-684.
 #'
 #' @examples
 #' 
@@ -153,6 +164,33 @@
 #' 
 #' # run the simulation, making sure we have more than 1 species in the end
 #' sim <- bd.sim(n0, lambda, mu, tMax, nFinal = c(2, Inf))
+#' 
+#' # we can plot the phylogeny to take a look
+#' if (requireNamespace("ape", quietly = TRUE)) {
+#'   phy <- make.phylo(sim)
+#'   ape::plot.phylo(phy)
+#' }
+#' 
+#' ###
+#' # if we want, we can simulate up to a number of species instead
+#' 
+#' # initial number of species
+#' n0 <- 1
+#' 
+#' # maximum simulation time
+#' N <- 10
+#' 
+#' # speciation
+#' lambda <- 0.11
+#' 
+#' # extinction
+#' mu <- 0.08
+#' 
+#' # set a seed
+#' set.seed(1)
+#' 
+#' # run the simulation, making sure we have more than 1 species in the end
+#' sim <- bd.sim(n0, lambda, mu, N = N)
 #' 
 #' # we can plot the phylogeny to take a look
 #' if (requireNamespace("ape", quietly = TRUE)) {
@@ -604,12 +642,13 @@
 #' @rdname bd.sim
 #' @export
 
-bd.sim <- function(n0, lambda, mu, tMax, 
-                  lShape = NULL, mShape = NULL, 
-                  envL = NULL, envM = NULL, 
-                  lShifts = NULL, mShifts = NULL, 
-                  nFinal = c(0, Inf), nExtant = c(0, Inf),
-                  trueExt = FALSE) {
+bd.sim <- function(n0, lambda, mu,
+                   tMax = Inf, N = Inf, 
+                   lShape = NULL, mShape = NULL, 
+                   envL = NULL, envM = NULL, 
+                   lShifts = NULL, mShifts = NULL, 
+                   nFinal = c(0, Inf), nExtant = c(0, Inf),
+                   trueExt = FALSE) {
   
   # if we have ONLY numbers for lambda and mu, it is constant
   if ((is.numeric(lambda) & length(lambda) == 1) &
@@ -619,7 +658,7 @@ bd.sim <- function(n0, lambda, mu, tMax,
     m <- mu
     
     # call bd.sim.constant
-    return(bd.sim.constant(n0, l, m, tMax, nFinal, nExtant, trueExt))
+    return(bd.sim.constant(n0, l, m, tMax, N, nFinal, nExtant, trueExt))
   }
 
   # else it is not constant
@@ -631,7 +670,7 @@ bd.sim <- function(n0, lambda, mu, tMax,
     m <- make.rate(mu, tMax, envM, mShifts)
 
     # call bd.sim.general
-    return(bd.sim.general(n0, l, m, tMax, lShape, mShape, 
+    return(bd.sim.general(n0, l, m, tMax, N, lShape, mShape, 
                           nFinal, nExtant, trueExt))
   }
 }

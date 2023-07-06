@@ -60,7 +60,8 @@
 #' 
 #' @noRd
 
-sample.age.time <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
+sample.age.time <- function(sim, rho, tMax,
+                            S = NULL, adFun = NULL, ...){
   # checking input
   # check that sim is a valid sim object
   if (!is.sim(sim)) {
@@ -98,7 +99,7 @@ sample.age.time <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
     
     # run sample.time
     occs <- sample.time(sim, rho, tMax, S)
-    
+
     # check how many species left no occurrences
     zeroOccs <- which(lapply(occs, length) == 0)
     message(paste0(length(zeroOccs), " species left no fossil"))
@@ -124,8 +125,9 @@ sample.age.time <- function(sim, rho, tMax, S = NULL, adFun = NULL, ...){
   
   # get the number of occurrences following a time-varying poisson process
   Noccs <- vector(length = length(sim$TE))
+  
   Noccs <- unlist(lapply(sample.time(sim = sim, rho = rho, tMax = tMax,
-                                     S = S), FUN = length))
+                                       S = S), FUN = length))
   
   occs <- list()
   

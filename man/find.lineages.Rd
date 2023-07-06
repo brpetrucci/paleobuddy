@@ -7,9 +7,9 @@
 find.lineages(sim, S = NULL)
 }
 \arguments{
-\item{sim}{A \code{sim} object, containing extinction times, speciation times,
-parent, and status information for each species in the simulation. See 
-\code{?sim}.}
+\item{sim}{A \code{sim} object, containing extinction times, speciation 
+times, parent, and status information for each species in the simulation. 
+See \code{?sim}.}
 
 \item{S}{A vector of species in \code{sim}. If not supplied, \code{S} will be
 the starting species in the simulation, i.e. those for which the parent is
