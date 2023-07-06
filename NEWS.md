@@ -3,13 +3,6 @@
 
 # paleobuddy 1.1.0.0
 
-## Changes to vignettes
-
-- `overview`: the Per Capita method estimation was changed to have a
-  more accurate estimate.
-- `overview`: a complex example was added to the end to respond to
-  comments from a reviewer in the manuscript.
-
 ## Simulating to a number of extant species
 
 - `bd.sim` now allows for simulation up to a number of species as well
@@ -29,10 +22,6 @@ Added functions to simulate trait evolution and trait-dependent birth
 death models, in particular State Speciation and Extinction (SSE) models
 BiSSE, MuSSE, and QuaSSE. See documentation for full reference.
 
-- `rexp.musse` is a particular case of `rexp.var` when the rate varies
-  with a discrete trait. Implemented to make the search for a waiting
-  time in this simpler case (i.e. when the rate is a step function) more
-  efficient.
 - `bd.sim.traits` simulates species diversification following a MuSSE
   model, where traits evolve from an Mk model and change speciation
   and/or extinction in a discrete fashion. Allows for the simulation of
@@ -64,6 +53,16 @@ BiSSE, MuSSE, and QuaSSE. See documentation for full reference.
   that this last functionality required a limited version of the
   `drop.tip` function of the `APE` package to be copied. See
   `?make.phylo` for reference and credits.
+
+## Changes to vignettes
+
+### `overview`
+
+- The Per Capita method estimation was changed to have a more accurate
+  estimate.
+- A complex example was added to the end to respond to comments from a
+  reviewer in the manuscript.
+- Examples of new features for version 1.1 (see above) were added.
 
 ## Simple fixes
 

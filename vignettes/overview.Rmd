@@ -252,8 +252,8 @@ Let us first run simulations with more species
 set.seed(1)
 
 # constant lambda and mu
-lambda = 0.15
-mu = 0.05
+lambda <- 0.15
+mu <- 0.05
 
 # nFinal means there will be at least 100 species in the simulation
 sim <- bd.sim(n0, lambda, mu, tMax, nFinal = c(100, Inf))
@@ -534,15 +534,106 @@ draw.sim(sim, fossils = fossils)
 # draw phylogenetic tree
 ape::plot.phylo(make.phylo(sim))
 ```
+## State-dependent speciation, extinction, and fossil sampling
+
+Starting with version 1.1, paleobuddy now also allows for trait-dependent diversification models, both for birth-death and fossil sampling simulations, through use of the `bd.sim.traits` and `sample.clade.traits` functions. To illustrate these features, we'll run a simple workflow simulating the Binary state-dependent speciation and extinction (BiSSE) model (Maddison et al 2007, see `?bd.sim.traits` for full reference). 
+
+```{r}
+# set seed
+set.seed(1)
+
+# initial number of species
+n0 <- 1
+
+# number of extant species at the end of the simulation
+N <- 10
+# conditioning the simulation on the number of extant species
+# is also a new feature of version 1.1!
+
+# speciation, higher for state 1
+lambda <- c(0.1, 0.2)
+
+# extinction, higher for state 0
+mu <- c(0.06, 0.03)
+
+# number of traits and states for each--one binary trait
+nTraits <- 1
+nStates <- 2
+
+# initial value of the trait
+X0 <- 0
+
+# trait transition matrix--it's a list 
+# to allow for the case with multiple traits
+Q <- list(matrix(c(0, 0.1, 0.1, 0), nrow = 2, ncol = 2))
+
+# run simulation
+sim <- bd.sim.traits(n0, lambda, mu, N = N, nTraits = nTraits, 
+                     nStates = nStates, X0 = X0, Q = Q)
+
+# extract sim object and trait data frames
+traits <- sim$TRAITS
+sim <- sim$SIM
+
+# make phylogeny
+phy <- make.phylo(sim)
+
+# get trait values for all tips, using the new traits.summary function
+tip_traits <- traits.summary(sim, traits)$trait1
+
+# plot phylogenetic tree coloring for the trait
+ape::plot.phylo(phy, tip.color = c("red", "blue")[tip_traits + 1])
+```
+
+We can also have fossil sampling be trait-dependent, of course.
+
+```{r}
+# set seed
+set.seed(1)
+
+# fossil sampling rate, higher for state 0
+rho <- c(0.5, 0.1)
+
+# run fossil sampling
+fossils <- sample.clade.traits(sim, rho, max(sim$TS), 
+                               traits, nStates = nStates)
+
+# extract fossil record (fossils$TRAITS would be the same as sim$TRAITS here)
+fossils <- fossils$FOSSILS
+
+# extract trait values for both fossils and extant species
+tip_traits <- traits.summary(sim, traits, fossils, 
+                             selection = "sampled")$trait1
+
+# we can visualize the simulation and fossils using draw.sim
+draw.sim(sim, fossils)
+# to-do: color edges and fossil samples using trait values
+
+# we can get a phylogeny including extant species and fossils, to
+# simulate a reconstructed phylogeny used in fossilized birth-death models
+phy <- make.phylo(sim, fossils, returnTrueExt = FALSE)
+# returnTrueExt being false means the tips representing the true extinction 
+# will be dropped, and the last sampled fossil will be in its place
+
+# plot phylogenetic tree coloring for the trait
+ape::plot.phylo(phy, tip.color = c("red", "blue")[tip_traits + 1])
+# here sampled ancestor fossils are represented as 0-length branches,
+# so that the tree could be used e.g. for a Beast2 analyses
+# some software prefer a degree-2 node, in which case one could set the
+# saFormat parameter of make.phylo to "node"
+```
+There are a multitude of ways to complicate these simulations. We could, e.g., allow for more states per trait, or more traits, where some traits might evolve neutrally with regards to diversification, and/or speciation and extinction depend on different traits. We could also allow for hidden traits to control diversification, to test the hidden state-dependent speciation and extinction model (HiSSE; Beaulieu & O'Meara 2016, see `?bd.sim.traits` for full reference) and its extensions. Fossil sampling has similar flexibility, with the exception of allowing for more traits since there is only one rate in that model. See `?bd.sim.traits` and `?sample.clade.traits` for examples exploring all the flexibility of these functions. Furthermore, see `?make.phylo` and `draw.sim` to check out the new features of these functions. 
 
 ## Conclusion
 
 For completion, we present a final list of the functions of the package
 
-* `bd.sim` birth-death simulator. Rates can be constant, time dependent, time and environmentally dependent, or a list of numbers. User can supply a shape parameter to make rate a Weibull scale.
-* `make.phylo` creates a `phylo` object from the `ape` package.
+* `bd.sim` birth-death simulator. Rates can be constant, time dependent, time and environmentally dependent, or a list of numbers. User can supply a shape parameter to make rate a Weibull scale. With the release of version 1.1, both `bd.sim` and the new `bd.sim.traits` (see below) allow for conditioning the simulation on either the maximum simulation time (`tMax`, as was originally implemented) or the number of extant species at the end of the simulation (`N`, see `?bd.sim` for implementation details).
+* `bd.sim.traits` functions like `bd.sim`, but for trait-dependent diversification rates. There is no limit to the number of traits (though speciation and extinction can only depend on one of those each), the number of states per trait (observed or hidden), or the parameters of trait evolution. In terms of models currently in the literature, `bd.sim.traits` can model BiSSE (Maddison et al 2007), MuSSE (Fitzjohn 2012), and HiSSE (Beaulieu & O'Meara 2016, see `?bd.sim.traits` for full references).
+* `make.phylo` creates a `phylo` object from the `ape` package. With the release of version 1.1, it now allows for the inclusion of fossil samples on the phylogeny as either 0-length branches or degree-2 nodes for use with fossilized birth-death models (Heath et al 2014, see `?make.phylo` for full reference).
 * `sample.clade` simulates fossil samples from a set of species, usually outputted from `bd.sim`. Sampling rate can be anything a speciation or extinction rate can be, without the option of a shape parameter. The user may instead supply a distribution of occurrences across a species age, so as to simulate age-dependency in sampling with more flexibility.
-* `draw.sim` function to draw longevities of the species in a `sim` object and, optionally, fossil occurrences of these species.
+* `sample.clade.traits` is to `sample.clade` what `bd.sim.traits` is to `bd.sim`, i.e. trait-dependent fossil sampling. It can simulate all models `bd.sim.traits` can, though the fact that there is only one rate leads to some caveats (see `?sample.clade.traits`).
+* `draw.sim` function to draw longevities of the species in a `sim` object and, optionally, fossil occurrences of these species. With the release of version 1.1, it now allows for the coloring of edges and fossil samples with regards to trait values.
 * `rexp.var` exponential and Weibull waiting time drawing with variable rates. Used by `bd.sim` and `sample.clade`.
 * `find.lineages` separates a group returned by the `bd.sim` function, or similar, by the species that started the simulation as mothers of each group. Allows for an optional argument, a list of numbers, and if supplied returns the groups generated by those species instead. A quick example:
 
@@ -567,6 +658,7 @@ ape::plot.phylo(make.phylo(clades$clade_2$sim), show.tip.label = FALSE)
 
 * `phylo.to.sim` creates a `sim` object from a phylogeny following the APE `phylo` class format (Paradis et al 2004). Can be used to integrate paleobuddy with other packages that output phylogenies. Note that the user must supply some optional arguments to allow for this; most importantly the information of each species' mother, since this is ambiguous from a bifurcating phylogeny.
 * `make.rate` creates a function of time from the customization options presented above - vector of numbers and vector of shift times, function of time and environment and an environment matrix, etc. Used by `bd.sim` and `sample.clade` to detect when the given rates are constant, and create the rates to pass to the helper functions.
+* `traits.summary` creates vectors listing the trait values of each species in a simulation (usually the output of `bd.sim.traits`), with flexibility on the range of species included, in particular with the inclusion of fossil species as well. These vectors can then easily be saved as Nexus data files.
 * `var.rate.div` calculates the expected diversity from a variable rate birth-death process and a time period.
 * `binner` given occurrence times and time bins, returns the number of occurrences in each bin.
 * Finally, there are a number of generics and methods for the `sim` class, like `print.sim` and `plot.sim`. See `?sim` for a detailed list.
