@@ -26,7 +26,10 @@
 #' @examples
 #'
 #' ###
-#' # run a birth-death simulation:
+#' # set seed
+#' set.seed(1) 
+#' 
+#' # run a birth-death simulation
 #' sim <- bd.sim(n0 = 1, lambda = 0.1, mu = 0.05, tMax = 50)
 #' 
 #' # choose bins
