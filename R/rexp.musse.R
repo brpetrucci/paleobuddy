@@ -125,9 +125,7 @@
 #'
 #' @import stats
 #'
-#' @name rexp.musse
-#' @rdname rexp.musse
-#' @export
+#' @noRd
 
 rexp.musse <- function(n, rate, traits,
                         now = 0, tMax = Inf, fast = FALSE) {

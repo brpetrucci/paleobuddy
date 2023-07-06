@@ -28,9 +28,9 @@ will go extinct before speciating even once. One way of generating large
 sample sizes in this case is to increase \code{n0}, which will simulate the
 diversification of a paraphyletic group.}
 
-\item{lambda}{Function to hold the speciation rate over time. It should
-either be a constant, or a list of size \code{nStates}. For each species a 
-trait evolution simulation will be run, and then used to calculate the final 
+\item{lambda}{Vector to hold the speciation rate over time. It should either
+be a constant, or a list of size \code{nStates}. For each species a trait
+evolution simulation will be run, and then used to calculate the final 
 speciation rate. Note that \code{lambda} should always be greater than or 
 equal to zero.}
 
@@ -276,8 +276,8 @@ nStates <- 2
 X0 <- 0
 
 # transition matrix, with q01 higher than q10
-Q <- list(matrix(c(0, 0.25,
-                   0.1, 0), ncol = 2, nrow = 2))
+Q <- list(matrix(c(0, 0.1,
+                   0.25, 0), ncol = 2, nrow = 2))
 
 # set seed
 set.seed(1)
@@ -351,7 +351,7 @@ if (requireNamespace("ape", quietly = TRUE)) {
 n0 <- 1
 
 # maximum simulation time
-tMax <- 40
+tMax <- 20
 
 # speciation, higher for state 1A, highest for 1B
 lambda <- c(0.1, 0.2, 0.1, 0.3)
@@ -451,8 +451,8 @@ if (requireNamespace("ape", quietly = TRUE)) {
 }
 
 ###
-# we can then do the same thing, but with the s
-# econd trait controlling extinction
+# we can then do the same thing, but with the
+# second trait controlling extinction
 
 # initial number of species
 n0 <- 1

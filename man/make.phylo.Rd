@@ -20,7 +20,9 @@ See \code{?sim}.}
 \item{fossils}{A data frame with a \code{"Species"} column and a
 \code{SampT} column, usually an output of the \code{sample.clade}
 function. Species names must contain only one number each, corresponding
-to the order of the \code{sim} vectors.}
+to the order of the \code{sim} vectors. Note that we require it to have a
+\code{SampT} column, i.e. fossils must have an exact age. This assumption
+might be relaxed in the future.}
 
 \item{saFormat}{A string indicating which form sampled ancestors should take
 in the tree. If set to \code{"branch"} (default), SAs are returned as 

@@ -29,7 +29,9 @@ of each interval}}}
 \item{fossils}{A data frame with a \code{"Species"} column and a
 \code{SampT} column, usually an output of the \code{sample.clade}
 function. Species names must contain only one number each, corresponding
-to the order of the \code{sim} vectors.}
+to the order of the \code{sim} vectors. Note that we require it to have a
+\code{SampT} column, i.e. fossils must have an exact age. This assumption
+might be relaxed in the future.}
 
 \item{selection}{Which subset of species to collect trait data for. If set
 to \code{"all"}, it will return every trait value it has access to, i.e.

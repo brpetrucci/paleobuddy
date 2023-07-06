@@ -23,9 +23,9 @@
 #'
 #' @inheritParams bd.sim
 #' 
-#' @param lambda Function to hold the speciation rate over time. It should
-#' either be a constant, or a list of size \code{nStates}. For each species a 
-#' trait evolution simulation will be run, and then used to calculate the final 
+#' @param lambda Vector to hold the speciation rate over time. It should either
+#' be a constant, or a list of size \code{nStates}. For each species a trait
+#' evolution simulation will be run, and then used to calculate the final 
 #' speciation rate. Note that \code{lambda} should always be greater than or 
 #' equal to zero.
 #'
@@ -230,8 +230,8 @@
 #' X0 <- 0
 #' 
 #' # transition matrix, with q01 higher than q10
-#' Q <- list(matrix(c(0, 0.25,
-#'                    0.1, 0), ncol = 2, nrow = 2))
+#' Q <- list(matrix(c(0, 0.1,
+#'                    0.25, 0), ncol = 2, nrow = 2))
 #' 
 #' # set seed
 #' set.seed(1)
@@ -305,7 +305,7 @@
 #' n0 <- 1
 #' 
 #' # maximum simulation time
-#' tMax <- 40
+#' tMax <- 20
 #' 
 #' # speciation, higher for state 1A, highest for 1B
 #' lambda <- c(0.1, 0.2, 0.1, 0.3)
@@ -405,8 +405,8 @@
 #' }
 #' 
 #' ###
-#' # we can then do the same thing, but with the s
-#' # econd trait controlling extinction
+#' # we can then do the same thing, but with the
+#' # second trait controlling extinction
 #' 
 #' # initial number of species
 #' n0 <- 1
@@ -800,8 +800,7 @@ bd.sim.traits <- function(n0, lambda, mu,
       for (j in 1:nTraits) {
         # df in question
         traitsSp <- traits[[i]][[j]]
-        print(traitsSp)
-        
+
         # eliminate rows with min greater than tMax
         traitsSp <- traitsSp[traitsSp$min < tMax, ]
         
@@ -815,7 +814,6 @@ bd.sim.traits <- function(n0, lambda, mu,
         # invert columns
         colnames(traitsSp) <- c("value", "max", "min")
         
-        print(traitsSp)
         # set traits back to it
         traits[[i]][[j]] <- traitsSp
       }
@@ -860,28 +858,74 @@ bd.sim.traits <- function(n0, lambda, mu,
   
   # truncate traits so that last min time is extinction time
   for (sp in 1:length(TE)) {
-    # check if it is extinct
-    if (!is.na(TE[sp])) {
-      # iterate through number of traits
-      for (i in 1:length(traits[[sp]])) {
+    # iterate through number of traits
+    for (tr in 1:length(traits[[sp]])) {
+      # get traits data frame
+      traitsSp <- traits[[sp]][[tr]]
+
+      # if there are hidden states
+      if (nHidden[tr] > 1) {
+        # set them to normal states
+        traitsSp$value <- traitsSp$value %% nStates
+        
+        if (nrow(traitsSp) > 1) {
+          # duplicate rows
+          dup <- c()
+          
+          # counting how many duplicates in a row
+          count <- 0
+          
+          #iterate through rows to make sure there are no duplicates
+          for (i in 2:nrow(traitsSp)) {
+            if (traitsSp$value[i] == traitsSp$value[i - 1]) {
+              # add to dup
+              dup <- c(dup, i)
+              
+              # increase count of dups
+              count <- count + 1
+            } else {
+              # if count > 0, change the max of count rows ago to max of last row
+              if (count > 0) {
+                traitsSp$min[i - 1 - count] <- traitsSp$min[i - 1]
+                
+                # return count to 0
+                count <- 0
+              }
+            }
+          }
+          
+          # need to do a last check in case the last row is a duplicate
+          if (count > 0) {
+            traitsSp$min[i - count] <- traitsSp$min[i]
+          }
+          
+          # delete duplicates
+          if (!is.null(dup)) traitsSp <- traitsSp[-dup, ]
+        }
+      }
+
+      # check if it is extinct
+      if (!is.na(TE[sp])) {
         # if so, find last row with maximum higher than TE
-        lastRow <- max(which(traits[[sp]][[i]]$max > TE[sp]))
+        lastRow <- max(which(traitsSp$max > TE[sp]))
         
         # set min of last row to TE
-        traits[[sp]][[i]]$min[lastRow] <- TE[sp]
+        traitsSp$min[lastRow] <- TE[sp]
         
         # delete other rows
-        if (lastRow < nrow(traits[[sp]][[i]])) {
+        if (lastRow < nrow(traitsSp)) {
           # row(s) to delete
-          if (lastRow + 1 < nrow(traits[[sp]][[i]])) {
-            delRow <- (lastRow + 1):nrow(traits[[sp]][[i]])
+          if (lastRow + 1 < nrow(traitsSp)) {
+            delRow <- (lastRow + 1):nrow(traitsSp)
           } else {
             delRow <- lastRow + 1
           }
-          traits[[sp]][[i]] <- traits[[sp]][[i]][-delRow, ]
-          
+          traitsSp <- traitsSp[-delRow, ]
         }
       }
+      
+      # reassign traits data frame
+      traits[[sp]][[tr]] <- traitsSp
     }
   }
   
@@ -896,7 +940,7 @@ bd.sim.traits <- function(n0, lambda, mu,
 
 ###
 # function to run trait evolution for a given species
-traits.musse <- function(tMax, tStart = 0, nTraits = 1, nStates = 2, 
+traits.musse <- function(tMax, tStart = 0, nTraits = 1, nStates = 2,
                          nHidden = 1, X0 = 0,
                          Q = list(matrix(c(0, 0.1, 0.1, 0), 2, 2))) {
   # create a return list
@@ -981,47 +1025,6 @@ trait.musse <- function(tMax, tStart = 0, nStates = 2, nHidden = 1, X0 = 0,
     
     # add it to traits data frame
     traits[shifts + 1, ] <- c(newState, tNow, NA)
-  }
-  
-  # if there are hidden states
-  if (nHidden > 1) {
-    # set them to normal states
-    traits$value <- traits$value %% nStates
-    
-    if (nrow(traits) > 1) {
-      # duplicate rows
-      dup <- c()
-      
-      # counting how many duplicates in a row
-      count <- 0
-      
-      #iterate through rows to make sure there are no duplicates
-      for (i in 2:nrow(traits)) {
-        if (traits$value[i] == traits$value[i - 1]) {
-          # add to dup
-          dup <- c(dup, i)
-          
-          # increase count of dups
-          count <- count + 1
-        } else {
-          # if count > 0, change the max of count rows ago to max of last row
-          if (count > 0) {
-            traits$max[i - 1 - count] <- traits$max[i - 1]
-          }
-          
-          # return count to 0
-          count <- 0
-        }
-      }
-      
-      # need to do a last check in case the last row is a duplicate
-      if (count > 0) {
-        traits$max[i - count] <- traits$max[i]
-      }
-      
-      # delete duplicates
-      if (!is.null(dup)) traits <- traits[-dup, ]
-    }
   }
   
   return(traits)
