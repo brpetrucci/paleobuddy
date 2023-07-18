@@ -866,7 +866,7 @@ bd.sim.traits <- function(n0, lambda, mu,
       # if there are hidden states
       if (nHidden[tr] > 1) {
         # set them to normal states
-        traitsSp$value <- traitsSp$value %% nStates
+        traitsSp$value <- traitsSp$value %% nStates[tr]
         
         if (nrow(traitsSp) > 1) {
           # duplicate rows

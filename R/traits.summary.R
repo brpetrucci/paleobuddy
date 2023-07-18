@@ -140,7 +140,7 @@ traits.summary <- function(sim, traits, fossils = NULL, selection = "all") {
   
   # create final list return
   res <- vector(mode = "list", length = length(traits[[1]]))
-  
+
   # iterate through traits
   for (t in 1:length(traits[[1]])) {
     # create return
@@ -159,7 +159,7 @@ traits.summary <- function(sim, traits, fossils = NULL, selection = "all") {
       # add name and status
       traitNames <- c(traitNames, paste0("t", sp))
       traitStatus <- c(traitStatus, c("extinct", "extant")[sim$EXTANT[sp] + 1])
-      
+
       # check whether we need to go through fossils or not
       if (!is.null(fossils) && sum(fossils$Species == paste0("t", sp)) > 0) {
         # select fossil rows that are for this species
@@ -184,7 +184,7 @@ traits.summary <- function(sim, traits, fossils = NULL, selection = "all") {
         }
       }
     }
-    
+
     # name traitList
     names(traitList) <- traitNames
     
