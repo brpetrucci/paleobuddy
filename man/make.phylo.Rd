@@ -28,7 +28,8 @@ might be relaxed in the future.}
 in the tree. If set to \code{"branch"} (default), SAs are returned as 
 0-length branches. If set to \code{"node"}, they are returned as degree-2 
 nodes. Note that some software prefer the former (e.g. Beast) and some the
-latter (e.g. RevBayes).}
+latter (e.g. RevBayes). The code for making 0-length branches become nodes
+was written by Joshua A. Justison.}
 
 \item{returnTrueExt}{A logical indicating whether to include in tree the
 tips representing the true extinction time of extinct species. If set to
