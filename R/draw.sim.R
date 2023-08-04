@@ -205,8 +205,18 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
   
   # limits in x axis (to enclose all species' durations)
   if (!("xlim" %in% names(args))) {
+    
+    # warnings are not relevant here:
+    suppressWarnings({
+      min_time = min(sim$SIM$TE, na.rm = TRUE)  
+    })
+    # if all species are extant, min_time must be adjusted:
+    if(!is.finite(min_time)){
+      min_time = 0
+    }
+    
     formals(plot.default)$xlim <- 
-      c(max(sim$TS, na.rm = TRUE), min(sim$TE, na.rm = TRUE) - 1)
+      c(max(sim$SIM$TS, na.rm = TRUE), min_time - 1)
   }
   
   # limits in y axis
