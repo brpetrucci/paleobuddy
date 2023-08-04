@@ -208,15 +208,18 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
     
     # warnings are not relevant here:
     suppressWarnings({
-      min_time <- min(sim$SIM$TE, na.rm = TRUE)  
+      min_time <- min(sim$TE, na.rm = TRUE)  
     })
     # if all species are extant, min_time must be adjusted:
-    if(!is.finite(min_time)){
-      min_time <- 0
+    min_time <- 0
+    xmin <- min_time
+    
+    if(showLabel){
+      xmin = 0 - (max(sim$TS, na.rm = TRUE)*0.035)
     }
     
     formals(plot.default)$xlim <- 
-      c(max(sim$SIM$TS, na.rm = TRUE), min_time - 1)
+      c(max(sim$TS, na.rm = TRUE), xmin - 1)
   }
   
   # limits in y axis
@@ -335,10 +338,11 @@ draw.sim <- function (sim, fossils = NULL, sortBy = "TS",
       tiplabels <- tipLabels[ord]
     }
     
-    
+    labelPosition = sim_mod$TE
+    labelPosition[is.na(labelPosition)]=0
     
     text(y = 1:length(sim_mod$TE), 
-         x = sim_mod$TE - ((max(sim$TS) - min_time) * 0.035), 
+         x = labelPosition - ((max(sim$TS) - min_time ) * 0.035), 
          labels = tiplabels)
   }
   
