@@ -67,7 +67,7 @@ bins <- seq(tMax, 0, -1) # something to simulate geologic intervals
 fossils <- sample.clade(sim = sim, rho = rho, tMax = tMax, bins = bins)
 
 # visualize simulation and fossil occurrences
-draw.sim(sim, fossils)
+draw.sim(sim, fossils = fossils)
 ```
 
 <img src="man/figures/README-unnamed-chunk-6-1.png" width="50%" />

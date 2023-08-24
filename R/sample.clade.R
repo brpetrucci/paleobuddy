@@ -139,7 +139,7 @@
 #'                         bins = bins, returnTrue = FALSE)
 #' 
 #' # draw simulation with fossil occurrences as ranges
-#' draw.sim(sim, fossils = fossils)
+#' draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges")
 #' 
 #' ###
 #' # sampling can be any function of time 
@@ -170,7 +170,7 @@
 #'                         bins = bins, returnTrue = FALSE)
 #' 
 #' # draw simulation with fossil occurrences as ranges
-#' draw.sim(sim, fossils = fossils)
+#' draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges")
 #' 
 #' ###
 #' # now we can try a step function rate
@@ -206,7 +206,7 @@
 #'                         bins = bins, returnTrue = FALSE)
 #' 
 #' # draw simulation with fossil occurrences as ranges
-#' draw.sim(sim, fossils = fossils)
+#' draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges")
 #' 
 #' ###
 #' # finally, sample.clade also accepts an environmental variable
@@ -316,8 +316,8 @@
 #' draw.sim(sim, fossils = fossils)
 #' # the warning is to let you know the ranges won't be used
 #' 
-#' # and also as ranges - we take out the column with true time points
-#' draw.sim(sim, fossils = fossils[, -3])
+#' # and also as ranges
+#' draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges")
 #' 
 #' ###
 #' # we can have more parameters on adFun
@@ -397,7 +397,7 @@
 #' # of age (a given percentile of the age, for instance) - see below
 #' 
 #' # draw simulation with fossil occurrences as ranges
-#' draw.sim(sim, fossils = fossils)
+#' draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges")
 #' 
 #' ###
 #' # we can also have a hat-shaped increase through the duration of a species
@@ -543,7 +543,7 @@
 #'                         returnTrue = FALSE)
 #' 
 #' # draw simulation with fossil occurrences as time ranges
-#' draw.sim(sim, fossils = fossils)
+#' draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges")
 #' 
 #' ###
 #' # we can also have a mix of age-independent and age-dependent
@@ -634,7 +634,7 @@
 #'                         bins = bins, returnTrue = FALSE)
 #' 
 #' # draw simulation with fossil occurrences as ranges
-#' draw.sim(sim, fossils = fossils)
+#' draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges")
 #' 
 #' # note how occurrences cluster close to the speciation time of
 #' # species 1, but not its extinction time, since around 5mya

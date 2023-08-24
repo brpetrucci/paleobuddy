@@ -6,12 +6,20 @@
 \usage{
 draw.sim(
   sim,
+  traits = NULL,
   fossils = NULL,
+  lineageColors = NULL,
   sortBy = "TS",
   lwdLin = 4,
-  lineageColors = NULL,
   tipLabels = NULL,
   showLabel = TRUE,
+  traitID = 1,
+  traitColors = c("#a40000", "#16317d", "#007e2f", "#ffcd12", "#b86092", "#721b3e",
+    "#00b7a7"),
+  traitLegendPlacement = "topleft",
+  fossilsToDraw = "exact",
+  fossilRangeAlpha = 100,
+  restoreOldPar = TRUE,
   ...
 )
 }
@@ -20,9 +28,22 @@ draw.sim(
 times, parent, and status information for each species in the simulation. 
 See \code{?sim}.}
 
+\item{traits}{A list of data frames enconding the value of one or more 
+traits during the lifetime of each species, usually coming from the
+\code{TRAITS} member of the output of \code{bd.sim.traits}. It should have
+length equal to the number of species in \code{sim}, and the 
+\code{traitID}th trait (see below) (i.e. the data frame of number 
+\code{traitID} for each species) will be used to draw trait values.}
+
 \item{fossils}{A \code{data.frame} containing the fossil occurrences of 
 each lineage, e.g. as returned by the \code{sample.clade} function. The
 format of this argument will define the way fossils are drawn (see below).}
+
+\item{lineageColors}{Character vector giving the colors of all lineages, 
+sorted by the original lineage order (the one in the \code{sim} object). 
+Must have same length as the number of lineages in the \code{sim} object. 
+If NULL (default value) all lineages are plotted as black. this parameter 
+has no effect if \code{traits} is also provided.}
 
 \item{sortBy}{A single character or integer vector indicating how lineages 
 should be sorted in the plot. If it is a string (see example 3), it 
@@ -37,11 +58,6 @@ default species will be sorted by order of origination in the simulation.}
 points in the plot. Default value is 4 (i.e. equal to \code{lwd = 4} for 
 the black horizontal lines).}
 
-\item{lineageColors}{Character vector giving the colors of all lineages, 
-sorted by the original lineage order (the one in the \code{sim} object). 
-Must have same length as the number of lineages in the \code{sim} object. 
-If NULL (default value) all lineages are plotted as black.}
-
 \item{tipLabels}{Character vector manually assigning the tip labels of all 
 lineages, sorted by the original lineage order (the one in the \code{sim} 
 object). Must have same length as the number of lineages in the \code{sim} 
@@ -50,6 +66,36 @@ being the position of that lineage in the \code{sim} object.}
 
 \item{showLabel}{A \code{logical} on whether to draw species labels (i.e. 
 species 1 being t1, species 2 t2 etc.). Default is \code{TRUE}.}
+
+\item{traitID}{Numerical giving the trait which will be plotted. this 
+parameter is only useful when multiple traits were simulated in the 
+same \code{sim} object, i.e. when \code{traits} has more than one data frame
+per species.}
+
+\item{traitColors}{Character vector providing colors for the states of a 
+given trait, so its length must equal or exceed the number of states. 
+Default values provide 7 colors (and so they can plot up to 7 states).}
+
+\item{traitLegendPlacement}{Placement of state legend. Accepted values are 
+\code{"topleft"} (default value), \code{"bottomleft"}, \code{"bottomright"}, 
+and \code{"topright"}.}
+
+\item{fossilsToDraw}{Character assigning if fossils will be represented by 
+exact time placements (\code{"exact"}, default value), by horizontal bars 
+giving range information (\code{"ranges"}), or by both forms (\code{"all"}).}
+
+\item{fossilRangeAlpha}{Numerical giving color transparency for fossil range 
+representation. Integers between \code{0} and \code{255} are preferred, 
+but any float between \code{0} and \code{1} is also accepted. Default value 
+is \code{100}.}
+
+\item{restoreOldPar}{Logical assigning if plot default values show be 
+restored after function finalizes plotting. Deafult is \code{TRUE}, but 
+users interesting in using plot additions (e.g. \code{abline()} to highlight 
+a certain age) should assign this as \code{FALSE} to use the x and y values 
+in the plot. If false, x-axis follows time, and y-axis follows the number of 
+species plotted, with 1 being the bottom lineage, and the upper y-limit 
+being the Nth lineage in the \code{sim}.}
 
 \item{...}{Further arguments to be passed to \code{plot}}
 }
@@ -70,7 +116,6 @@ speciation and sampling events, and further customization.
 }
 \examples{
 
-###
 # we start drawing a simple simulation
 
 # maximum simulation time
@@ -82,7 +127,7 @@ set.seed(1)
 # run a simulation
 sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
               nFinal = c(10,20)) 
-              
+
 # draw it
 draw.sim(sim)
 
@@ -119,7 +164,7 @@ draw.sim(sim, fossils = fossils, sortBy = "TE")
 # here we sort lineages by their extinction times
 
 ###
-# try with fossil ranges
+# fossils can also be represented by ranges
 
 # maximum simulation time
 tMax <- 10
@@ -147,16 +192,24 @@ set.seed(1)
 fossils <- sample.clade(sim = sim, rho = 2, tMax = tMax, 
                         returnTrue = FALSE, bins = bins)
 
+# get old par
+oldPar <- par(no.readonly = TRUE)
+
 # draw it, sorting lineages by their parent
-draw.sim(sim, fossils = fossils, sortBy = "PAR")
+draw.sim(sim, fossils = fossils, sortBy = "PAR",
+         fossilsToDraw = "ranges", restoreOldPar = FALSE)
 
 # adding the bounds of the simulated bins
 abline(v = bins, lty = 2, col = "blue", lwd = 0.5)
 
-#alternatively, one can draw lineages varying colors and tip labels:
-#(note how they are sorted)
-draw.sim(sim, tipLabels = paste0("spp_", 1:10), 
-     lineageColors = rep(c("red", "green", "blue"), times=5))
+# alternatively, we can draw lineages varying colors and tip labels
+# (note how they are sorted)
+draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges",
+         tipLabels = paste0("spp_", 1:length(sim$TS)), 
+         lineageColors = rep(c("red", "green", "blue"), times = 5))
+         
+# restore old par
+par(oldPar)
 
 ###
 # we can control how to sort displayed species exactly
@@ -180,6 +233,64 @@ fossils <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
 # draw it with random sorting (in pratice this could be a trait
 # value, for instance)
 draw.sim(sim, fossils = fossils, sortBy = sample(1:length(sim$TS)))
+
+###
+# we can display trait values as well
+
+# initial number of species
+n0 <- 1
+
+# maximum simulation time
+tMax <- 20
+
+# speciation, higher for state 1
+lambda <- c(0.1, 0.2)
+
+# extinction, lowest for state 0
+mu <- c(0.01, 0.03)
+
+# number of traits and states (2 binary traits)
+nTraits <- 2
+nStates <- 2
+
+# initial value of both traits
+X0 <- 0
+
+# transition matrix, with symmetrical transition rates for trait 1,
+# and asymmetrical (and higher) for trait 2
+Q <- list(matrix(c(0, 0.1,
+                   0.1, 0), ncol = 2, nrow = 2),
+          matrix(c(0, 1,
+                   0.5, 0), ncol = 2, nrow = 2))
+
+# set seed
+set.seed(1)
+
+# run the simulation
+sim <- bd.sim.traits(n0, lambda, mu, tMax, nTraits = nTraits, 
+                     nStates = nStates, X0 = X0, Q = Q, nFinal = c(2, 10))
+
+# maybe we want to take a look at the traits of fossil records too
+fossils <- sample.clade(sim$SIM, rho = 0.5, tMax = max(sim$SIM$TS), 
+                        returnAll = TRUE, bins = seq(0, 20, by = 1))
+                         
+draw.sim(sim$SIM, traits = sim$TRAITS, sortBy = "PAR",
+         fossils = fossils, fossilsToDraw = "all",
+         traitLegendPlacement = "bottomleft")
+# note how fossil ranges are displayed above and below the true
+# occurrence times, but we could also draw only one or the other
+
+# just ranges
+draw.sim(sim$SIM, traits = sim$TRAITS, sortBy = "PAR",
+         fossils = fossils, fossilsToDraw = "ranges",
+         traitLegendPlacement = "bottomleft")
+         
+# just true occurrence times
+draw.sim(sim$SIM, traits = sim$TRAITS, sortBy = "PAR", traitID = 2,
+         fossils = fossils, fossilsToDraw = "exact",
+         traitLegendPlacement = "bottomleft")
+# note the different traitID, so that segments are colored
+# following the value of the second trait
 
 }
 \author{

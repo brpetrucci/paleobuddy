@@ -199,7 +199,7 @@
 #'   oldPar <- par(no.readonly = TRUE) 
 #'   
 #'   # visualize longevities and fossil occurrences
-#'   draw.sim(sim, fossils)
+#'   draw.sim(sim, fossils = fossils)
 #'   
 #'   # change par to show phylogenies
 #'   par(mfrow = c(1, 2))
@@ -241,7 +241,7 @@
 #'   oldPar <- par(no.readonly = TRUE) 
 #'   
 #'   # visualize longevities and fossil occurrences
-#'   draw.sim(sim, fossils)
+#'   draw.sim(sim, fossils = fossils)
 #'   
 #'   # change par to show phylogenies
 #'   par(mfrow = c(1, 2))
@@ -287,7 +287,7 @@
 #'   oldPar <- par(no.readonly = TRUE) 
 #'   
 #'   # visualize longevities and fossil occurrences
-#'   draw.sim(sim, fossils)
+#'   draw.sim(sim, fossils = fossils)
 #'   
 #'   # change par to show phylogenies
 #'   par(mfrow = c(1, 2))
@@ -343,7 +343,7 @@
 #'   oldPar <- par(no.readonly = TRUE) 
 #'   
 #'   # visualize longevities and fossil occurrences
-#'   draw.sim(sim, fossils)
+#'   draw.sim(sim, fossils = fossils)
 #'   
 #'   # change par to show phylogenies
 #'   par(mfrow = c(1, 2))

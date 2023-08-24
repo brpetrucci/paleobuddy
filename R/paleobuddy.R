@@ -153,5 +153,6 @@
 #' }
 #' 
 #' @docType package
+#' @aliases paleobuddy-package
 #' @name paleobuddy
 NULL

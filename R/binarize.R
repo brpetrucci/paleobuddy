@@ -39,18 +39,18 @@
 #' fossils_true <- sample.clade(sim, rho = 1, tMax = 50, returnTrue = TRUE)
 #' 
 #' # bin the true occurrences
-#' fossils_binned <- binarize(fossils_true, bins)
+#' fossils_binned <- bin.occurrences(fossils_true, bins)
 #' 
 #' # compare
 #' fossils_true
 #' fossils_binned
 #' 
-#' @name binarize
-#' @rdname binarize
+#' @name bin.occurrences
+#' @rdname bin.occurrences
 #' @export
 #' 
 
-binarize <- function(fossils, bins) {
+bin.occurrences <- function(fossils, bins) {
   # sort bins in decreasing order
   bins <- sort(bins, decreasing = TRUE)
 

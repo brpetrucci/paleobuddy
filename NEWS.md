@@ -40,6 +40,14 @@ BiSSE, MuSSE, and QuaSSE. See documentation for full reference.
   coming from `bd.sim.traits`) needs to include all states as observed
   for that (see examples in `?sample.clade.traits` and vignettes for
   details).
+- `draw.sim` can now color longevity segments and fossil occurrences
+  based on the trait values of a given trait for each species through
+  time. Customization options include which colors to use for each
+  state, whether to plot fossils as true occurrence times or ranges
+  (already present in 1.0, but now with a dedicated argument for such,
+  `fossilsToDraw`), and where to place trait value legend. See
+  `?draw.sim`, `?bd.sim.traits`, `?sample.clade.traits`, and the
+  `overview` vignette for examples.
 
 ## Adding sampled ancestors to a phylogenetic tree
 
@@ -63,6 +71,13 @@ BiSSE, MuSSE, and QuaSSE. See documentation for full reference.
 - A complex example was added to the end to respond to comments from a
   reviewer in the manuscript.
 - Examples of new features for version 1.1 (see above) were added.
+
+## Other additions
+
+- `bin.occurrences` allows for ad-hoc binning of fossil occurrences, so
+  one can take a fossil record including only true times, i.e. an output
+  of `sample.clade(..., returnTrue = TRUE)`, and bin it to produce the
+  uncertainty in fossil ages ubiquitous in the true fossil record.
 
 ## Simple fixes
 

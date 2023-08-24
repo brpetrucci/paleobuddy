@@ -4,13 +4,16 @@
 #' see \code{?sim}) in the graphics window. Allows for the assignment of 
 #' speciation and sampling events, and further customization.
 #'
-#' @inheritParams traits.summary
-#'
 #' @param sim A \code{sim} object, containing extinction times, speciation 
 #' times, parent, and status information for each species in the simulation. 
 #' See \code{?sim}.
 #' 
-#' @traits 
+#' @param traits A list of data frames enconding the value of one or more 
+#' traits during the lifetime of each species, usually coming from the
+#' \code{TRAITS} member of the output of \code{bd.sim.traits}. It should have
+#' length equal to the number of species in \code{sim}, and the 
+#' \code{traitID}th trait (see below) (i.e. the data frame of number 
+#' \code{traitID} for each species) will be used to draw trait values.
 #' 
 #' @param fossils A \code{data.frame} containing the fossil occurrences of 
 #' each lineage, e.g. as returned by the \code{sample.clade} function. The
@@ -45,20 +48,20 @@
 #' being the position of that lineage in the \code{sim} object.
 #' 
 #' @param traitID Numerical giving the trait which will be plotted. this 
-#' parameter is only useful when multiple traits were simualted in the 
-#' same \code{sim} object.
+#' parameter is only useful when multiple traits were simulated in the 
+#' same \code{sim} object, i.e. when \code{traits} has more than one data frame
+#' per species.
 #' 
-#' @param traitColors Character vector providing colors providing colors for 
-#' the states of a given trait, so its length must equal or exceed the number 
-#' of states. Default values provide 7 colors (and so they can plot up to 7 
-#' states).
+#' @param traitColors Character vector providing colors for the states of a 
+#' given trait, so its length must equal or exceed the number of states. 
+#' Default values provide 7 colors (and so they can plot up to 7 states).
 #' 
-#' @param TraitLegendPlace Placement of state legend. Accepted values are 
+#' @param traitLegendPlacement Placement of state legend. Accepted values are 
 #' \code{"topleft"} (default value), \code{"bottomleft"}, \code{"bottomright"}, 
-#' and \code{"topright"}.
+#' \code{"topright"}, and \code{"none"}.
 #' 
-#' @param FossilsToDraw Character assigning if fossils will be represented by 
-#' exact time placements (\code{"exact"}, efault value), by horizontal bars 
+#' @param fossilsToDraw Character assigning if fossils will be represented by 
+#' exact time placements (\code{"exact"}, default value), by horizontal bars 
 #' giving range information (\code{"ranges"}), or by both forms (\code{"all"}).
 #' 
 #' @param fossilRangeAlpha Numerical giving color transparency for fossil range 
@@ -89,15 +92,14 @@
 #'
 #' @examples
 #' 
-#' 
 #' # we start drawing a simple simulation
-#' #'
+#'
 #' # maximum simulation time
 #' tMax <- 10
-#' #'
+#'
 #' # set seed
 #' set.seed(1)
-#' #'
+#'
 #' # run a simulation
 #' sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
 #'               nFinal = c(10,20)) 
@@ -107,20 +109,20 @@
 #' 
 #' ###
 #' # we can add fossils to the drawing
-#' #'
+#'
 #' # maximum simulation time
 #' tMax <- 10
-#' #'
+#'
 #' # set seed
 #' set.seed(1)
-#' #'
+#'
 #' # run a simulation
 #' sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
 #'               nFinal = c(10,20)) 
-#' #'
+#'
 #' # set seed
 #' set.seed(1)
-#' #'
+#'
 #' # simulate data resulting from a fossilization process
 #' # with exact occurrence times
 #' fossils <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
@@ -138,7 +140,7 @@
 #' # here we sort lineages by their extinction times
 #' 
 #' ###
-#' # try with fossil ranges
+#' # fossils can also be represented by ranges
 #' 
 #' # maximum simulation time
 #' tMax <- 10
@@ -155,7 +157,7 @@
 #' 
 #' # set seed
 #' set.seed(20)
-#' #'
+#'
 #' # create time bins randomly
 #' bins <- c(tMax, 0, runif(n = rpois(1, lambda = 6), min = 0, max = tMax))
 #' 
@@ -166,17 +168,24 @@
 #' fossils <- sample.clade(sim = sim, rho = 2, tMax = tMax, 
 #'                         returnTrue = FALSE, bins = bins)
 #' 
+#' # get old par
+#' oldPar <- par(no.readonly = TRUE)
+#' 
 #' # draw it, sorting lineages by their parent
 #' draw.sim(sim, fossils = fossils, sortBy = "PAR",
-#'          FossilsToDraw = "ranges", restoreOldPar = F)
+#'          fossilsToDraw = "ranges", restoreOldPar = FALSE)
 #' 
 #' # adding the bounds of the simulated bins
 #' abline(v = bins, lty = 2, col = "blue", lwd = 0.5)
 #' 
-#' #alternatively, one can draw lineages varying colors and tip labels:
-#' #(note how they are sorted)
-#' draw.sim(sim, tipLabels = paste0("spp_", 1:10), 
-#'          lineageColors = rep(c("red", "green", "blue"), times=5))
+#' # alternatively, we can draw lineages varying colors and tip labels
+#' # (note how they are sorted)
+#' draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges",
+#'          tipLabels = paste0("spp_", 1:length(sim$TS)), 
+#'          lineageColors = rep(c("red", "green", "blue"), times = 5))
+#'          
+#' # restore old par
+#' par(oldPar)
 #' 
 #' ###
 #' # we can control how to sort displayed species exactly
@@ -190,10 +199,10 @@
 #' # run birth-death simulations
 #' sim <- bd.sim(n0 = 1, lambda = 0.6, mu = 0.55, tMax = tMax, 
 #'               nFinal = c(10,20)) 
-#' #'
+#'
 #' # set seed
 #' set.seed(1)  
-#' #'
+#'
 #' # simulate fossil sampling
 #' fossils <- sample.clade(sim = sim, rho = 4, tMax = tMax, returnTrue = TRUE)
 #' 
@@ -202,7 +211,7 @@
 #' draw.sim(sim, fossils = fossils, sortBy = sample(1:length(sim$TS)))
 #' 
 #' ###
-#' # plotting trait dependent diversification:
+#' # we can display trait values as well
 #' 
 #' # initial number of species
 #' n0 <- 1
@@ -239,30 +248,48 @@
 #' 
 #' # maybe we want to take a look at the traits of fossil records too
 #' fossils <- sample.clade(sim$SIM, rho = 0.5, tMax = max(sim$SIM$TS), 
-#'                         returnAll = T,bins = seq(0,20, by=1))
-#' head(fossils)
+#'                         returnAll = TRUE, bins = seq(0, 20, by = 1))
+#'                          
+#' draw.sim(sim$SIM, traits = sim$TRAITS, sortBy = "PAR",
+#'          fossils = fossils, fossilsToDraw = "all",
+#'          traitLegendPlacement = "bottomleft")
+#' # note how fossil ranges are displayed above and below the true
+#' # occurrence times, but we could also draw only one or the other
 #' 
-#' draw.sim(sim$SIM, showLabel = T,  traits = sim$TRAITS, sortBy = "PAR",
-#'          fossils = fossils, FossilsToDraw = "all")
-#' 
+#' # just ranges
+#' draw.sim(sim$SIM, traits = sim$TRAITS, sortBy = "PAR",
+#'          fossils = fossils, fossilsToDraw = "ranges",
+#'          traitLegendPlacement = "bottomleft")
+#'          
+#' # just true occurrence times
+#' draw.sim(sim$SIM, traits = sim$TRAITS, sortBy = "PAR", traitID = 2,
+#'          fossils = fossils, fossilsToDraw = "exact",
+#'          traitLegendPlacement = "bottomleft")
+#' # note the different traitID, so that segments are colored
+#' # following the value of the second trait
 #' 
 #' @importFrom grDevices col2rgb rgb
-#' @importFrom graphics points segments text
+#' @importFrom graphics points segments text legend
 #' 
 #' @name draw.sim
 #' @rdname draw.sim
 #' @export
 #' 
-draw.sim=function (sim, traits=NULL, fossils = NULL, lineageColors=NULL,
-                   sortBy = "TS", lwdLin = 4, tipLabels=NULL, showLabel = TRUE,
-                   traitID=1, traitColors=c("#a40000", "#16317d", "#007e2f", "#ffcd12", 
-                                            "#b86092", "#721b3e", "#00b7a7"), TraitLegendPlace='topleft',
-                   FossilsToDraw="exact", fossilRangeAlpha=100, restoreOldPar=TRUE, ...) {
+
+draw.sim <- function (sim, traits = NULL, fossils = NULL, lineageColors = NULL,
+                      sortBy = "TS", lwdLin = 4, tipLabels = NULL, 
+                      showLabel = TRUE, traitID = 1, 
+                      traitColors = c("#a40000", "#16317d", "#007e2f", 
+                                      "#ffcd12", "#b86092", "#721b3e", 
+                                      "#00b7a7"), 
+                      traitLegendPlacement = "topleft", fossilsToDraw = "exact", 
+                      fossilRangeAlpha = 100, restoreOldPar = TRUE, ...) {
   
   # set up to return par to pre-function settings
   oldPar <- par(no.readonly = TRUE) 
   
-  if(restoreOldPar){
+  # if restoreOldPar is set to TRUE (default), restore it on exit
+  if (restoreOldPar) {
     on.exit(par(oldPar))  
   }
   
@@ -275,7 +302,6 @@ draw.sim=function (sim, traits=NULL, fossils = NULL, lineageColors=NULL,
   
   # suppress y axis
   if (!("yaxt" %in% names(args))) {
-    #change par
     par(yaxt = "n")
   }
   
@@ -292,27 +318,29 @@ draw.sim=function (sim, traits=NULL, fossils = NULL, lineageColors=NULL,
   # limits in x axis (to enclose all species' durations)
   if (!("xlim" %in% names(args))) {
     
-    # warnings are not relevant here:
+    # warnings are not relevant here
     suppressWarnings({
-      min_time <- min(sim$TE, na.rm = TRUE)  
+      minTime <- min(sim$TE, na.rm = TRUE)  
     })
-    # if all species are extant, min_time must be adjusted:
-    if(is.infinite(min_time)){
-      min_time <- 0  
-    }
-    xmin <- min_time
     
-    if(showLabel){
-      xmin = 0 - (max(sim$TS, na.rm = TRUE)*0.035)
+    # if all species are extant, minTime must be adjusted
+    if (is.infinite(minTime)) {
+      minTime <- 0  
     }
     
-    formals(plot.default)$xlim <- 
-      c(max(sim$TS, na.rm = TRUE), xmin - 1)
+    # set xMin
+    xMin <- minTime
+    
+    if (showLabel) {
+      xMin = 0 - (max(sim$TS, na.rm = TRUE) * 0.035)
+    }
+    
+    formals(plot.default)$xlim <- c(max(sim$TS, na.rm = TRUE), xMin - 1)
   }
   
   # limits in y axis
   if (!("ylim" %in% names(args))) {
-    formals(plot.default)$ylim <- c(0, (length(sim$TE)+1))
+    formals(plot.default)$ylim <- c(0, (length(sim$TE) + 1))
   }
   
   # no frame
@@ -328,68 +356,59 @@ draw.sim=function (sim, traits=NULL, fossils = NULL, lineageColors=NULL,
   
   # fossil data frame
   if (!is.null(fossils)) {
-    
-    if(!(FossilsToDraw %in% c("all", "ranges", "exact"))){
-      stop("\"FossilsToDraw \" must be equal to \"all\", \"ranges\", or to \"exact\"")
+    # check that fossilsToDraw is sensible
+    if (!(fossilsToDraw %in% c("all", "ranges", "exact"))) {
+      stop("fossilsToDraw must equal \"all\", \"ranges\", or \"exact\"")
     }
     
+    # if we want to draw ranges, have to have ranges
+    if (!("SampT" %in% colnames(fossils)) & fossilsToDraw != "ranges") {
+      stop(paste0("Fossils need a SampT column to draw true fossil times.\n", 
+                  "  Either run fossil sampling with returnAll or returnTrue", 
+                  " set to TRUE (see ?sample.clade or ?sample.clade.traits),", 
+                  " or set fossilsToDraw to \"ranges\""))
+    }
+    
+    # fossils has to contain either a SampT or both a MaxT and MinT columns
     if (!((c("SampT") %in% colnames(fossils)) | 
           all(c("MaxT", "MinT") %in% colnames(fossils)))) {
       stop("fossils must contain either a SampT or both a MinT and MaxT
            columns. See ?draw.sim and ?sample.clade.")
     }
     
-    if (!is.null(traits) & !(c("SampT") %in% colnames(fossils))){
-      stop("Plotting fossils with traits require information on true times of fossilization. \n \n Try to create \"fossils\" using \"sample.clade(..., returnAll = T)\"") 
+    if (!is.null(traits) & !(c("SampT") %in% colnames(fossils))) {
+      stop("Plotting fossils with traits requires information on true times of 
+           fossilization. Run fossil sampling with returnAll or returnTrue set
+           to TRUE (see ?sample.clade or ?sample.clade.traits)") 
     }
   }
   
-  
-  # trait info:
-  # getting traits:
-  unique_trts <- vector()
-  for(i in 1:length(traits)){
-    unique_trts <- c(unique_trts, unique(traits[[i]][[traitID]]$value))
-  }
-  unique_trts <- unique(unique_trts)
-  unique_trts
-  
-  if(length(traitColors)<length(unique_trts)){
-    stop("Less colors than traits")
-  }
-  
-  # checking length of inputted data:
-  if(!is.null(traits)){
-    unq_lengs <- length(unlist(unique(lapply(list(sim$TE, 
-                                                  sim$TS, sim$PAR, sim$EXTANT, traits), length))))  
-  }else{
-    unq_lengs <- length(unlist(unique(lapply(list(sim$TE, 
-                                                  sim$TS, sim$PAR, sim$EXTANT), length))))
-  }
-  
-  if (unq_lengs != 1) {
-    stop("Trait data does not match with birth-death simulation content. 
-      Please check inputted sim and traits")
-  }
-  
-  # check sortBy
-  if (!class(sortBy) %in% c("character", "integer")) {
-    stop("sortBy should be a character or a vector of integers.")
-  }
-  else if ((class(sortBy) == "integer") & !(all(1:length(sim$TE) %in% 
-                                                unique(sortBy)))) {
-    stop("sortBy must skip no lineage, and all lineages
-         should have unique indices.")
-  }
-  
-  #checking fossil input:
-  if(!is.null(fossils)){
-    if(!"SampT" %in% colnames(fossils) & FossilsToDraw != "ranges"){
-      stop("No temporal information to draw requested fossil representation. 
-           \n \n 
-  Try to create \"fossils\" using \"sample.clade(..., returnAll = T)\".
-  \n
-  Alternatively, you might want to set FossilsToDraw = \"ranges\"")
+  # traits list
+  if (!is.null(traits)) {
+    # create vector for unique trait values
+    uniqueTraits <- unique(unlist(lapply(1:length(traits), function(x) 
+                      traits[[x]][[traitID]]$value)))
+    
+    # check that we have enough colors
+    if (length(traitColors) < length(uniqueTraits)) {
+      stop("traitColors parameter should be of length >= the 
+           number of unique trait values")
+    }
+    
+    # make sure there are as many trait data frames as species
+    if (length(traits) != length(sim$TS)) {
+      stop("Length of traits list does not match the number of species in sim")
+    }
+    
+    # check sortBy
+    if (!class(sortBy) %in% c("character", "integer")) {
+      stop("sortBy should be a character or a vector of integers.")
+    }
+    
+    else if ((class(sortBy) == "integer") & !(all(1:length(sim$TE) %in% 
+                                                  unique(sortBy)))) {
+      stop("sortBy must skip no lineage, and all lineages
+           should have unique indices.")
     }
   }
   
@@ -439,104 +458,116 @@ draw.sim=function (sim, traits=NULL, fossils = NULL, lineageColors=NULL,
     ord <- sortBy
   }
   
-  # copy of sim object in the correct order
-  sim_mod <- sim
-  traits_mod <- traits
+  # copy of sim and traits object in the correct order
+  simMod <- sim
+  traitsMod <- traits
   
-  sim_mod$TE <- sim_mod$TE[ord]
+  simMod$TE <- simMod$TE[ord]
   
-  sim_mod$TS <- sim_mod$TS[ord]
+  simMod$TS <- simMod$TS[ord]
   
-  sim_mod$PAR <- sim_mod$PAR[ord]
+  simMod$PAR <- simMod$PAR[ord]
   
-  sim_mod$EXTANT <- sim_mod$EXTANT[ord]
+  simMod$EXTANT <- simMod$EXTANT[ord]
   
-  traits_mod <-  traits_mod[ord]
+  traitsMod <-  traitsMod[ord]
   
-  class(sim_mod) <- "sim"
+  class(simMod) <- "sim"
   
   # open plot following user inputs + defaults above
   plot(NA, ...)
   
   # plot durations
-  if(!is.null(traits)){
-    for(i in 1:length(traits_mod)){
-      segments(x0 = traits_mod[[i]][[traitID]]$max, 
-               x1 = traits_mod[[i]][[traitID]]$min, 
+  if (!is.null(traits)) {
+    for (i in 1:length(traitsMod)) {
+      # draw segments as per traits
+      segments(x0 = traitsMod[[i]][[traitID]]$max, 
+               x1 = traitsMod[[i]][[traitID]]$min, 
                y1 = i, 
                y0 = i, 
                lwd = lwdLin, 
-               # below we need the "+1" bc first trait is "zero"
-               col = traitColors[traits_mod[[i]][[traitID]]$value+1])  
+               # need the + 1 since first trait is 0
+               col = traitColors[traitsMod[[i]][[traitID]]$value + 1])  
     }  
-  }else{
-    if(is.null(lineageColors)){
-      lincols <- "black"
-    }else{
-      lincols <- lineageColors[ord]
+  } else {
+    # default color is black, otherwise use lineageColors
+    if (is.null(lineageColors)) {
+      linCols <- "black"
+    } else {
+      linCols <- lineageColors[ord]
     }
     
-    segments(x0 = sim_mod$TS, x1 = sim_mod$TE, y1 = 1:length(sim_mod$TE), 
-             y0 = 1:length(sim_mod$TE), lwd = lwdLin, col = lincols) 
+    # draw segments 
+    segments(x0 = simMod$TS, x1 = simMod$TE, y1 = 1:length(simMod$TE), 
+             y0 = 1:length(simMod$TE), lwd = lwdLin, col = linCols)
   }
-  
-  
-  
   
   # show species labels if user wants
   if (showLabel) {
-    if(is.null(tipLabels)){
-      tiplabels <- paste0("t", sprintf(paste0("%0", 
-                                              ceiling(log(length(sim$TE), 10)), "d"), ord))
-    }else{
-      tiplabels <- tipLabels[ord]
+    # if tipLabels are not set, use default 
+    # (same as sample.clade and make.phylo)
+    if (is.null(tipLabels)) {
+      tipN <- sprintf(paste0("%0", ceiling(log(length(sim$TE), 10)), "d"), ord)
+      tipLabs <- paste0("t", tipN)
+    } else {
+      tipLabs <- tipLabels[ord]
+    }
+
+    # position the label
+    labelPosition <- simMod$TE - max(unlist(lapply(tipLabs, nchar))) * 0.15
+
+    # if there are traits, we need to color the tips
+    if (!is.null(traits)) {
+      # get trait values at the tips
+      tipTraits <- traits.summary(sim, traits)[[traitID]]
+      
+      # get colors
+      tipCols <- traitColors[tipTraits + 1]
+      
+      # make them the correct order
+      tipCols <- tipCols[ord]
+    } else {
+      # otherwise, just black
+      tipCols <- rep("black", length(simMod$TE))
     }
     
-    labelPosition = sim_mod$TE
-    labelPosition[is.na(labelPosition)]=0
-    
-    if(!is.null(traits)){
-      textcolsaux = traits.summary(sim, traits = traits)[traitID]  
-      textcols = traitColors[unlist(textcolsaux)+1]
-      tip_traits <- unlist(lapply(traits, function(x) tail(x[[1]]$value, 1)))
-      tip_cols = traitColors[tip_traits+1]
-      tip_cols = tip_cols[ord]
-    }else{
-      tip_cols = rep("black", times=length(sim_mod$TE))
-    }
-    
-    
-    text(y = 1:length(sim_mod$TE), 
-         x = labelPosition - ((max(sim$TS) - min_time ) * 0.035), 
-         labels = tiplabels, col = tip_cols)
+    # write labels
+    text(y = 1:length(simMod$TE), 
+         x = labelPosition - ((max(sim$TS) - minTime ) * 0.035), 
+         labels = tipLabs, col = tipCols)
   }
   
   # establish references for plotting
   
   # find original species in the new sim object
-  luca <- which(is.na(sim_mod$PAR))
+  luca <- which(is.na(simMod$PAR))
   
   # find parents of each species in order
   aux_y <- unlist(lapply(sim$PAR, function(x) which(ord == x)[1]))
   
   # dashed lines between parent and daughter species
-  if(!is.null(traits)){
-    InheritedTraits = unlist(lapply(traits_mod, function(x) head(x[[traitID]]$value, 1)))
-    vertLinCols = traitColors[InheritedTraits+1]
-  }else{
-    vertLinCols = "gray50"
+  if (!is.null(traits)) {
+    # get traits at time of speciation
+    inheritedTraits <- unlist(lapply(traitsMod, function(x) 
+                          x[[traitID]]$value[1]))
+    
+    # get colors
+    vertLinCols <- traitColors[inheritedTraits + 1]
+  } else {
+    # otherwise, just gray
+    vertLinCols <-  "gray50"
   }
   
+  # draw segments connecting parents to children
+  segments(x0 = simMod$TS[-luca], x1 = simMod$TS[-luca], 
+           y1 = (1:length(simMod$TE))[-luca], y0 = (aux_y[ord])[-luca], 
+           lty = 2, lwd = lwdLin * 0.25, col = vertLinCols)
   
-  segments(x0 = sim_mod$TS[-luca], x1 = sim_mod$TS[-luca], 
-           y1 = (1:length(sim_mod$TE))[-luca], y0 = (aux_y[ord])[-luca], 
-           lty = 2, lwd = lwdLin*0.25, col = vertLinCols)
-  
-  if(!is.null(traits)){
-    legend(TraitLegendPlace, 
-           legend= paste("State ", sort(unique(InheritedTraits)))
-           , col=traitColors, lty=1, lwd=lwdLin)
-    
+  # if we have traits, need legend
+  if (!is.null(traits) && traitLegendPlacement != "none") {
+    legend(traitLegendPlacement, 
+           legend = paste("State", sort(unique(inheritedTraits))), 
+           col = traitColors, lty = 1, lwd = lwdLin)
   }
   
   # add fossils
@@ -544,53 +575,54 @@ draw.sim=function (sim, traits=NULL, fossils = NULL, lineageColors=NULL,
     # find number ID of each species' fossils
     ids <- as.numeric(gsub("t", "", fossils$Species))
     
-    if(!is.null(traits)){
-      # stablishing traits:
+    if (!is.null(traits)) {
+      # get trait values of all fossils
       traitSummary <- traits.summary(sim, traits, 
                                      fossils = fossils, selection = "fossil")
       
-      colFossils <- traitColors[unlist(traitSummary[traitID])+1]  
-    }else{
-      colFossils <- rep("red", times=length(sim$TE))
+      # and get their colors
+      colFossils <- traitColors[unlist(traitSummary[traitID]) + 1]  
+    } else {
+      # otherwise, all red
+      colFossils <- rep("red", times = length(sim$TE))
     }
     
-    # if SampT is in the data frame, have true occurrence times
-    if(FossilsToDraw=="ranges"){
-      
+    # check which fossils to draw
+    if (fossilsToDraw == "ranges") {
       # jitter lines for drawing fossil ranges
       y_jittered <- jitter_foo(unlist(lapply(ids, 
                                              function(x) which(ord == x))))
       
       # draw fossil ranges a bit transparent
       segments(x1 = fossils$MaxT, x0 = fossils$MinT, y1 = y_jittered, 
-               y0 = y_jittered, col = makeTransparent(someColor = colFossils,
-                                                      alpha = fossilRangeAlpha), lwd = lwdLin * 0.75)
-      
-    }else{
-      if(FossilsToDraw=="exact"){
+               y0 = y_jittered, 
+               col = makeTransparent(someColor = colFossils, 
+                                     alpha = fossilRangeAlpha), 
+               lwd = lwdLin * 0.75)
+    } 
+    
+    else if (fossilsToDraw == "exact") {
+      # draw fossil occurrences as time points
+      points(x = fossils$SampT, 
+             y = unlist(lapply(ids, function(x) which(ord == x))), 
+             col = colFossils, pch = 16, cex = lwdLin*0.25)
+    } else {
+      # jitter lines for drawing fossil ranges
+      y_jittered <- jitter_foo(unlist(lapply(ids, function(x) 
+                               which(ord == x))))
         
-        #raw fossil occurrences as time points
-        points(x = fossils$SampT, 
-               y = unlist(lapply(ids, function(x) which(ord == x))), 
-               col = colFossils, pch = 16, cex = lwdLin*0.25)
+      # draw fossil ranges a bit transparent
+      segments(x1 = fossils$MaxT, x0 = fossils$MinT, y1 = y_jittered, 
+               y0 = y_jittered, 
+               col = makeTransparent(someColor = colFossils,
+                                     alpha = fossilRangeAlpha), 
+               lwd = lwdLin * 0.75)
         
-      }else{
+      # draw fossil occurrences as time points
+      points(x = fossils$SampT, 
+             y = unlist(lapply(ids, function(x) which(ord == x))), 
+             col = colFossils, pch = 16, cex = lwdLin * 0.25)
         
-        # jitter lines for drawing fossil ranges
-        y_jittered <- jitter_foo(unlist(lapply(ids, 
-                                               function(x) which(ord == x))))
-        
-        # FIRST draw fossil ranges a bit transparent
-        segments(x1 = fossils$MaxT, x0 = fossils$MinT, y1 = y_jittered, 
-                 y0 = y_jittered, col = makeTransparent(someColor = colFossils,
-                                                        alpha = fossilRangeAlpha), lwd = lwdLin * 0.75)
-        
-        # THEN draw fossil occurrences as time points
-        points(x = fossils$SampT, 
-               y = unlist(lapply(ids, function(x) which(ord == x))), 
-               col = colFossils, pch = 16, cex = lwdLin*0.25)
-        
-      }
     }
   }
 }

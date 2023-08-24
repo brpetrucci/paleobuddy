@@ -192,11 +192,11 @@ simHead <- head(sim, 10)
 suppressMessages(draw.sim(simHead, fossils = fossils))
 ```
 
-We can also visualize the fossil ranges if we take away the `SampT` column, which is used by default if the data frame has it.
+We can also visualize the fossil ranges if we take away the `SampT` column, and set the `fossilsToDraw` parameter to `ranges`.
 
 ```{r}
 # draw longevities with fossil time ranges
-suppressMessages(draw.sim(simHead, fossils = fossils[, -3]))
+suppressMessages(draw.sim(simHead, fossils = fossils[, -3], fossilsToDraw = "ranges"))
 ```
 
 This fossil record's data frame organization allows for easy evaluation of its components, and is close to ready for use in PyRate, one of the most widely used birth-death rates estimators in the field currently. To make it ready we must manipulate the `Extant` column, left like this for clarity. In PyRate, that column must be `status`, with extant species marked `extant` and extinct species marked `extinct`.
@@ -468,13 +468,13 @@ We provide below a final example containing a lot of complexity on both birth-de
 ```{r eval=FALSE}
 ## setup
 # set seed
-set.seed(6)
+set.seed(123)
 
 # initial number of species
 n0 <- 1
 
-# maximum simulation time
-tMax <- 30
+# number of extant species
+tMax <- 10
 
 # lambda varies with absolute time (exponential decay)
 lambda <- function(t) {
@@ -529,10 +529,10 @@ sim <- suppressMessages(bd.sim(n0, lambda, mu, tMax, mShape = mu_shape))
 fossils <- suppressMessages(sample.clade(sim, rho, tMax, returnTrue = TRUE))
 
 # draw BD simulation with fossils
-draw.sim(sim, fossils = fossils)
+draw.sim(sim, fossils = fossils, showLabel = FALSE)
 
 # draw phylogenetic tree
-ape::plot.phylo(make.phylo(sim))
+ape::plot.phylo(make.phylo(sim), show.tip.label = FALSE)
 ```
 ## State-dependent speciation, extinction, and fossil sampling
 
@@ -606,8 +606,7 @@ tip_traits <- traits.summary(sim, traits, fossils,
                              selection = "sampled")$trait1
 
 # we can visualize the simulation and fossils using draw.sim
-draw.sim(sim, fossils)
-# to-do: color edges and fossil samples using trait values
+draw.sim(sim, traits, fossils, traitLegendPlacement = "bottomleft")
 
 # we can get a phylogeny including extant species and fossils, to
 # simulate a reconstructed phylogeny used in fossilized birth-death models

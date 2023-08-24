@@ -159,9 +159,8 @@ rho <- c(0.5, 1)
 fossils <- sample.clade.traits(sim$SIM, rho, tMax, sim$TRAITS)
 
 # draw simulation with fossil occurrences as time points
-draw.sim(sim$SIM, fossils = fossils$FOSSILS)
-# to-do: modify this to include colors referring to traits for 
-# lines and fossil occurrences
+draw.sim(sim$SIM, traits = sim$TRAITS, 
+         fossils = fossils$FOSSILS, traitLegendPlacement = "bottomleft")
 
 ###
 # can also run a HiSSE model, with hidden traits having an effect on rates
@@ -209,17 +208,21 @@ sim <- bd.sim.traits(n0, lambda, mu, tMax, nTraits = nTraits,
 # and highest yet for state 1B
 rho <- c(0.5, 1, 0.5, 2)
 
-# run fossil sampling
+# bins for fossil occurrences
+bins <- seq(tMax, 0, -1)
+
+# run fossil sampling, with returnAll = TRUE to include ranges
 fossils <- sample.clade.traits(sim$SIM, rho, tMax, sim$TRAITS, 
-                               nStates = 2, nHidden = 2)
+                               nStates = 2, nHidden = 2, 
+                               returnAll = TRUE, bins = bins)
 # note how fossils$TRAITS only contains trait values 0 and 1, similar to
 # if we had ran bd.sim.traits with nHidden = 2, since sample.clade.traits
 # did the job of transforming observed into hidden states
 
-# draw simulation with fossil occurrences as time points
-draw.sim(sim$SIM, fossils = fossils$FOSSILS)
-# to-do: modify this to include colors referring to traits for 
-# lines and fossil occurrences
+# draw simulation with fossil occurrences as time points AND ranges
+draw.sim(sim$SIM, traits = sim$TRAITS, fossils = fossils$FOSSILS,
+         fossilsToDraw = "all", traitLegendPlacement = "bottomleft")
+# note that there are a lot of fossils, so the ranges are difficult to see
 
 # see ?sample.clade for further examples using different return types
 # (fossil ranges etc.), and ?bd.sim.traits for more examples using

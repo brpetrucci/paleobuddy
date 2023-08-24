@@ -3,6 +3,7 @@
 \docType{package}
 \name{paleobuddy}
 \alias{paleobuddy}
+\alias{paleobuddy-package}
 \title{paleobuddy: Simulating diversification dynamics}
 \description{
 \code{paleobuddy} provides users with flexible scenarios for species 
