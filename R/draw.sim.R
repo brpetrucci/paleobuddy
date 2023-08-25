@@ -340,7 +340,7 @@ draw.sim <- function (sim, traits = NULL, fossils = NULL, lineageColors = NULL,
   
   # limits in y axis
   if (!("ylim" %in% names(args))) {
-    formals(plot.default)$ylim <- c(0, (length(sim$TE) + 1))
+    formals(plot.default)$ylim <- c((length(sim$TE) + 1),0)
   }
   
   # no frame
@@ -582,9 +582,14 @@ draw.sim <- function (sim, traits = NULL, fossils = NULL, lineageColors = NULL,
       
       # and get their colors
       colFossils <- traitColors[unlist(traitSummary[traitID]) + 1]  
-    } else {
+    } else if(is.null(lineageColors)){
       # otherwise, all red
       colFossils <- rep("red", times = length(sim$TE))
+    }else{
+      if(length(lineageColors)!=length(sim$TE)){
+        stop("\"lineageColors\" and sim do not match. See \"draw.sim\" help page.")
+      }
+      colFossils <- lineageColors[as.numeric(sub("t","", fossils$Species))]
     }
     
     # check which fossils to draw
