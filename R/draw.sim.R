@@ -60,9 +60,9 @@
 #' \code{"topleft"} (default value), \code{"bottomleft"}, \code{"bottomright"}, 
 #' \code{"topright"}, and \code{"none"}.
 #' 
-#' @param fossilsToDraw Character assigning if fossils will be represented by 
+#' @param fossilsFormat Character assigning if fossils will be represented by 
 #' exact time placements (\code{"exact"}, default value), by horizontal bars 
-#' giving range information (\code{"ranges"}), or by both forms (\code{"all"}).
+#' giving range information (\code{"ranges"}), or by both forms (\code{"all"}). 
 #' 
 #' @param fossilRangeAlpha Numerical giving color transparency for fossil range 
 #' representation. Integers between \code{0} and \code{255} are preferred, 
@@ -173,14 +173,14 @@
 #' 
 #' # draw it, sorting lineages by their parent
 #' draw.sim(sim, fossils = fossils, sortBy = "PAR",
-#'          fossilsToDraw = "ranges", restoreOldPar = FALSE)
+#'          fossilsFormat = "ranges", restoreOldPar = FALSE)
 #' 
 #' # adding the bounds of the simulated bins
 #' abline(v = bins, lty = 2, col = "blue", lwd = 0.5)
 #' 
 #' # alternatively, we can draw lineages varying colors and tip labels
 #' # (note how they are sorted)
-#' draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges",
+#' draw.sim(sim, fossils = fossils, fossilsFormat = "ranges",
 #'          tipLabels = paste0("spp_", 1:length(sim$TS)), 
 #'          lineageColors = rep(c("red", "green", "blue"), times = 5))
 #'          
@@ -251,19 +251,19 @@
 #'                         returnAll = TRUE, bins = seq(0, 20, by = 1))
 #'                          
 #' draw.sim(sim$SIM, traits = sim$TRAITS, sortBy = "PAR",
-#'          fossils = fossils, fossilsToDraw = "all",
+#'          fossils = fossils, fossilsFormat = "all",
 #'          traitLegendPlacement = "bottomleft")
 #' # note how fossil ranges are displayed above and below the true
 #' # occurrence times, but we could also draw only one or the other
 #' 
 #' # just ranges
 #' draw.sim(sim$SIM, traits = sim$TRAITS, sortBy = "PAR",
-#'          fossils = fossils, fossilsToDraw = "ranges",
+#'          fossils = fossils, fossilsFormat = "ranges",
 #'          traitLegendPlacement = "bottomleft")
 #'          
 #' # just true occurrence times
 #' draw.sim(sim$SIM, traits = sim$TRAITS, sortBy = "PAR", traitID = 2,
-#'          fossils = fossils, fossilsToDraw = "exact",
+#'          fossils = fossils, fossilsFormat = "exact",
 #'          traitLegendPlacement = "bottomleft")
 #' # note the different traitID, so that segments are colored
 #' # following the value of the second trait
@@ -282,7 +282,7 @@ draw.sim <- function (sim, traits = NULL, fossils = NULL, lineageColors = NULL,
                       traitColors = c("#a40000", "#16317d", "#007e2f", 
                                       "#ffcd12", "#b86092", "#721b3e", 
                                       "#00b7a7"), 
-                      traitLegendPlacement = "topleft", fossilsToDraw = "exact", 
+                      traitLegendPlacement = "topleft", fossilsFormat = "exact", 
                       fossilRangeAlpha = 100, restoreOldPar = TRUE, ...) {
   
   # set up to return par to pre-function settings
@@ -356,17 +356,17 @@ draw.sim <- function (sim, traits = NULL, fossils = NULL, lineageColors = NULL,
   
   # fossil data frame
   if (!is.null(fossils)) {
-    # check that fossilsToDraw is sensible
-    if (!(fossilsToDraw %in% c("all", "ranges", "exact"))) {
-      stop("fossilsToDraw must equal \"all\", \"ranges\", or \"exact\"")
+    # check that fossilsFormat is sensible
+    if (!(fossilsFormat %in% c("all", "ranges", "exact"))) {
+      stop("fossilsFormat must equal \"all\", \"ranges\", or \"exact\"")
     }
     
     # if we want to draw ranges, have to have ranges
-    if (!("SampT" %in% colnames(fossils)) & fossilsToDraw != "ranges") {
+    if (!("SampT" %in% colnames(fossils)) & fossilsFormat != "ranges") {
       stop(paste0("Fossils need a SampT column to draw true fossil times.\n", 
                   "  Either run fossil sampling with returnAll or returnTrue", 
                   " set to TRUE (see ?sample.clade or ?sample.clade.traits),", 
-                  " or set fossilsToDraw to \"ranges\""))
+                  " or set fossilsFormat to \"ranges\""))
     }
     
     # fossils has to contain either a SampT or both a MaxT and MinT columns
@@ -593,7 +593,7 @@ draw.sim <- function (sim, traits = NULL, fossils = NULL, lineageColors = NULL,
     }
     
     # check which fossils to draw
-    if (fossilsToDraw == "ranges") {
+    if (fossilsFormat == "ranges") {
       # jitter lines for drawing fossil ranges
       y_jittered <- jitter_foo(unlist(lapply(ids, 
                                              function(x) which(ord == x))))
@@ -606,7 +606,7 @@ draw.sim <- function (sim, traits = NULL, fossils = NULL, lineageColors = NULL,
                lwd = lwdLin * 0.75)
     } 
     
-    else if (fossilsToDraw == "exact") {
+    else if (fossilsFormat == "exact") {
       # draw fossil occurrences as time points
       points(x = fossils$SampT, 
              y = unlist(lapply(ids, function(x) which(ord == x))), 

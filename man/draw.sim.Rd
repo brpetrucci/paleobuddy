@@ -17,7 +17,7 @@ draw.sim(
   traitColors = c("#a40000", "#16317d", "#007e2f", "#ffcd12", "#b86092", "#721b3e",
     "#00b7a7"),
   traitLegendPlacement = "topleft",
-  fossilsToDraw = "exact",
+  fossilsFormat = "exact",
   fossilRangeAlpha = 100,
   restoreOldPar = TRUE,
   ...
@@ -78,9 +78,9 @@ Default values provide 7 colors (and so they can plot up to 7 states).}
 
 \item{traitLegendPlacement}{Placement of state legend. Accepted values are 
 \code{"topleft"} (default value), \code{"bottomleft"}, \code{"bottomright"}, 
-and \code{"topright"}.}
+\code{"topright"}, and \code{"none"}.}
 
-\item{fossilsToDraw}{Character assigning if fossils will be represented by 
+\item{fossilsFormat}{Character assigning if fossils will be represented by 
 exact time placements (\code{"exact"}, default value), by horizontal bars 
 giving range information (\code{"ranges"}), or by both forms (\code{"all"}).}
 
@@ -197,14 +197,14 @@ oldPar <- par(no.readonly = TRUE)
 
 # draw it, sorting lineages by their parent
 draw.sim(sim, fossils = fossils, sortBy = "PAR",
-         fossilsToDraw = "ranges", restoreOldPar = FALSE)
+         fossilsFormat = "ranges", restoreOldPar = FALSE)
 
 # adding the bounds of the simulated bins
 abline(v = bins, lty = 2, col = "blue", lwd = 0.5)
 
 # alternatively, we can draw lineages varying colors and tip labels
 # (note how they are sorted)
-draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges",
+draw.sim(sim, fossils = fossils, fossilsFormat = "ranges",
          tipLabels = paste0("spp_", 1:length(sim$TS)), 
          lineageColors = rep(c("red", "green", "blue"), times = 5))
          
@@ -275,19 +275,19 @@ fossils <- sample.clade(sim$SIM, rho = 0.5, tMax = max(sim$SIM$TS),
                         returnAll = TRUE, bins = seq(0, 20, by = 1))
                          
 draw.sim(sim$SIM, traits = sim$TRAITS, sortBy = "PAR",
-         fossils = fossils, fossilsToDraw = "all",
+         fossils = fossils, fossilsFormat = "all",
          traitLegendPlacement = "bottomleft")
 # note how fossil ranges are displayed above and below the true
 # occurrence times, but we could also draw only one or the other
 
 # just ranges
 draw.sim(sim$SIM, traits = sim$TRAITS, sortBy = "PAR",
-         fossils = fossils, fossilsToDraw = "ranges",
+         fossils = fossils, fossilsFormat = "ranges",
          traitLegendPlacement = "bottomleft")
          
 # just true occurrence times
 draw.sim(sim$SIM, traits = sim$TRAITS, sortBy = "PAR", traitID = 2,
-         fossils = fossils, fossilsToDraw = "exact",
+         fossils = fossils, fossilsFormat = "exact",
          traitLegendPlacement = "bottomleft")
 # note the different traitID, so that segments are colored
 # following the value of the second trait
