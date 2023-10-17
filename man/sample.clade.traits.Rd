@@ -221,7 +221,7 @@ fossils <- sample.clade.traits(sim$SIM, rho, tMax, sim$TRAITS,
 
 # draw simulation with fossil occurrences as time points AND ranges
 draw.sim(sim$SIM, traits = sim$TRAITS, fossils = fossils$FOSSILS,
-         fossilsToDraw = "all", traitLegendPlacement = "bottomleft")
+         fossilsFormat = "all", traitLegendPlacement = "bottomleft")
 # note that there are a lot of fossils, so the ranges are difficult to see
 
 # see ?sample.clade for further examples using different return types

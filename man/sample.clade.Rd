@@ -159,7 +159,7 @@ fossils <- sample.clade(sim, rho, tMax = 10,
                         bins = bins, returnTrue = FALSE)
 
 # draw simulation with fossil occurrences as ranges
-draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges")
+draw.sim(sim, fossils = fossils, fossilsFormat = "ranges")
 
 ###
 # sampling can be any function of time 
@@ -190,7 +190,7 @@ fossils <- sample.clade(sim, rho, tMax = 10,
                         bins = bins, returnTrue = FALSE)
 
 # draw simulation with fossil occurrences as ranges
-draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges")
+draw.sim(sim, fossils = fossils, fossilsFormat = "ranges")
 
 ###
 # now we can try a step function rate
@@ -226,7 +226,7 @@ fossils <- sample.clade(sim, rho = rList, rShifts = rShifts, tMax = 10,
                         bins = bins, returnTrue = FALSE)
 
 # draw simulation with fossil occurrences as ranges
-draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges")
+draw.sim(sim, fossils = fossils, fossilsFormat = "ranges")
 
 ###
 # finally, sample.clade also accepts an environmental variable
@@ -337,7 +337,7 @@ draw.sim(sim, fossils = fossils)
 # the warning is to let you know the ranges won't be used
 
 # and also as ranges
-draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges")
+draw.sim(sim, fossils = fossils, fossilsFormat = "ranges")
 
 ###
 # we can have more parameters on adFun
@@ -417,7 +417,7 @@ fossils <- sample.clade(sim, rho, tMax = 10, S = 1, adFun = dTRI,
 # of age (a given percentile of the age, for instance) - see below
 
 # draw simulation with fossil occurrences as ranges
-draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges")
+draw.sim(sim, fossils = fossils, fossilsFormat = "ranges")
 
 ###
 # we can also have a hat-shaped increase through the duration of a species
@@ -563,7 +563,7 @@ fossils <- sample.clade(sim, rho, tMax = 10, adFun = dTRImod2, bins = bins,
                         returnTrue = FALSE)
 
 # draw simulation with fossil occurrences as time ranges
-draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges")
+draw.sim(sim, fossils = fossils, fossilsFormat = "ranges")
 
 ###
 # we can also have a mix of age-independent and age-dependent
@@ -654,7 +654,7 @@ fossils <- sample.clade(sim, rho, tMax = 10, adFun = dPERTAndUniform,
                         bins = bins, returnTrue = FALSE)
 
 # draw simulation with fossil occurrences as ranges
-draw.sim(sim, fossils = fossils, fossilsToDraw = "ranges")
+draw.sim(sim, fossils = fossils, fossilsFormat = "ranges")
 
 # note how occurrences cluster close to the speciation time of
 # species 1, but not its extinction time, since around 5mya

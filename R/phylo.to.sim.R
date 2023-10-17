@@ -152,6 +152,8 @@
 #' # testing if simulation and converted object are the same
 #' all.equal(sim, res)
 #' 
+#' @importFrom methods is
+#' 
 #' @name phylo.to.sim
 #' @rdname phylo.to.sim
 #' @export
@@ -382,7 +384,7 @@ phylo.to.sim <- function(phy, mothers, extant, dateFromPresent = TRUE,
   }
   
   # one simple transformation if all lineages are extant:
-  if (class(res$TE) == "logical") {
+  if (is(res$TE, "logical")) {
     res$TE <- as.numeric(res$TE)
   }
   

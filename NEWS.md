@@ -45,7 +45,7 @@ BiSSE, MuSSE, and QuaSSE. See documentation for full reference.
   time. Customization options include which colors to use for each
   state, whether to plot fossils as true occurrence times or ranges
   (already present in 1.0, but now with a dedicated argument for such,
-  `fossilsToDraw`), and where to place trait value legend. See
+  `fossilsFormat`), and where to place trait value legend. See
   `?draw.sim`, `?bd.sim.traits`, `?sample.clade.traits`, and the
   `overview` vignette for examples.
 

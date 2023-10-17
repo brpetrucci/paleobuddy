@@ -401,11 +401,12 @@ draw.sim <- function (sim, traits = NULL, fossils = NULL, lineageColors = NULL,
     }
     
     # check sortBy
-    if (!class(sortBy) %in% c("character", "integer")) {
+    if (!(is(sortBy, "numeric") || 
+          (is(sortBy, "character") && length(sortBy) == 1))) {
       stop("sortBy should be a character or a vector of integers.")
     }
     
-    else if ((class(sortBy) == "integer") & !(all(1:length(sim$TE) %in% 
+    else if ((is(sortBy, "numeric")) & !(all(1:length(sim$TE) %in% 
                                                   unique(sortBy)))) {
       stop("sortBy must skip no lineage, and all lineages
            should have unique indices.")

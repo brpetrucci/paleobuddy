@@ -54,7 +54,10 @@ return.}
 simulation will be set for one of the times where \code{N} species are
 alive, chosen from all the times there were \code{N} species alive weighted
 by how long the simulation was in that situation. Exactly one of \code{tMax}
-and \code{N} must be non-\code{Inf}.}
+and \code{N} must be non-\code{Inf}. Note that if \code{N} is the chosen
+condition, \code{mu} cannot be \code{0}, since paelobuddy's current
+algorithm would mean only species 1 would have children. Future features
+will hopefully remove this limitation.}
 
 \item{lShape}{Shape parameter defining the degree of age-dependency in 
 speciation rate. This will be equal to the shape parameter in a Weibull 

@@ -192,11 +192,11 @@ simHead <- head(sim, 10)
 suppressMessages(draw.sim(simHead, fossils = fossils))
 ```
 
-We can also visualize the fossil ranges if we take away the `SampT` column, and set the `fossilsToDraw` parameter to `ranges`.
+We can also visualize the fossil ranges if we take away the `SampT` column, and set the `fossilsFormat` parameter to `ranges`.
 
 ```{r}
 # draw longevities with fossil time ranges
-suppressMessages(draw.sim(simHead, fossils = fossils[, -3], fossilsToDraw = "ranges"))
+suppressMessages(draw.sim(simHead, fossils = fossils[, -3], fossilsFormat = "ranges"))
 ```
 
 This fossil record's data frame organization allows for easy evaluation of its components, and is close to ready for use in PyRate, one of the most widely used birth-death rates estimators in the field currently. To make it ready we must manipulate the `Extant` column, left like this for clarity. In PyRate, that column must be `status`, with extant species marked `extant` and extinct species marked `extinct`.
