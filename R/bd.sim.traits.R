@@ -535,6 +535,7 @@ bd.sim.traits <- function(n0, lambda, mu,
                          nTraits = 1, nFocus = 1, nStates = 2, nHidden = 1,
                          X0 = 0, Q = list(matrix(c(0, 0.1, 0.1, 0), 
                                                  ncol = 2, nrow = 2)),
+                         lShifts = NULL, mShifts = NULL,
                          nFinal = c(0, Inf), nExtant = c(0, Inf)) {
   # check that n0 is not negative
   if (n0 <= 0) {
@@ -564,17 +565,25 @@ bd.sim.traits <- function(n0, lambda, mu,
   if (length(Q) == 1) {
     Q <- rep(list(Q[[1]]), nTraits)
   }
+  
+  # make rates a matrix, if vectors
+  if (is.vector(lambda)) {
+    lambda <- matrix(lambda, nrow = 1, ncol = length(lambda))
+  } 
+  if (is.vector(mu)) {
+    mu <- matrix(mu, nrow = 1, ncol = length(mu))
+  }
 
   # check that rates are numeric
   if (!is.numeric(c(lambda, mu))) {
     stop("lambda and mu must be numeric")
-  } else if (any(!(c(length(lambda), length(mu)) %in% 
+  } else if (any(!(c(ncol(lambda), ncol(mu)) %in% 
                    c(1, nStates * nHidden)))) {
     stop("lambda and mu must be of length either one or equal to nStates")
   } else {
     # if everything is good, we set flags on whether each are TD
-    tdLambda <- length(lambda) == nStates[nFocus[1]] * nHidden[nFocus[1]]
-    tdMu <- length(mu) == nStates[nFocus[2]] * nHidden[nFocus[2]]
+    tdLambda <- ncol(lambda) == nStates[nFocus[1]] * nHidden[nFocus[1]]
+    tdMu <- ncol(mu) == nStates[nFocus[2]] * nHidden[nFocus[2]]
   }
   
   # check that rates are non-negative
@@ -637,12 +646,14 @@ bd.sim.traits <- function(n0, lambda, mu,
   # do we condition on the number of species?
   condN <- condition == "number"
   
+  
+  
   # if conditioning on number, need to set some 
   # tMax for the trait evolution
   if (condN) {
     # thrice the average time it will take to get to 10*N species
     # under the slowest diversification rate parameters
-    trTMax <- max(log(10*N) / (lambda - mu))
+    trTMax <- max(log(10*N) / (unlist(lapply(lambda, function(x) x - mu))))
   } else trTMax <- Inf
   
   # whether our condition is met - rejection sampling for

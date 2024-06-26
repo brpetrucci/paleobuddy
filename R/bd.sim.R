@@ -95,9 +95,9 @@
 #' @param lShifts Vector of rate shifts. First element must be the starting
 #' time for the simulation (\code{0} or \code{tMax}). It must have the same 
 #' length as \code{lambda}. \code{c(0, x, tMax)} is equivalent to 
-#' \code{c(tMax, tMax - x, 0)} for the purposes of \code{make.rate}.
+#' \code{c(tMax, tMax - x, 0)}
 #' 
-#' @param mShifts Similar to \code{mShifts}, but for the extinction rate.
+#' @param mShifts Similar to \code{lShifts}, but for the extinction rate.
 #' 
 #' @param nFinal A \code{vector} of length \code{2}, indicating an interval of
 #' acceptable number of species at the end of the simulation. Default value is

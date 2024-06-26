@@ -127,7 +127,7 @@
 #'
 #' @noRd
 
-rexp.musse <- function(n, rate, traits,
+rexp.musse <- function(n, rate, traits, shifts = NULL,
                         now = 0, tMax = Inf, fast = FALSE) {
   # some error checking
   if (tMax == Inf & fast) {
@@ -141,7 +141,28 @@ rexp.musse <- function(n, rate, traits,
   upper <- ifelse(tMax == Inf, now + 100, tMax)
   # time will still be truncated without tMax, but only if fast = TRUE
   
-  # manipulate traits to include only relevant portion
+  # manipulate rate to include only relevant portion
+  if (now < max(shifts)) {
+    # find highest shift that's lower than now
+    lastShift <- max(which(shifts <= now))
+    
+    # delete rate rows before that
+    rate <- rate[lastShift:nrow(rate), ]
+    
+    # delete shifts before that
+    shifts <- shifts[lastShift:length(shifts)]
+    
+    # make first shift now
+    shifts[1] <- now
+  } else {
+    # if now is greater than all shifts, rates will just have onw row
+    rate <- t(as.matrix(rates[nrow(rate), ]))
+    
+    # and shifts will just be now
+    shifts <- now
+  }
+  
+  # manipulate traits (and rate, if necessary) to include only relevant portion
   if (now < max(traits$max)) {
     # delete the rows in traits that are lower than now
     traits <- traits[traits$max > now, ]
@@ -156,12 +177,6 @@ rexp.musse <- function(n, rate, traits,
     traits <- traits[nrow(traits), ]
   }
   
-  
-  # if rate has length 1, make it a vector
-  if (length(rate) == 1) {
-    rate <- rep(rate, max(traits$value) + 1)
-  }
-  
   # if only one rate is to be considered, return rexp
   if (length(unique(rate)) == 1 || nrow(traits) == 1) {
     if (rate[traits$value[1] + 1] == 0) {
@@ -174,8 +189,27 @@ rexp.musse <- function(n, rate, traits,
   # when there are no rate shifts after now
   
   # make a rates data frame
-  rates <- data.frame(rate[traits$value + 1], traits$min, traits$max)
-  colnames(rates) <- colnames(traits)
+  new_rate <- data.frame(matrix(nrow = 0, ncol = ncol(traits)))
+  
+  # find relevant rate row values for each traits row
+  for (i in 1:nrow(traits)) {
+    # find shifts placement
+    if (max(shifts) < traits$min[i]) {
+      thisShift <- length(shifts)
+    } else if (any(shifts == traits$min[i])) {
+      thisShift <- which(shifts == traits$min[i])
+    } else {
+      thisShift <- which(shifts >= traits$min[i] & shifts < traits$max[i])
+    }
+    
+    # get relevant rate
+    new_rate <- rbind(new_rate, c(rate[thisShift, traits$value[i] + 1],
+                                  traits$min[i], traits$max[i]))
+  }
+  
+  # rename rates data frame
+  colnames(new_rate) <- colnames(traits)
+  rates <- new_rate
   
   for (i in 1:n) {
     # draw an uniform random variable from 0 to 1
@@ -209,5 +243,6 @@ rexp.musse <- function(n, rate, traits,
                          tol = tol)$root - now
     }
   }
+  
   return(vars)
 }

@@ -16,6 +16,8 @@ bd.sim.traits(
   nHidden = 1,
   X0 = 0,
   Q = list(matrix(c(0, 0.1, 0.1, 0), ncol = 2, nrow = 2)),
+  lShifts = NULL,
+  mShifts = NULL,
   nFinal = c(0, Inf),
   nExtant = c(0, Inf)
 )
@@ -89,6 +91,13 @@ if \code{nTraits > 1} and any of those is of length \code{1}, they will be
 considered to apply to all traits equally. This might lead to problems if,
 e.g., two traits have different states but the same \code{Q}, so double
 check that you are providing all parameters for the required traits.}
+
+\item{lShifts}{Vector of rate shifts. First element must be the starting
+time for the simulation (\code{0} or \code{tMax}). It must have the same 
+length as \code{lambda}. \code{c(0, x, tMax)} is equivalent to 
+\code{c(tMax, tMax - x, 0)}}
+
+\item{mShifts}{Similar to \code{lShifts}, but for the extinction rate.}
 
 \item{nFinal}{A \code{vector} of length \code{2}, indicating an interval of
 acceptable number of species at the end of the simulation. Default value is
