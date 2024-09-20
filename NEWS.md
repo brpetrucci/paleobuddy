@@ -30,10 +30,9 @@ BiSSE, MuSSE, and QuaSSE. See documentation for full reference.
   HiSSE as well, by setting the `nHidden` parameter, representing the
   number of hidden states, to something higher than 1. Can set separate
   number of states (observed or hidden), initial trait values, and
-  transition matrices for each trait. See the now expanded `?bd.sim` for
-  details. In the future, other trait-dependent diversification models
-  will be implemented, including relaxing the assumption of discrete
-  traits.
+  transition matrices for each trait. See `?bd.sim.traits` for details.
+  In the future, other trait-dependent diversification models will be
+  implemented, including relaxing the assumption of discrete traits.
 - `sample.clade.traits` simulates state-dependent fossil sampling,
   following a similar algorithm as `bd.sim.traits`. It allows for a
   hidden state model as well, but note that trait information (usually
@@ -74,10 +73,11 @@ BiSSE, MuSSE, and QuaSSE. See documentation for full reference.
 
 ## Other additions
 
-- `bin.occurrences` allows for ad-hoc binning of fossil occurrences, so
-  one can take a fossil record including only true times, i.e. an output
-  of `sample.clade(..., returnTrue = TRUE)`, and bin it to produce the
-  uncertainty in fossil ages ubiquitous in the true fossil record.
+- `bin.occurrences` allows for post-hoc binning of fossil occurrences,
+  so one can take a fossil record including only true times, i.e. an
+  output of `sample.clade(..., returnTrue = TRUE)`, and bin it to
+  produce the uncertainty in fossil ages ubiquitous in the true fossil
+  record.
 
 ## Simple fixes
 
