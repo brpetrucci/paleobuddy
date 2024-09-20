@@ -86,6 +86,8 @@ ape::axisPhylo() # add axis
 
 `sample.clade` generates fossil records, returning an organized data frame with occurrence times - or occurrence time ranges, provided the user supplies the respective interval vector. It allows for a sampling rate `rho` that can be as flexible as `lambda` and `mu` above, with the exception of a `shape` parameter, since we omitted that option given the absence of the use of Weibull distributions to model age-dependent fossil sampling in the literature. Instead, we allow for the user to supply a function they wish to use as age-dependent sampling, `adFun`, such as the PERT distribution used in [PyRate](https://github.com/dsilvestro/PyRate).
 
+`bd.sim.traits` and `sample.clade.traits` work similarly to `bd.sim` and `sample.clade`, but on the context of state-dependent diversification, in particular using the MuSSE model. 
+
 `make.phylo` closes the trio of most important functions of the package, taking a `paleobuddy` simulation and returning a `phylo` object from the APE package (see above).
 
 `draw.sim` allows for easy visualization of birth-death simulation objects, drawing species' durations and kinship, besides allowing for the addition of fossil occurrences as well.

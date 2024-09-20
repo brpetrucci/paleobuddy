@@ -6,7 +6,7 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/brpetrucci/paleobuddy/workflows/R-CMD-check/badge.svg)](https://github.com/brpetrucci/paleobuddy/actions/workflows/R-CMD-check.yaml)
-[![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/paleobuddy)](https://cran.r-project.org/package=paleobuddy)
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/paleobuddy)](https://cran.r-project.org/package=paleobuddy)
 <!-- badges: end -->
 
 `paleobuddy` is an R package to simulate species diversification, fossil
@@ -105,6 +105,10 @@ fossil sampling in the literature. Instead, we allow for the user to
 supply a function they wish to use as age-dependent sampling, `adFun`,
 such as the PERT distribution used in
 [PyRate](https://github.com/dsilvestro/PyRate).
+
+`bd.sim.traits` and `sample.clade.traits` work similarly to `bd.sim` and
+`sample.clade`, but on the context of state-dependent diversification,
+in particular using the MuSSE model.
 
 `make.phylo` closes the trio of most important functions of the package,
 taking a `paleobuddy` simulation and returning a `phylo` object from the

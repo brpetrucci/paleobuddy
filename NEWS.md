@@ -1,4 +1,3 @@
-
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
 
 # paleobuddy 1.1.0.0
