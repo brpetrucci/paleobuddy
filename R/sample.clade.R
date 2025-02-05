@@ -174,7 +174,9 @@
 #' 
 #' ###
 #' # now we can try a step function rate
+#' # not running because it takes a long time
 #' 
+#' \dontrun{
 #' # set seed
 #' set.seed(1)
 #' 
@@ -207,6 +209,7 @@
 #' 
 #' # draw simulation with fossil occurrences as ranges
 #' draw.sim(sim, fossils = fossils, fossilsFormat = "ranges")
+#' }
 #' 
 #' ###
 #' # finally, sample.clade also accepts an environmental variable

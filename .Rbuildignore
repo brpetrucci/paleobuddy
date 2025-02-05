@@ -14,3 +14,4 @@
 ^NEWS\.Rmd$
 ^checks\.R$
 ^CRAN-RELEASE$
+^CRAN-SUBMISSION$

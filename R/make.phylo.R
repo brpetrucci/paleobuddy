@@ -780,7 +780,7 @@ make.phylo <- function(sim, fossils = NULL, saFormat = "branch",
   # then check to see if there was 
   if (!is.null(fossils)) {
     # drop true extinction time tips if the parameter is set
-    if (!returnTrueExt) phy <- drop.tip.pb(phy, extinctTips)
+    if (!returnTrueExt) phy <- dropTipPB(phy, extinctTips)
     
     # make 0-length branches degree-2 nodes if saFormat is "node"
     if (saFormat == "node") {
@@ -800,7 +800,7 @@ make.phylo <- function(sim, fossils = NULL, saFormat = "branch",
       nodeNumbers <- phy$edge[delInd, 1]
       
       # drop tips, but keep them as nodes
-      phy <- drop.tip.pb(phy, deletedTips, collapse.singles = FALSE)
+      phy <- dropTipPB(phy, deletedTips, collapse.singles = FALSE)
       
       # reset node labels
       phy$node.label <- rep("", rep(phy$Nnode))
@@ -847,7 +847,7 @@ make.phylo <- function(sim, fossils = NULL, saFormat = "branch",
   return(phy)
 }
 
-drop.tip.pb <- function(phy, tip, root.edge = 0, collapse.singles = TRUE)
+dropTipPB <- function(phy, tip, root.edge = 0, collapse.singles = TRUE)
 {
   ###    if (!inherits(phy, "phylo"))
   ###        stop('object "phy" is not of class "phylo"')
@@ -961,12 +961,12 @@ drop.tip.pb <- function(phy, tip, root.edge = 0, collapse.singles = TRUE)
   if (!is.null(phy$node.label)) # update node.label if needed
     phy$node.label <- phy$node.label[which(newNb > 0) - Ntip]
 
-  if (collapse.singles) phy <- collapse.singles.pb(phy)
+  if (collapse.singles) phy <- collapseSinglesPB(phy)
   
   phy
 }
 
-collapse.singles.pb <- function(tree, root.edge = FALSE)
+collapseSinglesPB <- function(tree, root.edge = FALSE)
 {
   n <- length(tree$tip.label)
   tree <- reorder(tree) # this works now

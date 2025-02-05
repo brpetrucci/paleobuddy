@@ -164,8 +164,20 @@ if (requireNamespace("ape", quietly = TRUE)) {
 }
 
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/brpetrucci/paleobuddy}
+  \item Report bugs at \url{https://github.com/brpetrucci/paleobuddy/issues}
+}
+
+}
 \author{
 Bruno do Rosario Petrucci, Matheus Januario and Tiago B. Quental
 
 Maintainer: Bruno do Rosario Petrucci <petrucci@iastate.edu>
 }
+\keyword{fossils}
+\keyword{paleobiology}
+\keyword{phylogeny}
+\keyword{simulation}

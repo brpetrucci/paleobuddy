@@ -194,7 +194,9 @@ draw.sim(sim, fossils = fossils, fossilsFormat = "ranges")
 
 ###
 # now we can try a step function rate
+# not running because it takes a long time
 
+\dontrun{
 # set seed
 set.seed(1)
 
@@ -227,6 +229,7 @@ fossils <- sample.clade(sim, rho = rList, rShifts = rShifts, tMax = 10,
 
 # draw simulation with fossil occurrences as ranges
 draw.sim(sim, fossils = fossils, fossilsFormat = "ranges")
+}
 
 ###
 # finally, sample.clade also accepts an environmental variable

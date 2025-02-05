@@ -152,7 +152,8 @@
 #'   ape::axisPhylo()
 #' }
 #' 
-#' @docType package
 #' @aliases paleobuddy-package
 #' @name paleobuddy
+#' @keywords simulation paleobiology fossils phylogeny
+"_PACKAGE"
 NULL
