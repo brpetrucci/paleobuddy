@@ -684,8 +684,22 @@ sample.clade <- function(sim, rho, tMax, S = NULL,
   } 
   
   # if rho is not a constant, apply make.rate to it
-  if (!is.numeric(rho) || length(rho) > 1) {
-    rho <- make.rate(rho, tMax, envR, rShifts)
+  if (!is.numeric(rho) || (length(rho) > 1)) {
+    # if it is numeric and all elements are the same, not necessary
+    if (is.numeric(rho)) {
+      if (length(unique(rho) == 1)) {
+        # set rho to a constant
+        rho <- rho[1]
+        
+        # get rid of rShifts
+        rShifts <- NULL
+      }
+      else {
+        rho <- make.rate(rho, tMax, envR, rShifts)
+      }
+    } else {
+      rho <- make.rate(rho, tMax, envR, rShifts)
+    }
   }
   
   # make TE

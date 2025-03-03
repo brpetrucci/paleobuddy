@@ -1,4 +1,16 @@
+
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
+
+# paleobuddy 1.1.1.0
+
+## Simple fixes
+
+- `bd.sim` now corrects rates to constant if given a vector of rates for
+  lambda or mu, and all the elements of the vector are the same. This
+  will allow for faster simulations when one wants to have the
+  convenience of setting the rates to a constant vector (because other
+  simulations have non-constant vector). The same will be implemented
+  for `sample.clade`.
 
 # paleobuddy 1.1.0.0
 

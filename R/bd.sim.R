@@ -653,6 +653,26 @@ bd.sim <- function(n0, lambda, mu,
                    nFinal = c(0, Inf), nExtant = c(0, Inf),
                    trueExt = FALSE) {
   
+  # if lambda is a numeric vector with equal values, make it a number
+  if (is.numeric(lambda) & length(lambda) > 1) {
+    if (length(unique(lambda)) == 1) {
+      lambda <- lambda[1]
+      
+      # lShifts is unnecessary then
+      lShifts <- NULL
+    }
+  }
+  
+  # same for mu
+  if (is.numeric(mu) & length(mu) > 1) {
+    if (length(unique(mu)) == 1) {
+      mu <- mu[1]
+      
+      # mShifts is unnecessary then 
+      mShifts <- NULL
+    }
+  }
+  
   # if we have ONLY numbers for lambda and mu, it is constant
   if ((is.numeric(lambda) & length(lambda) == 1) &
       (is.numeric(mu) & length(mu) == 1) &
