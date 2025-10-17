@@ -341,10 +341,14 @@ rexp.var <- function(n, rate,
     }
     else {
       # calculate the probability that the event will happen at all
-      total <- 1 - exp(-integrate(Vectorize(function(x) rate(x)), 
+      total <- try(1 - exp(-integrate(Vectorize(function(x) rate(x)), 
                                   lower = now, upper = upper, 
                                   subdivisions = 2000, 
-                                  stop.on.error = FALSE)$value)
+                                  stop.on.error = FALSE)$value))
+      
+      if (inherits(total, "try-error")) {
+        print("failed :(")
+      }
       
       # if the probability is lower than p, the event will not happen
       if (total < p & fast) {
@@ -359,10 +363,14 @@ rexp.var <- function(n, rate,
         }
         
         # if f(t) = 0, t is exponentially distributed
-        f <- Vectorize(function(t) {
+        f <- try(Vectorize(function(t) {
           1 - p - exp(-integrate(Vectorize(function(x) rate(x)), lower = now, 
                                  upper = t, subdivisions = 2000, 
-                                 stop.on.error = FALSE)$value)})
+                                 stop.on.error = FALSE)$value)}))
+        
+        if (inherits(f, "try-error")) {
+          print("failed")
+        }
 
         # if rate is really high and the integral goes to +-infinity 
         # (computationally speaking), uniroot substitutes it for a really

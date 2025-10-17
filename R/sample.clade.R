@@ -687,7 +687,7 @@ sample.clade <- function(sim, rho, tMax, S = NULL,
   if (!is.numeric(rho) || (length(rho) > 1)) {
     # if it is numeric and all elements are the same, not necessary
     if (is.numeric(rho)) {
-      if (length(unique(rho) == 1)) {
+      if (length(unique(rho)) == 1) {
         # set rho to a constant
         rho <- rho[1]
         
