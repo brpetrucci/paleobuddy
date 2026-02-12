@@ -779,8 +779,19 @@ make.phylo <- function(sim, fossils = NULL, saFormat = "branch",
   # if there are fossils, collapse fossils if saFormat is node, and
   # then check to see if there was 
   if (!is.null(fossils)) {
-    # drop true extinction time tips if the parameter is set
-    if (!returnTrueExt) phy <- dropTipPB(phy, extinctTips)
+    # check if we want to return true extinction times
+    if (!returnTrueExt) {
+      # if not, drop extinct species
+      phy <- dropTipPB(phy, extinctTips)
+      
+      # get new stem and root if necessary
+      strt <- find_root(sim, fossils)
+      st <- strt[1]
+      rt <- strt[2]
+      
+      # get new root.edge
+      phy$root.edge <- st - rt
+    }
     
     # make 0-length branches degree-2 nodes if saFormat is "node"
     if (saFormat == "node") {
@@ -1028,4 +1039,42 @@ collapseSinglesPB <- function(tree, root.edge = FALSE)
     tree$edge.length <- el
   }
   tree
+}
+
+# function to find new root and stem of a tree with fossils
+find_root <- function(sim, sample) {
+  # initial stem
+  st <- sim$TS[1]
+  
+  # initial root
+  rt <- sim$TS[2]
+  
+  # sampled species
+  sp_sampled <- sort(unique(as.numeric(gsub("t", "",c(which(sim$EXTANT), 
+                                                      sample$Species)))))
+  
+  # get left and right clades
+  right_clade <- find.lineages(sim, S = 2)$clade_2$LIN
+  left_clade <- seq_along(sim$TS)[-right_clade]
+  
+  # check whether all of either of those is not sampled
+  right_sampled <- any(right_clade %in% sp_sampled)
+  left_sampled <- any(left_clade %in% sp_sampled)
+  
+  # if one of those is not true
+  if (!(right_sampled && left_sampled)) {
+    # new stem is the age of the oldest sampled species
+    st <- max(sim$TS[sp_sampled])
+    
+    # which species represents that sample
+    st_sp <- which(sim$TS == st)
+    
+    # new root is the max of the oldest sample of a sampled species, and the 
+    # speciation of the next sampled species
+    rt <- max(sample$SampT, 
+              sim$TS[sp_sampled[-which(sp_sampled == st_sp)]])
+  }
+  
+  # return root and stem
+  return(c(st, rt))
 }
