@@ -189,10 +189,10 @@ sim.char.one <- function(sim, sample, nStates, X0, Q, species_clock,
     if (sim$EXTANT[i]) {
       char <- rbind(char, c(paste0("t", i), tail(traits[[i]]$value, 1)))
     } else if (nrow(sample_sp) > 0) {
-      # if not, choose a random time from within fossil range
-      char_samp_time <- runif(1, min(sample_sp$SampT), max(sample_sp$SampT))
+      # if not, get first fossil sample
+      char_samp_time <- sample_sp$SampT[1]
       
-      # and sample state at that time
+      # and sample state at that time (simulating a morphospecies)
       char <- rbind(char, c(paste0("t", i),
                             traits[[i]]$value[findInterval(char_samp_time,
                                                            traits[[i]]$min)]))
