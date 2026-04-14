@@ -60,6 +60,8 @@ getChildren.buddPhylo <- function(buddPhylo, focalLineage, returnInfo = TRUE) {
     } else { # if no children is sampled ancesotr:
       aux <- buddPhylo$orientation[match(desc, buddPhylo$name)]
       names(res) <- aux
+      # make sure ancestor is always first
+      res <- res[order(names(res))]
     }
   }
   
@@ -80,7 +82,8 @@ getChildren.buddPhylo <- function(buddPhylo, focalLineage, returnInfo = TRUE) {
 #'
 #' @export
 
-getDescendants.buddPhylo <- function(buddPhylo, focalLineage, onlyImmediates = FALSE) {
+getDescendants.buddPhylo <- function(buddPhylo, focalLineage, 
+                                     onlyImmediates = FALSE, all = FALSE) {
   checked <- vector()
   toCheck <- focalLineage
   res <- vector()
@@ -100,6 +103,11 @@ getDescendants.buddPhylo <- function(buddPhylo, focalLineage, onlyImmediates = F
     } else {
       toCheck <- toCheck[!toCheck %in% focalLineage]
     }
+  }
+  
+  if (!all) {
+    internal_nodes <- which(res %in% buddPhylo$name[buddPhylo$type == "node"])
+    if (length(internal_nodes) > 0) res <- res[-internal_nodes]
   }
   
   return(res)
@@ -253,7 +261,7 @@ as.phylo.buddPhylo <- function(buddPhylo) {
     tempIDS <- !aux %in% names(node.id[!is.na(node.id)])
     sumTempIDS <- sum(tempIDS)
     if (sumTempIDS > 0) {
-      print(paste0("N = ", length(pars)))
+      #print(paste0("N = ", length(pars)))
       aux2 <- aux[tempIDS]
       node.id[match(rev(aux2), names(node.id))] <- nextNode:(nextNode + sumTempIDS - 1)
       nextNode <- max(node.id, na.rm = T) + 1
@@ -273,7 +281,7 @@ as.phylo.buddPhylo <- function(buddPhylo) {
   edge1 <- node.id[match(buddPhylo$parent, node.label)]
   edge2 <- all.ids[match(buddPhylo$name, all.labels)]
   edge <- cbind(edge1, edge2)
-  edge <- edge[-nrow(edge), ] # last element is the root, ignore it
+  edge <- edge[-which(is.na(edge[, 1])), ] # NA element is the root, ignore it
   
   # Finally, we re-order so phylo() doesnt break:
   edge <- reorder_edges(edge)

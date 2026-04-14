@@ -107,7 +107,7 @@ is.buddPhylo <- function(x) {
   # Checks the classes of each colmun:
   cmatch <- match(mustHaveCols, colnames(buddPhylo))
   cc1 <- (apply(buddPhylo[, cmatch[1:6]], 2, class) == "character")
-  cc2 <- (apply(buddPhylo[, cmatch[7:8]], 2, class) == "numeric")
+  cc2 <- (apply(buddPhylo[, c("x_coord", "y_coord")], 2, class) == "numeric")
   
   if (!all(cc1)) {
     message(paste0(
@@ -257,6 +257,244 @@ tail.buddPhylo <- function(x, subType = NULL, ...) {
 }
 
 #' @rdname buddPhylo
+#' 
+#' @details \code{fix.coords} Fixes the x and y coordinates of a buddPhylo 
+#' object based on its associated phylo object.
+#' 
+#' @author Bruno do Rosario Petrucci
+#' 
+#' @export
+#' 
+fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
+  # ladderize phylo
+  phylo <- ladderize(phylo)
+  
+  # ensure length is numeric
+  buddPhylo$length <- as.numeric(buddPhylo$length)
+  
+  # function to find the y coordinates of the tips of a phylo object
+  get_tip_y_coords <- function(phylo) {
+    n_tips <- length(phylo$tip.label)
+    n_nodes <- phylo$Nnode
+    n_total <- n_tips + n_nodes
+
+    # Identify "true" tips: leaves that are NOT the parent of a zero-length branch
+    # whose child is also a leaf. In a ladderized tree with zero-length branches,
+    # some internal nodes appear as tips visually but aren't.
+    edge <- phylo$edge
+    edge_lengths <- phylo$edge.length
+
+    # Find nodes that are parents of zero-length edges leading to tips
+    zero_len_edges <- which(!is.null(edge_lengths) & edge_lengths == 0)
+    ghost_parents <- c()
+    if (length(zero_len_edges) > 0) {
+      children_of_zero <- edge[zero_len_edges, 2]
+      # Ghost parents are nodes whose only outgoing edges are zero-length to tips
+      ghost_parents <- children_of_zero[children_of_zero > n_tips]
+    }
+
+    # True tips: tip indices (1..n_tips) NOT reachable only via zero-length edges
+    true_tips <- setdiff(1:n_tips, edge[zero_len_edges, 2])
+
+    # Assign y positions in the order they appear in the tip.label vector,
+    # respecting the ladderized traversal order
+    # plot.phylo assigns y=1..n_tips in cladogram traversal order
+    yy <- numeric(n_total)
+
+    # Traverse the tree in the same order plot.phylo does:
+    # post-order, left-to-right for a ladderized tree
+    # Tip y's are assigned by their visitation order in a left-to-right traversal
+    traverse_order <- integer(0)
+
+    get_children <- function(node) {
+      edge[edge[, 1] == node, 2]
+    }
+
+    # Iterative pre-order traversal (left to right = first child first)
+    stack <- phylo$edge[phylo$edge[, 1] == (n_tips + 1), 2]
+    # Reverse so first child is on top of stack
+    stack <- rev(stack)
+
+    visit_order <- integer(0)
+    stk <- stack
+    while (length(stk) > 0) {
+      node <- stk[length(stk)]
+      stk <- stk[-length(stk)]
+      if (node <= n_tips) {
+        visit_order <- c(visit_order, node)
+      } else {
+        children <- get_children(node)
+        stk <- c(stk, rev(children))
+      }
+    }
+
+    # Assign y = 1..n_tips in traversal order
+    for (i in seq_along(visit_order)) {
+      yy[visit_order[i]] <- i
+    }
+
+    # For internal nodes, y = mean of children's y (matches plot.phylo)
+    # Process nodes in reverse post-order (leaves up to root)
+    all_nodes <- (n_tips + 1):n_total
+    # Process in reverse of edge order (post-order)
+    node_order <- rev(unique(edge[, 1]))
+    for (nd in node_order) {
+      children <- get_children(nd)
+      yy[nd] <- mean(yy[children])
+    }
+
+    # Filter to only true tips if zero-length branches exist
+    result <- yy[true_tips]
+    names(result) <- phylo$tip.label[true_tips]
+    return(result)
+  }
+
+  # if fix_x is false, need to save x coordinates
+  if (!fix_x) {
+    x_coords_bak <- buddPhylo$x_coord
+    x_par_bak <- buddPhylo$x_par
+  }
+  
+  # get the y coordinates for the tips of the object
+  yy <- get_tip_y_coords(phylo)
+  
+  # get x coordinates for these tips
+  xx <- node.depth.edgelength(phylo)[which(phylo$tip.label %in% names(yy))]
+  
+  yy <- yy[order(yy, decreasing = TRUE)]
+  xx <- xx[order(yy, decreasing = TRUE)]
+  
+  tip_names <- phylo$tip.label
+  
+  buddPhylo$y_coord <- NA
+  buddPhylo$x_coord <- NA
+  
+  matching_ids <- match(names(yy), buddPhylo$name)
+  
+  buddPhylo$y_coord[matching_ids] <- yy
+  buddPhylo$x_coord[matching_ids] <- xx
+  
+  # now re-assign y values recursively from tip to root:
+  #tipNames <- unique(buddPhylo$name[buddPhylo$type == "tip"])
+  buddPhylo$x_par <- NA
+  buddPhylo$y_par <- NA
+  tipNames <- unique(buddPhylo$name[buddPhylo$type == "tip"])
+  
+  for (tt in tipNames) {
+    todo <- TRUE
+    while (todo) {
+      ttID <- which(buddPhylo$name == tt)
+      Parental <- getParents.buddPhylo(buddPhylo, tt)[1]
+      ParID <- which(buddPhylo$name == Parental)
+
+      # update the refences coordinates:
+      if (!is.na(buddPhylo$x_coord[ParID])) {
+        buddPhylo$x_par[ttID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+        todo <- FALSE
+      } else {
+        buddPhylo$y_coord[ParID] <- buddPhylo$y_coord[ttID]
+        buddPhylo$x_coord[ParID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+        buddPhylo$x_par[ttID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+      }
+
+      if (buddPhylo$orientation[ParID] == "uca") {
+        buddPhylo$x_par[ParID] <- buddPhylo$x_coord[ParID] - buddPhylo$length[ParID]
+        buddPhylo$y_par[ParID] <- buddPhylo$y_coord[ParID]
+        todo <- FALSE
+      } else {
+        tt <- Parental
+      }
+    }
+  }
+  
+  # buddPhylo$y_set <- !is.na(buddPhylo$y_coord)
+  # tipNames <- unique(buddPhylo$name[buddPhylo$type == "tip"])
+  # 
+  # for (tt in tipNames) {
+  #   todo <- TRUE
+  #   while (todo) {
+  #     ttID     <- which(buddPhylo$name == tt)
+  #     Parental <- getParents.buddPhylo(buddPhylo, tt)[1]
+  #     ParID    <- which(buddPhylo$name == Parental)
+  #     
+  #     if (buddPhylo$y_set[ParID]) {
+  #       buddPhylo$x_par[ttID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+  #       todo <- FALSE
+  #     } else {
+  #       # Block only if: arriving via a descendant child AND the parent has an
+  #       # ancestor-orientation sibling that has NOT yet been walked (y_set=FALSE)
+  #       ancestorSiblings <- buddPhylo$name[
+  #         !is.na(buddPhylo$parent) &
+  #           buddPhylo$parent == Parental &
+  #           buddPhylo$orientation == "ancestor" &
+  #           buddPhylo$type != "sampAnc"
+  #       ]
+  #       hasUnwalkedAncestorSibling <- length(ancestorSiblings) > 0 &&
+  #         any(!buddPhylo$y_set[match(ancestorSiblings, buddPhylo$name)])
+  #       
+  #       if (buddPhylo$orientation[ttID] == "descendant" && hasUnwalkedAncestorSibling) {
+  #         buddPhylo$x_coord[ParID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+  #         buddPhylo$x_par[ttID]    <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+  #         todo <- FALSE
+  #       } else {
+  #         buddPhylo$y_coord[ParID] <- buddPhylo$y_coord[ttID]
+  #         buddPhylo$x_coord[ParID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+  #         buddPhylo$x_par[ttID]    <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+  #         buddPhylo$y_set[ParID]   <- TRUE
+  #       }
+  #     }
+  #     
+  #     # FIX 2: only stop at the true root (no parent), not at every uca-orientation node
+  #     grandParental <- getParents.buddPhylo(buddPhylo, Parental)[1]
+  #     if (is.na(grandParental) || length(grandParental) == 0) {
+  #       buddPhylo$x_par[ParID] <- buddPhylo$x_coord[ParID] - buddPhylo$length[ParID]
+  #       buddPhylo$y_par[ParID] <- buddPhylo$y_coord[ParID]
+  #       todo <- FALSE
+  #     } else {
+  #       tt <- Parental
+  #     }
+  #   }
+  # }
+  # 
+  # buddPhylo$y_set <- NULL
+  
+  # Now do the sampling ancestors:
+  SAncNames <- unique(buddPhylo$name[buddPhylo$type == "sampAnc"])
+  ss <- SAncNames[1]
+  for (ss in SAncNames) {
+    SAID <- which(buddPhylo$name == ss)
+    SAParID <- which(buddPhylo$name == buddPhylo$parent[SAID])
+    
+    buddPhylo$y_coord[SAID] <- buddPhylo$y_coord[SAParID]
+    buddPhylo$x_coord[SAID] <- buddPhylo$x_coord[SAParID]
+    buddPhylo$x_par[SAID] <- buddPhylo$x_coord[SAParID]
+  }
+  
+  min_x <- min(c(buddPhylo$x_coord, buddPhylo$x_par), na.rm = T)
+  
+  buddPhylo$x_coord <- buddPhylo$x_coord - min_x
+  buddPhylo$x_par <- buddPhylo$x_par - min_x
+  
+  # Now for descendants
+  buddPhylo$y_par <- buddPhylo$y_coord[match(buddPhylo$parent, buddPhylo$name)]
+  buddPhylo$y_par[buddPhylo$orientation == "uca"] <- buddPhylo$y_coord[buddPhylo$orientation == "uca"]
+  
+  # restore x coords
+  if (!fix_x) {
+    buddPhylo$x_coord <- x_coords_bak
+    buddPhylo$x_par <- x_par_bak
+  }
+  
+  # fix row types
+  buddPhylo$length <- as.numeric(buddPhylo$length)
+  buddPhylo$x_coord <- as.numeric(buddPhylo$x_coord)
+  buddPhylo$y_coord <- as.numeric(buddPhylo$y_coord)
+
+  # return
+  return(buddPhylo)
+}
+
+#' @rdname buddPhylo
 #'
 #' @details \code{summary.buddPhylo} Quantitative details on the \code{buddPhylo} object.
 #' Prints the number of species, number of extant species, summary of durations
@@ -355,7 +593,10 @@ summary.buddPhylo <- function(object, ...) {
 #'
 #' @param show.tip.label a logical indicating whether to show the tip labels on
 #'  the phylogeny (defaults to TRUE, i.e. the labels are shown).
-#'
+#'  
+#' @param show.SA.label a logical indicating whether to show the sampAnc labels on
+#' the phylogeny (defaults to FALSE, i.e. the labels are not shown).
+#'  
 #' @param show.node.label a logical indicating whether to show the node labels
 #'  on the phylogeny (defaults to FALSE, i.e. the labels are not shown).
 #'
@@ -439,7 +680,8 @@ plot.buddPhylo <- function(x, type = "phylogram",
                            cex = par("cex"), tipCex = par("cex"), nodeCex = par("cex"),
                            tip.color = par("col"), lineageAsNodeLabels = F,
                            sampAncJitterMean = 0, sampAncJitterSD = 0.3,
-                           show.tip.label = TRUE, show.node.label = FALSE,
+                           show.tip.label = TRUE, show.SA.label = FALSE, 
+                           show.node.label = FALSE,
                            edge.color = "black", edge.width = NULL, edge.lty = NULL,
                            node.color = "grey30", node.width = NULL, node.lty = NULL,
                            font = 3, adj = NULL, srt = 0,
@@ -516,10 +758,16 @@ plot.buddPhylo <- function(x, type = "phylogram",
     yrange <- y.lim
   }
   
-  if (!underscore) {
-    labels <- sub("_", " ", buddPhylo$taxon[buddPhylo$type == "tip"], )
+  if (show.SA.label) {
+    row_tip_labels <- which(buddPhylo$type %in% c("tip", "sampAnc"))
   } else {
-    labels <- buddPhylo$taxon[buddPhylo$type == "tip"]
+    row_tip_labels <- which(buddPhylo$type == "tip")
+  }
+  
+  if (!underscore) {
+    labels <- sub("_", " ", buddPhylo$taxon[row_tip_labels])
+  } else {
+    labels <- buddPhylo$taxon[row_tip_labels]
   }
   
   if (type == "phylogram") {
@@ -562,11 +810,12 @@ plot.buddPhylo <- function(x, type = "phylogram",
     
     if (timeFromPresent) {
       ticks <- pretty(xrange)
+      if (any(abs(ticks - xrange[1]) < 3)) ticks <- ticks[-which(abs(ticks - xrange[1]) < 3)]
       ticks[1] <- xrange[1]
-      ticks <- unique(c(ticks, 0))
-      
+      ticks <- sort(unique(c(ticks, 0)), decreasing = TRUE)
+
       graphics::axis(1,
-           at = ticks, xrange[1],
+           at = ticks,# xrange[1],
            labels = round(ticks, 2)
       )
       graphics::mtext("Time (Mya)", side = 1, line = 2.5)
@@ -597,7 +846,7 @@ plot.buddPhylo <- function(x, type = "phylogram",
     
     # Names:
     if (show.tip.label) {
-      xtip <- buddPhylo$x_coord[buddPhylo$type == "tip"]
+      xtip <- buddPhylo$x_coord[row_tip_labels]
       
       if (align.tip.label) {
         if (timeFromPresent) {
@@ -609,7 +858,7 @@ plot.buddPhylo <- function(x, type = "phylogram",
       
       text(
         x = xtip,
-        y = buddPhylo$y_coord[buddPhylo$type == "tip"] - .05,
+        y = buddPhylo$y_coord[row_tip_labels] - .05,
         labels = labels, adj = adjust, srt = srt,
         cex = tipCex, font = font
       )
@@ -733,7 +982,7 @@ plot.buddPhylo <- function(x, type = "phylogram",
       x0 <- (r0) * cos(th)
       y0 <- (r0) * sin(th)
       
-      ids2plot <- which(buddPhylo$type == "tip")
+      ids2plot <- row_tip
       
       if (align.tip.label) {
         rx0 <- x0

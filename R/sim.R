@@ -327,3 +327,30 @@ sim.counts <- function(sim, t) {
   
   return(list(births = births, deaths = deaths, div = div))
 }
+
+#' @rdname sim
+#' 
+#' @details \code{getDescendants.sim} Returns all lineages descended from 
+#' \code{lin}.
+#' 
+#' @export
+#' 
+getDescendants.sim <- function(sim, lin) {
+  # get all lineages with this for a parent
+  descendants <- descendants_left <- which(sim$PAR == lin)
+  
+  # recursively find all descendants
+  while (sum(sim$PAR %in% descendants_left) > 0) {
+    # new desc
+    new_desc <- which(sim$PAR %in% descendants_left)
+    
+    # add those to descendants
+    descendants <- c(descendants, new_desc)
+    
+    # redo descendants_left
+    descendants_left <- new_desc
+  }
+  
+  # return descendants
+  return(descendants)
+}
