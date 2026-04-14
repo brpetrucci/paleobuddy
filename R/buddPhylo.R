@@ -361,9 +361,6 @@ fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
   # get x coordinates for these tips
   xx <- node.depth.edgelength(phylo)[which(phylo$tip.label %in% names(yy))]
   
-  yy <- yy[order(yy, decreasing = TRUE)]
-  xx <- xx[order(yy, decreasing = TRUE)]
-  
   tip_names <- phylo$tip.label
   
   buddPhylo$y_coord <- NA
@@ -380,83 +377,90 @@ fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
   buddPhylo$y_par <- NA
   tipNames <- unique(buddPhylo$name[buddPhylo$type == "tip"])
   
-  for (tt in tipNames) {
-    todo <- TRUE
-    while (todo) {
-      ttID <- which(buddPhylo$name == tt)
-      Parental <- getParents.buddPhylo(buddPhylo, tt)[1]
-      ParID <- which(buddPhylo$name == Parental)
-
-      # update the refences coordinates:
-      if (!is.na(buddPhylo$x_coord[ParID])) {
-        buddPhylo$x_par[ttID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
-        todo <- FALSE
-      } else {
-        buddPhylo$y_coord[ParID] <- buddPhylo$y_coord[ttID]
-        buddPhylo$x_coord[ParID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
-        buddPhylo$x_par[ttID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
-      }
-
-      if (buddPhylo$orientation[ParID] == "uca") {
-        buddPhylo$x_par[ParID] <- buddPhylo$x_coord[ParID] - buddPhylo$length[ParID]
-        buddPhylo$y_par[ParID] <- buddPhylo$y_coord[ParID]
-        todo <- FALSE
-      } else {
-        tt <- Parental
-      }
-    }
-  }
-  
-  # buddPhylo$y_set <- !is.na(buddPhylo$y_coord)
-  # tipNames <- unique(buddPhylo$name[buddPhylo$type == "tip"])
-  # 
   # for (tt in tipNames) {
   #   todo <- TRUE
   #   while (todo) {
-  #     ttID     <- which(buddPhylo$name == tt)
-  #     Parental <- getParents.buddPhylo(buddPhylo, tt)[1]
-  #     ParID    <- which(buddPhylo$name == Parental)
-  #     
-  #     if (buddPhylo$y_set[ParID]) {
-  #       buddPhylo$x_par[ttID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+  #     ttID <- which(branches$name == tt)
+  #     Parental <- getParents.buddPhylo(branches, tt)[1]
+  #     ParID <- which(branches$name == Parental)
+  # 
+  #     # update the refences coordinates:
+  #     if (!is.na(branches$x_coord[ParID])) {
+  #       branches$x_par[ttID] <- branches$x_coord[ttID] - branches$length[ttID]
   #       todo <- FALSE
   #     } else {
-  #       # Block only if: arriving via a descendant child AND the parent has an
-  #       # ancestor-orientation sibling that has NOT yet been walked (y_set=FALSE)
-  #       ancestorSiblings <- buddPhylo$name[
-  #         !is.na(buddPhylo$parent) &
-  #           buddPhylo$parent == Parental &
-  #           buddPhylo$orientation == "ancestor" &
-  #           buddPhylo$type != "sampAnc"
-  #       ]
-  #       hasUnwalkedAncestorSibling <- length(ancestorSiblings) > 0 &&
-  #         any(!buddPhylo$y_set[match(ancestorSiblings, buddPhylo$name)])
-  #       
-  #       if (buddPhylo$orientation[ttID] == "descendant" && hasUnwalkedAncestorSibling) {
-  #         buddPhylo$x_coord[ParID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
-  #         buddPhylo$x_par[ttID]    <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
-  #         todo <- FALSE
-  #       } else {
-  #         buddPhylo$y_coord[ParID] <- buddPhylo$y_coord[ttID]
-  #         buddPhylo$x_coord[ParID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
-  #         buddPhylo$x_par[ttID]    <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
-  #         buddPhylo$y_set[ParID]   <- TRUE
-  #       }
+  #       branches$y_coord[ParID] <- branches$y_coord[ttID]
+  #       branches$x_coord[ParID] <- branches$x_coord[ttID] - branches$length[ttID]
+  #       branches$x_par[ttID] <- branches$x_coord[ttID] - branches$length[ttID]
   #     }
-  #     
-  #     # FIX 2: only stop at the true root (no parent), not at every uca-orientation node
-  #     grandParental <- getParents.buddPhylo(buddPhylo, Parental)[1]
-  #     if (is.na(grandParental) || length(grandParental) == 0) {
-  #       buddPhylo$x_par[ParID] <- buddPhylo$x_coord[ParID] - buddPhylo$length[ParID]
-  #       buddPhylo$y_par[ParID] <- buddPhylo$y_coord[ParID]
+  # 
+  #     if (branches$orientation[ParID] == "uca") {
+  #       branches$x_par[ParID] <- branches$x_coord[ParID] - branches$length[ParID]
+  #       branches$y_par[ParID] <- branches$y_coord[ParID]
   #       todo <- FALSE
   #     } else {
   #       tt <- Parental
   #     }
   #   }
   # }
-  # 
-  # buddPhylo$y_set <- NULL
+  
+  buddPhylo$y_set <- !is.na(buddPhylo$y_coord)
+  tipNames <- unique(buddPhylo$name[buddPhylo$type == "tip"])
+
+  for (tt in tipNames) {
+    todo <- TRUE
+    while (todo) {
+      ttID     <- which(buddPhylo$name == tt)
+      Parental <- getParents.buddPhylo(buddPhylo, tt)[1]
+      ParID    <- which(buddPhylo$name == Parental)
+
+      if (buddPhylo$y_set[ParID]) {
+        buddPhylo$x_par[ttID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+        todo <- FALSE
+      } else {
+        # Block only if: arriving via a descendant child AND the parent has an
+        # ancestor-orientation sibling that has NOT yet been walked (y_set=FALSE)
+        ancestorSiblings <- buddPhylo$name[
+          !is.na(buddPhylo$parent) &
+            buddPhylo$parent == Parental &
+            buddPhylo$orientation == "ancestor" &
+            buddPhylo$type != "sampAnc"
+        ]
+        hasUnwalkedAncestorSibling <- length(ancestorSiblings) > 0 &&
+          any(is.na(buddPhylo$x_par[match(ancestorSiblings, buddPhylo$name)]))
+
+        if (buddPhylo$orientation[ttID] == "descendant" && hasUnwalkedAncestorSibling) {
+          buddPhylo$x_coord[ParID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+          buddPhylo$x_par[ttID]    <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+          todo <- FALSE
+        } else {
+          buddPhylo$y_coord[ParID] <- buddPhylo$y_coord[ttID]
+          buddPhylo$x_coord[ParID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+          buddPhylo$x_par[ttID]    <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+          buddPhylo$y_set[ParID]   <- TRUE
+        }
+      }
+
+      # FIX 2: only stop at the true root (no parent), not at every uca-orientation node
+      grandParental <- getParents.buddPhylo(buddPhylo, Parental)[1]
+      if (is.na(grandParental) || length(grandParental) == 0) {
+        buddPhylo$x_par[ParID] <- buddPhylo$x_coord[ParID] - buddPhylo$length[ParID]
+        buddPhylo$y_par[ParID] <- buddPhylo$y_coord[ParID]
+        todo <- FALSE
+      } else {
+        tt <- Parental
+      }
+      # 
+      # if (buddPhylo$y_coord[ParID] != branches$y_coord[ParID] ||
+      #     buddPhylo$y_coord[ttID] != branches$y_coord[ttID] ||
+      #     buddPhylo$x_coord[ParID] != branches$x_coord[ParID] ||
+      #     buddPhylo$x_coord[ttID] != branches$x_coord[ttID]) {
+      #   break
+      # }
+    }
+  }
+
+  buddPhylo$y_set <- NULL
   
   # Now do the sampling ancestors:
   SAncNames <- unique(buddPhylo$name[buddPhylo$type == "sampAnc"])
