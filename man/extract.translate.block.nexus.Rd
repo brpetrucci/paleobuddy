@@ -4,7 +4,7 @@
 \alias{extract.translate.block.nexus}
 \title{Extract the "translation" block in a nexus file}
 \usage{
-extract.translate.block.nexus(file)
+extract.translate.block.nexus(text = NULL, file = NULL)
 }
 \arguments{
 \item{file}{A character containing a nexus file name.}

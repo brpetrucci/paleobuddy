@@ -15,6 +15,7 @@
   sampAncJitterMean = 0,
   sampAncJitterSD = 0.3,
   show.tip.label = TRUE,
+  show.SA.label = FALSE,
   show.node.label = FALSE,
   edge.color = "black",
   edge.width = NULL,
@@ -73,6 +74,9 @@ normally-distributed random deviation from the parental lineage and is
 
 \item{show.tip.label}{a logical indicating whether to show the tip labels on
 the phylogeny (defaults to TRUE, i.e. the labels are shown).}
+
+\item{show.SA.label}{a logical indicating whether to show the sampAnc labels on
+the phylogeny (defaults to FALSE, i.e. the labels are not shown).}
 
 \item{show.node.label}{a logical indicating whether to show the node labels
 on the phylogeny (defaults to FALSE, i.e. the labels are not shown).}

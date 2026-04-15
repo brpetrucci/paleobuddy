@@ -33,16 +33,13 @@ was written by Joshua A. Justison.}
 
 \item{returnTrueExt}{A logical indicating whether to include in tree the
 tips representing the true extinction time of extinct species. If set to
-\code{FALSE}, the returned tree will include those tips. If \code{TRUE} 
-(default), they will be dropped and instead the last sampled fossil of
+\code{TRUE} (default), the returned tree will include those tips. If 
+\code{FALSE}, they will be dropped and instead the last sampled fossil of
 a given species will be the last sampled tip of that species. Note that if
 a species was not sampled it will then not appear in the tree. If no fossils
 have been added to the tree with the parameter \code{fossils}, this will
 have the same effect as the ape function \code{drop.fossil}, returning an
-ultrametric tree. Note that if this is set to \code{FALSE}, the 
-\code{root.time} and \code{root.edge} arguments will not be accurate,
-depending on which species are dropped. The user is encouraged to use the
-\code{ape} package to correct these problems, as shown in an example below.}
+ultrametric tree.}
 
 \item{returnRootTime}{Logical indicating if phylo should have information
 regarding \code{root.time}. If set to \code{NULL} (default), returned 
@@ -304,71 +301,6 @@ if (requireNamespace("ape", quietly = TRUE)) {
   # note how t1.3 is an extinct tip now, as opposed to t1, since 
   # we would not know the exact extinction time for t1,
   # rather just see the last sampled fossil
-  
-  # reset par
-  par(oldPar)
-}
-
-### 
-# suppose in the last example, t2 went extinct and left no fossils
-# this might lead to problems with the root.time object
-
-# set seed
-set.seed(5) 
-
-# simulate a simple birth-death process
-sim <- bd.sim(n0 = 1, lambda = 0.2, mu = 0.05, tMax = 10, 
-              nExtant = c(2, Inf))
-
-# make the traditional phylogeny
-phy <- make.phylo(sim)
-
-# sample fossils
-fossils <- sample.clade(sim, 0.5, 10)
-
-# make it so t2 is extinct
-sim$TE[2] <- 9
-sim$EXTANT[2] <- FALSE
-
-# take out fossils of t2
-fossils <- fossils[-which(fossils$Species == "t2"), ]
-
-# make the sampled ancestor tree
-fbdPhy <- make.phylo(sim, fossils, saFormat = "node", returnTrueExt = FALSE)
-# returnTrueExt = FALSE means the extinct tips will be removed, 
-# so we will only see the last sampled fossil (see tree below)
-
-# plot them
-if (requireNamespace("ape", quietly = TRUE)) {
-  # store old par settings
-  oldPar <- par(no.readonly = TRUE) 
-  
-  # visualize longevities and fossil occurrences
-  draw.sim(sim, fossils = fossils)
-  
-  # change par to show phylogenies
-  par(mfrow = c(1, 2))
-
-  # phylogeny
-  ape::plot.phylo(phy, main = "Phylogenetic tree")
-  ape::axisPhylo()
-  
-  # sampled ancestor tree, need show.node.label parameter to see SAs
-  ape::plot.phylo(fbdPhy, main = "Sampled Ancestor tree", 
-                  show.node.label = TRUE)
-  ape::axisPhylo()
-  # note how t2 is gone, since it went extinct and left no fossils
-  
-  # this made it so the length of the tree + the root edge 
-  # does not equal the origin time of the simulation anymore
-  max(ape::node.depth.edgelength(fbdPhy)) + fbdPhy$root.edge
-  # it should equal 10
-  
-  # to correct it, we need to set the root edge again
-  fbdPhy$root.edge <- 10 - max(ape::node.depth.edgelength(fbdPhy))
-  # this is necessary because ape does not automatically fix the root.edge
-  # when species are dropped, and analyes using phylogenies + fossils
-  # frequently condition on the origin of the process
   
   # reset par
   par(oldPar)

@@ -4,7 +4,7 @@
 \alias{as.phylo.buddPhylo}
 \title{Genertaing a phlyo object from a buddPhylo object}
 \usage{
-as.phylo.buddPhylo(buddPhylo)
+\method{as.phylo}{buddPhylo}(buddPhylo)
 }
 \arguments{
 \item{buddPhylo}{Object of class "buddPhylo"}

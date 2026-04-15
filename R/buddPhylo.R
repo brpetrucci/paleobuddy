@@ -35,7 +35,7 @@
 #' for the plotting functions}.
 #'
 #' \item{\code{extant}}{A logical indicating whether the tip is alive at the
-#' present \code{extant=TRUE} or not}.
+#' present \code{extant=TRUE} or not}.}
 #'
 #' Here we declare useful generics and methods for \code{buddPhylo} objects.
 #'
@@ -267,7 +267,7 @@ tail.buddPhylo <- function(x, subType = NULL, ...) {
 #' 
 fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
   # ladderize phylo
-  phylo <- ladderize(phylo)
+  phylo <- ape::ladderize(phylo)
   
   # ensure length is numeric
   buddPhylo$length <- as.numeric(buddPhylo$length)
@@ -359,7 +359,7 @@ fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
   yy <- get_tip_y_coords(phylo)
   
   # get x coordinates for these tips
-  xx <- node.depth.edgelength(phylo)[which(phylo$tip.label %in% names(yy))]
+  xx <- ape::node.depth.edgelength(phylo)[which(phylo$tip.label %in% names(yy))]
   
   tip_names <- phylo$tip.label
   
@@ -372,42 +372,14 @@ fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
   buddPhylo$x_coord[matching_ids] <- xx
   
   # now re-assign y values recursively from tip to root:
-  #tipNames <- unique(buddPhylo$name[buddPhylo$type == "tip"])
   buddPhylo$x_par <- NA
   buddPhylo$y_par <- NA
   tipNames <- unique(buddPhylo$name[buddPhylo$type == "tip"])
   
-  # for (tt in tipNames) {
-  #   todo <- TRUE
-  #   while (todo) {
-  #     ttID <- which(branches$name == tt)
-  #     Parental <- getParents.buddPhylo(branches, tt)[1]
-  #     ParID <- which(branches$name == Parental)
-  # 
-  #     # update the refences coordinates:
-  #     if (!is.na(branches$x_coord[ParID])) {
-  #       branches$x_par[ttID] <- branches$x_coord[ttID] - branches$length[ttID]
-  #       todo <- FALSE
-  #     } else {
-  #       branches$y_coord[ParID] <- branches$y_coord[ttID]
-  #       branches$x_coord[ParID] <- branches$x_coord[ttID] - branches$length[ttID]
-  #       branches$x_par[ttID] <- branches$x_coord[ttID] - branches$length[ttID]
-  #     }
-  # 
-  #     if (branches$orientation[ParID] == "uca") {
-  #       branches$x_par[ParID] <- branches$x_coord[ParID] - branches$length[ParID]
-  #       branches$y_par[ParID] <- branches$y_coord[ParID]
-  #       todo <- FALSE
-  #     } else {
-  #       tt <- Parental
-  #     }
-  #   }
-  # }
-  
   buddPhylo$y_set <- !is.na(buddPhylo$y_coord)
-  tipNames <- unique(buddPhylo$name[buddPhylo$type == "tip"])
 
   for (tt in tipNames) {
+    #if (tt == "t11.3") break
     todo <- TRUE
     while (todo) {
       ttID     <- which(buddPhylo$name == tt)
@@ -450,13 +422,6 @@ fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
       } else {
         tt <- Parental
       }
-      # 
-      # if (buddPhylo$y_coord[ParID] != branches$y_coord[ParID] ||
-      #     buddPhylo$y_coord[ttID] != branches$y_coord[ttID] ||
-      #     buddPhylo$x_coord[ParID] != branches$x_coord[ParID] ||
-      #     buddPhylo$x_coord[ttID] != branches$x_coord[ttID]) {
-      #   break
-      # }
     }
   }
 
@@ -559,8 +524,6 @@ summary.buddPhylo <- function(object, ...) {
 #' @details \code{plot.buddPhylo} Plots a buddPhylo objects as phylogenetic
 #' trees. The function was coded to work similarly, thought not exactly like,
 #' \code{ape::plot.phylo()}.
-#'
-#' @inheritParams buddPhylo
 #'
 #' @param x Object of class "buddPhylo"
 #'
@@ -751,7 +714,7 @@ plot.buddPhylo <- function(x, type = "phylogram",
   
   # Plotting:
   if (is.null(x.lim)) {
-    xrange <- range(c(0, buddPhylo$x_coord, buddPhylo$x_par), na.rm = T)
+    xrange <- range(c(buddPhylo$x_coord, buddPhylo$x_par), na.rm = T)
   } else {
     xrange <- x.lim
   }
@@ -792,14 +755,14 @@ plot.buddPhylo <- function(x, type = "phylogram",
     }
     
     # now decide if time is form root
-    timeFromPresent <- (diff(c(0, max(buddPhylo$x_coord[buddPhylo$extant]))) < 10E-10)
+    timeFromPresent <- min(buddPhylo$x_coord[buddPhylo$type == "tip"]) < min(buddPhylo$x_coord[buddPhylo$type == "node"])
     if (timeFromPresent) {
       xrange <- rev(xrange)
     }
     
     if (timeFromPresent) {
       plot(NA,
-           xlim = xrange + c(0, diff(xrange) * .1), ylim = yrange, frame.plot = F,
+           xlim = xrange + c(0.5, diff(xrange) * .1), ylim = yrange, frame.plot = F,
            xaxt = "n", yaxt = "n", xaxs = "i",
            ylab = "", xlab = ""
       )
@@ -862,7 +825,7 @@ plot.buddPhylo <- function(x, type = "phylogram",
       
       text(
         x = xtip,
-        y = buddPhylo$y_coord[row_tip_labels] - .05,
+        y = buddPhylo$y_coord[row_tip_labels] - .01,
         labels = labels, adj = adjust, srt = srt,
         cex = tipCex, font = font
       )

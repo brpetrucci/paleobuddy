@@ -57,6 +57,7 @@ getChildren.buddPhylo <- function(buddPhylo, focalLineage, returnInfo = TRUE) {
       aux <- buddPhylo$length[match(desc, buddPhylo$name)]
       aux <- ifelse(aux == 0, yes = "sampAnc", no = "lineage")
       names(res) <- aux
+      res <- res[order(names(res), decreasing = TRUE)]
     } else { # if no children is sampled ancesotr:
       aux <- buddPhylo$orientation[match(desc, buddPhylo$name)]
       names(res) <- aux
