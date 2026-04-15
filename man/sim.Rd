@@ -9,6 +9,7 @@
 \alias{summary.sim}
 \alias{plot.sim}
 \alias{sim.counts}
+\alias{getDescendants.sim}
 \title{Details, generics, and methods for the \code{sim} class}
 \usage{
 is.sim(sim)
@@ -24,6 +25,8 @@ is.sim(sim)
 \method{plot}{sim}(x, ...)
 
 sim.counts(sim, t)
+
+getDescendants.sim(sim, lin)
 }
 \arguments{
 \item{sim, x, object}{Object of class "sim"}
@@ -81,4 +84,7 @@ the sim object.
 
 \code{sim.counts} Calculates the births, deaths, and diversity for a 
 sim at time t.
+
+\code{getDescendants.sim} Returns all lineages descended from 
+\code{lin}.
 }

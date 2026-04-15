@@ -171,6 +171,17 @@ bd.sim.general <- function(n0, lambda, mu, tMax = Inf, N = Inf,
   # time, or exactly number of species at the end for number
   condMet <- FALSE
   
+  # if conditioning on number, need to set some 
+  # tMax so we don't run the simulation forever
+  if (condN) {
+    # average time it will take to get to 10 * N species
+    tMax <- uniroot(
+      function(t) integrate(function(s) lambda(s) - mu(s), 
+                            lower = 0, upper = t)$value - log(10 * N),
+      lower = 0, upper = 10000
+    )$root
+  }
+  
   # counter to make sure the nFinal is achievable
   counter <- 1
 

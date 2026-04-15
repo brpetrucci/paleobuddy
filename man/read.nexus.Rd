@@ -4,7 +4,7 @@
 \alias{read.nexus}
 \title{Read a buddPhylo tree from a file in nexus format}
 \usage{
-read.nexus(file, treeNumbers = NULL, timeFromRoot = FALSE)
+read.nexus(file, treeNumbers = NULL, timeFromRoot = FALSE, old_way = FALSE)
 }
 \arguments{
 \item{file}{A character containing a nexus file name.}

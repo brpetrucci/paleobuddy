@@ -640,9 +640,14 @@ bd.sim.traits <- function(n0, lambda, mu,
   # if conditioning on number, need to set some 
   # tMax for the trait evolution
   if (condN) {
-    # thrice the average time it will take to get to 10*N species
+    # the average time it will take to get to 10*N species
     # under the slowest diversification rate parameters
     trTMax <- max(log(10*N) / (lambda - mu))
+    
+    # if we have mu = 0, tMax also needs to be set
+    if (sum(mu) == 0) {
+      tMax <- trTMax
+    }
   } else trTMax <- Inf
   
   # whether our condition is met - rejection sampling for

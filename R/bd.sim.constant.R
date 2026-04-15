@@ -90,6 +90,13 @@ bd.sim.constant <- function(n0, lambda, mu,
   # do we condition on the number of species?
   condN <- condition == "number"
   
+  # if conditioning on number, need to set some 
+  # tMax if we have no mu
+  if (condN && mu == 0) {
+    # average time it will take to get to 10*N species
+    tMax <- log(10 * N) / lambda
+  }
+  
   # whether our condition is met - rejection sampling for
   # time, or exactly number of species at the end for number
   condMet <- FALSE

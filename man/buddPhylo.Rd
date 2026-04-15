@@ -6,6 +6,7 @@
 \alias{print.buddPhylo}
 \alias{head.buddPhylo}
 \alias{tail.buddPhylo}
+\alias{fix.coords}
 \alias{summary.buddPhylo}
 \alias{getParents.buddPhylo}
 \alias{getChildren.buddPhylo}
@@ -22,13 +23,20 @@ is.buddPhylo(x)
 
 \method{tail}{buddPhylo}(x, subType = NULL, ...)
 
+fix.coords(buddPhylo, phylo, fix_x = TRUE)
+
 \method{summary}{buddPhylo}(object, ...)
 
 getParents.buddPhylo(buddPhylo, focalLineage)
 
 getChildren.buddPhylo(buddPhylo, focalLineage, returnInfo = TRUE)
 
-getDescendants.buddPhylo(buddPhylo, focalLineage, onlyImmediates = FALSE)
+getDescendants.buddPhylo(
+  buddPhylo,
+  focalLineage,
+  onlyImmediates = FALSE,
+  all = FALSE
+)
 
 getMRCA.buddPhylo(buddPhylo, nameList)
 
@@ -56,7 +64,44 @@ be considered.}
 exlcuded from the output.}
 }
 \description{
+The \code{buddPhylo} class is a format that stores the
+information from a phylogeny that contains budding speciation events. Every
+\code{buddPhylo} is also a \code{data.frame}, and every line refers to a
+node in the phylogeny. Every node (i.e., "line") may contain a myriad of
+types of information ("columns"), but the following elements organize the
+core information regarding every node within a \code{buddPhylo} object:
 
+\describe{
+\item{\code{name}}{Name of the node. Must be a character column used to
+trace evolutionary relationships among edges. It can be any character
+(including numbers), as long as it is consistently named across each
+relevant branches/edge connection}.
+
+\item{\code{length}}{Numeric column containing the length of the edge that
+lead to the node. All functions assume time is measured in millions of years}
+
+\item{\code{orientation}}{}
+
+\item{\code{taxon}}{Name that should be associated with the node (e.g., in
+plotting functions)}
+
+\item{\code{parent}}{ \code{name} of the parental edge of the node in
+question. Note this refer to \code{name}, not to \code{taxon}. The edge that
+lead to the \code{uca} has its parent set as \code{NA}.}
+
+\item{\code{type}}{Character assigiong whether the node is a \code{node},
+a \code{tip}, or a sampled ancestor (\code{sampAnc}).}
+
+\item{\code{y_coord}}{Y coordinate to be used as a reference for that node
+for the plotting functions}.
+
+\item{\code{x_coord}}{X coordinate to be used as a reference for that node
+for the plotting functions}.
+
+\item{\code{extant}}{A logical indicating whether the tip is alive at the
+present \code{extant=TRUE} or not}.}
+
+Here we declare useful generics and methods for \code{buddPhylo} objects.
 }
 \details{
 \code{is.buddPhylo} A \code{buddPhylo} object must contain all 9
@@ -74,6 +119,9 @@ beginning of a \code{buddPhylo} object.
 
 \code{tail.buddPhylo} Selects only a number of species from the end of a
 \code{buddPhylo} object.
+
+\code{fix.coords} Fixes the x and y coordinates of a buddPhylo 
+object based on its associated phylo object.
 
 \code{summary.buddPhylo} Quantitative details on the \code{buddPhylo} object.
 Prints the number of species, number of extant species, summary of durations
@@ -115,4 +163,6 @@ to most distal descendant. Note this does not use the information in the
 }
 \author{
 Matheus Januario
+
+Bruno do Rosario Petrucci
 }

@@ -4,7 +4,7 @@
 \alias{parse.nexus}
 \title{Subset and parse a nexus file}
 \usage{
-parse.nexus(file, treeNumbers = NULL)
+parse.nexus(text = NULL, file = NULL, treeNumbers = NULL)
 }
 \arguments{
 \item{file}{A character containing a nexus file name.}
