@@ -566,7 +566,7 @@ parse.newick.annotations.notrans <- function(newick) {
 #' @export
 #'
 
-read.nexus <- function(file, treeNumbers = NULL, timeFromRoot = FALSE, old_way = FALSE) {
+read.nexus.buddPhylo <- function(file, treeNumbers = NULL, timeFromRoot = FALSE, old_way = FALSE) {
   full_text <- readLines(file)
   
   # parse file info & build buddPhylo:
