@@ -562,6 +562,8 @@ parse.newick.annotations.notrans <- function(newick) {
 #' @return A \code{buddPhylo} with the time adjusted accordingly.
 #'
 #' @author Matheus Januario
+#' 
+#' @export
 #'
 
 read.nexus <- function(file, treeNumbers = NULL, timeFromRoot = FALSE, old_way = FALSE) {

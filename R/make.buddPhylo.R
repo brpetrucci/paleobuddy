@@ -252,10 +252,14 @@ make.buddPhylo <- function(sim, fossils = NULL, returnTrueExt = TRUE) {
         buddPhylo$parent[child_indices] <- buddPhylo$parent[i]
         
         # correct length and orientation
-        buddPhylo$length[child_indices] <- buddPhylo$length[child_indices] + 
-          buddPhylo$length[i]
-        buddPhylo$x_par[child_indices] <- buddPhylo$x_par[i]
-        buddPhylo$orientation[child_indices] <- buddPhylo$orientation[i]
+        buddPhylo$length[child_indices] <- ifelse(buddPhylo$orientation[i] == "uca",
+                                                  buddPhylo$length[i],
+                                                  buddPhylo$length[child_indices] + 
+                                                    buddPhylo$length[i])
+        buddPhylo$x_par[child_indices] <- ifelse(buddPhylo$orientation[i] == "uca",
+                                                 buddPhylo$x_coord[child_indices],
+                                                 buddPhylo$x_par[i])
+        buddPhylo$orientation[child_indices] <- buddPhylo$orientation[i] 
         
         # get the children of the child
         next_children <- getChildren.buddPhylo(buddPhylo, children)
@@ -267,7 +271,9 @@ make.buddPhylo <- function(sim, fossils = NULL, returnTrueExt = TRUE) {
           
           # correct y coordinates and orientation 
           if (all(names(next_children) == c("sampAnc", "lineage"))) {
-            buddPhylo$orientation[nxt_child_indices] <- buddPhylo$orientation[i]
+            buddPhylo$orientation[nxt_child_indices] <- 
+              ifelse(buddPhylo$orientation[i] == "uca",
+                     "ancestor", buddPhylo$orientation[i])
             buddPhylo$y_coord[nxt_child_indices] <- buddPhylo$y_coord[i]
             
             # get the next children
