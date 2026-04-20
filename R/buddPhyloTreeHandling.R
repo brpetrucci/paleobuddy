@@ -339,3 +339,62 @@ adjust.timescale.buddPhylo <- function(buddPhylo, timeFromRoot = FALSE) {
   }
   return(buddPhylo)
 }
+
+#' List the monophyletic clades in a budding phylogeny
+#'
+#' Get a list of monophyletic clades in this budding phylogeny.
+#'
+#' @param buddPhylo Object of class "buddPhylo"
+#' 
+#' @param returnInfo Whether to return the MRCA (if the defining node of the
+#' clade is a sampled-ancestor node) or orientation (if the defining node of
+#' the clade is a speciation node) for each clade. Defaults to \code{TRUE}.
+#'
+#' @return A list of length equal to the number of nodes, with each element
+#' being a vector of strings (listing the tips/SAs that are descended
+#' from each node). If \code{returnInfo = TRUE}, each element contains two 
+#' vectors of strings: either the SA and lineage, or the ancestor clade and
+#' the descendant clade (similar to \code{getChildren.buddPhylo}).
+#'
+#' @author Bruno do Rosario Petrucci
+#'
+
+subtrees.buddPhylo <- function(buddPhylo, returnInfo = TRUE) {
+  # internal nodes
+  nodes <- buddPhylo$name[buddPhylo$type == "node"]
+  
+  # number of subtrees
+  n_subtrees <- length(nodes)
+
+  # start the results list
+  res <- vector("list", n_subtrees)
+
+  # iterate through number of subtrees
+  for (i in 1:n_subtrees) {
+    # check if we want the info
+    if (returnInfo) {
+      # get the children of this node
+      children <- getChildren.buddPhylo(buddPhylo, nodes[i])
+      
+      res[[i]] <- lapply(children, function(x) {
+        # get the descendants
+        desc <- getDescendants.buddPhylo(buddPhylo, x)
+        
+        # if it has any descendants, return those, otherwise just return it
+        if (length(desc) > 0) desc else x
+      })
+      
+      # name it
+      names(res[[i]]) <- names(children)
+    } else {
+      # get the descendants of this node
+      desc <- getDescendants.buddPhylo(buddPhylo, nodes[i])
+      
+      # add to res
+      res[[i]] <- desc
+    }
+  }
+  
+  # return result
+  return(res)
+}
