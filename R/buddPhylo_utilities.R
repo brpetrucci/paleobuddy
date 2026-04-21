@@ -360,41 +360,166 @@ adjust.timescale.buddPhylo <- function(buddPhylo, timeFromRoot = FALSE) {
 #'
 
 subtrees.buddPhylo <- function(buddPhylo, returnInfo = TRUE) {
-  # internal nodes
-  nodes <- buddPhylo$name[buddPhylo$type == "node"]
+  # extract information from buddPhylo
+  nms   <- buddPhylo$name
+  pars  <- buddPhylo$parent
+  types <- buddPhylo$type
+  oris  <- buddPhylo$orientation
   
-  # number of subtrees
-  n_subtrees <- length(nodes)
+  # if names and lineage differ, get lineage instead
+  if (any(nms != buddPhylo$lineage)) nms <- buddPhylo$lineage
 
-  # start the results list
-  res <- vector("list", n_subtrees)
-
-  # iterate through number of subtrees
-  for (i in 1:n_subtrees) {
-    # check if we want the info
-    if (returnInfo) {
-      # get the children of this node
-      children <- getChildren.buddPhylo(buddPhylo, nodes[i])
-      
-      res[[i]] <- lapply(children, function(x) {
-        # get the descendants
-        desc <- getDescendants.buddPhylo(buddPhylo, x)
-        
-        # if it has any descendants, return those, otherwise just return it
-        if (length(desc) > 0) desc else x
-      })
-      
-      # name it
-      names(res[[i]]) <- names(children)
-    } else {
-      # get the descendants of this node
-      desc <- getDescendants.buddPhylo(buddPhylo, nodes[i])
-      
-      # add to res
-      res[[i]] <- desc
+  # build children lookup
+  children <- new.env(hash = TRUE, parent = emptyenv())
+  for (i in seq_along(nms)) {
+    # get parent of nms
+    p <- pars[i]
+    
+    # check that there is a parent
+    if (!is.na(p)) {
+      # check if the parent is already in the environment
+      if (exists(p, envir = children, inherits = FALSE))
+        # if so, add this species to its descendants
+        children[[p]] <- c(children[[p]], nms[i])
+      else
+        # otherwise, just start it as this species
+        children[[p]] <- nms[i]
     }
   }
   
-  # return result
-  return(res)
+  # the descendants of all tips (i.e. the tips themselves)
+  tip_set <- new.env(hash = TRUE, parent = emptyenv())
+  
+  # iterate through all names
+  for (i in seq_along(nms)) {
+    # if this is not a node, i.e. if it is a tip or SA, add it to tip_set
+    if (types[i] != "node") tip_set[[nms[i]]] <- nms[i]
+  }
+  
+  # get root, i.e. UCA
+  root  <- nms[is.na(pars) & types == "node"]
+  
+  # empty character vector, we will use to keep track of the order
+  order <- character(sum(types == "node"))
+  
+  # start at root
+  stack <- root
+  
+  # how many nodes we've already checked
+  k <- 0
+  
+  # while we have something on the stack
+  while (length(stack)) {
+    # get the first stack element
+    n <- stack[1]
+    
+    # remove first element from stack
+    stack <- stack[-1]
+    
+    # increase k
+    k <- k + 1
+    
+    # make kth order equal to the current node
+    order[k] <- n
+    
+    # if n is a node, get its children, otherwise nothing
+    ch    <- if (exists(n, envir = children, inherits = FALSE)) children[[n]]
+    else character(0L)
+    
+    # add children of this node to the stack, if any
+    stack <- c(ch[types[match(ch, nms)] == "node"], stack)
+  }
+  # now we know the order to fill tip_sets
+  
+  # fill tip sets in reverse (post-order = children before parents)
+  for (n in rev(order[seq_len(k)])) {
+    # get the childrenm of this node, if they exist
+    ch <- if (exists(n, envir = children, inherits = FALSE)) children[[n]]
+    else character(0L)
+    
+    # add to tip_set
+    tip_set[[n]] <- unlist(lapply(ch, function(x) tip_set[[x]]))
+  }
+  # now we have a hash table for the descendants of each node
+  
+  # get all the nodes
+  nodes <- nms[types == "node"]
+  
+  # iterate through nodes
+  lapply(nodes, function(n) {
+    # get the children of this node
+    ch <- children[[n]]
+    
+    # get the types of children
+    type <- types[match(ch, nms)]
+    
+    # if one of the children is an SA, this is an SA node
+    if (any(type == "sampAnc")) {
+      # get which one is the SA
+      sa  <- ch[type == "sampAnc"]
+      
+      # and which one is the lineage
+      lin <- ch[type != "sampAnc"]
+      
+      # return the named list with the SA and the descendants of lin
+      if (returnInfo) list(sampAnc = sa,
+                           lineage = sort(unlist(lapply(lin, 
+                                                        function(x) tip_set[[x]]))))
+      else sort(c(sa, unlist(lapply(lin, 
+                                         function(x) tip_set[[x]]))))
+    } else {
+      # otherwise, get the ancestor and descendant lineage
+      ori <- oris[match(ch, nms)]
+      anc <- ch[ori == "ancestor"]
+      des <- ch[ori == "descendant"]
+      
+      # and return the named list with each and their descendants
+      if (returnInfo) list(ancestor = sort(unlist(lapply(anc, function(x) tip_set[[x]]))),
+           descendant = sort(unlist(lapply(des, function(x) tip_set[[x]]))))
+      else sort(c(unlist(lapply(anc, function(x) tip_set[[x]])),
+                       unlist(lapply(des, function(x) tip_set[[x]]))))
+    }
+  })
 }
+
+
+# subtrees.buddPhylo <- function(buddPhylo, returnInfo = TRUE) {
+#   # internal nodes
+#   nodes <- buddPhylo$name[buddPhylo$type == "node"]
+#   
+#   # number of subtrees
+#   n_subtrees <- length(nodes)
+#   
+#   # start the results list
+#   res <- vector("list", n_subtrees)
+#   
+#   # iterate through number of subtrees
+#   for (i in 1:n_subtrees) {
+#     # check if we want the info
+#     if (returnInfo) {
+#       # get the children of this node
+#       children <- getChildren.buddPhylo(buddPhylo, nodes[i])
+#       
+#       res[[i]] <- lapply(children, function(x) {
+#         # get the descendants
+#         desc <- sort(getDescendants.buddPhylo(buddPhylo, x))
+#         
+#         # if it has any descendants, return those, otherwise just return it
+#         if (length(desc) > 0) desc else x
+#       })
+#       
+#       # name it
+#       names(res[[i]]) <- names(children)
+#     } else {
+#       # get the descendants of this node
+#       desc <- sort(getDescendants.buddPhylo(buddPhylo, nodes[i]))
+#       
+#       # add to res
+#       res[[i]] <- desc
+#     }
+#   }
+#   
+#   # return result
+#   return(res)
+# }
+
