@@ -727,7 +727,7 @@ make.phylo <- function(sim, fossils = NULL, saFormat = "branch",
       phy$node.label <- rep("", phy$Nnode)
       
       # new number of tips and node depths
-      new_ntips  <- Ntip(phy)
+      new_ntips  <- ape::Ntip(phy)
       new_depths <- ape::node.depth.edgelength(phy)
       
       # get the nodes with degree-2, i.e. the SA nodes

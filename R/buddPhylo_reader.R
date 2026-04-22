@@ -27,26 +27,15 @@ parse.nexus <- function(text = NULL, file = NULL, treeNumbers = NULL) {
     lines <- text
   }
   
-  # Find the line with the tree-indicating pattern
+  # Find the lines with the tree-indicating pattern
   target_line <- grep("tree ", lines, value = TRUE)
   
-  if (length(target_line) > 1) {
-    lines <- as.list(target_line)
-    foo <- function(x) {
-      sub('.*tree MCC_tree =\\s*"([^"]*)".*', "\\1", x)
-    }
-    
-    if (!is.null(treeNumbers)) {
-      trees <- lapply(lines[treeNumbers], foo)
-    } else {
-      trees <- lapply(lines, foo)
-    }
-    return(trees)
-  } else {
-    # Extract text inside quotes after the pattern
-    mcc_tree <- sub('.*tree MCC_tree =\\s*"([^"]*)".*', "\\1", target_line)
-    return(mcc_tree)
-  }
+  # restrict to the treeNumbers lines if it is not NULL
+  if (!is.null(treeNumbers)) target_line <- target_line[treeNumbers]
+  trees <- sub('^\\s*tree\\s+\\S+\\s*=\\s*"?', "", target_line, perl = TRUE)
+  trees <- sub('"\\s*$', "", trees, perl = TRUE)
+  
+  return(trees)
 }
 
 #' Extract the "translation" block in a nexus file
@@ -72,17 +61,15 @@ extract.translate.block.nexus <- function(text = NULL, file = NULL) {
   }
   
   # find start and end of Translate block
-  start <- grep("^\\s*Translate\\b", lines, ignore.case = TRUE)
-  end <- grep("^\\s*;", lines)
-  
-  # keep the first ";" after Translate
-  end <- end[end > start][1]
-  
-  if (length(start) == 0 || length(end) == 0) {
-    return(NULL)
-    #stop("Translate block not found.")
-  }
-  
+  # using Position to avoid scanning entire file
+  start <- Position(function(ln) grepl("^\\s*Translate\\b", ln,
+                                       ignore.case = TRUE, perl = TRUE),
+                    lines)
+  if (is.na(start)) return(NULL)
+  rel <- Position(function(ln) grepl("^\\s*;", ln, perl = TRUE),
+                  lines[(start + 1):length(lines)])
+  end <- if (!is.null(rel)) start + rel else integer(0)
+
   # extract block (remove "Translate" line)
   block <- lines[(start + 1):(end - 1)]
   
@@ -126,104 +113,130 @@ extract.translate.block.nexus <- function(text = NULL, file = NULL) {
 #'
 
 parse.newick.annotations <- function(newick, taxonDiction) {
-  # Step 1: Extract tokens (label + annotation + length)
+  # extract tokens
   pattern <- "([A-Za-z0-9_]+)(\\[&[^]]*\\])?(?::([0-9\\.eE+-]+))?"
   matches <- gregexpr(pattern, newick, perl = TRUE)
   tokens <- regmatches(newick, matches)[[1]]
   
-  # Step 2: Extract components
-  get_label <- function(x) sub("\\[&.*|:.*", "", x)
+  # get labels
+  labels <- sub("\\[&.*|:.*", "", tokens)
   
-  get_annot <- function(x) {
-    if (grepl("\\[&", x)) {
-      sub(".*\\[&([^]]*)\\].*", "\\1", x)
-    } else {
-      NA
-    }
-  }
+  # get annotations, when present
+  has_annot <- grepl("[&", tokens, fixed = TRUE)
+  annots <- rep(NA_character_, length(tokens))
+  annots[has_annot] <- sub(".*\\[&([^]]*)\\].*", "\\1", tokens[has_annot])
   
-  get_length <- function(x) {
-    if (grepl(":", x)) {
-      sub(".*:([0-9\\.eE+-]+).*", "\\1", x)
-    } else {
-      NA
-    }
-  }
-  
-  labels <- sapply(tokens, get_label)
-  annots <- sapply(tokens, get_annot)
-  lengths <- as.numeric(sapply(tokens, get_length))
-  
-  #  Step 3: split annotation safely (ignores commas inside {})
-  split_annot <- function(a) {
-    parts <- strsplit(a, ",(?=(?:[^{}]*\\{[^{}]*\\})*[^{}]*$)", perl = TRUE)[[1]]
-    trimws(parts)
-  }
-  
-  #  Step 4: Collect all keys (including interval-related keys)
-  all_keys <- c()
-  
-  for (a in annots[!is.na(annots)]) {
-    parts <- split_annot(a)
-    for (p in parts) {
-      key <- sub("=.*", "", p)
-      
-      if (grepl("\\{", p)) {
-        all_keys <- c(all_keys, paste0(key, "_min"), paste0(key, "_max"))
-      } else {
-        all_keys <- c(all_keys, key)
-      }
-    }
-  }
-  
-  all_keys <- unique(all_keys)
-  
-  #  Step 5:  Initialize dataframe
-  df <- data.frame(
-    name = labels,
-    length = lengths,
-    stringsAsFactors = FALSE
+  # get lengths, when present
+  has_length <- grepl(":", tokens, fixed = TRUE)
+  lengths <- rep(NA_real_, length(tokens))
+  lengths[has_length] <- as.numeric(
+    sub(".*:([0-9\\.eE+-]+).*", "\\1", tokens[has_length])
   )
   
-  for (k in all_keys) df[[k]] <- NA
+  # remove labels and lengths for NA annots
+  labels <- labels[!is.na(annots)]
+  lengths <- lengths[!is.na(annots)]
+  annots <- annots[!is.na(annots)]
   
-  #  Step 6:  Fill data.frame
-  for (i in seq_along(annots)) {
-    if (!is.na(annots[i])) {
-      parts <- split_annot(annots[i])
-      
-      for (p in parts) {
-        key <- sub("=.*", "", p)
-        val <- sub(".*=", "", p)
-        
-        # interval case {a,b}
-        if (grepl("^\\{.*\\}$", val)) {
-          nums <- gsub("[\\{\\}]", "", val)
-          nums <- strsplit(nums, ",")[[1]]
-          
-          df[i, paste0(key, "_min")] <- as.numeric(nums[1])
-          df[i, paste0(key, "_max")] <- as.numeric(nums[2])
-        } else {
-          # normal scalar value
-          df[i, key] <- val
-        }
-      }
-    }
+  # split all annotations into each annotation
+  split_list <- split_list <- strsplit(
+    annots,
+    "\\s*,\\s*(?=(?:[^{}]*\\{[^{}]*\\})*[^{}]*$)",
+    perl = TRUE
+  )
+  
+  
+  # number of total nodes
+  N <- length(annots)
+  
+  # number of constituent annotations per node
+  parts_per_annot <- lengths(split_list)
+  
+  # the index of the rows for each annotation
+  row_idx <- rep(seq_len(N), parts_per_annot)
+  
+  # flatten split_list to get all individual annotations
+  flat <- unlist(split_list, use.names = FALSE)
+  
+  # keys and values
+  key_vec <- sub("=.*",  "", flat)
+  val_vec <- sub(".*=",  "", flat)
+  
+  # which annotations, if any, are ranges
+  is_interval <- grepl("{", val_vec, fixed = TRUE)
+  
+  # get values per interval annotations
+  int_raw <- gsub("[{}]", "", val_vec[is_interval])
+  int_pair <- strsplit(int_raw, ",", fixed = TRUE)
+  int_min <- as.numeric(vapply(int_pair, `[`, character(1), 1))
+  int_max <- as.numeric(vapply(int_pair, `[`, character(1), 2))
+  
+  # start list of columns
+  cols <- list()
+  
+  # scalar rows
+  s_rows <- row_idx[!is_interval]
+  s_keys <- key_vec[!is_interval]
+  s_vals <- val_vec[!is_interval]
+  
+  # iterate through scalar keys
+  for (k in unique(s_keys)) {
+    # make the entire column NAs
+    col <- rep(NA_character_, N)
+    
+    # choose which keys are this iter
+    sel <- s_keys == k
+    
+    # add values to this column
+    col[s_rows[sel]] <- s_vals[sel]
+    
+    # add col to cols
+    cols[[k]] <- col
   }
   
-  # extract and sotre lineage info:
-  df$lineage <- taxonDiction$taxon[match(df$name, taxonDiction$id)]
+  # interval rows
+  i_rows <- row_idx[is_interval]
+  i_keys <- key_vec[is_interval]
+  
+  
+  # iterate through interval keys
+  for (k in unique(i_keys)) {
+    # choose which keys are this iter
+    sel <- i_keys == k
+    
+    # start columns as NA
+    col_min <- rep(NA_real_, N)
+    col_max <- rep(NA_real_, N)
+    
+    # get min and max columns
+    col_min[i_rows[sel]] <- int_min[sel]
+    col_max[i_rows[sel]] <- int_max[sel]
+    
+    # put them into cols
+    cols[[paste0(k, "_min")]] <- col_min
+    cols[[paste0(k, "_max")]] <- col_max
+  }
+  
+  # assemble data frame
+  df <- data.frame(
+    name   = labels,
+    length = lengths,
+    cols,
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+  
+  # extract and store lineage info:
+  df$lineage <- 
+    if (!is.null(taxonDiction)) taxonDiction$taxon[match(df$name, taxonDiction$id)]else df$name
   
   # If there is no "taxon" column, make it
   if (!"taxon" %in% colnames(df)) {
-    df$taxon <- sub("_first", "", df$lineage)
-    df$taxon <- sub("_last", "", df$taxon)
+    df$taxon <- sub("_first|_last", "", df$lineage)
   }
   
   # last tidying:
   rownames(df) <- NULL
-  df=df[-grep("tree|STATE_", df$name),]
-  
   
   # re ordering columns:
   neworder <- match(c("lineage", "taxon", "orientation", "length", "name"), colnames(df))
@@ -288,15 +301,9 @@ build.buddPhylo <- function(newick, parsedTxt, tolExtant = 10E-10, old_way = FAL
   # edge matrix: parent -> child (in numeric indices)
   edges <- phyl$edge
   
-  # Convert to data.frame with names instead of indices
-  edge_df <- data.frame(
-    parent = all_names[edges[, 1]],
-    child = all_names[edges[, 2]],
-    stringsAsFactors = FALSE
-  )
-  
   # Match each branch name to its parent
-  branches$parent <- edge_df$parent[match(branches$name, edge_df$child)]
+  parent_of <- setNames(all_names[edges[, 1]], all_names[edges[, 2]])
+  branches$parent <- parent_of[branches$name]
   
   # The root (unique ancestor) will naturally get NA
   branches$orientation[is.na(branches$parent)] <- "uca"
@@ -310,16 +317,11 @@ build.buddPhylo <- function(newick, parsedTxt, tolExtant = 10E-10, old_way = FAL
   branches$type[branches$name %in% tip_names] <- "tip"
   branches$type[branches$name %in% sampAncs_names] <- "sampAnc"
   
-  dropSampAncs <- TRUE
-  if (dropSampAncs) {
-    treeWithSampAncs <- phyl
-    phylo <- ape::drop.tip(phyl, sampAncs_names)
-  }
-  
-  phylo <- ape::keep.tip(phylo, branches$name[branches$type %in% c("tip")])
-  phylo <- ape::ladderize(phylo)
+  phylo <- ape::keep.tip(phyl, branches$name[branches$type == "tip"])
   
   if (old_way) {
+    phylo <- ape::ladderize(phylo)
+    
     obj <- ape::plot.phylo(phylo, plot = FALSE)
     
     if (is.null(obj$yy)) {
@@ -415,136 +417,14 @@ build.buddPhylo <- function(newick, parsedTxt, tolExtant = 10E-10, old_way = FAL
   branches$extant <- FALSE
   branches$extant[max(branches$x_coord, na.rm = T) - branches$x_coord < tolExtant] <- TRUE
   
+  # correct lineage and taxon to NA for nodes
+  branches$lineage[branches$type == "node"] <- 
+    branches$taxon[branches$type == "node"] <- NA
+  
   class(branches) <- c("buddPhylo", "data.frame")
   
   return(branches)
 }
-
-#' Parse and organize annotations from a newick tree
-#'
-#' This function finds and sorts any node-specific annotation in a nexus file.
-#'
-#' @param newick A character containing an annotated tree in newick 
-#' (parenthetic) format (e.g., as output from \code{parse.nexus}).
-#'
-#' @return A data frame containing node information on lineage (taxon + 
-#' first/last occurrence), taxon (taxonomic name associated with the branch), 
-#' orientation, branch length, node name, and any other annotations 
-#' associated with every node in a tree. Note the function does not return a 
-#' \code{buddPhylo} object.
-#'
-#' @author Matheus Januario 
-#' 
-#' @export
-#' 
-
-parse.newick.annotations.notrans <- function(newick) {
-  
-  # Step 1: Extract tokens (label + annotation + length)
-  pattern <- "([A-Za-z0-9_]+)(\\[&[^]]*\\])?(?::([0-9\\.eE+-]+))?"
-  matches <- gregexpr(pattern, newick, perl = TRUE)
-  tokens <- regmatches(newick, matches)[[1]]
-  
-  # Step 2: Extract components
-  get_label <- function(x) sub("\\[&.*|:.*", "", x)
-  
-  get_annot <- function(x) {
-    if (grepl("\\[&", x)) {
-      sub(".*\\[&([^]]*)\\].*", "\\1", x)
-    } else {
-      NA
-    }
-  }
-  
-  get_length <- function(x) {
-    if (grepl(":", x)) {
-      sub(".*:([0-9\\.eE+-]+).*", "\\1", x)
-    } else {
-      NA
-    }
-  }
-  
-  labels  <- sapply(tokens, get_label)
-  annots  <- sapply(tokens, get_annot)
-  lengths <- as.numeric(sapply(tokens, get_length))
-  
-  #  Step 3: split annotation safely (ignores commas inside {})
-  split_annot <- function(a) {
-    parts <- strsplit(a, ",(?=(?:[^{}]*\\{[^{}]*\\})*[^{}]*$)", perl = TRUE)[[1]]
-    trimws(parts)
-  }
-  
-  #  Step 4: Collect all keys (including interval-related keys)
-  all_keys <- c()
-  
-  for (a in annots[!is.na(annots)]) {
-    parts <- split_annot(a)
-    for (p in parts) {
-      key <- sub("=.*", "", p)
-      
-      if (grepl("\\{", p)) {
-        all_keys <- c(all_keys, paste0(key, "_min"), paste0(key, "_max"))
-      } else {
-        all_keys <- c(all_keys, key)
-      }
-    }
-  }
-  
-  all_keys <- unique(all_keys)
-  
-  #  Step 5:  Initialize dataframe
-  df <- data.frame(
-    name   = labels,
-    length = lengths,
-    stringsAsFactors = FALSE
-  )
-  
-  for (k in all_keys) df[[k]] <- NA
-  
-  #  Step 6:  Fill data.frame
-  for (i in seq_along(annots)) {
-    if (!is.na(annots[i])) {
-      parts <- split_annot(annots[i])
-      
-      for (p in parts) {
-        key <- sub("=.*", "", p)
-        val <- sub(".*=", "", p)
-        
-        # interval case {a,b}
-        if (grepl("^\\{.*\\}$", val)) {
-          nums <- gsub("[\\{\\}]", "", val)
-          nums <- strsplit(nums, ",")[[1]]
-          
-          df[i, paste0(key, "_min")] <- as.numeric(nums[1])
-          df[i, paste0(key, "_max")] <- as.numeric(nums[2])
-          
-        } else {
-          # normal scalar value
-          df[i, key] <- val
-        }
-      }
-    }
-  }
-  
-  # If there is no "taxon" column, make it
-  if(!"taxon" %in% colnames(df)){
-    #taxonDiction = extract.translate.block.nexus(file)
-    df$lineage= df$name#taxonDiction$taxon[match(df$name, taxonDiction$id)]
-    df$taxon = sub("_first", "", df$lineage)
-    df$taxon = sub("_last", "", df$taxon)
-  }
-  
-  # last tidying:
-  rownames(df)=NULL
-  df=df[-grep("tree|STATE_", df$name),]
-
-  # re ordering columns:
-  neworder = match(c("lineage", "taxon", "orientation", "length", "name"), colnames(df))
-  df = df[, c(neworder, (1:ncol(df))[-neworder])]
-  
-  return(df)
-}
-
 
 #' Read a buddPhylo tree from a file in nexus format
 #'
@@ -571,32 +451,21 @@ read.nexus.buddPhylo <- function(file, treeNumbers = NULL, timeFromRoot = FALSE,
   
   # parse file info & build buddPhylo:
   txt <- parse.nexus(text = full_text, treeNumbers = treeNumbers)
-  if (length(txt) > 1) {
-    translate_block <- extract.translate.block.nexus(text = full_text)
-    if (is.null(translate_block)) {
-      branches <- lapply(txt, function(x) parse.newick.annotations.notrans(x))
-    } else {
-      branches <- lapply(txt, function(x) 
-        parse.newick.annotations(x, taxonDiction = translate_block))
-    }
-    res <- list()
-    for (i in 1:length(txt)) {
-      phy <- build.buddPhylo(newick = txt[[i]], parsedTxt = as.data.frame(branches[i]), old_way = old_way)
-      res[[i]] <- adjust.timescale.buddPhylo(phy)
-    }
-    class(res) <- "multi.buddPhylo"
+  
+  translate_block <- extract.translate.block.nexus(text = full_text)
+  branches <- lapply(txt, parse.newick.annotations, 
+                     taxonDiction = translate_block)
+  
+  res <- list()
+  for (i in 1:length(txt)) {
+    phy <- build.buddPhylo(newick = txt[[i]], parsedTxt = branches[[i]], old_way = old_way)
+    res[[i]] <- adjust.timescale.buddPhylo(phy)
+  }
+  
+  if (length(res) == 1) {
+    res <- res[[1]]
   } else {
-    txt <- txt[[1]]
-    
-    translate_block <- extract.translate.block.nexus(text = full_text)
-    if (is.null(translate_block)) {
-      branches <- parse.newick.annotations.notrans(txt)
-    } else {
-      branches <- parse.newick.annotations(txt, taxonDiction = translate_block)
-    }
-    
-    phy <- build.buddPhylo(newick = txt, parsedTxt = branches, old_way = old_way)
-    res <- adjust.timescale.buddPhylo(phy)
+    class(res) <- "multi.buddPhylo"
   }
   
   return(res)

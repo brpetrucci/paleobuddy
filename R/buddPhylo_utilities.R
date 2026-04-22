@@ -362,12 +362,14 @@ adjust.timescale.buddPhylo <- function(buddPhylo, timeFromRoot = FALSE) {
 subtrees.buddPhylo <- function(buddPhylo, returnInfo = TRUE) {
   # extract information from buddPhylo
   nms   <- buddPhylo$name
+  lins <- buddPhylo$lineage
   pars  <- buddPhylo$parent
   types <- buddPhylo$type
   oris  <- buddPhylo$orientation
   
   # if names and lineage differ, get lineage instead
-  if (any(nms != buddPhylo$lineage)) nms <- buddPhylo$lineage
+  if (any(nms != lins)) 
+    nms[!is.na(lins)] <- lins[!is.na(lins)]
 
   # build children lookup
   children <- new.env(hash = TRUE, parent = emptyenv())
