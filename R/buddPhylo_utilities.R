@@ -368,7 +368,7 @@ subtrees.buddPhylo <- function(buddPhylo, returnInfo = TRUE) {
   oris  <- buddPhylo$orientation
   
   # if names and lineage differ, get lineage instead
-  if (any(nms != lins)) 
+  if (any(nms != lins, na.rm = TRUE)) 
     nms[!is.na(lins)] <- lins[!is.na(lins)]
 
   # build children lookup
