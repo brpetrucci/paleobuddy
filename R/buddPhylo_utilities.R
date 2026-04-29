@@ -361,16 +361,17 @@ adjust.timescale.buddPhylo <- function(buddPhylo, timeFromRoot = FALSE) {
 
 subtrees.buddPhylo <- function(buddPhylo, returnInfo = TRUE) {
   # extract information from buddPhylo
-  nms   <- buddPhylo$name
+  nms <- buddPhylo$name
   lins <- buddPhylo$lineage
-  pars  <- buddPhylo$parent
+  pars <- buddPhylo$parent
   types <- buddPhylo$type
-  oris  <- buddPhylo$orientation
+  oris <- buddPhylo$orientation
+  ranges <- buddPhylo$range
   
   # if names and lineage differ, get lineage instead
   if (any(nms != lins, na.rm = TRUE)) 
     nms[!is.na(lins)] <- lins[!is.na(lins)]
-
+  
   # build children lookup
   children <- new.env(hash = TRUE, parent = emptyenv())
   for (i in seq_along(nms)) {
@@ -425,7 +426,7 @@ subtrees.buddPhylo <- function(buddPhylo, returnInfo = TRUE) {
     order[k] <- n
     
     # if n is a node, get its children, otherwise nothing
-    ch    <- if (exists(n, envir = children, inherits = FALSE)) children[[n]]
+    ch <- if (exists(n, envir = children, inherits = FALSE)) children[[n]]
     else character(0L)
     
     # add children of this node to the stack, if any
@@ -437,7 +438,7 @@ subtrees.buddPhylo <- function(buddPhylo, returnInfo = TRUE) {
   for (n in rev(order[seq_len(k)])) {
     # get the childrenm of this node, if they exist
     ch <- if (exists(n, envir = children, inherits = FALSE)) children[[n]]
-    else character(0L)
+    else character(0)
     
     # add to tip_set
     tip_set[[n]] <- unlist(lapply(ch, function(x) tip_set[[x]]))
@@ -455,6 +456,9 @@ subtrees.buddPhylo <- function(buddPhylo, returnInfo = TRUE) {
     # get the types of children
     type <- types[match(ch, nms)]
     
+    # get the range
+    ran <- ranges[match(n, nms)]
+    
     # if one of the children is an SA, this is an SA node
     if (any(type == "sampAnc")) {
       # get which one is the SA
@@ -462,13 +466,15 @@ subtrees.buddPhylo <- function(buddPhylo, returnInfo = TRUE) {
       
       # and which one is the lineage
       lin <- ch[type != "sampAnc"]
+
       
       # return the named list with the SA and the descendants of lin
       if (returnInfo) list(sampAnc = sa,
                            lineage = sort(unlist(lapply(lin, 
-                                                        function(x) tip_set[[x]]))))
+                                                        function(x) tip_set[[x]]))),
+                           range = ran)
       else sort(c(sa, unlist(lapply(lin, 
-                                         function(x) tip_set[[x]]))))
+                                    function(x) tip_set[[x]]))))
     } else {
       # otherwise, get the ancestor and descendant lineage
       ori <- oris[match(ch, nms)]
@@ -476,52 +482,259 @@ subtrees.buddPhylo <- function(buddPhylo, returnInfo = TRUE) {
       des <- ch[ori == "descendant"]
       
       # and return the named list with each and their descendants
-      if (returnInfo) list(ancestor = sort(unlist(lapply(anc, function(x) tip_set[[x]]))),
-           descendant = sort(unlist(lapply(des, function(x) tip_set[[x]]))))
+      if (returnInfo) list(ancestor = sort(unlist(lapply(anc, 
+                                                         function(x) tip_set[[x]]))),
+                           descendant = sort(unlist(lapply(des, 
+                                                           function(x) tip_set[[x]]))),
+                           range = ran)
       else sort(c(unlist(lapply(anc, function(x) tip_set[[x]])),
-                       unlist(lapply(des, function(x) tip_set[[x]]))))
+                  unlist(lapply(des, function(x) tip_set[[x]]))))
     }
   })
 }
 
+#' Get clades from buddPhylos and phylos
+#'
+#' Get a list of monophyletic clades from a phylogenetic tree. Could be budding
+#' or bifurcating. 
+#'
+#' @param tree Object of class "buddPhylo" or "phylo".
+#' 
+#' @param considerSAs Logical indicating whether sampled ancestors should be
+#' considered in the definition of a clade.
+#' 
+#' @param considerOrientation Logical indicating whether speciation node 
+#' orientation should be considered in the definition of a clade.
+#'
+#' @return A list of length equal to the number of internal nodes, with each
+#' element being a string with taxa in a given clade separated by commas.
+#' If \code{considerSAs = TRUE}, clades defined by an SA rather than speciation
+#' node will end with \code{"\001SA:X"}, where X is the taxon in question.
+#' If \code{considerOrientation = TRUE}, clades defined by a speciation node
+#' will end with \code{"\001ANC:X;Y;..."}, where X, Y, etc. are the taxa in the
+#' ancestral branch.
+#'
+#' @author Bruno do Rosario Petrucci
 
-# subtrees.buddPhylo <- function(buddPhylo, returnInfo = TRUE) {
-#   # internal nodes
-#   nodes <- buddPhylo$name[buddPhylo$type == "node"]
-#   
-#   # number of subtrees
-#   n_subtrees <- length(nodes)
-#   
-#   # start the results list
-#   res <- vector("list", n_subtrees)
-#   
-#   # iterate through number of subtrees
-#   for (i in 1:n_subtrees) {
-#     # check if we want the info
-#     if (returnInfo) {
-#       # get the children of this node
-#       children <- getChildren.buddPhylo(buddPhylo, nodes[i])
-#       
-#       res[[i]] <- lapply(children, function(x) {
-#         # get the descendants
-#         desc <- sort(getDescendants.buddPhylo(buddPhylo, x))
-#         
-#         # if it has any descendants, return those, otherwise just return it
-#         if (length(desc) > 0) desc else x
-#       })
-#       
-#       # name it
-#       names(res[[i]]) <- names(children)
-#     } else {
-#       # get the descendants of this node
-#       desc <- sort(getDescendants.buddPhylo(buddPhylo, nodes[i]))
-#       
-#       # add to res
-#       res[[i]] <- desc
-#     }
-#   }
-#   
-#   # return result
-#   return(res)
-# }
+extract.clades <- function(tree,
+                           considerSAs = FALSE,
+                           considerOrientation = FALSE) {
+  # check if this is a phylo
+  is_phylo <- inherits(tree, "phylo")
+  
+  # check type
+  if (is_phylo) {
+    # tip labels
+    tip_labels <- tree$tip.label
+    
+    # number of tips
+    N <- length(tip_labels)
+    
+    # number of nodes
+    Mn <- tree$Nnode
+    
+    # total number of nodes
+    total <- N + Mn
+    
+    # post-order traversal edge order
+    edge_po <- ape::reorder.phylo(tree, "postorder")$edge
+    
+    # start SA and anc nodes (the latter will never be filled)
+    node_sa <- NULL
 
+    # check if we want to fill SA nodes
+    if (considerSAs && !is.null(tree$edge.length)) {
+      # tip edge length, indexed by tip id
+      tip_el <- tree$edge.length[match(seq_len(N), tree$edge[, 2])]
+      
+      # sa tips
+      sa_tips <- which(tip_el < 1e-8)
+      
+      # check if there are any
+      if (length(sa_tips) > 0) {
+        # internal-node parent of each SA tip
+        sa_pars <- tree$edge[match(sa_tips, tree$edge[, 2]), 1]
+        
+        # initialize full-length vector so it can be indexed by internal
+        node_sa <- rep(NA_character_, total)
+        
+        # if a node has multiple SA children, take the first
+        keep_first <- !duplicated(sa_pars)
+        node_sa[sa_pars[keep_first]] <- tip_labels[sa_tips[keep_first]]
+      }
+    }
+  } else if (inherits(tree, "buddPhylo")) {
+    # get each column
+    nm <- tree$name
+    par <- tree$parent
+    typ <- tree$type
+    ori <- tree$orientation
+    
+    # get the number of rows
+    N_row <- length(nm)
+    
+    # find what's a tip and what's an internal node
+    is_tip  <- typ %in% c("tip", "sampAnc")
+    is_node <- typ == "node"
+    
+    # store those values
+    N  <- sum(is_tip)
+    Mn <- sum(is_node)
+    
+    # total  number of nodes
+    total <- N + Mn
+    
+    # ids for each node
+    new_id <- integer(N_row)
+    new_id[is_tip]  <- seq_len(N)
+    new_id[is_node] <- N + seq_len(Mn)
+    
+    # tip labels
+    tip_labels <- nm[is_tip]
+    
+    # parent index per row (NA for root)
+    par_idx <- match(par, nm)
+    
+    # ensure order is correct
+    stopifnot("buddPhylo rows are not in pre-order" =
+                all(par_idx < seq_len(N_row), na.rm = TRUE))
+    
+    # traversal order
+    po_order <- rev(seq_len(N_row))
+    
+    # make an SA map, if we want to consider SAs
+    node_sa <- NULL
+    if (considerSAs) {
+      # get rows representing SA tips
+      sa_rows <- which(typ == "sampAnc")
+      
+      # check if there are any
+      if (length(sa_rows)) {
+        # get the parents of each SA
+        sa_par_rows <- par_idx[sa_rows]
+        
+        # avoid duplicated SA parents
+        keep <- !duplicated(sa_par_rows)
+        
+        # set node_sa to which nodes are defined by SAs
+        node_sa <- rep(NA_character_, total)
+        node_sa[new_id[sa_par_rows[keep]]] <- nm[sa_rows[keep]]
+      }
+    }
+  } else {
+    stop("`tree` must be of class 'phylo' or 'buddPhylo'.")
+  }
+  
+  # precompute order of tip labels
+  rank_of_tip <- integer(N)
+  rank_of_tip[order(tip_labels)] <- seq_len(N)
+  
+  # get members of each clade
+  members <- vector("list", total)
+  if (is_phylo) {
+    # make trivial clades to make things easier
+    members[seq_len(N)] <- as.list(rank_of_tip)
+    
+    # get the clades
+    for (k in seq_len(nrow(edge_po))) {
+      # parent and children node for this edge
+      p <- edge_po[k, 1]
+      c <- edge_po[k, 2]
+      
+      # add members of c clade to the p clade
+      members[[p]] <- c(members[[p]], members[[c]])
+    }
+  } else {
+    # get rows of tips
+    tip_rows <- which(is_tip)
+    
+    # make trivial clades to make things easier
+    for (r in tip_rows) members[[new_id[r]]] <- rank_of_tip[new_id[r]]
+    
+    # get the clades
+    for (r in po_order) {
+      # get parent for this clade
+      pr <- par_idx[r]
+      
+      # we don't need to check the root since it has no parent
+      if (is.na(pr)) next
+      
+      # add members of child clade to parent clade
+      members[[new_id[pr]]] <- c(members[[new_id[pr]]], members[[new_id[r]]])
+    }
+  }
+  
+  # get sorted labels
+  sorted_labels <- tip_labels[order(tip_labels)]
+  
+  # get internal labels
+  internal <- N + seq_len(Mn)
+  
+  # make clade strings
+  clades <- vapply(internal, function(nd) {
+    paste(sorted_labels[sort.int(members[[nd]])], collapse = ", ")
+  }, character(1))
+  
+  # check if we want to consider SAs
+  if (considerSAs && !is.null(node_sa)) {
+    # get the SA nodes
+    sa <- node_sa[internal]
+    
+    # nodes for which we want SAs
+    has <- !is.na(sa)
+    
+    # add to clade
+    clades[has] <- paste0(clades[has], "\x01SA:", sa[has])
+  }
+  
+  # check if we want to consider ancestors
+  if (inherits(tree, "buddPhylo") && considerOrientation) {
+    # start node list
+    node_anc <- vector("list", total)
+    
+    # children of each parent
+    ch_by_par <- split(seq_len(N_row), par_idx)
+    
+    # iterate through internal nodes
+    for (r in which(is_node)) {
+      # get the children of this node
+      ch <- ch_by_par[[as.character(r)]]
+      
+      # if there are none, skip
+      if (!length(ch)) next
+      
+      # if any of the children are sampled ancestors, skip (SA node)
+      if (any(typ[ch] == "sampAnc")) next
+      
+      # get the ancestor child
+      anc_ch <- ch[ori[ch] == "ancestor"]
+      
+      # if there are none, skip
+      if (!length(anc_ch)) next
+      
+      # get the children of the ancestral branch
+      anc_ranks <- members[[new_id[anc_ch[1]]]]
+      
+      # add to node_anc
+      node_anc[[new_id[r]]] <- sorted_labels[sort.int(anc_ranks)]
+    }
+    
+    # reorder ancestor nodes
+    anc <- node_anc[internal]
+    
+    # check if there are any
+    has <- lengths(anc) > 0
+    if (any(has)) {
+      # get the string of ancestral clade
+      anc_str <- vapply(anc[has],
+                        function(a) paste(a, collapse = "; "),
+                        character(1))
+      
+      # add to clade
+      clades[has] <- paste0(clades[has], "\x01ANC:", anc_str)
+    }
+  }
+  
+  # return clades
+  return(clades)
+}

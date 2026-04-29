@@ -270,7 +270,7 @@ parse.newick.annotations <- function(newick, taxonDiction) {
 #' @export
 #'
 
-build.buddPhylo <- function(newick, parsedTxt, tolExtant = 10E-10, old_way = FALSE) {
+build.buddPhylo <- function(newick, parsedTxt, tolExtant = 10E-10) {
   
   branches <- parsedTxt
   
@@ -319,99 +319,7 @@ build.buddPhylo <- function(newick, parsedTxt, tolExtant = 10E-10, old_way = FAL
   
   phylo <- ape::keep.tip(phyl, branches$name[branches$type == "tip"])
   
-  if (old_way) {
-    phylo <- ape::ladderize(phylo)
-    
-    obj <- ape::plot.phylo(phylo, plot = FALSE)
-    
-    if (is.null(obj$yy)) {
-      grDevices::pdf(NULL)  # open null device (no file created)
-      on.exit(grDevices::dev.off(), add = TRUE)
-      
-      obj <- ape::plot.phylo(phylo, plot = FALSE)
-      obj <- get("last_plot.phylo", envir = utils::getFromNamespace(".PlotPhyloEnv", "ape"))
-    }
-    
-    yy <- obj$yy
-    xx <- obj$xx
-    
-    if ("node.label" %in% names(phylo)) {
-      names(yy) <- c(phylo$tip.label, phylo$node.label)
-      names(xx) <- names(yy)
-    } else {
-      names(yy)[1:Ntip(phylo)] <- phylo$tip.label
-      names(xx) <- names(yy)
-    }
-    
-    # drop yy thata re irrelevant to budding:
-    valid_refs <- which(branches$type == "tip" | branches$orientation == "none")
-    yy <- yy[names(yy) %in% branches$name[valid_refs]]
-    xx <- xx[names(xx) %in% branches$name[valid_refs]]
-    
-    branches$y_coord <- NA
-    branches$x_coord <- NA
-    
-    matching_ids <- match(names(yy), branches$name)
-    
-    branches$y_coord[matching_ids] <- yy
-    branches$x_coord[matching_ids] <- xx
-    
-    # now re-assign y values recursively from tip to root:
-    tipNames <- unique(branches$name[branches$type == "tip"])
-    branches$x_par <- NA
-    branches$y_par <- NA
-    tt <- tip_names[1]
-    for (tt in tipNames) {
-      todo <- TRUE
-      while (todo) {
-        ttID <- which(branches$name == tt)
-        Parental <- getParents.buddPhylo(branches, tt)[1]
-        ParID <- which(branches$name == Parental)
-        
-        # update the refences coordinates:
-        if (!is.na(branches$x_coord[ParID])) {
-          branches$x_par[ttID] <- branches$x_coord[ttID] - branches$length[ttID]
-          todo <- FALSE
-        } else {
-          branches$y_coord[ParID] <- branches$y_coord[ttID]
-          branches$x_coord[ParID] <- branches$x_coord[ttID] - branches$length[ttID]
-          branches$x_par[ttID] <- branches$x_coord[ttID] - branches$length[ttID]
-        }
-        
-        if (branches$orientation[ParID] == "uca") {
-          branches$x_par[ParID] <- branches$x_coord[ParID] - branches$length[ParID]
-          branches$y_par[ParID] <- branches$y_coord[ParID]
-          todo <- FALSE
-        } else {
-          tt <- Parental
-        }
-      }
-    }
-    
-    # Now do the sampling ancestors:
-    SAncNames <- unique(branches$name[branches$type == "sampAnc"])
-    ss <- SAncNames[1]
-    for (ss in SAncNames) {
-      SAID <- which(branches$name == ss)
-      SAParID <- which(branches$name == branches$parent[SAID])
-      
-      branches$y_coord[SAID] <- branches$y_coord[SAParID]
-      branches$x_coord[SAID] <- branches$x_coord[SAParID]
-      branches$x_par[SAID] <- branches$x_coord[SAParID]
-    }
-    
-    min_x <- min(c(branches$x_coord, branches$x_par), na.rm = T)
-    
-    branches$x_coord <- branches$x_coord - min_x
-    branches$x_par <- branches$x_par - min_x
-    
-    # Now for descendants
-    branches$y_par <- branches$y_coord[match(branches$parent, branches$name)]
-    branches$y_par[branches$orientation == "uca"] <- branches$y_coord[branches$orientation == "uca"]
-    # branches$x_par = branches$x_coord[match(branches$parent, branches$name)]
-  } else {
-    branches <- fix.coords(branches, phylo)
-  }
+  branches <- fix.coords(branches, phylo)
   
   # Flagging extant species:
   branches$extant <- FALSE
@@ -420,6 +328,25 @@ build.buddPhylo <- function(newick, parsedTxt, tolExtant = 10E-10, old_way = FAL
   # correct lineage and taxon to NA for nodes
   branches$lineage[branches$type == "node"] <- 
     branches$taxon[branches$type == "node"] <- NA
+  
+  # set some helper variables for reordering
+  N_row <- nrow(branches)
+  par_idx <- match(branches$parent, branches$name)
+  ch_by_par <- split(seq_len(N_row), par_idx)
+  
+  # reorder with a BFS depth from the root
+  depth <- integer(N_row)
+  frontier <- which(is.na(par_idx))
+  while (length(frontier)) {
+    ch <- unlist(ch_by_par[as.character(frontier)], use.names = FALSE)
+    if (!length(ch)) break
+    depth[ch] <- depth[par_idx[ch]] + 1
+    frontier <- ch
+  }
+  
+  # stable sort by ascending depth — root first, deepest last
+  branches <- branches[order(depth), , drop = FALSE]
+  rownames(branches) <- NULL
   
   class(branches) <- c("buddPhylo", "data.frame")
   
@@ -446,7 +373,7 @@ build.buddPhylo <- function(newick, parsedTxt, tolExtant = 10E-10, old_way = FAL
 #' @export
 #'
 
-read.nexus.buddPhylo <- function(file, treeNumbers = NULL, timeFromRoot = FALSE, old_way = FALSE) {
+read.nexus.buddPhylo <- function(file, treeNumbers = NULL, timeFromRoot = FALSE) {
   full_text <- readLines(file)
   
   # parse file info & build buddPhylo:
@@ -458,7 +385,49 @@ read.nexus.buddPhylo <- function(file, treeNumbers = NULL, timeFromRoot = FALSE,
   
   res <- list()
   for (i in 1:length(txt)) {
-    phy <- build.buddPhylo(newick = txt[[i]], parsedTxt = branches[[i]], old_way = old_way)
+    phy <- build.buddPhylo(newick = txt[[i]], parsedTxt = branches[[i]])
+    res[[i]] <- adjust.timescale.buddPhylo(phy)
+  }
+  
+  if (length(res) == 1) {
+    res <- res[[1]]
+  } else {
+    class(res) <- "multi.buddPhylo"
+  }
+  
+  return(res)
+}
+
+#' Read a buddPhylo tree from a file in Newick format
+#'
+#' This function reads one or several trees in Newick file.
+#'
+#' @param file 	A character containing a nexus file name.
+#'
+#' @param treeNumbers A numeric vector containing which trees should be read.
+#' If \code{NULL} (default), the function reads all trees within \code{file}.
+#'
+#' @param timeFromRoot A logical indicating whether time should be expressed as
+#' time since the root (\code{timeFromRoot=TRUE}). If set to \code{FALSE}
+#' (default), time is expressed as millions of years ago (Mya), taking the tip extant tip that is further from the root as a reference for "present".
+#'
+#' @return A \code{buddPhylo} with the time adjusted accordingly.
+#'
+#' @author Bruno do Rosario Petrucci
+#' 
+#' @export
+#'
+
+read.trees.buddPhylo <- function(file, treeNumbers = NULL, timeFromRoot = FALSE) {
+  txt <- readLines(file)
+  
+  # parse file info & build buddPhylo:
+  branches <- lapply(txt, parse.newick.annotations, 
+                     taxonDiction = NULL)
+  
+  res <- list()
+  for (i in 1:length(txt)) {
+    phy <- build.buddPhylo(newick = txt[[i]], parsedTxt = branches[[i]])
     res[[i]] <- adjust.timescale.buddPhylo(phy)
   }
   

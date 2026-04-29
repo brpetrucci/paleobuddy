@@ -4,7 +4,7 @@
 \alias{build.buddPhylo}
 \title{Build a buddPhylo object}
 \usage{
-build.buddPhylo(newick, parsedTxt, tolExtant = 1e-09, old_way = FALSE)
+build.buddPhylo(newick, parsedTxt, tolExtant = 1e-09)
 }
 \arguments{
 \item{newick}{A character containing an annotated tree in newick
