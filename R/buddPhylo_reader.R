@@ -319,6 +319,9 @@ build.buddPhylo <- function(newick, parsedTxt, tolExtant = 10E-10) {
   
   phylo <- ape::keep.tip(phyl, branches$name[branches$type == "tip"])
   
+  # if phylo only has one tip, we need to use the whole tree to find the coords
+  if (length(phylo$tip.label) == 1) phylo <- phyl
+  
   branches <- fix.coords(branches, phylo)
   
   # Flagging extant species:
