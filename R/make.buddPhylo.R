@@ -394,6 +394,10 @@ make.buddPhylo <- function(sim, fossils = NULL, returnTrueExt = TRUE) {
   buddPhylo$x_par <- as.numeric(buddPhylo$x_par)
   buddPhylo$y_par <- as.numeric(buddPhylo$y_par)
   
+  # correct lineage and taxon to NA for nodes
+  buddPhylo$lineage[buddPhylo$type == "node"] <- 
+    buddPhylo$taxon[buddPhylo$type == "node"] <- NA
+  
   # set classes
   class(buddPhylo) <- c("buddPhylo", "data.frame")  
   

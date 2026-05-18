@@ -272,6 +272,9 @@ fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
   # ensure length is numeric
   buddPhylo$length <- as.numeric(buddPhylo$length)
   
+  # build row->name lookup to make things faster later
+  parent_idx <- match(buddPhylo$parent, buddPhylo$name)
+  
   # function to find the y coordinates of the tips of a phylo object
   get_tip_y_coords <- function(phylo) {
     n_tips <- length(phylo$tip.label)
@@ -306,24 +309,25 @@ fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
     # Tip y's are assigned by their visitation order in a left-to-right traversal
     traverse_order <- integer(0)
 
-    get_children <- function(node) {
-      edge[edge[, 1] == node, 2]
-    }
+    # make map of children per parent
+    children_by_parent <- split(edge[, 2], edge[, 1])
 
     # Iterative pre-order traversal (left to right = first child first)
     stack <- phylo$edge[phylo$edge[, 1] == (n_tips + 1), 2]
     # Reverse so first child is on top of stack
     stack <- rev(stack)
 
-    visit_order <- integer(0)
+    visit_order <- integer(n_tips)
+    k <- 1
     stk <- stack
     while (length(stk) > 0) {
       node <- stk[length(stk)]
       stk <- stk[-length(stk)]
       if (node <= n_tips) {
-        visit_order <- c(visit_order, node)
+        visit_order[k] <- node
+        k <- k + 1
       } else {
-        children <- get_children(node)
+        children <- children_by_parent[[as.character(node)]]
         stk <- c(stk, rev(children))
       }
     }
@@ -339,7 +343,7 @@ fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
     # Process in reverse of edge order (post-order)
     node_order <- rev(unique(edge[, 1]))
     for (nd in node_order) {
-      children <- get_children(nd)
+      children <- children_by_parent[[as.character(nd)]]
       yy[nd] <- mean(yy[children])
     }
 
@@ -374,32 +378,35 @@ fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
   # now re-assign y values recursively from tip to root:
   buddPhylo$x_par <- NA
   buddPhylo$y_par <- NA
-  tipNames <- unique(buddPhylo$name[buddPhylo$type == "tip"])
-  
-  buddPhylo$y_set <- !is.na(buddPhylo$y_coord)
 
-  for (tt in tipNames) {
-    #if (tt == "t11.3") break
+  buddPhylo$y_set <- !is.na(buddPhylo$y_coord)
+  
+  # precompute row ids of the children for each parent
+  children_by_par <- split(seq_len(nrow(buddPhylo)), parent_idx)
+
+  tip_ids <- which(buddPhylo$type == "tip")
+  for (ttID in tip_ids) {
+
     todo <- TRUE
     while (todo) {
-      ttID     <- which(buddPhylo$name == tt)
-      Parental <- getParents.buddPhylo(buddPhylo, tt)[1]
-      ParID    <- which(buddPhylo$name == Parental)
-
+      ParID <- parent_idx[ttID]
+      grandParID <- parent_idx[ParID]
+      
       if (buddPhylo$y_set[ParID]) {
         buddPhylo$x_par[ttID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
         todo <- FALSE
       } else {
         # Block only if: arriving via a descendant child AND the parent has an
         # ancestor-orientation sibling that has NOT yet been walked (y_set=FALSE)
-        ancestorSiblings <- buddPhylo$name[
-          !is.na(buddPhylo$parent) &
-            buddPhylo$parent == Parental &
-            buddPhylo$orientation == "ancestor" &
-            buddPhylo$type != "sampAnc"
-        ]
-        hasUnwalkedAncestorSibling <- length(ancestorSiblings) > 0 &&
-          any(is.na(buddPhylo$x_par[match(ancestorSiblings, buddPhylo$name)]))
+        sibs <- children_by_par[[as.character(ParID)]]
+        sibs <- sibs[sibs != ttID]
+        
+        # ancestor-orientation, non-sampAnc siblings:
+        anc_sibs <- sibs[buddPhylo$orientation[sibs] == "ancestor" &
+                           buddPhylo$type[sibs]        != "sampAnc"]
+        
+        hasUnwalkedAncestorSibling <-
+          length(anc_sibs) > 0 && any(is.na(buddPhylo$x_par[anc_sibs]))
 
         if (buddPhylo$orientation[ttID] == "descendant" && hasUnwalkedAncestorSibling) {
           buddPhylo$x_coord[ParID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
@@ -414,13 +421,12 @@ fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
       }
 
       # FIX 2: only stop at the true root (no parent), not at every uca-orientation node
-      grandParental <- getParents.buddPhylo(buddPhylo, Parental)[1]
-      if (is.na(grandParental) || length(grandParental) == 0) {
+      if (is.na(grandParID) || length(grandParID) == 0) {
         buddPhylo$x_par[ParID] <- buddPhylo$x_coord[ParID] - buddPhylo$length[ParID]
         buddPhylo$y_par[ParID] <- buddPhylo$y_coord[ParID]
         todo <- FALSE
       } else {
-        tt <- Parental
+        ttID <- ParID
       }
     }
   }
@@ -428,16 +434,12 @@ fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
   buddPhylo$y_set <- NULL
   
   # Now do the sampling ancestors:
-  SAncNames <- unique(buddPhylo$name[buddPhylo$type == "sampAnc"])
-  ss <- SAncNames[1]
-  for (ss in SAncNames) {
-    SAID <- which(buddPhylo$name == ss)
-    SAParID <- which(buddPhylo$name == buddPhylo$parent[SAID])
-    
-    buddPhylo$y_coord[SAID] <- buddPhylo$y_coord[SAParID]
-    buddPhylo$x_coord[SAID] <- buddPhylo$x_coord[SAParID]
-    buddPhylo$x_par[SAID] <- buddPhylo$x_coord[SAParID]
-  }
+  sa_ids <- which(buddPhylo$type == "sampAnc")
+  sa_par_ids <- parent_idx[sa_ids]
+  
+  buddPhylo$y_coord[sa_ids] <- buddPhylo$y_coord[sa_par_ids]
+  buddPhylo$x_coord[sa_ids] <- buddPhylo$x_coord[sa_par_ids]
+  buddPhylo$x_par[sa_ids] <- buddPhylo$x_coord[sa_par_ids]
   
   min_x <- min(c(buddPhylo$x_coord, buddPhylo$x_par), na.rm = T)
   
