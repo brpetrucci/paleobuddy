@@ -286,6 +286,58 @@ rexp.var <- function(n, rate,
     }
   }
 
+  # A piecewise-constant rate needs neither quadrature nor root-finding: its cumulative
+  # hazard is piecewise-linear, so the waiting time follows by walking the intervals and
+  # solving the last one directly. make.rate returns a stepfun for a rates-and-shifts
+  # vector, which is what makes this safe to detect rather than guess at.
+  step <- NULL
+  if (is.null(shape) && is.function(rate)) {
+    # make.rate wraps the stepfun in Vectorize so that integrate() can take it, so the
+    # knots and values sit one environment down rather than on the object itself
+    f <- environment(rate)$FUN
+    if (!is.null(f) && inherits(f, "stepfun")) step <- f
+  }
+  if (!is.null(step)) {
+    k <- stats::knots(step)
+    # read the values off the function rather than its internals: just below the first knot,
+    # then just above each one, gives the rate on every interval in order
+    v <- step(c(k[1] - 1, k + 1e-9))
+
+    # seq_len rather than 1:n so that n = 0 draws nothing instead of iterating on 1:0
+    for (i in seq_len(n)) {
+      # target cumulative hazard for this draw
+      target <- rexp(1)
+      t <- now
+      repeat {
+        # rate on the interval containing t, and where that interval ends
+        j <- findInterval(t, k) + 1
+        edge <- if (j > length(k)) Inf else k[j]
+        r <- v[j]
+
+        # hazard accumulated by the end of this interval
+        hazardToEdge <- if (is.infinite(edge)) Inf else (edge - t) * r
+
+        if (r > 0 && target <= hazardToEdge) {
+          t <- t + target / r
+          break
+        }
+        if (is.infinite(edge)) {
+          # zero rate with nothing beyond: the event never happens
+          t <- tMax + 0.01
+          break
+        }
+        target <- target - hazardToEdge
+        t <- edge
+        if (t > tMax) {
+          t <- tMax + 0.01
+          break
+        }
+      }
+      vars[i] <- t - now
+    }
+    return(vars)
+  }
+
   # if tMax is not supplied, need another upper for uniroot
   upper <- ifelse(tMax == Inf, now + 100, tMax)
   # time will still be truncated without tMax, but only if fast = TRUE
