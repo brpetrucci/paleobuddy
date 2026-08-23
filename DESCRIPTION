@@ -20,11 +20,11 @@ Authors@R: c(
 Description: Simulation of species diversification, fossil records, and phylogenies. While the literature on species birth-death simulators is extensive, including important software like 'paleotree' and 'APE', we concluded there were interesting gaps to be filled regarding possible diversification scenarios. Here we strove for flexibility over focus, implementing a large array of regimens for users to experiment with and combine. In this way, 'paleobuddy' can be used in complement to other simulators as a flexible jack of all trades, or, in the case of scenarios implemented only here, can allow for robust and easy simulations for novel situations. Environmental data modified from that in 'RPANDA': Morlon H. et al (2016) <doi:10.1111/2041-210X.12526>.
 URL: https://github.com/brpetrucci/paleobuddy
 Suggests:
-    ape,
     fitdistrplus,
     knitr,
     rmarkdown
 Imports:
+    ape,
     methods
 License: GPL-3
 Encoding: UTF-8

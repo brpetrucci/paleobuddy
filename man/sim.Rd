@@ -35,6 +35,8 @@ getDescendants.sim(sim, lin)
 
 \item{t}{Time t (in Mya). Used for counting and/or plotting births, deaths
 and species number.}
+
+\item{lin}{A numeric indicating the lineage in question.}
 }
 \description{
 The \code{sim} class is a frequent return and input argument for functions in

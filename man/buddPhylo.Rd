@@ -4,26 +4,18 @@
 \alias{buddPhylo}
 \alias{is.buddPhylo}
 \alias{print.buddPhylo}
-\alias{head.buddPhylo}
-\alias{tail.buddPhylo}
-\alias{fix.coords}
 \alias{summary.buddPhylo}
 \alias{getParents.buddPhylo}
 \alias{getChildren.buddPhylo}
 \alias{getDescendants.buddPhylo}
 \alias{getMRCA.buddPhylo}
 \alias{is.monophyletic.buddPhylo}
+\alias{node.time.buddPhylo}
 \title{Details, generics, and methods for the \code{buddPhylo} class}
 \usage{
 is.buddPhylo(x)
 
 \method{print}{buddPhylo}(x, ...)
-
-\method{head}{buddPhylo}(x, subType = NULL, ...)
-
-\method{tail}{buddPhylo}(x, subType = NULL, ...)
-
-fix.coords(buddPhylo, phylo, fix_x = TRUE)
 
 \method{summary}{buddPhylo}(object, ...)
 
@@ -35,134 +27,204 @@ getDescendants.buddPhylo(
   buddPhylo,
   focalLineage,
   onlyImmediates = FALSE,
-  all = FALSE
+  internalNodes = FALSE
 )
 
-getMRCA.buddPhylo(buddPhylo, nameList)
+getMRCA.buddPhylo(buddPhylo, tipList)
 
-is.monophyletic.buddPhylo(buddPhylo, nameList, excludeSampAnc = TRUE)
+is.monophyletic.buddPhylo(buddPhylo, tipList, excludeSampAnc = TRUE)
+
+node.time.buddPhylo(buddPhylo, node)
 }
 \arguments{
 \item{...}{Further arguments inherited from generics.}
 
-\item{subType}{A character telling which "type" should be used to subset the
-output, for instance only tips \code{subType="tip"} or only sampled ancestors
-\code{subType="sampAnc"}. If set to \code(NULL) (default), it shows all elements.}
-
-\item{buddPhylo, x, object}{Object of class "buddPhylo"}
+\item{buddPhylo, x, object}{Object of class "buddPhylo".}
 
 \item{focalLineage}{A node/lineage to be used as reference for the tree operation.}
+
+\item{returnInfo}{Logical on whether to return information on each
+child. If \code{TRUE}, the function also annotates each descendant based on 
+its status. If \code{focalLineage} is a sampled ancestor node, one child is
+labeled "sampAnc" and the other "lineage". If it instead is a speciation 
+node, descendants are labeled according to their \code{orientation}
+("ancestor" or "descendant"). Note that this function does not use 
+information from the \code{buddPhylo$taxon} column.}
 
 \item{onlyImmediates}{Logical indicating if only the most immediate
 descendant (the two daughter) lineages of a given \code{focalLineage} should
 be considered.}
 
-\item{nameList}{A character vector with a list of \code{name} (i.e., not
-"taxon") to use as a reference for the node set operation.}
+\item{internalNodes}{Logical on whether to return internal node descendants.
+If \code{FALSE} (default), only tips and sampled ancestors will be returned.}
+
+\item{tipList}{A character vector with a list of \code{name}s (i.e., not
+"taxon") to use as a reference for the node set operation. These could be
+tips or sampled ancestors in the tree, but not internal nodes.}
 
 \item{excludeSampAnc}{Logical indicating whether sampled ancestors should be
-exlcuded from the output.}
+excluded when considering a monophyletic group. Default is \code{TRUE}.}
+
+\item{node}{A character representing the name of a node.}
 }
 \description{
 The \code{buddPhylo} class is a format that stores the
 information from a phylogeny that contains budding speciation events. Every
 \code{buddPhylo} is also a \code{data.frame}, and every line refers to a
-node in the phylogeny. Every node (i.e., "line") may contain a myriad of
-types of information ("columns"), but the following elements organize the
-core information regarding every node within a \code{buddPhylo} object:
+branch (and the node at the tip of said branch) in the phylogeny. Every 
+node (i.e., "line") may contain a myriad of types of information ("columns"),
+but the following elements organize the core information regarding every node
+within a \code{buddPhylo} object:
 
 \describe{
 \item{\code{name}}{Name of the node. Must be a character column used to
 trace evolutionary relationships among edges. It can be any character
 (including numbers), as long as it is consistently named across each
-relevant branches/edge connection}.
-
+relevant branches/edge connection.}
 \item{\code{length}}{Numeric column containing the length of the edge that
-lead to the node. All functions assume time is measured in millions of years}
-
-\item{\code{orientation}}{}
-
-\item{\code{taxon}}{Name that should be associated with the node (e.g., in
-plotting functions)}
-
-\item{\code{parent}}{ \code{name} of the parental edge of the node in
-question. Note this refer to \code{name}, not to \code{taxon}. The edge that
-lead to the \code{uca} has its parent set as \code{NA}.}
-
+lead to the node. All functions assume time is measured in million years
+since the present.}
+\item{\code{orientation}}{Whether this is an ancestor or descendant branch.
+This is where these trees differ from traditional bifurcating trees. After
+every speciation event, one of the branches is assigned an orientation, with
+ancestor branches assigned to the progenitor species, and descendant branches
+assigned to the generated species.}
+\item{\code{taxon}}{Name of the species that should be associated with the 
+node (e.g., in plotting functions). Could be the same as \code{name}, but
+only terminal branches (tips and sampled ancestors) will have a \code{taxon}
+field.}
+\item{\code{parent}}{\code{name} of the parent node of the node in question.
+Note this refers to \code{name}, not to \code{taxon}. The root node has
+parent \code{NA}.}
 \item{\code{type}}{Character assigiong whether the node is a \code{node},
-a \code{tip}, or a sampled ancestor (\code{sampAnc}).}
-
-\item{\code{y_coord}}{Y coordinate to be used as a reference for that node
-for the plotting functions}.
-
-\item{\code{x_coord}}{X coordinate to be used as a reference for that node
-for the plotting functions}.
-
+a \code{tip}, a sampled ancestor (\code{sampAnc}), or the root (\code{uca}).}
+\item{\code{y_coord}}{Y-coordinate to be used as a reference for that node
+for the plotting functions.}
+\item{\code{x_coord}}{X-coordinate to be used as a reference for that node
+for the plotting functions.}
 \item{\code{extant}}{A logical indicating whether the tip is alive at the
-present \code{extant=TRUE} or not}.}
+present (\code{TRUE}) or not (\code{FALSE}).}}
 
 Here we declare useful generics and methods for \code{buddPhylo} objects.
 }
 \details{
 \code{is.buddPhylo} A \code{buddPhylo} object must contain all 9
-members: \code{"name}, \code{length}, \code{orientation}, \code{taxon},
-\code{parent}, \code{type}, \code{y_coord}, \code{x_coord"}. And all of
-these must have the correct length (i.e. \code{= (2*Ntip)-1)}.
+members: \code{name}, \code{length}, \code{orientation}, \code{taxon},
+\code{parent}, \code{type}, \code{y_coord}, \code{x_coord}. All of these 
+must have the correct length (i.e. \code{2 * Ntip - 1)}, and correct class
+(\code{character}, \code{logical}, or \code{numeric} depending on the 
+member).
 
-\code{print.buddPhylo} The printing of a buddPhylo object is formatted into a more
-straightforward and informative sequence manner. We provide details only for
-the first few species, since otherwise this print could be overwhelming for
-simulations with 10+ species.
+\code{print.buddPhylo} The printing of a buddPhylo object is 
+formatted into a more straightforward and informative sequence manner. We 
+provide details only for the first few species, since otherwise this print 
+could be overwhelming for simulations with 10+ species.
 
-\code{head.buddPhylo} Selects only a number of species from the
-beginning of a \code{buddPhylo} object.
+\code{summary.buddPhylo} Quantitative details on the 
+\code{buddPhylo} object. Prints the number of species, number of extant 
+species, summary of durations and speciation waiting times.
 
-\code{tail.buddPhylo} Selects only a number of species from the end of a
-\code{buddPhylo} object.
-
-\code{fix.coords} Fixes the x and y coordinates of a buddPhylo 
-object based on its associated phylo object.
-
-\code{summary.buddPhylo} Quantitative details on the \code{buddPhylo} object.
-Prints the number of species, number of extant species, summary of durations
-and speciation waiting times, in case there are more than one species.
-
-\code{getParents.buddPhylo} Find all the parental lineages of a
+\code{getParents.buddPhylo} Finds all the parental lineages of a
 \code{focalLineage} from a \code{buddPhylo$name} object, from first to
 last ancestor. Note this does not use the information in the
 \code{buddPhylo$taxon} column.
 
-\code{getChildren.buddPhylo} returns the immediate descendant
+\code{getChildren.buddPhylo} Returns the immediate descendant
 (daughter) lineages of a given \code{focalLineage} in a \code{buddPhylo}
 object (using the \code{name} column). The output is a character vector of
 length two containing the \code{name} of each child, equivalent to
 \code{getDescendants.buddPhylo(..., onlyImmediates = TRUE)}.
 
-By default (\code{returnInfo = TRUE}), the function also annotates each
-descendant based on its status. If \code{focalLineage} leads to a sampled
-ancestor, one child is labeled accordingly and the other as a "lineage". If
-it instead \code{focalLineage} leads to a speciation event, descendants are
-labeled according to their \code{orientation}. Note that this function does
-not use information from the \code{buddPhylo$taxon} column.
+\code{getDescendants.buddPhylo} Find all the descendant lineages of
+a \code{focalLineage} from a \code{buddPhylo$name} object, from most 
+immediate to most distal descendant. \code{getChildren.buddPhylo} returns 
+only the most immediate descendants (same effect as
+\code{getDescendants.buddPhylo(..., onlyImmediates = TRUE)}). Note this does 
+not use the information in the \code{buddPhylo$taxon} column.
 
-\code{getDescendants.buddPhylo} Find all the descendant lineages of a
-\code{focalLineage} from a \code{buddPhylo$name} object, from most immediate
-to most distal descendant. \code{getChildren.buddPhylo} returns only the
-most immediate descendants (same effect as \code{getDescendants.buddPhylo(..., onlyImmediates = T)}). Note this does not use the information in the
-\code{buddPhylo$taxon} column.
+\code{getMRCA.buddPhylo} Finds the node representing the most recent
+common ancestor of the tips in \code{tipList}.
 
-\code{getDescendants.buddPhylo} Find all the descendant lineages of a
-\code{focalLineage} from a \code{buddPhylo$name} object, from most immediate
-to most distal descendant. Note this does not use the information in the
-\code{buddPhylo$taxon} column.
+\code{is.monophyletic.buddPhylo} Checks if the tips in
+\code{tipList} constitute a monophyletic group in \code{buddPhylo}.
 
-\code{getDescendants.buddPhylo} Find all the descendant lineages of a
-\code{focalLineage} from a \code{buddPhylo$name} object, from most immediate
-to most distal descendant. Note this does not use the information in the
-\code{buddPhylo$taxon} column.
+\code{node.time.buddPhylo} Finds the time of a node with a given
+\code{name} field.
+}
+\examples{
+
+# set seed
+set.seed(1)
+
+# run a simple birth-death simulation
+sim <- bd.sim(1, 0.2, 0.05, 20)
+
+# and sample fossils on it
+sample <- suppressMessages(sample.clade(sim, 0.5, 20))
+
+###
+# plotting, printing, summarizing
+
+# build and plot the tree
+budd <- make.buddPhylo(sim, sample, returnTrueExt = FALSE)
+plot(budd, show.SA.label = TRUE)
+
+# check out print and summary
+print(budd)
+summary(budd)
+
+###
+# learning about the relationships in the tree
+
+# check the MRCA of t13 and t1
+mrca <- getMRCA.buddPhylo(budd, c("t1", "t13"))
+# should be the first speciation node
+
+# what about the parent of this node?
+par <- getParents.buddPhylo(budd, mrca)[1]
+
+# we can check what kind of node it is by looking at its children
+children <- getChildren.buddPhylo(budd, par)
+# children[1] is an SA, the third t1 occurrence
+
+# which species are descended from the descendant lineage
+# in that first budding speciation?
+desc_node <- getChildren.buddPhylo(budd, mrca)["descendant"]
+descendants <- getDescendants.buddPhylo(budd, desc_node)
+
+# since this is all descendants from a node, it makes a monophyletic group
+is.monophyletic.buddPhylo(budd, descendants)
+# FALSE because by default we only consider tips
+is.monophyletic.buddPhylo(budd, descendants, excludeSampAnc = FALSE)
+
+# if you'd like to compare the budding and bifurcating trees,
+# you can make use of the conversion function
+phy <- ape::as.phylo(budd)
+
+###
+# advanced clade operations
+
+# similarly to ape::subtrees, you can extract all subtrees of a buddPhylo
+sub_budd <- subtrees.buddPhylo(budd)
+
+# of course it's hard to comb through all clades of a tree
+# by hand, so we have a nice wrapper to easily extract the
+# relevant info for each clade implied by your tree
+clades <- extract.clades(budd)
+
+# you can get more info by using the arguments within
+sa_clades <- extract.clades(budd, 
+                            considerSAs = TRUE)
+oriented_clades <- extract.clades(budd, 
+                                  considerSAs = TRUE, 
+                                  considerOrientation = TRUE)
+# the SA species or ancestor lineage is included in the output now
+
 }
 \author{
-Matheus Januario
+Matheus Januario and Bruno do Rosario Petrucci.
 
-Bruno do Rosario Petrucci
+Matheus Januario.
+
+Bruno do Rosario Petrucci.
 }

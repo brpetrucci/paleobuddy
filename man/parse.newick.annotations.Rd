@@ -4,7 +4,7 @@
 \alias{parse.newick.annotations}
 \title{Parse and organize annotations from a newick tree}
 \usage{
-parse.newick.annotations(newick, taxonDiction)
+parse.newick.annotations(newick, taxonDiction = NULL)
 }
 \arguments{
 \item{newick}{A character containing an annotated tree in newick
@@ -15,15 +15,13 @@ parse.newick.annotations(newick, taxonDiction)
 the \code{taxon} associated with it.}
 }
 \value{
-A data frame containing node information on lineage (taxon +
-first/last occurrence), taxon (taxonomic name associated with the branch),
-orientation, branch length, node name, and any other annotations
-associated with every node in a tree. Note the function does not return a
-\code{buddPhylo} object.
+A data frame containing node information on orientation, branch 
+length, node name, and any other annotations associated with every node in 
+the tree. Note the function does not return a \code{buddPhylo} object.
 }
 \description{
 This function finds and sorts any node-specific annotation in a nexus file.
 }
 \author{
-Matheus Januario
+Matheus Januario and Bruno do Rosario Petrucci
 }

@@ -1,67 +1,72 @@
 #' @rdname buddPhylo
 #'
-#' @inheritParams buddPhylo
-#'
-#' @details \code{getParents.buddPhylo} Find all the parental lineages of a
+#' @details \code{getParents.buddPhylo} Finds all the parental lineages of a
 #' \code{focalLineage} from a \code{buddPhylo$name} object, from first to
 #' last ancestor. Note this does not use the information in the
 #' \code{buddPhylo$taxon} column.
 #' 
-#' @author Matheus Januario
+#' @author Matheus Januario.
 #'
 #' @export
+#' 
 
 getParents.buddPhylo <- function(buddPhylo, focalLineage) {
-  res <- vector()
-  res <- c(res, buddPhylo$parent[buddPhylo$name == focalLineage])
+  # start the vector of parents with the parent of the original lineage
+  res <- buddPhylo$parent[buddPhylo$name == focalLineage]
   
+  # while we haven't reached the root...
   while (!is.na(res[length(res)])) {
+    # get the last parent as the current lineage
     focalLineage <- res[length(res)]
     
+    # add that lineage's parent to res
     res <- c(res, buddPhylo$parent[buddPhylo$name == focalLineage])
   }
   
-  # removing the NA at the end:
+  # remove the NA parent
   res <- res[-length(res)]
   return(res)
 }
 
 #' @rdname buddPhylo
-#'
-#' @inheritParams buddPhylo
 #' 
-#' @details \code{getChildren.buddPhylo} returns the immediate descendant
+#' @details \code{getChildren.buddPhylo} Returns the immediate descendant
 #' (daughter) lineages of a given \code{focalLineage} in a \code{buddPhylo}
 #' object (using the \code{name} column). The output is a character vector of
 #' length two containing the \code{name} of each child, equivalent to
 #' \code{getDescendants.buddPhylo(..., onlyImmediates = TRUE)}.
-#'
-#' By default (\code{returnInfo = TRUE}), the function also annotates each
-#' descendant based on its status. If \code{focalLineage} leads to a sampled
-#' ancestor, one child is labeled accordingly and the other as a "lineage". If
-#' it instead \code{focalLineage} leads to a speciation event, descendants are
-#' labeled according to their \code{orientation}. Note that this function does
-#' not use information from the \code{buddPhylo$taxon} column.
 #' 
-#' @author Matheus Januario
+#' @author Matheus Januario.
 #'
 #' @export
+#' 
 
 getChildren.buddPhylo <- function(buddPhylo, focalLineage, returnInfo = TRUE) {
+  # find the lineages with this lineage as parent
   desc <- buddPhylo$name[buddPhylo$parent == focalLineage]
   desc <- desc[!is.na(desc)]
   res <- desc
   
+  # if res is of length 0, this is a node with no children, return NULL
+  if (!length(res)) return(NULL)
+  
+  # check if we want to return the status of each child
   if (returnInfo) {
+    # check if any of the children have 0 length branches
     if (0 %in% buddPhylo$length[buddPhylo$name %in% desc]) {
-      aux <- buddPhylo$length[match(desc, buddPhylo$name)]
-      aux <- ifelse(aux == 0, yes = "sampAnc", no = "lineage")
-      names(res) <- aux
+      # if so, name the one with 0 length branch the sampled ancestor
+      desc_len <- buddPhylo$length[match(desc, buddPhylo$name)]
+      desc_len <- ifelse(desc_len == 0, yes = "sampAnc", no = "lineage")
+      
+      # set names
+      names(res) <- desc_len
+      
+      # order with SA first
       res <- res[order(names(res), decreasing = TRUE)]
-    } else { # if no children is sampled ancesotr:
-      aux <- buddPhylo$orientation[match(desc, buddPhylo$name)]
-      names(res) <- aux
-      # make sure ancestor is always first
+    } else {
+      # otherwise, just order based on orientation (ancestor first)
+      desc_ori <- buddPhylo$orientation[match(desc, buddPhylo$name)]
+      names(res) <- desc_ori
       res <- res[order(names(res))]
     }
   }
@@ -71,150 +76,201 @@ getChildren.buddPhylo <- function(buddPhylo, focalLineage, returnInfo = TRUE) {
 
 #' @rdname buddPhylo
 #'
-#' @inheritParams buddPhylo
-#'
-#' @details \code{getDescendants.buddPhylo} Find all the descendant lineages of a
-#' \code{focalLineage} from a \code{buddPhylo$name} object, from most immediate
-#' to most distal descendant. \code{getChildren.buddPhylo} returns only the
-#' most immediate descendants (same effect as \code{getDescendants.buddPhylo(..., onlyImmediates = T)}). Note this does not use the information in the
-#' \code{buddPhylo$taxon} column.
+#' @details \code{getDescendants.buddPhylo} Find all the descendant lineages of
+#' a \code{focalLineage} from a \code{buddPhylo$name} object, from most 
+#' immediate to most distal descendant. \code{getChildren.buddPhylo} returns 
+#' only the most immediate descendants (same effect as
+#' \code{getDescendants.buddPhylo(..., onlyImmediates = TRUE)}). Note this does 
+#' not use the information in the \code{buddPhylo$taxon} column.
 #' 
-#' @author Matheus Januario
+#' @author Matheus Januario.
 #'
 #' @export
+#' 
 
 getDescendants.buddPhylo <- function(buddPhylo, focalLineage, 
-                                     onlyImmediates = FALSE, all = FALSE) {
+                                     onlyImmediates = FALSE, 
+                                     internalNodes = FALSE) {
+  # initialize variables for bookkeeping
   checked <- vector()
   toCheck <- focalLineage
   res <- vector()
   
+  # while we still have lineages to check
   while (length(toCheck) > 0) {
+    # get the first one
     focalLineage <- toCheck[1]
+    
+    # get the children of this lineage
     desc <- buddPhylo$name[buddPhylo$parent == focalLineage]
     desc <- desc[!is.na(desc)]
     
+    # check if there are any children
     if (length(desc) > 0) {
+      # if so, add those to the toCheck and result
       toCheck <- c(toCheck, desc)
       res <- c(res, desc)
     }
     
+    # check if we only want the immediate children
     if (onlyImmediates) {
       break
     } else {
+      # otherwise, remove focalLineage from toCheck
       toCheck <- toCheck[!toCheck %in% focalLineage]
     }
   }
   
-  if (!all) {
+  # if we don't want internal nodes, remove them from result
+  if (!internalNodes) {
     internal_nodes <- which(res %in% buddPhylo$name[buddPhylo$type == "node"])
     if (length(internal_nodes) > 0) res <- res[-internal_nodes]
   }
   
+  # if res is of length 0, this is a node with no children, return NULL
+  if (!length(res)) return(NULL)
+  
   return(res)
 }
 
-
 #' @rdname buddPhylo
 #'
-#' @inheritParams buddPhylo
-#'
-#' @details \code{getDescendants.buddPhylo} Find all the descendant lineages of a
-#' \code{focalLineage} from a \code{buddPhylo$name} object, from most immediate
-#' to most distal descendant. Note this does not use the information in the
-#' \code{buddPhylo$taxon} column.
+#' @details \code{getMRCA.buddPhylo} Finds the node representing the most recent
+#' common ancestor of the tips in \code{tipList}.
 #' 
-#' @author Matheus Januario
+#' @author Matheus Januario.
 #'
 #' @export
+#' 
 
-getMRCA.buddPhylo <- function(buddPhylo, nameList) {
-  # First,get the LUCA of the list:
-  ParentList <- list()
-  for (i in 1:length(nameList)) {
-    ParentList[[i]] <- getParents.buddPhylo(buddPhylo, nameList[i])
+getMRCA.buddPhylo <- function(buddPhylo, tipList) {
+  # check that tipList is in the phylogeny
+  if (any(!(tipList %in% buddPhylo$name))) {
+    stop("Tips tipList must be in buddPhylo$name.")
   }
-  # find longest par-desc length:
+  
+  # if tipList is of length one, MRCA is itself
+  if (length(tipList) == 1) return(tipList)
+  
+  # create the list of parents
+  ParentList <- list()
+  
+  # iterate through list of tips
+  for (i in 1:length(tipList)) {
+    # get the parents of each of the tips in tipList
+    ParentList[[i]] <- getParents.buddPhylo(buddPhylo, tipList[i])
+  }
+  
+  # find longest parent-descendant length
   lengs <- unlist(lapply(ParentList, length))
   ref <- which.max(lengs)
   
+  # function to check if an element is in a list
   listChecker <- function(pars, ca) {
     return(ca %in% pars)
   }
   
-  UCA <- toCheck <- rev(unlist(ParentList[ref])) # check tipwards from LUCA
-  test <- all(unlist(lapply(ParentList, listChecker, toCheck[1])))
-  while (test) {
+  # start at the root, check all the elements 
+  # in longest parent-descendant length
+  path_to_root <- toCheck <- rev(unlist(ParentList[ref]))
+  
+  # check that the first node (i.e. the root) is in the path
+  node_in_path <- all(unlist(lapply(ParentList, listChecker, toCheck[1])))
+  
+  # while the node in question is in the path
+  while (node_in_path) {
+    # remove checked node
     toCheck <- toCheck[-1]
-    test <- all(unlist(lapply(ParentList, listChecker, toCheck[1])))
+    
+    # check again
+    node_in_path <- all(unlist(lapply(ParentList, listChecker, toCheck[1])))
   }
   
-  UCA <- UCA[!UCA %in% toCheck]
-  MRCA <- rev(UCA)[1]
+  # remove the checked nodes from the path to the root
+  path_to_root <- path_to_root[!(path_to_root %in% toCheck)]
+  
+  # the MRCA is the last node in the remaining path
+  # i.e. the last node that was in both parent lists
+  MRCA <- rev(path_to_root)[1]
   return(MRCA)
 }
 
 
 #' @rdname buddPhylo
 #'
-#' @inheritParams buddPhylo
-#'
-#' @details \code{getDescendants.buddPhylo} Find all the descendant lineages of a
-#' \code{focalLineage} from a \code{buddPhylo$name} object, from most immediate
-#' to most distal descendant. Note this does not use the information in the
-#' \code{buddPhylo$taxon} column.
+#' @details \code{is.monophyletic.buddPhylo} Checks if the tips in
+#' \code{tipList} constitute a monophyletic group in \code{buddPhylo}.
 #' 
-#' @author Matheus Januario
+#' @author Matheus Januario and Bruno do Rosario Petrucci.
 #'
 #' @export
+#' 
 
-is.monophyletic.buddPhylo <- function(buddPhylo, nameList,
+is.monophyletic.buddPhylo <- function(buddPhylo, tipList,
                                       excludeSampAnc = TRUE) {
-  MRCA <- getMRCA.buddPhylo(buddPhylo, nameList)
+  # get the MRCA of this list of tips
+  MRCA <- getMRCA.buddPhylo(buddPhylo, tipList)
   
+  # get all the descendants of the MRCA
   alldesc <- getDescendants.buddPhylo(buddPhylo, MRCA)
   
+  # check if we want to exclude sampled ancestors
   if (excludeSampAnc) {
-    alldesc <- alldesc[alldesc %in% buddPhylo$name[buddPhylo$type == "sampAnc"]]
-    res <- all(alldesc %in% nameList)
-  } else {
-    res <- all(alldesc %in% nameList)
+    # exclude sampled ancestors
+    alldesc <- alldesc[!(alldesc %in% 
+                           buddPhylo$name[buddPhylo$type == "sampAnc"])]
   }
+  
+  # ensure that all descendants of the MRCA and tipList are the same
+  res <- identical(sort(alldesc), sort(tipList))
   
   return(res)
 }
 
-#' Genertaing a phlyo object from a buddPhylo object
+#' Generating a phylo object from a buddPhylo object
 #'
-#' Generates a phylogeny ina \code{phylo} format based on the ifnromation within 
-#' a \code{buddPhylo} object.
+#' Generates a phylogeny in a \code{phylo} format based on the information
+#' within a \code{buddPhylo} object.
 #' 
-#' @param buddPhylo Object of class "buddPhylo"
+#' @param x A \code{buddPhylo} object.
 #' 
-#' @return A \code{phylo} object compatible with fucntions from package \code{ape}
+#' @param ... Further arguments inherited from generics.
+#' 
+#' @return A \code{phylo} object compatible with functions from the \code{ape}
+#' package.
 #' 
 #' @author Matheus Januario
 #' 
+#' @export
+#' 
+#' @importFrom ape as.phylo
+#' 
 
-as.phylo.buddPhylo <- function(buddPhylo) {
-  ########################################################
-  # aux fucnctions:
-  # To count resembalnces in node paths:
+as.phylo.buddPhylo <- function(x, ...) {
+  # assign to buddPhylo for clarity
+  buddPhylo <- x
+  
+  # function to count similarities in node paths
   countEqual <- function(x, ref) {
     return(sum(ref %in% x))
   }
   
-  # function to re-order edges so the phlyo object does not break:
-  reorder_edges <- function(edge) { #input is any edge matrix
+  # function to re-order edges so the phlyo object does not break
+  reorder_edges <- function(edge) {
+    # get parents and children from edge matrix
     parents <- edge[, 1]
     children <- edge[, 2]
     
+    # find the root
     root <- setdiff(parents, children)
     
-    adj <- split(edge[, 2], edge[, 1])
+    # separate children edges into parent edges they connect to
+    adj <- split(children, parents)
     
+    # make a matrix for new edges
     new_edge <- matrix(ncol = 2, nrow = 0)
     
+    # depth-first search
     dfs <- function(node) {
       if (!is.null(adj[[as.character(node)]])) {
         for (child in adj[[as.character(node)]]) {
@@ -227,95 +283,115 @@ as.phylo.buddPhylo <- function(buddPhylo) {
       }
     }
     
+    # get the dfs for the root
     dfs(root)
     
     return(new_edge)
   }
-  ########################################################
-  
-  ########### Part 1: Labels
-  # labels
+
+  # get tip and node labels
   tip.label <- buddPhylo$name[buddPhylo$type %in% c("tip", "sampAnc")]
   node.label <- buddPhylo$name[!buddPhylo$type %in% c("tip", "sampAnc")]
   
-  ########### Part 2: Edge matrix
-  # Make a node dictionary:
+  # create node dictionary
   node.id <- rep(NA, times = length(node.label))
   names(node.id) <- node.label
-  # First, make a list with all descendats:
+  
+  # make a list of descendants for each parent
   pars <- list()
   for (tt in 1:length(tip.label)) {
+    # get parents of this tip
     pars[[tt]] <- getParents.buddPhylo(buddPhylo,
-                                       focalLineage = tip.label[tt]
-    )
+                                       focalLineage = tip.label[tt])
   }
   names(pars) <- tip.label
   
-  # we can start from anywhere, so choose the tip w/ most descs:
+  # find ancestor number of each tip
   plen <- unlist(lapply(pars, length))
   
+  # get the one with the most ancestors
   refDesc <- tip.label[which.max(plen)]
   refID <- which(tip.label == refDesc)
+  
+  # get the first node
   nextNode <- length(tip.label) + 1
+  
+  # while we still have parents to go through
   while (length(pars) > 0) {
-    aux <- pars[[refID]]
-    tempIDS <- !aux %in% names(node.id[!is.na(node.id)])
+    # get parent of the current tip
+    par_tip <- pars[[refID]]
+    
+    # get the ancestors that are not in dictionary yet
+    tempIDS <- !par_tip %in% names(node.id[!is.na(node.id)])
+    
+    # check if there are any to go through
     sumTempIDS <- sum(tempIDS)
     if (sumTempIDS > 0) {
-      #print(paste0("N = ", length(pars)))
-      aux2 <- aux[tempIDS]
-      node.id[match(rev(aux2), names(node.id))] <- nextNode:(nextNode + sumTempIDS - 1)
-      nextNode <- max(node.id, na.rm = T) + 1
+      # get the ancestors not in dictionary yet
+      anc_to_check <- par_tip[tempIDS]
+      
+      # add to dictionary
+      node.id[match(rev(anc_to_check), names(node.id))] <- 
+        nextNode:(nextNode + sumTempIDS - 1)
+      
+      # increment the node counter
+      nextNode <- max(node.id, na.rm = TRUE) + 1
     }
     
-    # choose & update next ref
+    # remove this tip from pars
     pars[[refID]] <- NULL
-    refID <- which.max(unlist(lapply(pars, countEqual, ref = aux)))
+    
+    # find the next tip with most ancestors in common with this one
+    refID <- which.max(unlist(lapply(pars, countEqual, ref = par_tip)))
+    
+    # get the descendants of the parents of this tip
     refDesc <- names(pars[refID])
   }
   
-  # aux objects"
+  # get labels and ids for these labels
   all.labels <- c(tip.label, names(node.id))
   all.ids <- c(1:length(tip.label), node.id)
   
-  # edge matrix
+  # create edge matrix
   edge1 <- node.id[match(buddPhylo$parent, node.label)]
   edge2 <- all.ids[match(buddPhylo$name, all.labels)]
   edge <- cbind(edge1, edge2)
-  edge <- edge[-which(is.na(edge[, 1])), ] # NA element is the root, ignore it
+  edge <- edge[-which(is.na(edge[, 1])), ] 
+  # NA element is the root, ignore it
   
-  # Finally, we re-order so phylo() doesnt break:
+  # re-order phylo edges
   edge <- reorder_edges(edge)
   
-  ########### Part 3: Edge lengths
-  edge_names <- all.labels[match(edge[, 2], all.ids)] # aux obj
+  # set edge lengths
+  edge_names <- all.labels[match(edge[, 2], all.ids)]
   edge.length <- buddPhylo$length[match(edge_names, buddPhylo$name)]
   
-  ########### Part 4: Assemble the tree:
+  # assemble the tree
   phy <- list(
     edge = edge, edge.length = edge.length, Nnode = length(node.label),
     node.label = node.label, tip.label = tip.label,
     root.edge = buddPhylo$length[buddPhylo$orientation == "uca"]
   )
+  
+  # set class
   class(phy) <- "phylo"
+  
   return(phy)
 }
 
-#' Adjust the timescale of a buddPhylo pbject
+#' Adjust the timescale of a buddPhylo object
 #'
-#' Given a vector of fossil occurrences and time bins to represent geological
-#' ranges, returns the occurrence counts in each bin.
+#' @details \code{adjust.timescale.buddPhylo} Adjusts the time coordinates of a
+#' buddPhylo object, either with time going from the root or from the present 
+#' (based on an argument).
 #'
-#' @param buddPhylo Object of class "buddPhylo"
-#'
-#' @param timeFromRoot A logical indicating whether time should be expressed as
-#' time since the root (\code{timeFromRoot=TRUE}). If set to \code{FALSE}
-#' (default), time is expressed as millions of years ago (Mya), taking the tip
-#' extant tip that is further from the root as a reference for "present".
+#' @param buddPhylo Object of class \code{buddPhylo}.
 #'
 #' @return A \code{buddPhylo} with the time adjusted accordingly.
 #'
-#' @author Matheus Januario
+#' @author Matheus Januario and Bruno do Rosario Petrucci.
+#'
+#' @noRd
 #'
 
 adjust.timescale.buddPhylo <- function(buddPhylo, timeFromRoot = FALSE) {
@@ -324,172 +400,93 @@ adjust.timescale.buddPhylo <- function(buddPhylo, timeFromRoot = FALSE) {
     stop("Invalid buddPhylo object, see ?buddPhylo")
   }
   
-  if (timeFromRoot) {
-    needsCorrection1 <- (diff(c(0, max(buddPhylo$x_coord[buddPhylo$extant]))) < 10E-10)
-    if (needsCorrection1) {
-      buddPhylo$x_coord <- max(buddPhylo$x_coord) - buddPhylo$x_coord
-    }
-  } else { # if time from present:
-    needsCorrection2 <- !(diff(c(0, max(buddPhylo$x_coord[buddPhylo$extant]))) < 10E-10)
-    if (needsCorrection2) {
-      refMax <- max(c(buddPhylo$x_coord, buddPhylo$x_par))
-      buddPhylo$x_coord <- refMax - buddPhylo$x_coord
-      buddPhylo$x_par <- refMax - buddPhylo$x_par
-    }
+  # get root time
+  root_x <- buddPhylo$x_coord[buddPhylo$orientation == "uca"]
+  
+  # check if time is from root
+  is_time_from_root <- root_x < 10E-10
+  
+  # check if we need correction
+  if (is_time_from_root != timeFromRoot) {
+    # find maximum time
+    refMax <- max(c(buddPhylo$x_coord, buddPhylo$x_par), na.rm = TRUE)
+    
+    # reverse time
+    buddPhylo$x_coord <- refMax - buddPhylo$x_coord
+    buddPhylo$x_par  <- refMax - buddPhylo$x_par
   }
+  
   return(buddPhylo)
 }
 
-#' List the monophyletic clades in a budding phylogeny
+#' All subtrees of a budding phylogenetic tree
 #'
-#' Get a list of monophyletic clades in this budding phylogeny.
+#' This function returns a list of all the subtrees of a budding phylogenetic
+#' tree, i.e. a list of \code{buddPhylo} objects.
 #'
-#' @param buddPhylo Object of class "buddPhylo"
+#' @param buddPhylo Object of class "buddPhylo".
 #' 
-#' @param returnInfo Whether to return the MRCA (if the defining node of the
-#' clade is a sampled-ancestor node) or orientation (if the defining node of
-#' the clade is a speciation node) for each clade. Defaults to \code{TRUE}.
+#' @return A list of \code{buddPhylo} objects, one per internal node of 
+#' \code{buddPhylo}, each rooted at that node.
 #'
-#' @return A list of length equal to the number of nodes, with each element
-#' being a vector of strings (listing the tips/SAs that are descended
-#' from each node). If \code{returnInfo = TRUE}, each element contains two 
-#' vectors of strings: either the SA and lineage, or the ancestor clade and
-#' the descendant clade (similar to \code{getChildren.buddPhylo}).
-#'
-#' @author Bruno do Rosario Petrucci
+#' @author Bruno do Rosario Petrucci.
+#' 
+#' @export
 #'
 
-subtrees.buddPhylo <- function(buddPhylo, returnInfo = TRUE) {
-  # extract information from buddPhylo
-  nms <- buddPhylo$name
-  lins <- buddPhylo$lineage
-  pars <- buddPhylo$parent
-  types <- buddPhylo$type
-  oris <- buddPhylo$orientation
-  ranges <- buddPhylo$range
-  
-  # if names and lineage differ, get lineage instead
-  if (any(nms != lins, na.rm = TRUE)) 
-    nms[!is.na(lins)] <- lins[!is.na(lins)]
-  
-  # build children lookup
-  children <- new.env(hash = TRUE, parent = emptyenv())
-  for (i in seq_along(nms)) {
-    # get parent of nms
-    p <- pars[i]
-    
-    # check that there is a parent
-    if (!is.na(p)) {
-      # check if the parent is already in the environment
-      if (exists(p, envir = children, inherits = FALSE))
-        # if so, add this species to its descendants
-        children[[p]] <- c(children[[p]], nms[i])
-      else
-        # otherwise, just start it as this species
-        children[[p]] <- nms[i]
-    }
+subtrees.buddPhylo <- function(buddPhylo) {
+  # check it is a valid buddPhylo object
+  if (!is.buddPhylo(buddPhylo)) {
+    stop("Invalid buddPhylo object, see ?buddPhylo")
   }
   
-  # the descendants of all tips (i.e. the tips themselves)
-  tip_set <- new.env(hash = TRUE, parent = emptyenv())
+  # get number of rows
+  N <- nrow(buddPhylo)
   
-  # iterate through all names
-  for (i in seq_along(nms)) {
-    # if this is not a node, i.e. if it is a tip or SA, add it to tip_set
-    if (types[i] != "node") tip_set[[nms[i]]] <- nms[i]
+  # get parents for each node
+  par_idx <- match(buddPhylo$parent, buddPhylo$name)
+  
+  # make sure it is in pre-order (should be if built by paleobuddy)
+  stopifnot("buddPhylo rows are not in pre-order" =
+              all(par_idx < seq_len(N), na.rm = TRUE))
+  
+  # get internal node rows
+  node_rows <- which(buddPhylo$type == "node")
+  
+  # descendant row indices per row, including self
+  desc <- as.list(seq_len(N))
+  for (i in rev(seq_len(N))) {
+    # get parent of this node
+    p <- par_idx[i]
+    
+    # add to descendants
+    if (!is.na(p)) desc[[p]] <- c(desc[[p]], desc[[i]])
   }
   
-  # get root, i.e. UCA
-  root  <- nms[is.na(pars) & types == "node"]
-  
-  # empty character vector, we will use to keep track of the order
-  order <- character(sum(types == "node"))
-  
-  # start at root
-  stack <- root
-  
-  # how many nodes we've already checked
-  k <- 0
-  
-  # while we have something on the stack
-  while (length(stack)) {
-    # get the first stack element
-    n <- stack[1]
+  # build list of trees
+  lapply(node_rows, function(r) {
+    # get the subtree
+    sub <- buddPhylo[desc[[r]], , drop = FALSE]
     
-    # remove first element from stack
-    stack <- stack[-1]
+    # find root
+    root_i <- match(buddPhylo$name[r], sub$name)
     
-    # increase k
-    k <- k + 1
+    # fix root values
+    sub$parent[root_i] <- NA_character_
+    sub$orientation[root_i] <- "uca"
     
-    # make kth order equal to the current node
-    order[k] <- n
+    # rename rows
+    rownames(sub) <- NULL
     
-    # if n is a node, get its children, otherwise nothing
-    ch <- if (exists(n, envir = children, inherits = FALSE)) children[[n]]
-    else character(0L)
+    # zero root length
+    sub$length[root_i] <- 0
+    sub$x_par[root_i] <- sub$x_coord[root_i]
     
-    # add children of this node to the stack, if any
-    stack <- c(ch[types[match(ch, nms)] == "node"], stack)
-  }
-  # now we know the order to fill tip_sets
-  
-  # fill tip sets in reverse (post-order = children before parents)
-  for (n in rev(order[seq_len(k)])) {
-    # get the childrenm of this node, if they exist
-    ch <- if (exists(n, envir = children, inherits = FALSE)) children[[n]]
-    else character(0)
+    # set classes
+    class(sub) <- c("buddPhylo", "data.frame")
     
-    # add to tip_set
-    tip_set[[n]] <- unlist(lapply(ch, function(x) tip_set[[x]]))
-  }
-  # now we have a hash table for the descendants of each node
-  
-  # get all the nodes
-  nodes <- nms[types == "node"]
-  
-  # iterate through nodes
-  lapply(nodes, function(n) {
-    # get the children of this node
-    ch <- children[[n]]
-    
-    # get the types of children
-    type <- types[match(ch, nms)]
-    
-    # get the range
-    ran <- ranges[match(n, nms)]
-    
-    # if one of the children is an SA, this is an SA node
-    if (any(type == "sampAnc")) {
-      # get which one is the SA
-      sa  <- ch[type == "sampAnc"]
-      
-      # and which one is the lineage
-      lin <- ch[type != "sampAnc"]
-
-      
-      # return the named list with the SA and the descendants of lin
-      if (returnInfo) list(sampAnc = sa,
-                           lineage = sort(unlist(lapply(lin, 
-                                                        function(x) tip_set[[x]]))),
-                           range = ran)
-      else sort(c(sa, unlist(lapply(lin, 
-                                    function(x) tip_set[[x]]))))
-    } else {
-      # otherwise, get the ancestor and descendant lineage
-      ori <- oris[match(ch, nms)]
-      anc <- ch[ori == "ancestor"]
-      des <- ch[ori == "descendant"]
-      
-      # and return the named list with each and their descendants
-      if (returnInfo) list(ancestor = sort(unlist(lapply(anc, 
-                                                         function(x) tip_set[[x]]))),
-                           descendant = sort(unlist(lapply(des, 
-                                                           function(x) tip_set[[x]]))),
-                           range = ran)
-      else sort(c(unlist(lapply(anc, function(x) tip_set[[x]])),
-                  unlist(lapply(des, function(x) tip_set[[x]]))))
-    }
+    # return
+    sub
   })
 }
 
@@ -498,7 +495,7 @@ subtrees.buddPhylo <- function(buddPhylo, returnInfo = TRUE) {
 #' Get a list of monophyletic clades from a phylogenetic tree. Could be budding
 #' or bifurcating. 
 #'
-#' @param tree Object of class "buddPhylo" or "phylo".
+#' @param tree Object of class \code{buddPhylo} or \code{phylo}.
 #' 
 #' @param considerSAs Logical indicating whether sampled ancestors should be
 #' considered in the definition of a clade.
@@ -514,7 +511,10 @@ subtrees.buddPhylo <- function(buddPhylo, returnInfo = TRUE) {
 #' will end with \code{"\001ANC:X;Y;..."}, where X, Y, etc. are the taxa in the
 #' ancestral branch.
 #'
-#' @author Bruno do Rosario Petrucci
+#' @author Bruno do Rosario Petrucci.
+#' 
+#' @export
+#' 
 
 extract.clades <- function(tree,
                            considerSAs = FALSE,
@@ -737,4 +737,289 @@ extract.clades <- function(tree,
   
   # return clades
   return(clades)
+}
+
+#' 
+#' @details \code{fix.coords} Fixes the x and y coordinates of a buddPhylo 
+#' object based on its associated phylo object.
+#' 
+#' @author Bruno do Rosario Petrucci.
+#' 
+#' @noRd
+#' 
+
+fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
+  # ladderize phylo
+  phylo <- ape::ladderize(phylo)
+  
+  # ensure length is numeric
+  buddPhylo$length <- as.numeric(buddPhylo$length)
+  
+  # build row->name lookup to make things faster later
+  parent_idx <- match(buddPhylo$parent, buddPhylo$name)
+  
+  # function to find the y coordinates of the tips of a phylo object
+  get_tip_y_coords <- function(phylo) {
+    # collect useful variables
+    n_tips <- length(phylo$tip.label)
+    n_nodes <- phylo$Nnode
+    n_total <- n_tips + n_nodes
+    edge <- phylo$edge
+    edge_lengths <- phylo$edge.length
+    
+    # zero-length edges
+    zero_len_edges <- which(!is.null(edge_lengths) & edge_lengths == 0)
+    
+    # start vector for parents of zero-length edges
+    ghost_parents <- c()
+    
+    # if there are any...
+    if (length(zero_len_edges) > 0) {
+      # get the children...
+      children_of_zero <- edge[zero_len_edges, 2]
+      
+      # ...and the parents
+      ghost_parents <- children_of_zero[children_of_zero > n_tips]
+      # only outgoing children of these nodes are tips with zero-length edges
+    }
+    
+    # true tips: tip indices NOT reachable only via zero-length edges
+    true_tips <- setdiff(1:n_tips, edge[zero_len_edges, 2])
+    
+    # assign y positions in the order they appear in the tip.label vector,
+    # respecting the ladderized traversal order
+    yy <- numeric(n_total)
+    
+    # traverse the tree in the same order ape::plot.phylo does:
+    # post-order, left-to-right for a ladderized tree
+    traverse_order <- integer(0)
+    
+    # make map of children per parent
+    children_by_parent <- split(edge[, 2], edge[, 1])
+    
+    # iterative pre-order traversal (left to right = first child first)
+    stack <- phylo$edge[phylo$edge[, 1] == (n_tips + 1), 2]
+    
+    # reverse so first child is on top of stack
+    stack <- rev(stack)
+    
+    # create vector to hold visit order
+    visit_order <- integer(n_tips)
+    
+    # start at the beginning of the stack
+    k <- 1
+    stk <- stack
+    
+    # while we have a stack
+    while (length(stk) > 0) {
+      # get this last node on the stack
+      node <- stk[length(stk)]
+      
+      # remove it from the stack
+      stk <- stk[-length(stk)]
+      
+      # check if it is a tip
+      if (node <= n_tips) {
+        # if so, add it to visit order
+        visit_order[k] <- node
+        
+        # increment order
+        k <- k + 1
+      } else {
+        # if not, get its children
+        children <- children_by_parent[[as.character(node)]]
+        
+        # add children to stack
+        stk <- c(stk, rev(children))
+      }
+    }
+    
+    # assign tip number in traversal order
+    for (i in seq_along(visit_order)) {
+      yy[visit_order[i]] <- i
+    }
+    
+    # get all non-tip nodes
+    all_nodes <- (n_tips + 1):n_total
+    
+    # process in reverse of edge order (post-order)
+    node_order <- rev(unique(edge[, 1]))
+    for (nd in node_order) {
+      # get children
+      children <- children_by_parent[[as.character(nd)]]
+      
+      # set y based on the mean of children ys
+      yy[nd] <- mean(yy[children])
+    }
+    
+    # filter to only true tips if zero-length branches exist
+    result <- yy[true_tips]
+    names(result) <- phylo$tip.label[true_tips]
+    
+    # return result
+    return(result)
+  }
+  
+  # if fix_x is false, need to save x coordinates
+  if (!fix_x) {
+    x_coords_bak <- buddPhylo$x_coord
+    x_par_bak <- buddPhylo$x_par
+  }
+  
+  # get the y coordinates for the tips of the object
+  yy <- get_tip_y_coords(phylo)
+  
+  # get x coordinates for these tips
+  xx <- ape::node.depth.edgelength(phylo)[which(phylo$tip.label %in% names(yy))]
+  
+  # get the tip names
+  tip_names <- phylo$tip.label
+  
+  # start coordinates as NA
+  buddPhylo$y_coord <- NA
+  buddPhylo$x_coord <- NA
+  
+  # get the match between phylo and buddPhylo nodes
+  matching_ids <- match(names(yy), buddPhylo$name)
+  
+  # set the coordinates for tips
+  buddPhylo$y_coord[matching_ids] <- yy
+  buddPhylo$x_coord[matching_ids] <- xx
+  
+  # start the parent coordinates as NA
+  buddPhylo$x_par <- NA
+  buddPhylo$y_par <- NA
+  
+  # check which already have a set y coordinate
+  buddPhylo$y_set <- !is.na(buddPhylo$y_coord)
+  
+  # precompute row ids of the children for each parent
+  children_by_par <- split(seq_len(nrow(buddPhylo)), parent_idx)
+  
+  # check which are tips
+  tip_ids <- which(buddPhylo$type == "tip")
+  
+  # iterate through tips
+  for (ttID in tip_ids) {
+    # set todo
+    todo <- TRUE
+    
+    # while we need to set these coordinates...
+    while (todo) {
+      # get parent and grandparent IDs
+      ParID <- parent_idx[ttID]
+      grandParID <- parent_idx[ParID]
+      
+      # check if parent ID is set
+      if (buddPhylo$y_set[ParID]) {
+        # if so, parent x-coordinate will just be 
+        # based on this tip's x-coordinate and length
+        buddPhylo$x_par[ttID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+        todo <- FALSE
+      } else {
+        # get siblings of this tip
+        sibs <- children_by_par[[as.character(ParID)]]
+        sibs <- sibs[sibs != ttID]
+        
+        # find non-SA siblings that are ancestors
+        anc_sibs <- sibs[buddPhylo$orientation[sibs] == "ancestor" &
+                           buddPhylo$type[sibs] != "sampAnc"]
+        
+        # check if this tip has an ancestor sibling we have not hit yet
+        hasUnwalkedAncestorSibling <-
+          length(anc_sibs) > 0 && any(is.na(buddPhylo$x_par[anc_sibs]))
+        
+        # check if this is a descendant tip with an unwalked ancestor sib
+        if (buddPhylo$orientation[ttID] == "descendant" && 
+            hasUnwalkedAncestorSibling) {
+          # if so, set parent coordinates based on this tip
+          buddPhylo$x_coord[ParID] <- buddPhylo$x_coord[ttID] - 
+            buddPhylo$length[ttID]
+          buddPhylo$x_par[ttID] <- buddPhylo$x_coord[ttID] - 
+            buddPhylo$length[ttID]
+          todo <- FALSE
+        } else {
+          # otherwise, set y coordinates too
+          buddPhylo$y_coord[ParID] <- buddPhylo$y_coord[ttID]
+          buddPhylo$x_coord[ParID] <- buddPhylo$x_coord[ttID] - 
+            buddPhylo$length[ttID]
+          buddPhylo$x_par[ttID] <- buddPhylo$x_coord[ttID] - buddPhylo$length[ttID]
+          buddPhylo$y_set[ParID] <- TRUE
+        }
+        # in this way we avoid setting parent coordinates to
+        # the coordinates of a descendant child
+      }
+      
+      # check if there is a grandparent
+      if (is.na(grandParID) || length(grandParID) == 0) {
+        # if not, we have reached the node for which the parent is the root
+        # set the parent coordinates and stop
+        buddPhylo$x_par[ParID] <- buddPhylo$x_coord[ParID] - 
+          buddPhylo$length[ParID]
+        buddPhylo$y_par[ParID] <- buddPhylo$y_coord[ParID]
+        todo <- FALSE
+      } else {
+        # otherwise, continue to the parent
+        ttID <- ParID
+      }
+    }
+  }
+  
+  # reset y_set to NULL
+  buddPhylo$y_set <- NULL
+  
+  # now get the sampled ancestor nodes
+  sa_ids <- which(buddPhylo$type == "sampAnc")
+  sa_par_ids <- parent_idx[sa_ids]
+  
+  # set their coordinates and parent coordinates
+  buddPhylo$y_coord[sa_ids] <- buddPhylo$y_coord[sa_par_ids]
+  buddPhylo$x_coord[sa_ids] <- buddPhylo$x_coord[sa_par_ids]
+  buddPhylo$x_par[sa_ids] <- buddPhylo$x_coord[sa_par_ids]
+  
+  # get minimum x (present)
+  min_x <- min(c(buddPhylo$x_coord, buddPhylo$x_par), na.rm = TRUE)
+  
+  # set time scale based on min_x
+  buddPhylo$x_coord <- buddPhylo$x_coord - min_x
+  buddPhylo$x_par <- buddPhylo$x_par - min_x
+  
+  # match y_par to parent coordinates
+  buddPhylo$y_par <- buddPhylo$y_coord[match(buddPhylo$parent, buddPhylo$name)]
+  buddPhylo$y_par[buddPhylo$orientation == "uca"] <- 
+    buddPhylo$y_coord[buddPhylo$orientation == "uca"]
+  
+  # restore x coords if we wanted to not mess with it
+  if (!fix_x) {
+    buddPhylo$x_coord <- x_coords_bak
+    buddPhylo$x_par <- x_par_bak
+  }
+  
+  # fix row types
+  buddPhylo$length <- as.numeric(buddPhylo$length)
+  buddPhylo$x_coord <- as.numeric(buddPhylo$x_coord)
+  buddPhylo$y_coord <- as.numeric(buddPhylo$y_coord)
+  
+  # return
+  return(buddPhylo)
+}
+
+#' @rdname buddPhylo
+#' 
+#' @details \code{node.time.buddPhylo} Finds the time of a node with a given
+#' \code{name} field.
+#' 
+#' @author Bruno do Rosario Petrucci.
+#' 
+#' @export
+#' 
+
+node.time.buddPhylo <- function(buddPhylo, node) {
+  # check that the node exists in buddPhylo
+  if (!(node %in% buddPhylo$name)) {
+    stop("node must be in buddPhylo$name")
+  }
+  
+  # get the time
+  buddPhylo$x_coord[buddPhylo$name == node]
 }

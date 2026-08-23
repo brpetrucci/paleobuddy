@@ -7,7 +7,7 @@
 extract.clades(tree, considerSAs = FALSE, considerOrientation = FALSE)
 }
 \arguments{
-\item{tree}{Object of class "buddPhylo" or "phylo".}
+\item{tree}{Object of class \code{buddPhylo} or \code{phylo}.}
 
 \item{considerSAs}{Logical indicating whether sampled ancestors should be
 considered in the definition of a clade.}
@@ -29,5 +29,5 @@ Get a list of monophyletic clades from a phylogenetic tree. Could be budding
 or bifurcating.
 }
 \author{
-Bruno do Rosario Petrucci
+Bruno do Rosario Petrucci.
 }

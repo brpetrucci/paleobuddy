@@ -4,17 +4,27 @@
 \alias{read.trees.buddPhylo}
 \title{Read a buddPhylo tree from a file in Newick format}
 \usage{
-read.trees.buddPhylo(file, treeNumbers = NULL, timeFromRoot = FALSE)
+read.trees.buddPhylo(
+  file,
+  text = NULL,
+  treeNumbers = NULL,
+  timeFromRoot = FALSE
+)
 }
 \arguments{
-\item{file}{A character containing a nexus file name.}
+\item{file}{A character containing a Newick file name.}
+
+\item{text}{A string with one or several trees in Newick format, separated
+by newlines (\code{\\n}). \code{NULL} by default. If not \code{NULL}, the 
+argument \code{file} is ignored.}
 
 \item{treeNumbers}{A numeric vector containing which trees should be read.
 If \code{NULL} (default), the function reads all trees within \code{file}.}
 
 \item{timeFromRoot}{A logical indicating whether time should be expressed as
-time since the root (\code{timeFromRoot=TRUE}). If set to \code{FALSE}
-(default), time is expressed as millions of years ago (Mya), taking the tip extant tip that is further from the root as a reference for "present".}
+time since the root (\code{TRUE}). If set to \code{FALSE} (default), time is 
+expressed as millions of years ago (Mya), taking the tip extant tip that is 
+further from the root as a reference for "present".}
 }
 \value{
 A \code{buddPhylo} with the time adjusted accordingly.
@@ -23,5 +33,5 @@ A \code{buddPhylo} with the time adjusted accordingly.
 This function reads one or several trees in Newick file.
 }
 \author{
-Bruno do Rosario Petrucci
+Bruno do Rosario Petrucci.
 }

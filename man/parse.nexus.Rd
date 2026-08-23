@@ -7,7 +7,11 @@
 parse.nexus(text = NULL, file = NULL, treeNumbers = NULL)
 }
 \arguments{
-\item{file}{A character containing a nexus file name.}
+\item{text}{A string with the tree in a Newick format. Optional, but at least
+one of \code{text} or \code{file} must be not \code{NULL}.}
+
+\item{file}{A character containing a Nexus filename. Optional, but at least
+one of \code{text} or \code{file} must be not \code{NULL}.}
 
 \item{treeNumbers}{A numeric vector containing which trees should be read.
 If \code{NULL} (default), the function reads all trees within \code{file}.}
@@ -15,15 +19,16 @@ If \code{NULL} (default), the function reads all trees within \code{file}.}
 \value{
 A character with the parenthetic format within the nexus file.
 If more than one tree is read, a list of characters is returned in the
-order given by \code{treeNumbers}
+order given by \code{treeNumbers}.
 }
 \description{
-This function reads and parses one or several trees in a NEXUS file.
+This function parses one or several budding phylogenetic trees in a Nexus 
+file.
 }
 \details{
 The does not take note on  whichever name was assigned for any tree
 in the nexus file.
 }
 \author{
-Matheus Januario
+Matheus Januario and Bruno do Rosario Petrucci.
 }

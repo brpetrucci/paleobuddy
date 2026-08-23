@@ -2,27 +2,21 @@
 % Please edit documentation in R/buddPhylo_utilities.R
 \name{subtrees.buddPhylo}
 \alias{subtrees.buddPhylo}
-\title{List the monophyletic clades in a budding phylogeny}
+\title{All subtrees of a budding phylogenetic tree}
 \usage{
-subtrees.buddPhylo(buddPhylo, returnInfo = TRUE)
+subtrees.buddPhylo(buddPhylo)
 }
 \arguments{
-\item{buddPhylo}{Object of class "buddPhylo"}
-
-\item{returnInfo}{Whether to return the MRCA (if the defining node of the
-clade is a sampled-ancestor node) or orientation (if the defining node of
-the clade is a speciation node) for each clade. Defaults to \code{TRUE}.}
+\item{buddPhylo}{Object of class "buddPhylo".}
 }
 \value{
-A list of length equal to the number of nodes, with each element
-being a vector of strings (listing the tips/SAs that are descended
-from each node). If \code{returnInfo = TRUE}, each element contains two 
-vectors of strings: either the SA and lineage, or the ancestor clade and
-the descendant clade (similar to \code{getChildren.buddPhylo}).
+A list of \code{buddPhylo} objects, one per internal node of 
+\code{buddPhylo}, each rooted at that node.
 }
 \description{
-Get a list of monophyletic clades in this budding phylogeny.
+This function returns a list of all the subtrees of a budding phylogenetic
+tree, i.e. a list of \code{buddPhylo} objects.
 }
 \author{
-Bruno do Rosario Petrucci
+Bruno do Rosario Petrucci.
 }
