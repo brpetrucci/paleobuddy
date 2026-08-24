@@ -1,7 +1,132 @@
 
 <!-- NEWS.md is generated from NEWS.Rmd. Please edit that file -->
 
-# paleobuddy 1.1.1.0
+# paleobuddy 1.2.0.0
+
+## Simulating DNA and morphology
+
+- `sim.chars` is a function for simulating discrete characters on a
+  `sim` object and fossil record. It can be used to simulate DNA or
+  morphology, and accommodates all commonly-used molecular/morphological
+  evolution models. Transition rates are mediated through a parameter
+  `Q`, which takes the form of a function that takes a number of states
+  and returns a square transition matrix. It is easy, then, to set it up
+  as an e.g. GTR or Mk model. Clock parameters are mediated by the
+  `species_clock` argument, which takes a clock parameter per species.
+  While this cannot currently fully encapsulate an uncorrelated clock
+  model on a bifurcating phylogeny (since paleobuddy uses budding
+  speciation, so one species occupies more than one branch), that is a
+  planned expansion. Check `?sim.chars` for a full rundown of available
+  options.
+
+- `sim.char.species` is a helper function that simulates one trait
+  during the lifetime of one species. It is used by both `bd.sim.traits`
+  and `sim.chars`. It is likely not going to be useful for a user, but
+  we are leaving it exported in case it is useful for something we can’t
+  predict.
+
+## Reading and manipulating budding phylogenetic trees
+
+Because of the functions described below, we have decided to make `ape`
+an official dependency of the package. While we’ve generally strived not
+to have any dependencies, we assume anyone using a birth-death
+simulation package will already have `ape`, and hope it will not be an
+inconvenience.
+
+- `buddPhylo` is an object that holds a budding phylogenetic tree. In
+  essence it is just a data frame, with each row being a branch in the
+  tree (and the node at the end of that branch). Each column gives the
+  information about that node, specifically the `name`, time (as
+  `x_coord`), `orientation` (ancestor/descendant, since this is a
+  budding tree), `type` (node, tip, or sampled ancestor), branch
+  `length`, `parent`, among others. This format is meant to work with
+  the output from an sRanges analysis in BEAST2, which includes
+  stratigraphic ranges within the branches of the tree. So there is also
+  a `range` column to store which species’s range that given branch is
+  assigned to, if any. A `buddPhylo` therefore represents a budding
+  phylogenetic tree, with tips representing either the first or last
+  occurrence of a species, with last occurrences being either an actual
+  tip (terminal), or a sampled ancestor (zero length branch). All first
+  occurrences are sampled ancestors.
+
+- Versions for the `print`, `summary`, `ape::as.phylo`, and `plot`
+  generics are implemented for `buddPhylo`. `print` prints simple
+  information about the makeup of the tree. `summary` prints some simple
+  statistical summaries of the speciation and extinction waiting times
+  implied by the tree. `as.phylo` converts the `buddPhylo` into a
+  `phylo` object to be used by functions in the `ape` package. `plot`
+  plots a `buddPhylo`, with many aesthetic options to be played around
+  with by the user. While not as flexible as the `ape` plot functions
+  yet, we will work to expand its functionality.
+
+To complement the introduction of an object to store budding trees, we
+introduced a number of functions to read, build, and learn about
+`buddPhylo` objects.
+
+### Building budding phylogenies from simulated data
+
+- `make.buddPhylo` builds a `buddPhylo` object from a `sim` object and,
+  optionally, a `fossils` object. This not only allows the user to
+  visualize their simulations more effectively, but also to build a
+  ground-truth phylogeny to compare to analysis results in a simulation
+  study context. Just like `make.phylo`, the function returns the true
+  extinction time of each species by default, but allows for an argument
+  to change that to better reflect reconstructed stratigraphic-range
+  trees.
+
+### Reading budding phylogenies
+
+- `read.nexus.buddPhylo` and `read.trees.buddPhylo` emulate `read.nexus`
+  and `read.trees` from the `ape` package. These functions read one or
+  several budding phylogenies from a file (nexus or otherwise). The
+  trees are expected to be in the sRanges format, i.e. with node
+  comments declaring the orientation of each node. The tree will be
+  formatted and ordered in the exact same way as a tree built with
+  `make.buddPhylo`.
+
+### Exploring budding phylogenies
+
+- `getChildren.buddPhylo` outputs the nodes that are the immediate
+  descendants of a node in a given `buddPhylo` object. It also lists the
+  identity of each child, either `ancestor` and `descendant` if it is a
+  speciation node, or `sampAnc` and `lineage` if it is a sampled
+  ancestor node. `getDescendants.buddPhylo` is similar, but goes a bit
+  further–it lists all tips descended from the node in question,
+  including terminals and sampled ancestors. It optionally may also list
+  internal nodes descended from that node.
+
+- `getParents.buddPhylo` does the opposite, listing the parent node of
+  the node in question. It also lists the parent of the parent node, and
+  so on until the root. It therefore outputs the node path from the
+  current node to the root, the first element being the immediate
+  parent, and the last being the root.
+
+- `getMRCA.buddPhylo` outputs the node that represents the most recent
+  common ancestor of a list of specimens (which could be tips or sampled
+  ancestors). `is.monophyletic.buddPhylo` uses `getMRCA.buddPhylo` to
+  test whether a list of specimens is monophyletic, i.e. whether the
+  list of descendants of the MRCA of the list is exactly equal to that
+  list. You can ignore sampled ancestors or not when checking for
+  monophyly, depending on an argument.
+
+- `subtrees.buddPhylo` works similarly to `ape::subtrees`, returning a
+  list of `buddPhylo` objects representing the subtrees descended from
+  each internal node of the original `buddPhylo`. The first element will
+  be the `buddPhylo` itself, and then we follow the nodes in a pre-order
+  traversal and list the subtrees implied by each node. `extract.clades`
+  is a helpful function when analyzing a set of many trees. It uses an
+  algorithm similar to `subtrees.buddPhylo` to find the monophyletic
+  clade implied by each internal node, and then lists these clades in a
+  compact way as a list of strings, with each element being a specimen
+  in this clade. It allows for optional arguments about whether to
+  include information on the sampled ancestor/orientation status of the
+  clade. If so, it includes the species that is a sampled ancestor (if
+  the node is a sampled ancestor node) after a `\001SA:` tag, or the
+  species that are part of the ancestor lineage (if the node is a
+  speciation node) after a `\001ANC:` tag. By applying this function to
+  all trees in a sample, one might efficiently gather the frequency of
+  each clade in the set, differentiating or not by sampled
+  ancestry/orientation.
 
 ## Simple fixes
 
@@ -11,6 +136,10 @@
   convenience of setting the rates to a constant vector (because other
   simulations have non-constant vector). The same will be implemented
   for `sample.clade`.
+
+- All `bd` functions now set a `tMax` value when `mu = 0` and we are
+  conditioning on `N`. Previously `tMax` was set to `Inf` and the
+  function would run indefinitely.
 
 # paleobuddy 1.1.0.0
 

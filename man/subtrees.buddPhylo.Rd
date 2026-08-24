@@ -11,7 +11,9 @@ subtrees.buddPhylo(buddPhylo)
 }
 \value{
 A list of \code{buddPhylo} objects, one per internal node of 
-\code{buddPhylo}, each rooted at that node.
+\code{buddPhylo}, each rooted at that node. Each subtree will be rerooted,
+i.e. the node that is the root will have \code{parent=NA},
+\code{orientation = "uca"}, and \code{length=0}.
 }
 \description{
 This function returns a list of all the subtrees of a budding phylogenetic

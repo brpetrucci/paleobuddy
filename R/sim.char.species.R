@@ -63,7 +63,7 @@
 #' # simple example using all default parameters
 #' char <- sim.char.species(10)
 #' # the species starts at state 0, stays there for most of its lifetime,
-#' # and quickly transitions to state 1 around 7.5my in, before transitionin
+#' # and quickly transitions to state 1 around 7.5my in, before transitioning
 #' # back to 0 shortly after, and staying there until the end
 #' 
 #' ###
@@ -147,6 +147,11 @@ sim.char.species <- function(tMax, tStart = 0, nStates = 2, X0 = 0,
   # make sure tMax > tStart
   if (tStart >= tMax) {
     stop("tMax must be greater than tStart")
+  }
+  
+  # make sure nStates is at least 2
+  if (nStates < 2) {
+    stop("nStates must be at least 2.")
   }
   
   # make sure X0 is a possible state

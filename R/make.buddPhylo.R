@@ -20,7 +20,14 @@
 #' \code{?buddPhylo} for details. The \code{lineage} column will be used to 
 #' list the specific occurrence of each taxon--i.e. the first fossil occurrence
 #' of species \code{t1} will be \code{t1.1}, the second \code{t1.2}, etc. If the
-#' species is extant, \code{t1} will be the name of the extant tip.
+#' species is extant, \code{t1} will be the name of the extant tip. If there are
+#' enough fossils for a species that clarity is needed, a padding of zeros is
+#' added, e.g. if there are more than 10 fossils, the first occurrence will be
+#' \code{t1.01} instead.
+#' 
+#' @details Note that the function fails for a simulation with only one sample,
+#' so if there is only one species in \code{sim} and no \code{fossils} data
+#' frame, it will fail. This is worth guarding against in loops.
 #' 
 #' @author Bruno do Rosario Petrucci.
 #' 
@@ -63,11 +70,24 @@ make.buddPhylo <- function(sim, fossils = NULL, returnTrueExt = TRUE) {
     stop("Invalid sim object")
   } 
   
-  # start buddPhylo
-  buddPhylo <- data.frame(matrix(nrow = 0, ncol = 13))
-  colnames(buddPhylo) <- c("lineage", "taxon", "orientation", "length", "name",
-                           "range", "parent", "type", "y_coord", "x_coord", 
-                           "x_par", "y_par", "extant")
+  # check that fossils is correct if it exists 
+  if (!is.null(fossils)) {
+    # which columns we really need
+    needed <- c("Species", "SampT")
+    
+    # ensure they are there
+    if (!all(needed %in% names(fossils))) {
+      stop("fossils must have columns ", paste(needed, collapse = " and "),
+           "; usually the output of sample.clade")
+    }
+  }
+  
+  # start buddPhylo rows list
+  rows <- vector("list", 0)
+  
+  # running name / x_coord of appended rows, for parent lookups
+  row_name <- character(0)
+  row_xcoord <- numeric(0)
   
   # start internal node number
   n_node <- 1
@@ -121,8 +141,8 @@ make.buddPhylo <- function(sim, fossils = NULL, returnTrueExt = TRUE) {
     t_parent <- sim$TS[i]
     
     # and parent node
-    parent_node <- ifelse(uca, NA,
-                          buddPhylo$name[buddPhylo$x_coord == t_parent])
+    parent_node <- if (uca) NA_character_ else
+      row_name[match(t_parent, row_xcoord)]
     
     # next fossil sample will be the first
     sample_id <- 1
@@ -150,15 +170,19 @@ make.buddPhylo <- function(sim, fossils = NULL, returnTrueExt = TRUE) {
         }
         
         # add speciation node to buddPhylo
-        buddPhylo <- rbind(buddPhylo,
-                           as.data.frame(as.list(
-                             c(lineage = n_node, taxon = n_node, 
-                               orientation = ori, length = t_parent - time, 
-                               name = n_node, range = range, parent = parent_node, 
-                               type = "node", y_coord = i, 
-                               x_coord = time, 
-                               x_par = t_parent, y_par = i, 
-                               extant = FALSE))))
+        rows[[length(rows) + 1]] <- list(lineage = n_node, taxon = n_node, 
+                                         orientation = ori, 
+                                         length = t_parent - time, 
+                                         name = n_node, range = range, 
+                                         parent = parent_node, 
+                                         type = "node", y_coord = i, 
+                                         x_coord = time, 
+                                         x_par = t_parent, y_par = i, 
+                                         extant = FALSE)
+        
+        # record for parent lookups
+        row_name <- c(row_name, rows[[length(rows)]]$name)
+        row_xcoord <- c(row_xcoord, rows[[length(rows)]]$x_coord)
         
         # set the parent node for the next event as this node
         parent_node <- n_node
@@ -185,14 +209,19 @@ make.buddPhylo <- function(sim, fossils = NULL, returnTrueExt = TRUE) {
         # if this is not the last event, we need an auxiliary node for the
         # sampled ancestor branch to be attached to
         if (!last_sampled_event) {
-          buddPhylo <- rbind(buddPhylo,
-                             as.data.frame(as.list(
-                               c(lineage = n_node, taxon = n_node, 
-                                 orientation = ori,  length = t_parent - time,
-                                 name = n_node, range = range, parent = parent_node, 
-                                 type = "node", y_coord = i, x_coord = time, 
-                                 x_par = t_parent, y_par = i, 
-                                 extant = FALSE))))
+          rows[[length(rows) + 1]] <- list(lineage = n_node, taxon = n_node, 
+                                           orientation = ori,  
+                                           length = t_parent - time,
+                                           name = n_node, range = range, 
+                                           parent = parent_node, 
+                                           type = "node", y_coord = i, 
+                                           x_coord = time, 
+                                           x_par = t_parent, y_par = i, 
+                                           extant = FALSE)
+          
+          # record for parent lookups
+          row_name   <- c(row_name, rows[[length(rows)]]$name)
+          row_xcoord <- c(row_xcoord, rows[[length(rows)]]$x_coord)
           
           # set this as the SA parent node
           parent_node <- n_node
@@ -224,39 +253,52 @@ make.buddPhylo <- function(sim, fossils = NULL, returnTrueExt = TRUE) {
         sp_y_coord <- ifelse(last_sampled_event, i, i - 0.5)
         
         # add sampled ancestor or fossil tip to buddPhylo
-        buddPhylo <- rbind(buddPhylo,
-                           as.data.frame(as.list(
-                             c(lineage = fossil_name, 
-                               taxon = tax, orientation = ori, 
-                               length = t_parent - time,
-                               name = fossil_name, 
-                               range = range, parent = parent_node,
-                               type = ifelse(last_sampled_event, 
-                                             "tip", "sampAnc"), 
-                               y_coord = sp_y_coord, 
-                               x_coord = time, x_par = t_parent, y_par = i, 
-                               extant = FALSE))))
+        rows[[length(rows) + 1]] <- list(lineage = fossil_name, 
+                                         taxon = tax, orientation = ori, 
+                                         length = t_parent - time,
+                                         name = fossil_name, 
+                                         range = range, parent = parent_node,
+                                         type = ifelse(last_sampled_event, 
+                                                       "tip", "sampAnc"), 
+                                         y_coord = sp_y_coord, 
+                                         x_coord = time, 
+                                         x_par = t_parent, y_par = i, 
+                                         extant = FALSE)
+        
+        # record for parent lookups
+        row_name   <- c(row_name, rows[[length(rows)]]$name)
+        row_xcoord <- c(row_xcoord, rows[[length(rows)]]$x_coord)
         
         # if this is one of many sampling events, we're now in a range
-        range <- ifelse(sum(lin_events$type %in% c("sampling", "extinction")) == 1, NA, 
+        range <- ifelse(sum(lin_events$type 
+                            %in% c("sampling", "extinction")) == 1, NA, 
                         paste0("t", i))
         
         # increase the id for the next sample
         sample_id <- sample_id + 1
       } else if (event$type == "extinction" && (returnTrueExt || time == 0)) {
         # if returnTrueExt is true or this is an extant lineage, include tip
-        buddPhylo <- rbind(buddPhylo,
-                           as.data.frame(as.list(
-                             c(lineage = tax, taxon = tax, orientation = ori,
-                               length = t_parent - time, name = tax,
-                               range = range, parent = parent_node,
-                               type = "tip", y_coord = i, x_coord = time,
-                               x_par = t_parent, y_par = i, extant = (time == 0)))))
+        rows[[length(rows) + 1]] <- list(lineage = tax, taxon = tax, 
+                                         orientation = ori,
+                                         length = t_parent - time, name = tax,
+                                         range = range, parent = parent_node,
+                                         type = "tip", 
+                                         y_coord = i, x_coord = time,
+                                         x_par = t_parent, y_par = i, 
+                                         extant = (time == 0))
         # note that if returnTrueExt is false, the tip for this species
         # will be the last sampling event (if any)
+        
+        # record for parent lookups
+        row_name   <- c(row_name, rows[[length(rows)]]$name)
+        row_xcoord <- c(row_xcoord, rows[[length(rows)]]$x_coord)
       }
     }
   }
+  
+  # assemble buddPhylo
+  buddPhylo <- do.call(rbind, lapply(rows, as.data.frame,
+                                     stringsAsFactors = FALSE))
   
   # set length to numeric
   buddPhylo$length <- as.numeric(buddPhylo$length)
@@ -381,16 +423,13 @@ make.buddPhylo <- function(sim, fossils = NULL, returnTrueExt = TRUE) {
     nodes_to_rename <- nodes_to_rename[-which(nodes_to_rename == cur_node)]
   }
   
-  # get a lookup
-  lookup <- setNames(node_rename$new, node_rename$old)
-  
-  # match
-  m <- match(as.matrix(buddPhylo), node_rename$old)
-  
-  # substitute values
-  buddPhylo[] <- ifelse(is.na(m),
-                        as.matrix(buddPhylo),
-                        node_rename$new[m])
+  # rename node ids, but only in the columns that hold node names
+  lookup <- stats::setNames(as.character(node_rename$new),
+                            as.character(node_rename$old))
+  for (cl in c("lineage", "taxon", "name", "parent")) {
+    hit <- match(buddPhylo[[cl]], names(lookup))
+    buddPhylo[[cl]][!is.na(hit)] <- lookup[hit[!is.na(hit)]]
+  }
   
   # redo y coords
   buddPhylo$y_coord <- y_coords

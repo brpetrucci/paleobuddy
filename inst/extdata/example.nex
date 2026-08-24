@@ -1,0 +1,21 @@
+#NEXUS
+
+Begin taxa;
+	Dimensions tax=3;
+		Taxlabels
+			t1_first,
+			t1_last,
+			t2_first
+			;
+
+End;
+
+Begin trees;
+	Translate
+		1 t1_first,
+		2 t1_last,
+		3 t2_first
+		;
+
+tree example_tree = ((2[&orientation=ancestor,range=t1]:1,1[&orientation=ancestor]:0)5[&orientation=ancestor]:1,3[&orientation=descendant]:2)4[&orientation=ancestor]:0;
+End;

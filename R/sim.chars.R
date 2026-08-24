@@ -39,13 +39,15 @@
 #' @param nStates The number of states for each character. Can be either a
 #' single number, a vector of numbers of length \code{nTraits}, or a vector of
 #' numbers representing the number of characters to simulate with a given number
-#' of states. See the \code{nTraits} description for details. Default is 
-#' \code{2}.
+#' of states. If \code{nTraits=NULL}, \code{nStates[1]} must be \code{0}. 
+#' Invariant traits can be added after with \code{cbind}. See the \code{nTraits}
+#' description for details. Default is \code{2}.
 #' 
 #' @param X0 The initial state for each character. Can be either a single number
 #' or a vector of numbers of length \code{nTraits}. If \code{nTraits} is
 #' \code{NULL}, \code{X0} should be a single number representing the starting
-#' state for all characters. Default is \code{0}.
+#' state for all characters, or a vector where \code{X0[i]} represents the
+#' initial state for a character with \code{i} states. Default is \code{0}.
 #' 
 #' @param Q The transition matrix for a given number of states. It is assumed
 #' to be a function that takes one argument (the number of states) and returns
@@ -53,7 +55,7 @@
 #' \code{i} and \code{j}, the rate at which a species at state \code{i}
 #' transitions to \code{j} is assumed to be \code{Q(n)[i + 1, j + 1]}, where 
 #' \code{n} is the number of states. Default is a 2x2 matrix with symmetrical
-#' transition rates equal to \code{2}. Note that while the standard is to set 
+#' transition rates equal to \code{0.1}. Note that while the standard is to set 
 #' the diagonal values such that rows sum to \code{0}, the diagonal values are 
 #' never used in our algorithm, and we generally set them to \code{0}.
 #' 
@@ -123,7 +125,8 @@
 #' 
 #' @return A data frame with rows representing sampled species in the simulation
 #' (i.e. extinct species with no fossil samples are excluded), and columns
-#' representing each character.
+#' representing each character. Note that rows are named by species and exclude
+#' unsampled extinct species, so always index by rownames, never by position.
 #' 
 #' @author Bruno do Rosario Petrucci
 #' 
@@ -228,7 +231,7 @@
 #'                    labels = labels)
 #' 
 #' # you might then want to delete the data for the extinct species
-#' chars[which(!sim$EXTANT), ] <- rep("?", 10)
+#' chars[rownames(chars) %in% paste0("t", which(!sim$EXTANT)), ] <- "?"
 #'                    
 #' ###
 #' # we can simulate under a more complicated molecular evolution model
@@ -256,7 +259,7 @@
 #' # run the simulation
 #' chars <- sim.chars(sim, sample, nTraits = 10, nStates = 4, X0, Q, 
 #'                    labels = labels)
-#' chars[which(!sim$EXTANT), ] <- rep("?", 10)
+#' chars[rownames(chars) %in% paste0("t", which(!sim$EXTANT)), ] <- "?"
 #'                    
 #' 
 #' @name sim.chars
@@ -264,44 +267,80 @@
 #' @export
 
 sim.chars <- function(sim, sample = NULL, nTraits = 1, nStates = 2, X0 = 0, 
-                      Q = function(i) return(matrix(c(0, 0.1, 0.1, 0), 2, 2)), 
+                      Q = function(i) { 
+                        m <- matrix(0.1, i, i); diag(m) <- 0; m }, 
                       species_clock = 1,
                       var_min = 0, 
                       labels = NULL, sim_max = 10000,
                       sample_fossil = "first", 
                       extant_sampling = FALSE) {
-  #### TODO: ERROR CHECKS ####
-  # # check that all parameters are the necessary dimensions
-  # if (!(length(nStates) %in% c(1, nTraits)) ||
-  #     !(length(X0) %in% c(1, nTraits))) {
-  #   stop("nStates and X0 must be either of length 1 or nTraits")
-  # }
-  # if (length(nStates) == 1) nStates <- rep(nStates, nTraits)
-  # if (length(X0) == 1) X0 <- rep(X0, nTraits)
-  # if (!(species_clock %in% c(1, length(sim$TS)))) {
-  #   stop("species_clock must be either of length 1 or the number of species in sim")
-  # }
-  # if (length(species_clock) == 1) species_clock <- rep(species_clock,
-  #                                                      length(sim$TS))
-  # if (typeof(Q) == "closure") {
-  #   for (i in 1:length(nStates)) {
-  #     # get this Q
-  #     Q_i <- Q(nStates[i])
-  #     
-  #     # check that it is the right type and dimensions
-  #     if (!(typeof(Q_i) == "double") &&
-  #         (nrow(Q_i) == nStates[i] && ncol(Q_i) == nStates[i] && 
-  #          all(diag(Q_i) == 0))) {
-  #       stop("Q must return a 0-diagonal matrix of dimensions NxN when applied to N")
-  #     }
-  #   }
-  # } else {
-  #   if (!(typeof(Q) == "double") && (length(unique(nStates)) == 1) &&
-  #       (nrow(Q) == nStates[1] && ncol(Q) == nStates[1] && 
-  #        all(diag(Q) == 0))) {
-  #     stop("Q must have dimensions NxN, where N is nStates")
-  #   }
-  # }
+  # ensure sim is a valid sim object
+  if (!is.sim(sim)) stop("Invalid sim object")
+  
+  # make sure sample has the necessary columns
+  if (!is.null(sample)) {
+    needed <- c("Species", "SampT")
+    if (!all(needed %in% names(sample))) {
+      stop("sample must have columns ", paste(needed, collapse = " and "),
+           "; usually the output of sample.clade")
+    }
+  }
+  
+  # ensure Q is of type closure
+  if (typeof(Q) != "closure") {
+    stop("Q must be a function.")
+  }
+  
+  # ensure Q takes exactly 1 argument
+  if (length(formals(Q)) != 1) {
+    stop("Q must take exactly one argument.")
+  }
+  
+  # error check will be slightly different depending on whether nTraits is given
+  if (is.null(nTraits)) {
+    # check that nStates is a vector with at least two elements
+    if (!(is.numeric(nStates) && length(nStates) > 1)) {
+      stop("nStates must be a numeric vector of length at least 2.")
+    }
+    
+    # check that nStates[1] is 0
+    if (nStates[1] != 0) {
+      stop("nStates[1] must be 0. Invariant traits can be added 
+           after with cbind.")
+    }
+    
+    # ensure X0 is numeric
+    if (!is.numeric(X0)) {
+      stop("Initial state (X0) must be numeric.")
+    } else {
+      # ensure it is either of length 1 or equal to the length of nStates
+      if (length(X0) == 1) {
+        # set it to the length of nStates
+        X0 <- rep(X0, length(nStates))
+      } else if (length(X0) != length(nStates)) {
+        stop("X0 has to be the length of nStates, representing the initial state
+             for each character with a given number of states.")
+      }
+    }
+  } else {
+    # ensure nStates and X0 are numeric
+    if (!(is.numeric(nStates) && is.numeric(X0))) {
+      stop("X0 and nStates must be numeric.")
+    } else {
+      # check that they are of the correct length
+      if (!((length(nStates) == 1 || length(nStates) == nTraits) &&
+            (length(X0) == 1 || length(X0) == nTraits))) {
+        stop("X0 and nStates must be of length 1 or nTraits.")
+      }
+      
+      # correct length if needed
+      if (length(nStates) == 1) nStates <- rep(nStates, nTraits)
+      if (length(X0) == 1) X0 <- rep(X0, nTraits)
+    }
+  }
+  
+  # sample_fossil must be one of the documented values
+  sample_fossil <- match.arg(sample_fossil, c("first", "last", "random"))
   
   # if sample is null, make it an empty data frame
   if (is.null(sample)) {
@@ -337,6 +376,9 @@ sim.chars <- function(sim, sample = NULL, nTraits = 1, nStates = 2, X0 = 0,
       # get Q matrix 
       Q_i <- Q(i)
       
+      # get the initial value
+      X0_i <- X0[i]
+      
       # start sim counter--we don't want to try to run this for too long
       sim_count <- 1
       
@@ -348,7 +390,7 @@ sim.chars <- function(sim, sample = NULL, nTraits = 1, nStates = 2, X0 = 0,
         # until we have the number we want
         while (!cond) {
           # get this character 
-          char_n <- sim.char.one(sim, sample, i, X0, Q_i, 
+          char_n <- sim.char.one(sim, sample, i, X0_i, Q_i, 
                                  species_clock, labels,
                                  sample_fossil, extant_sampling)
           # allow for invariant character
@@ -373,11 +415,6 @@ sim.chars <- function(sim, sample = NULL, nTraits = 1, nStates = 2, X0 = 0,
       }
     }
   } else {
-    # if nStates is of length 1, make it the length of nTraits
-    # same for X0
-    if (length(nStates) == 1) nStates <- rep(nStates, nTraits)
-    if (length(X0) == 1) X0 <- rep(X0, nTraits)
-    
     # iterate through the number of traits
     for (i in 1:nTraits) {
       # get rate matrix

@@ -24,6 +24,25 @@ A \code{buddPhylo} with the time adjusted accordingly.
 \description{
 This function reads one or several trees in a Nexus file.
 }
+\details{
+Note that internal nodes must have labels.
+}
+\examples{
+
+###
+# a small annotated tree in Nexus format ships with the package
+f <- system.file("extdata", "example.nex", package = "paleobuddy")
+
+# read it
+budd <- read.nexus.buddPhylo(f)
+
+# read only specific trees from a multi-tree file
+budd2 <- read.nexus.buddPhylo(f, treeNumbers = 1)
+
+# time can be expressed from the root instead of Mya
+budd_root <- read.nexus.buddPhylo(f, timeFromRoot = TRUE)
+
+}
 \author{
-Matheus Januario and Bruno do Rosario Petrucci
+Matheus Januario and Bruno do Rosario Petrucci.
 }

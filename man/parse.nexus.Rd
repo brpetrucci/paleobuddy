@@ -25,10 +25,7 @@ order given by \code{treeNumbers}.
 This function parses one or several budding phylogenetic trees in a Nexus 
 file.
 }
-\details{
-The does not take note on  whichever name was assigned for any tree
-in the nexus file.
-}
 \author{
 Matheus Januario and Bruno do Rosario Petrucci.
 }
+\keyword{internal}

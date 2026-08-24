@@ -33,12 +33,20 @@ A \code{buddPhylo} object corresponding to the simulation given. See
 \code{?buddPhylo} for details. The \code{lineage} column will be used to 
 list the specific occurrence of each taxon--i.e. the first fossil occurrence
 of species \code{t1} will be \code{t1.1}, the second \code{t1.2}, etc. If the
-species is extant, \code{t1} will be the name of the extant tip.
+species is extant, \code{t1} will be the name of the extant tip. If there are
+enough fossils for a species that clarity is needed, a padding of zeros is
+added, e.g. if there are more than 10 fossils, the first occurrence will be
+\code{t1.01} instead.
 }
 \description{
 \code{make.buddPhylo} generates a budding phylogenetic tree
 from a birth-death simulation (e.g. an output from \code{bd.sim}) and 
 (optionally) a fossil record (e.g. an output from \code{sample.clade}).
+}
+\details{
+Note that the function fails for a simulation with only one sample,
+so if there is only one species in \code{sim} and no \code{fossils} data
+frame, it will fail. This is worth guarding against in loops.
 }
 \examples{
 

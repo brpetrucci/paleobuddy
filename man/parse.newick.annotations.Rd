@@ -23,5 +23,6 @@ the tree. Note the function does not return a \code{buddPhylo} object.
 This function finds and sorts any node-specific annotation in a nexus file.
 }
 \author{
-Matheus Januario and Bruno do Rosario Petrucci
+Matheus Januario and Bruno do Rosario Petrucci.
 }
+\keyword{internal}

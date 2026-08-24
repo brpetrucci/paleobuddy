@@ -130,7 +130,7 @@ the labels. If an integer, the tips are aligned and this gives the type of
 the lines (\code{lty}).}
 
 \item{x.lim}{A 2-characters long numeric vector of length one or two giving
-the limit(s) of the x-axis. If \code{NUL}L, this is computed with respect to
+the limit(s) of the x-axis. If \code{NULL}, this is computed with respect to
 various parameters such as the string lengths of the labels and the branch 
 lengths.}
 

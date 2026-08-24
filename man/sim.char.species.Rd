@@ -71,7 +71,7 @@ set.seed(1)
 # simple example using all default parameters
 char <- sim.char.species(10)
 # the species starts at state 0, stays there for most of its lifetime,
-# and quickly transitions to state 1 around 7.5my in, before transitionin
+# and quickly transitions to state 1 around 7.5my in, before transitioning
 # back to 0 shortly after, and staying there until the end
 
 ###

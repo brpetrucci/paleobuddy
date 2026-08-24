@@ -10,7 +10,11 @@ sim.chars(
   nTraits = 1,
   nStates = 2,
   X0 = 0,
-  Q = function(i) return(matrix(c(0, 0.1, 0.1, 0), 2, 2)),
+  Q = function(i) {
+     m <- matrix(0.1, i, i)
+     diag(m) <- 0
+     m
+ },
   species_clock = 1,
   var_min = 0,
   labels = NULL,
@@ -46,13 +50,15 @@ states. Default is \code{1}.}
 \item{nStates}{The number of states for each character. Can be either a
 single number, a vector of numbers of length \code{nTraits}, or a vector of
 numbers representing the number of characters to simulate with a given number
-of states. See the \code{nTraits} description for details. Default is 
-\code{2}.}
+of states. If \code{nTraits=NULL}, \code{nStates[1]} must be \code{0}. 
+Invariant traits can be added after with \code{cbind}. See the \code{nTraits}
+description for details. Default is \code{2}.}
 
 \item{X0}{The initial state for each character. Can be either a single number
 or a vector of numbers of length \code{nTraits}. If \code{nTraits} is
 \code{NULL}, \code{X0} should be a single number representing the starting
-state for all characters. Default is \code{0}.}
+state for all characters, or a vector where \code{X0[i]} represents the
+initial state for a character with \code{i} states. Default is \code{0}.}
 
 \item{Q}{The transition matrix for a given number of states. It is assumed
 to be a function that takes one argument (the number of states) and returns
@@ -60,7 +66,7 @@ a square matrix with that many rows and columns. For different states
 \code{i} and \code{j}, the rate at which a species at state \code{i}
 transitions to \code{j} is assumed to be \code{Q(n)[i + 1, j + 1]}, where 
 \code{n} is the number of states. Default is a 2x2 matrix with symmetrical
-transition rates equal to \code{2}. Note that while the standard is to set 
+transition rates equal to \code{0.1}. Note that while the standard is to set 
 the diagonal values such that rows sum to \code{0}, the diagonal values are 
 never used in our algorithm, and we generally set them to \code{0}.}
 
@@ -131,7 +137,8 @@ characters must be sampled at the present.}
 \value{
 A data frame with rows representing sampled species in the simulation
 (i.e. extinct species with no fossil samples are excluded), and columns
-representing each character.
+representing each character. Note that rows are named by species and exclude
+unsampled extinct species, so always index by rownames, never by position.
 }
 \description{
 Simulates a discrete character following a continuous-time Markov Chain
@@ -236,7 +243,7 @@ chars <- sim.chars(sim, sample, nTraits = 10, nStates = 4, Q = Q,
                    labels = labels)
 
 # you might then want to delete the data for the extinct species
-chars[which(!sim$EXTANT), ] <- rep("?", 10)
+chars[rownames(chars) \%in\% paste0("t", which(!sim$EXTANT)), ] <- "?"
                    
 ###
 # we can simulate under a more complicated molecular evolution model
@@ -264,7 +271,7 @@ Q <- function(i) return(matrix(c(0, pi_A, kappa * pi_A, pi_A,
 # run the simulation
 chars <- sim.chars(sim, sample, nTraits = 10, nStates = 4, X0, Q, 
                    labels = labels)
-chars[which(!sim$EXTANT), ] <- rep("?", 10)
+chars[rownames(chars) \%in\% paste0("t", which(!sim$EXTANT)), ] <- "?"
                    
 
 }

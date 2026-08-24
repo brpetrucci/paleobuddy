@@ -11,20 +11,24 @@
 #' 
 
 getParents.buddPhylo <- function(buddPhylo, focalLineage) {
-  # start the vector of parents with the parent of the original lineage
-  res <- buddPhylo$parent[buddPhylo$name == focalLineage]
+  # make a map of parent to child index
+  par_idx <- match(buddPhylo$parent, buddPhylo$name)
+  
+  # get the index of the focal lineage
+  i <- match(focalLineage, buddPhylo$name)
+  
+  # start the vector of parents
+  res <- character(0)
   
   # while we haven't reached the root...
-  while (!is.na(res[length(res)])) {
-    # get the last parent as the current lineage
-    focalLineage <- res[length(res)]
+  while (!is.na(par_idx[i])) {
+    # make the parent of the focal lineage the focal lineage
+    i <- par_idx[i]
     
-    # add that lineage's parent to res
-    res <- c(res, buddPhylo$parent[buddPhylo$name == focalLineage])
+    # add number to result
+    res <- c(res, buddPhylo$name[i])
   }
   
-  # remove the NA parent
-  res <- res[-length(res)]
   return(res)
 }
 
@@ -92,7 +96,6 @@ getDescendants.buddPhylo <- function(buddPhylo, focalLineage,
                                      onlyImmediates = FALSE, 
                                      internalNodes = FALSE) {
   # initialize variables for bookkeeping
-  checked <- vector()
   toCheck <- focalLineage
   res <- vector()
   
@@ -250,12 +253,7 @@ as.phylo.buddPhylo <- function(x, ...) {
   # assign to buddPhylo for clarity
   buddPhylo <- x
   
-  # function to count similarities in node paths
-  countEqual <- function(x, ref) {
-    return(sum(ref %in% x))
-  }
-  
-  # function to re-order edges so the phlyo object does not break
+  # function to re-order edges so the phylo object does not break
   reorder_edges <- function(edge) {
     # get parents and children from edge matrix
     parents <- edge[, 1]
@@ -293,59 +291,33 @@ as.phylo.buddPhylo <- function(x, ...) {
   tip.label <- buddPhylo$name[buddPhylo$type %in% c("tip", "sampAnc")]
   node.label <- buddPhylo$name[!buddPhylo$type %in% c("tip", "sampAnc")]
   
-  # create node dictionary
-  node.id <- rep(NA, times = length(node.label))
+  # match parents and children
+  par_idx  <- match(buddPhylo$parent, buddPhylo$name)
+  kids <- split(seq_len(nrow(buddPhylo)), par_idx)
+  
+  # start a node index map
+  node.id <- integer(length(node.label))
   names(node.id) <- node.label
-  
-  # make a list of descendants for each parent
-  pars <- list()
-  for (tt in 1:length(tip.label)) {
-    # get parents of this tip
-    pars[[tt]] <- getParents.buddPhylo(buddPhylo,
-                                       focalLineage = tip.label[tt])
-  }
-  names(pars) <- tip.label
-  
-  # find ancestor number of each tip
-  plen <- unlist(lapply(pars, length))
-  
-  # get the one with the most ancestors
-  refDesc <- tip.label[which.max(plen)]
-  refID <- which(tip.label == refDesc)
-  
-  # get the first node
   nextNode <- length(tip.label) + 1
   
-  # while we still have parents to go through
-  while (length(pars) > 0) {
-    # get parent of the current tip
-    par_tip <- pars[[refID]]
+  # start stack at root
+  stack <- which(is.na(par_idx))
+  
+  # while the stack has something in it
+  while (length(stack)) {
+    # get first element of stack and remove it
+    r <- stack[1]
+    stack <- stack[-1]
     
-    # get the ancestors that are not in dictionary yet
-    tempIDS <- !par_tip %in% names(node.id[!is.na(node.id)])
-    
-    # check if there are any to go through
-    sumTempIDS <- sum(tempIDS)
-    if (sumTempIDS > 0) {
-      # get the ancestors not in dictionary yet
-      anc_to_check <- par_tip[tempIDS]
-      
-      # add to dictionary
-      node.id[match(rev(anc_to_check), names(node.id))] <- 
-        nextNode:(nextNode + sumTempIDS - 1)
-      
-      # increment the node counter
-      nextNode <- max(node.id, na.rm = TRUE) + 1
+    # number this row if it is an internal node
+    if (buddPhylo$type[r] == "node") {
+      node.id[[buddPhylo$name[r]]] <- nextNode
+      nextNode <- nextNode + 1
     }
     
-    # remove this tip from pars
-    pars[[refID]] <- NULL
-    
-    # find the next tip with most ancestors in common with this one
-    refID <- which.max(unlist(lapply(pars, countEqual, ref = par_tip)))
-    
-    # get the descendants of the parents of this tip
-    refDesc <- names(pars[refID])
+    # push children, preserving row order
+    ch <- kids[[as.character(r)]]
+    if (!is.null(ch)) stack <- c(ch, stack)
   }
   
   # get labels and ids for these labels
@@ -355,7 +327,7 @@ as.phylo.buddPhylo <- function(x, ...) {
   # create edge matrix
   edge1 <- node.id[match(buddPhylo$parent, node.label)]
   edge2 <- all.ids[match(buddPhylo$name, all.labels)]
-  edge <- cbind(edge1, edge2)
+  edge <- cbind(as.integer(edge1), as.integer(edge2))
   edge <- edge[-which(is.na(edge[, 1])), ] 
   # NA element is the root, ignore it
   
@@ -427,7 +399,9 @@ adjust.timescale.buddPhylo <- function(buddPhylo, timeFromRoot = FALSE) {
 #' @param buddPhylo Object of class "buddPhylo".
 #' 
 #' @return A list of \code{buddPhylo} objects, one per internal node of 
-#' \code{buddPhylo}, each rooted at that node.
+#' \code{buddPhylo}, each rooted at that node. Each subtree will be rerooted,
+#' i.e. the node that is the root will have \code{parent=NA},
+#' \code{orientation = "uca"}, and \code{length=0}.
 #'
 #' @author Bruno do Rosario Petrucci.
 #' 
@@ -770,29 +744,12 @@ fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
     # zero-length edges
     zero_len_edges <- which(!is.null(edge_lengths) & edge_lengths == 0)
     
-    # start vector for parents of zero-length edges
-    ghost_parents <- c()
-    
-    # if there are any...
-    if (length(zero_len_edges) > 0) {
-      # get the children...
-      children_of_zero <- edge[zero_len_edges, 2]
-      
-      # ...and the parents
-      ghost_parents <- children_of_zero[children_of_zero > n_tips]
-      # only outgoing children of these nodes are tips with zero-length edges
-    }
-    
     # true tips: tip indices NOT reachable only via zero-length edges
     true_tips <- setdiff(1:n_tips, edge[zero_len_edges, 2])
     
     # assign y positions in the order they appear in the tip.label vector,
     # respecting the ladderized traversal order
     yy <- numeric(n_total)
-    
-    # traverse the tree in the same order ape::plot.phylo does:
-    # post-order, left-to-right for a ladderized tree
-    traverse_order <- integer(0)
     
     # make map of children per parent
     children_by_parent <- split(edge[, 2], edge[, 1])
@@ -839,9 +796,6 @@ fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
       yy[visit_order[i]] <- i
     }
     
-    # get all non-tip nodes
-    all_nodes <- (n_tips + 1):n_total
-    
     # process in reverse of edge order (post-order)
     node_order <- rev(unique(edge[, 1]))
     for (nd in node_order) {
@@ -871,9 +825,6 @@ fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
   
   # get x coordinates for these tips
   xx <- ape::node.depth.edgelength(phylo)[which(phylo$tip.label %in% names(yy))]
-  
-  # get the tip names
-  tip_names <- phylo$tip.label
   
   # start coordinates as NA
   buddPhylo$y_coord <- NA

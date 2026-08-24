@@ -96,8 +96,8 @@ field.}
 \item{\code{parent}}{\code{name} of the parent node of the node in question.
 Note this refers to \code{name}, not to \code{taxon}. The root node has
 parent \code{NA}.}
-\item{\code{type}}{Character assigiong whether the node is a \code{node},
-a \code{tip}, a sampled ancestor (\code{sampAnc}), or the root (\code{uca}).}
+\item{\code{type}}{Character assigning whether the node is an internal
+\code{node}, a \code{tip}, or a sampled ancestor (\code{sampAnc}).}
 \item{\code{y_coord}}{Y-coordinate to be used as a reference for that node
 for the plotting functions.}
 \item{\code{x_coord}}{X-coordinate to be used as a reference for that node
@@ -108,12 +108,20 @@ present (\code{TRUE}) or not (\code{FALSE}).}}
 Here we declare useful generics and methods for \code{buddPhylo} objects.
 }
 \details{
-\code{is.buddPhylo} A \code{buddPhylo} object must contain all 9
+\code{is.buddPhylo} A \code{buddPhylo} object must contain all 10
 members: \code{name}, \code{length}, \code{orientation}, \code{taxon},
-\code{parent}, \code{type}, \code{y_coord}, \code{x_coord}. All of these 
-must have the correct length (i.e. \code{2 * Ntip - 1)}, and correct class
-(\code{character}, \code{logical}, or \code{numeric} depending on the 
-member).
+\code{parent}, \code{type}, \code{y_coord}, \code{x_coord}, \code{y_par}, and
+\code{x_par}. All of these must be the correct class (\code{character}, 
+\code{logical}, or \code{numeric} depending on the member). Rows must be in
+pre-order: every non-root row appears after the row naming its parent. 
+Objects produced by \code{make.buddPhylo} and the \code{read.*.buddPhylo}
+functions always satisfy this.
+
+Subsetting a \code{buddPhylo} returns a \code{buddPhylo} when the
+required amount of columns survive, and a plain \code{data.frame} otherwise.
+As a convenience, the empty subscript \code{buddPhylo[]} always returns the
+underlying data frame, which is useful for inspecting the raw table 
+(equivalent to \code{as.data.frame(buddPhylo)}).
 
 \code{print.buddPhylo} The printing of a buddPhylo object is 
 formatted into a more straightforward and informative sequence manner. We 

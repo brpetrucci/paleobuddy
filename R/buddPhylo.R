@@ -28,8 +28,8 @@
 #' \item{\code{parent}}{\code{name} of the parent node of the node in question.
 #' Note this refers to \code{name}, not to \code{taxon}. The root node has
 #' parent \code{NA}.}
-#' \item{\code{type}}{Character assigiong whether the node is a \code{node},
-#' a \code{tip}, a sampled ancestor (\code{sampAnc}), or the root (\code{uca}).}
+#' \item{\code{type}}{Character assigning whether the node is an internal
+#' \code{node}, a \code{tip}, or a sampled ancestor (\code{sampAnc}).}
 #' \item{\code{y_coord}}{Y-coordinate to be used as a reference for that node
 #' for the plotting functions.}
 #' \item{\code{x_coord}}{X-coordinate to be used as a reference for that node
@@ -149,14 +149,22 @@ NULL
 
 #' @rdname buddPhylo
 #'
-#' @details \code{is.buddPhylo} A \code{buddPhylo} object must contain all 9
+#' @details \code{is.buddPhylo} A \code{buddPhylo} object must contain all 10
 #' members: \code{name}, \code{length}, \code{orientation}, \code{taxon},
-#' \code{parent}, \code{type}, \code{y_coord}, \code{x_coord}. All of these 
-#' must have the correct length (i.e. \code{2 * Ntip - 1)}, and correct class
-#' (\code{character}, \code{logical}, or \code{numeric} depending on the 
-#' member).
+#' \code{parent}, \code{type}, \code{y_coord}, \code{x_coord}, \code{y_par}, and
+#' \code{x_par}. All of these must be the correct class (\code{character}, 
+#' \code{logical}, or \code{numeric} depending on the member). Rows must be in
+#' pre-order: every non-root row appears after the row naming its parent. 
+#' Objects produced by \code{make.buddPhylo} and the \code{read.*.buddPhylo}
+#' functions always satisfy this.
 #'
 #' @author Matheus Januario and Bruno do Rosario Petrucci.
+#' 
+#' @details Subsetting a \code{buddPhylo} returns a \code{buddPhylo} when the
+#' required amount of columns survive, and a plain \code{data.frame} otherwise.
+#' As a convenience, the empty subscript \code{buddPhylo[]} always returns the
+#' underlying data frame, which is useful for inspecting the raw table 
+#' (equivalent to \code{as.data.frame(buddPhylo)}).
 #'
 #' @export
 #'
@@ -190,12 +198,11 @@ is.buddPhylo <- function(x) {
   }
   
   # check the classes of each column
-  cmatch <- match(mustHaveCols, colnames(buddPhylo))
   chr_cols <- c("name", "orientation", "taxon", "parent", "type")
   num_cols <- c("length", "x_coord", "y_coord")
   
   cc1 <- vapply(buddPhylo[chr_cols], is.character, logical(1))
-  cc2 <- vapply(buddPhylo[num_cols],  is.numeric,  logical(1))
+  cc2 <- vapply(buddPhylo[num_cols], is.numeric, logical(1))
   
   if (!all(cc1)) {
     message("Columns: ", paste(chr_cols[!cc1], collapse = ", "),
@@ -298,15 +305,17 @@ print.buddPhylo <- function(x, ...) {
   first_nodes <- first_nodes[order(first_nodes$x_coord, decreasing = TRUE), ]
   first_nodes <- first_nodes[!duplicated(first_nodes$taxon), ]
   
-  # get the parent ranges of these species
-  parent_ranges <- buddPhylo$range[buddPhylo$name %in% first_nodes$parent]
-  
   # and then some details for first five
   cat("\nSpecies names:\n")
   print(head(first_nodes$taxon))
   
-  cat("\nNames of progenitor taxa:\n")
-  print(head(parent_ranges))
+  # check if we have ranges
+  if ("range" %in% names(buddPhylo)) {
+    # get the parent ranges of these species
+    parent_ranges <- buddPhylo$range[buddPhylo$name %in% first_nodes$parent]
+    cat("\nNames of progenitor taxa:\n")
+    print(head(parent_ranges))
+  }
   
   # to see the whole vector
   cat("\n\nFor more details on vector y, try buddPhylo$y, with y one of:\n")
@@ -600,7 +609,7 @@ summary.buddPhylo <- function(object, ...) {
 #' the lines (\code{lty}).
 #'
 #' @param x.lim A 2-characters long numeric vector of length one or two giving
-#' the limit(s) of the x-axis. If \code{NUL}L, this is computed with respect to
+#' the limit(s) of the x-axis. If \code{NULL}, this is computed with respect to
 #' various parameters such as the string lengths of the labels and the branch 
 #' lengths.
 #'
@@ -1028,4 +1037,25 @@ plot.buddPhylo <- function(x, type = "phylogram",
   }
 }
 
+#' @export
+#' @noRd
+#' 
 
+`[.buddPhylo` <- function(x, i, j, ...) {
+  # b[] returns the underlying data frame, for easy inspection
+  if (nargs() == 2L && missing(i) && missing(j)) {
+    res <- x
+    class(res) <- "data.frame"
+    return(res)
+  }
+  
+  res <- NextMethod()
+  
+  # dropping any required column means this is no longer a buddPhylo
+  if (is.data.frame(res) &&
+      !all(c("name", "type", "parent") %in% names(res))) {
+    class(res) <- "data.frame"
+  }
+  
+  res
+}

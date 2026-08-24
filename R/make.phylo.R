@@ -350,7 +350,11 @@ make.phylo <- function(sim, fossils = NULL, saFormat = "branch",
   
   # simulations with just one species do not have a phylogeny
   if (length(sim$TE) < 2) {
-    stop("There is no phylogeny for a simulation with only one lineage")
+    if (is.null(fossils)) {
+      stop("There is no phylogeny for a simulation with only one lineage")
+    } else if (nrow(fossils) < 1) {
+      stop("There is no phylogeny for a simulation with only one lineage")
+    }
   }
   
   # simulations with more than one starting species have multiple phylogenies

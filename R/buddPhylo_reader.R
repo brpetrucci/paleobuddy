@@ -17,9 +17,8 @@
 #' order given by \code{treeNumbers}.
 #'
 #' @author Matheus Januario and Bruno do Rosario Petrucci.
-#'
-#' @details The does not take note on  whichever name was assigned for any tree
-#' in the nexus file.
+#' 
+#' @keywords internal
 #'
 
 parse.nexus <- function(text = NULL, file = NULL, treeNumbers = NULL) {
@@ -60,6 +59,8 @@ parse.nexus <- function(text = NULL, file = NULL, treeNumbers = NULL) {
 #' associated with it.
 #'
 #' @author Matheus Januario and Bruno do Rosario Petrucci.
+#' 
+#' @keywords internal
 #'
 
 extract.translate.block.nexus <- function(text = NULL, file = NULL) {
@@ -122,17 +123,12 @@ extract.translate.block.nexus <- function(text = NULL, file = NULL) {
 #' length, node name, and any other annotations associated with every node in 
 #' the tree. Note the function does not return a \code{buddPhylo} object.
 #'
-#' @author Matheus Januario and Bruno do Rosario Petrucci
+#' @author Matheus Januario and Bruno do Rosario Petrucci.
+#' 
+#' @keywords internal
 #'
 
 parse.newick.annotations <- function(newick, taxonDiction = NULL) {
-  # ensure we are only using this if it's a buddPhylo
-  if (nrow(df) == 0) {
-    stop("No annotated nodes found. buddPhylo trees require [&...] ",
-         "annotations (e.g. orientation) on each node; a plain Newick ",
-         "tree can be read with ape::read.tree instead.")
-  }
-  
   # extract tokens
   pattern <- "([A-Za-z0-9_]+)(\\[&[^]]*\\])?(?::([0-9\\.eE+-]+))?"
   matches <- gregexpr(pattern, newick, perl = TRUE)
@@ -245,6 +241,13 @@ parse.newick.annotations <- function(newick, taxonDiction = NULL) {
     check.names = FALSE
   )
   
+  # ensure we are only using this if it's a buddPhylo
+  if (nrow(df) == 0) {
+    stop("No annotated nodes found. buddPhylo trees require [&...] ",
+         "annotations (e.g. orientation) on each node; a plain Newick ",
+         "tree can be read with ape::read.tree instead.")
+  }
+    
   # translate name via taxonDiction if provided 
   if (!is.null(taxonDiction)) {
     m <- match(df$name, taxonDiction$id)
@@ -280,6 +283,8 @@ parse.newick.annotations <- function(newick, taxonDiction = NULL) {
 #' @return A \code{buddPhylo} object.
 #'
 #' @author Matheus Januario and Bruno do Rosario Petrucci.
+#' 
+#' @keywords internal
 #'
 
 build.buddPhylo <- function(newick, parsedTxt, 
@@ -300,10 +305,6 @@ build.buddPhylo <- function(newick, parsedTxt,
     phyl$tip.label <- tip_names
   }
   
-  # build full vector of node names (tips + internal nodes)
-  Ntip <- length(phyl$tip.label)
-  Nnode <- phyl$Nnode
-  
   # collect them together
   all_names <- c(tip_names, phyl$node.label)
   
@@ -313,6 +314,12 @@ build.buddPhylo <- function(newick, parsedTxt,
   # match each branch name to its parent
   parent_of <- setNames(all_names[edges[, 1]], all_names[edges[, 2]])
   branches$parent <- parent_of[branches$name]
+  
+  # make sure we have node labels
+  if (anyNA(branches$parent) && sum(is.na(branches$parent)) > 1) {
+    stop("Some nodes could not be matched to a parent. All internal nodes in ",
+         "the tree must carry labels (e.g. \"...)5[&orientation=uca]:0\").")
+  }
   
   # the root (unique ancestor) will get its own orientation
   branches$orientation[is.na(branches$parent)] <- "uca"
@@ -390,8 +397,25 @@ build.buddPhylo <- function(newick, parsedTxt,
 #' further from the root as a reference for "present".
 #'
 #' @return A \code{buddPhylo} with the time adjusted accordingly.
+#' 
+#' @details Note that internal nodes must have labels.
 #'
-#' @author Matheus Januario and Bruno do Rosario Petrucci
+#' @author Matheus Januario and Bruno do Rosario Petrucci.
+#' 
+#' @examples
+#' 
+#' ###
+#' # a small annotated tree in Nexus format ships with the package
+#' f <- system.file("extdata", "example.nex", package = "paleobuddy")
+#' 
+#' # read it
+#' budd <- read.nexus.buddPhylo(f)
+#' 
+#' # read only specific trees from a multi-tree file
+#' budd2 <- read.nexus.buddPhylo(f, treeNumbers = 1)
+#' 
+#' # time can be expressed from the root instead of Mya
+#' budd_root <- read.nexus.buddPhylo(f, timeFromRoot = TRUE)
 #' 
 #' @export
 #'
@@ -404,6 +428,11 @@ read.nexus.buddPhylo <- function(file, treeNumbers = NULL,
   # parse file
   txt <- parse.nexus(text = full_text, treeNumbers = treeNumbers)
   
+  # check that there are trees
+  if (length(txt) == 0) {
+    stop("No trees found in ", if (is.null(text)) file else "text")
+  }
+  
   # get translate block
   translate_block <- extract.translate.block.nexus(text = full_text)
   
@@ -415,7 +444,7 @@ read.nexus.buddPhylo <- function(file, treeNumbers = NULL,
   res <- list()
   
   # iterate through trees in the file
-  for (i in 1:length(txt)) {
+  for (i in seq_len(length(txt))) {
     # build this tree
     phy <- build.buddPhylo(newick = txt[[i]], parsedTxt = branches[[i]],
                            taxonDiction = translate_block)
@@ -448,8 +477,33 @@ read.nexus.buddPhylo <- function(file, treeNumbers = NULL,
 #' @inheritParams read.nexus.buddPhylo
 #'
 #' @return A \code{buddPhylo} with the time adjusted accordingly.
+#' 
+#' @details Note that internal nodes must have labels.
 #'
 #' @author Bruno do Rosario Petrucci.
+#' 
+#' @examples
+#' 
+#' ###
+#' # buddPhylo trees are Newick trees with [&...] annotations on each node,
+#' # minimally an orientation ("ancestor", or "descendant")
+#' nw <- paste0("((t1_last[&orientation=ancestor,range=t1]:1,",
+#'              "t1_first[&orientation=ancestor]:0)",
+#'              "2[&orientation=ancestor]:1,",
+#'              "t2_first[&orientation=descendant]:2)",
+#'              "1[&orientation=ancestor]:0;")
+#' 
+#' # read it
+#' budd <- read.trees.buddPhylo(text = nw)
+#' 
+#' # note taxon strips the _first/_last occurrence suffix
+#' budd[, c("name", "lineage", "taxon", "type")]
+#' 
+#' # several trees can be read at once, one per element
+#' budds <- read.trees.buddPhylo(text = c(nw, nw))
+#' 
+#' # and you can pick which ones to read
+#' just_second <- read.trees.buddPhylo(text = c(nw, nw), treeNumbers = 2)
 #' 
 #' @export
 #'
@@ -465,8 +519,18 @@ read.trees.buddPhylo <- function(file, text = NULL, treeNumbers = NULL,
     txt <- text
   }
   
+  # check that there are trees
+  if (length(txt) == 0) {
+    stop("No trees found in ", if (is.null(text)) file else "text")
+  }
+  
   # take just the treeNumbers supplied
   if (!is.null(treeNumbers)) txt <- txt[treeNumbers]
+  
+  # check that we have enough trees
+  if (!is.null(treeNumbers) && any(is.na(txt))) {
+    stop("treeNumbers out of range: file has ", length(txt), " trees")
+  }
   
   # parse newick annotations
   branches <- lapply(txt, parse.newick.annotations, 
@@ -476,7 +540,7 @@ read.trees.buddPhylo <- function(file, text = NULL, treeNumbers = NULL,
   res <- list()
   
   # iterate through trees in the file
-  for (i in 1:length(txt)) {
+  for (i in seq_len(length(txt))) {
     # build this tree
     phy <- build.buddPhylo(newick = txt[[i]], parsedTxt = branches[[i]])
     

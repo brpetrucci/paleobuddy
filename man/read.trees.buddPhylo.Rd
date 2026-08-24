@@ -32,6 +32,33 @@ A \code{buddPhylo} with the time adjusted accordingly.
 \description{
 This function reads one or several trees in Newick file.
 }
+\details{
+Note that internal nodes must have labels.
+}
+\examples{
+
+###
+# buddPhylo trees are Newick trees with [&...] annotations on each node,
+# minimally an orientation ("ancestor", or "descendant")
+nw <- paste0("((t1_last[&orientation=ancestor,range=t1]:1,",
+             "t1_first[&orientation=ancestor]:0)",
+             "2[&orientation=ancestor]:1,",
+             "t2_first[&orientation=descendant]:2)",
+             "1[&orientation=ancestor]:0;")
+
+# read it
+budd <- read.trees.buddPhylo(text = nw)
+
+# note taxon strips the _first/_last occurrence suffix
+budd[, c("name", "lineage", "taxon", "type")]
+
+# several trees can be read at once, one per element
+budds <- read.trees.buddPhylo(text = c(nw, nw))
+
+# and you can pick which ones to read
+just_second <- read.trees.buddPhylo(text = c(nw, nw), treeNumbers = 2)
+
+}
 \author{
 Bruno do Rosario Petrucci.
 }
