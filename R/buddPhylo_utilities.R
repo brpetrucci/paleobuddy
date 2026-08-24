@@ -5,7 +5,7 @@
 #' last ancestor. Note this does not use the information in the
 #' \code{buddPhylo$taxon} column.
 #' 
-#' @author Matheus Januario.
+#' @author Matheus Januario and Bruno do Rosario Petrucci.
 #'
 #' @export
 #' 
@@ -40,7 +40,7 @@ getParents.buddPhylo <- function(buddPhylo, focalLineage) {
 #' length two containing the \code{name} of each child, equivalent to
 #' \code{getDescendants.buddPhylo(..., onlyImmediates = TRUE)}.
 #' 
-#' @author Matheus Januario.
+#' @author Matheus Januario and Bruno do Rosario Petrucci.
 #'
 #' @export
 #' 
@@ -87,7 +87,7 @@ getChildren.buddPhylo <- function(buddPhylo, focalLineage, returnInfo = TRUE) {
 #' \code{getDescendants.buddPhylo(..., onlyImmediates = TRUE)}). Note this does 
 #' not use the information in the \code{buddPhylo$taxon} column.
 #' 
-#' @author Matheus Januario.
+#' @author Matheus Januario and Bruno do Rosario Petrucci.
 #'
 #' @export
 #' 
@@ -141,7 +141,7 @@ getDescendants.buddPhylo <- function(buddPhylo, focalLineage,
 #' @details \code{getMRCA.buddPhylo} Finds the node representing the most recent
 #' common ancestor of the tips in \code{tipList}.
 #' 
-#' @author Matheus Januario.
+#' @author Matheus Januario and Bruno do Rosario Petrucci.
 #'
 #' @export
 #' 
@@ -242,7 +242,7 @@ is.monophyletic.buddPhylo <- function(buddPhylo, tipList,
 #' @return A \code{phylo} object compatible with functions from the \code{ape}
 #' package.
 #' 
-#' @author Matheus Januario
+#' @author Matheus Januario and Bruno do Rosario Petrucci.
 #' 
 #' @export
 #' 

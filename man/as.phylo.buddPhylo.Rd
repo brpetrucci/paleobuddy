@@ -20,5 +20,5 @@ Generates a phylogeny in a \code{phylo} format based on the information
 within a \code{buddPhylo} object.
 }
 \author{
-Matheus Januario
+Matheus Januario and Bruno do Rosario Petrucci.
 }
