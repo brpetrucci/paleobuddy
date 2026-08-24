@@ -960,7 +960,7 @@ fix.coords <- function(buddPhylo, phylo, fix_x = TRUE) {
 #' @details \code{node.time.buddPhylo} Finds the time of a node with a given
 #' \code{name} field.
 #' 
-#' @author Bruno do Rosario Petrucci.
+#' @author Matheus Januario and Bruno do Rosario Petrucci.
 #' 
 #' @export
 #' 

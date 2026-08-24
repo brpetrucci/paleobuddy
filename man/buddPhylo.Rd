@@ -231,6 +231,4 @@ oriented_clades <- extract.clades(budd,
 }
 \author{
 Matheus Januario and Bruno do Rosario Petrucci.
-
-Bruno do Rosario Petrucci.
 }
