@@ -7,15 +7,20 @@
 extract.translate.block.nexus(text = NULL, file = NULL)
 }
 \arguments{
-\item{file}{A character containing a nexus file name.}
+\item{text}{A string with the tree in a Newick format. Optional, but at least
+one of \code{text} or \code{file} must be not \code{NULL}.}
+
+\item{file}{A character containing a Nexus filename. Optional, but at least
+one of \code{text} or \code{file} must be not \code{NULL}.}
 }
 \value{
 A data frame containing the number \code{id} and the \code{taxon}
 associated with it.
 }
 \description{
-This function only the tip translations (numbers to characters) in NEXUS file.
+This function extracts the tip translation block (the block relating numbers
+to taxon names) in a Nexus file.
 }
 \author{
-Matheus Januario
+Matheus Januario and Bruno do Rosario Petrucci.
 }

@@ -16,11 +16,42 @@
 #' 
 #' @inheritParams make.phylo
 #' 
-#' @details .... TODO
+#' @return A \code{buddPhylo} object corresponding to the simulation given. See
+#' \code{?buddPhylo} for details. The \code{lineage} column will be used to 
+#' list the specific occurrence of each taxon--i.e. the first fossil occurrence
+#' of species \code{t1} will be \code{t1.1}, the second \code{t1.2}, etc. If the
+#' species is extant, \code{t1} will be the name of the extant tip.
 #' 
-#' @return ... TODO
+#' @author Bruno do Rosario Petrucci.
 #' 
-#' @author Bruno do Rosario Petrucci
+#' @examples
+#' 
+#' # set seed
+#' set.seed(1)
+#' 
+#' # run a simple birth-death simulation
+#' sim <- bd.sim(1, 0.2, 0.05, 20)
+#' 
+#' # and sample fossils on it
+#' sample <- suppressMessages(sample.clade(sim, 0.5, 20))
+#' 
+#' # build and plot the tree
+#' budd <- make.buddPhylo(sim, sample)
+#' plot(budd, show.SA.label = TRUE)
+#' 
+#' # by default, we include species that weren't sampled (e.g. t7 in this case)
+#' # we can exclude them (and also exclude the time interval between the last
+#' # sample and extinction of a species through the returnTrueExt argument
+#' budd_all <- make.buddPhylo(sim, sample, returnTrueExt = FALSE)
+#' plot(budd_all, show.SA.label = TRUE)
+#' # note the lines that disappeared, leading some species to be sampled
+#' # ancestors, and others to not be in the tree at all
+#' 
+#' # of course we could also draw the phylogeny representing the
+#' # birth-death simulation only, before fossils are sampled at all
+#' budd_sim <- make.buddPhylo(sim)
+#' plot(budd_sim)
+#' # this allows you to visualize a simulation in its entirety
 #' 
 #' @name make.buddPhylo
 #' @rdname make.buddPhylo
@@ -90,9 +121,8 @@ make.buddPhylo <- function(sim, fossils = NULL, returnTrueExt = TRUE) {
     t_parent <- sim$TS[i]
     
     # and parent node
-    parent_node <- ifelse(uca, NA, 
-                          ifelse(i == 1, n_tips + 1, 
-                                 buddPhylo$name[buddPhylo$x_coord == t_parent]))
+    parent_node <- ifelse(uca, NA,
+                          buddPhylo$name[buddPhylo$x_coord == t_parent])
     
     # next fossil sample will be the first
     sample_id <- 1

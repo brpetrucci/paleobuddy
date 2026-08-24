@@ -15,3 +15,5 @@
 ^checks\.R$
 ^CRAN-RELEASE$
 ^CRAN-SUBMISSION$
+^\.claude$
+^R/\.claude$

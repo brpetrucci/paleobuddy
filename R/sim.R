@@ -24,6 +24,8 @@
 #' @param t Time t (in Mya). Used for counting and/or plotting births, deaths
 #' and species number.
 #' 
+#' @param lin A numeric indicating the lineage in question.
+#' 
 #' @param ... Further arguments inherited from generics.
 #'
 #' @name sim
@@ -335,6 +337,7 @@ sim.counts <- function(sim, t) {
 #' 
 #' @export
 #' 
+
 getDescendants.sim <- function(sim, lin) {
   # get all lineages with this for a parent
   descendants <- descendants_left <- which(sim$PAR == lin)

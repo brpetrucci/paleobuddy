@@ -2,19 +2,22 @@
 % Please edit documentation in R/buddPhylo_utilities.R
 \name{as.phylo.buddPhylo}
 \alias{as.phylo.buddPhylo}
-\title{Genertaing a phlyo object from a buddPhylo object}
+\title{Generating a phylo object from a buddPhylo object}
 \usage{
-\method{as.phylo}{buddPhylo}(buddPhylo)
+\method{as.phylo}{buddPhylo}(x, ...)
 }
 \arguments{
-\item{buddPhylo}{Object of class "buddPhylo"}
+\item{x}{A \code{buddPhylo} object.}
+
+\item{...}{Further arguments inherited from generics.}
 }
 \value{
-A \code{phylo} object compatible with fucntions from package \code{ape}
+A \code{phylo} object compatible with functions from the \code{ape}
+package.
 }
 \description{
-Generates a phylogeny ina \code{phylo} format based on the ifnromation within 
-a \code{buddPhylo} object.
+Generates a phylogeny in a \code{phylo} format based on the information
+within a \code{buddPhylo} object.
 }
 \author{
 Matheus Januario

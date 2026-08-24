@@ -1,38 +1,49 @@
 #' Subset and parse a nexus file
 #'
-#' This function reads and parses one or several trees in a NEXUS file.
+#' This function parses one or several budding phylogenetic trees in a Nexus 
+#' file.
 #'
-#' @param file 	A character containing a nexus file name.
+#' @param text A string with the tree in a Newick format. Optional, but at least
+#' one of \code{text} or \code{file} must be not \code{NULL}.
+#' 
+#' @param file A character containing a Nexus filename. Optional, but at least
+#' one of \code{text} or \code{file} must be not \code{NULL}.
 #'
 #' @param treeNumbers A numeric vector containing which trees should be read.
 #' If \code{NULL} (default), the function reads all trees within \code{file}.
 #'
 #' @return A character with the parenthetic format within the nexus file.
 #' If more than one tree is read, a list of characters is returned in the
-#' order given by \code{treeNumbers}
+#' order given by \code{treeNumbers}.
 #'
-#' @author Matheus Januario
+#' @author Matheus Januario and Bruno do Rosario Petrucci.
 #'
 #' @details The does not take note on  whichever name was assigned for any tree
 #' in the nexus file.
 #'
-#' @export
-#'
 
 parse.nexus <- function(text = NULL, file = NULL, treeNumbers = NULL) {
+  # check if text is null
   if (is.null(text)) {
-    # Read file
+    # check if file is also null
+    if (is.null(file)) {
+      stop("Either file or text must not be null.")
+    }
+    
+    # otherwise, read file
     lines <- readLines(file)
   } else {
+    # otherwise, read text
     lines <- text
   }
   
-  # Find the lines with the tree-indicating pattern
-  target_line <- grep("tree ", lines, value = TRUE)
+  # find the lines with the tree-indicating pattern
+  target_line <- grep("tree ", lines, value = TRUE, ignore.case = TRUE)
   
   # restrict to the treeNumbers lines if it is not NULL
   if (!is.null(treeNumbers)) target_line <- target_line[treeNumbers]
-  trees <- sub('^\\s*tree\\s+\\S+\\s*=\\s*"?', "", target_line, perl = TRUE)
+  trees <- sub('^\\s*tree\\s+\\S+\\s*=\\s*"?', "", target_line, 
+               perl = TRUE, ignore.case = TRUE)
   trees <- sub('"\\s*$', "", trees, perl = TRUE)
   
   return(trees)
@@ -40,23 +51,29 @@ parse.nexus <- function(text = NULL, file = NULL, treeNumbers = NULL) {
 
 #' Extract the "translation" block in a nexus file
 #'
-#' This function only the tip translations (numbers to characters) in NEXUS file.
+#' This function extracts the tip translation block (the block relating numbers
+#' to taxon names) in a Nexus file.
 #'
-#' @param file 	A character containing a nexus file name.
+#' @inheritParams parse.nexus
 #'
 #' @return A data frame containing the number \code{id} and the \code{taxon}
 #' associated with it.
 #'
-#' @author Matheus Januario
-#'
-#' @export
+#' @author Matheus Januario and Bruno do Rosario Petrucci.
 #'
 
 extract.translate.block.nexus <- function(text = NULL, file = NULL) {
+  # check if text is null
   if (is.null(text)) {
-    # read file
+    # check if file is also null
+    if (is.null(file)) {
+      stop("Either file or text must not be null.")
+    }
+    
+    # otherwise, read file
     lines <- readLines(file)
   } else {
+    # otherwise, read text
     lines <- text
   }
   
@@ -101,18 +118,21 @@ extract.translate.block.nexus <- function(text = NULL, file = NULL) {
 #' \code{extract.translate.block.nexus}, containing the node \code{id} and 
 #' the \code{taxon} associated with it.
 #'
-#' @return A data frame containing node information on lineage (taxon +
-#' first/last occurrence), taxon (taxonomic name associated with the branch),
-#' orientation, branch length, node name, and any other annotations
-#' associated with every node in a tree. Note the function does not return a
-#' \code{buddPhylo} object.
+#' @return A data frame containing node information on orientation, branch 
+#' length, node name, and any other annotations associated with every node in 
+#' the tree. Note the function does not return a \code{buddPhylo} object.
 #'
-#' @author Matheus Januario
-#'
-#' @export
+#' @author Matheus Januario and Bruno do Rosario Petrucci
 #'
 
-parse.newick.annotations <- function(newick, taxonDiction) {
+parse.newick.annotations <- function(newick, taxonDiction = NULL) {
+  # ensure we are only using this if it's a buddPhylo
+  if (nrow(df) == 0) {
+    stop("No annotated nodes found. buddPhylo trees require [&...] ",
+         "annotations (e.g. orientation) on each node; a plain Newick ",
+         "tree can be read with ape::read.tree instead.")
+  }
+  
   # extract tokens
   pattern <- "([A-Za-z0-9_]+)(\\[&[^]]*\\])?(?::([0-9\\.eE+-]+))?"
   matches <- gregexpr(pattern, newick, perl = TRUE)
@@ -144,7 +164,6 @@ parse.newick.annotations <- function(newick, taxonDiction) {
     "\\s*,\\s*(?=(?:[^{}]*\\{[^{}]*\\})*[^{}]*$)",
     perl = TRUE
   )
-  
   
   # number of total nodes
   N <- length(annots)
@@ -219,28 +238,25 @@ parse.newick.annotations <- function(newick, taxonDiction) {
   
   # assemble data frame
   df <- data.frame(
-    name   = labels,
+    name = labels,
     length = lengths,
     cols,
     stringsAsFactors = FALSE,
     check.names = FALSE
   )
   
-  # extract and store lineage info:
-  df$lineage <- 
-    if (!is.null(taxonDiction)) taxonDiction$taxon[match(df$name, taxonDiction$id)]else df$name
-  
-  # If there is no "taxon" column, make it
-  if (!"taxon" %in% colnames(df)) {
-    df$taxon <- sub("_first|_last", "", df$lineage)
+  # translate name via taxonDiction if provided 
+  if (!is.null(taxonDiction)) {
+    m <- match(df$name, taxonDiction$id)
+    df$name[!is.na(m)] <- taxonDiction$taxon[m[!is.na(m)]]
   }
   
-  # last tidying:
+  # tidy
   rownames(df) <- NULL
   
-  # re ordering columns:
-  neworder <- match(c("lineage", "taxon", "orientation", "length", "name"), colnames(df))
-  df <- df[, c(neworder, (1:ncol(df))[-neworder])]
+  # put name, length, orientation up front; leave annotation cols after
+  front <- intersect(c("orientation", "length", "name"), colnames(df))
+  df <- df[, c(front, setdiff(colnames(df), front))]
   
   return(df)
 }
@@ -250,14 +266,12 @@ parse.newick.annotations <- function(newick, taxonDiction) {
 #' This function builds a \code{buddPhylo} object from the data contained in
 #' a newick tree.
 #'
-#' @param newick A character containing an annotated tree in newick
-#' (parenthetic) format (e.g., as output from \code{parse.nexus}).
+#' @inheritParams parse.newick.annotations
 #'
 #' @param parsedTxt A data frame similar to the one generated by
-#' \code{parse.newick.annotations}. It must contain node information on lineage
-#' (taxon + first/last occurrence), taxon (taxonomic name associated with the
-#' branch), orientation, branch length, node name, and any other annotations
-#' associated with every node in a tree.
+#' \code{parse.newick.annotations}. It must contain node information on 
+#' orientation, branch length, node name, and any other annotations associated 
+#' with every node in a tree.
 #'
 #' @param tolExtant Rounding error tolerance for assigning a tip as extant,
 #' given the distance in time from the tip that is further from the root.
@@ -265,72 +279,75 @@ parse.newick.annotations <- function(newick, taxonDiction) {
 #'
 #' @return A \code{buddPhylo} object.
 #'
-#' @author Matheus Januario
-#'
-#' @export
+#' @author Matheus Januario and Bruno do Rosario Petrucci.
 #'
 
-build.buddPhylo <- function(newick, parsedTxt, tolExtant = 10E-10) {
-  
+build.buddPhylo <- function(newick, parsedTxt, 
+                            taxonDiction = NULL, tolExtant = 10E-10) {
+  # start the branches data frame with the parsed annotations
   branches <- parsedTxt
   
-  # 1. Read input as a phylo object
+  # get the tree as a phylo object
   phyl <- ape::read.tree(text = newick)
-  # plot(phyl, cex=.5, show.node.label = T)
+  
+  # get tip names
   tip_names <- phyl$tip.label
-  if ("node.label" %in% names(phyl)) {
-    node_names <- phyl$node.label
-    assignNodeNamesManually <- FALSE
-  } else {
-    assignNodeNamesManually <- TRUE
+  
+  # match tip names with taxon dictionary, if it exists
+  if (!is.null(taxonDiction)) {
+    m <- match(tip_names, taxonDiction$id)
+    tip_names[!is.na(m)] <- taxonDiction$taxon[m[!is.na(m)]]
+    phyl$tip.label <- tip_names
   }
   
-  ################################
-  # Add parent branch information
-  
-  # Build full vector of node names (tips + internal nodes)
+  # build full vector of node names (tips + internal nodes)
   Ntip <- length(phyl$tip.label)
   Nnode <- phyl$Nnode
   
-  # If node names were missing, you already created them
-  node_names <- phyl$node.label
-  tip_names <- phyl$tip.label
-  
-  all_names <- c(phyl$tip.label, node_names)
+  # collect them together
+  all_names <- c(tip_names, phyl$node.label)
   
   # edge matrix: parent -> child (in numeric indices)
   edges <- phyl$edge
   
-  # Match each branch name to its parent
+  # match each branch name to its parent
   parent_of <- setNames(all_names[edges[, 1]], all_names[edges[, 2]])
   branches$parent <- parent_of[branches$name]
   
-  # The root (unique ancestor) will naturally get NA
+  # the root (unique ancestor) will get its own orientation
   branches$orientation[is.na(branches$parent)] <- "uca"
-  branches$parent[branches$parent == ""] <- NA # branches$name[branches$parent==""]
-  
-  # now mark which are sampled ancestors:
+
+  # now mark which are sampled ancestors
   sampAncs_names <- tip_names
-  sampAncs_names <- sampAncs_names[sampAncs_names %in% branches$name[branches$length == 0]]
+  sampAncs_names <- sampAncs_names[sampAncs_names %in% 
+                                     branches$name[branches$length == 0]]
   
+  # and assign the type of node for each branch
   branches$type <- "node"
   branches$type[branches$name %in% tip_names] <- "tip"
   branches$type[branches$name %in% sampAncs_names] <- "sampAnc"
   
+  # get a phylo object with no sampled ancestors to find coords
   phylo <- ape::keep.tip(phyl, branches$name[branches$type == "tip"])
   
   # if phylo only has one tip, we need to use the whole tree to find the coords
   if (length(phylo$tip.label) == 1) phylo <- phyl
   
+  # find the x and y coords of branches
   branches <- fix.coords(branches, phylo)
   
-  # Flagging extant species:
+  # flag extant species
   branches$extant <- FALSE
-  branches$extant[max(branches$x_coord, na.rm = T) - branches$x_coord < tolExtant] <- TRUE
+  branches$extant[max(branches$x_coord, na.rm = TRUE) - 
+                    branches$x_coord < tolExtant] <- TRUE
   
-  # correct lineage and taxon to NA for nodes
-  branches$lineage[branches$type == "node"] <- 
-    branches$taxon[branches$type == "node"] <- NA
+  # derive lineage and taxon from name + type
+  tip_like <- branches$type %in% c("tip", "sampAnc")
+  branches$lineage <- NA_character_
+  branches$lineage[tip_like] <- branches$name[tip_like]
+  branches$taxon <- NA_character_
+  branches$taxon[tip_like] <- 
+    sub("_(first|last)$", "", branches$name[tip_like])
   
   # set some helper variables for reordering
   N_row <- nrow(branches)
@@ -351,50 +368,67 @@ build.buddPhylo <- function(newick, parsedTxt, tolExtant = 10E-10) {
   branches <- branches[order(depth), , drop = FALSE]
   rownames(branches) <- NULL
   
+  # final reorder of columns
+  front <- c("lineage", "taxon", "orientation", "length", "name")
+  branches <- branches[, c(front, setdiff(colnames(branches), front))]
+  
+  # set classes
   class(branches) <- c("buddPhylo", "data.frame")
   
   return(branches)
 }
 
-#' Read a buddPhylo tree from a file in nexus format
+#' Read a buddPhylo tree from a file in Nexus format
 #'
-#' This function reads one or several trees in a NEXUS file.
+#' This function reads one or several trees in a Nexus file.
 #'
-#' @param file 	A character containing a nexus file name.
-#'
-#' @param treeNumbers A numeric vector containing which trees should be read.
-#' If \code{NULL} (default), the function reads all trees within \code{file}.
+#' @inheritParams parse.nexus
 #'
 #' @param timeFromRoot A logical indicating whether time should be expressed as
-#' time since the root (\code{timeFromRoot=TRUE}). If set to \code{FALSE}
-#' (default), time is expressed as millions of years ago (Mya), taking the tip extant tip that is further from the root as a reference for "present".
+#' time since the root (\code{TRUE}). If set to \code{FALSE} (default), time is 
+#' expressed as millions of years ago (Mya), taking the tip extant tip that is 
+#' further from the root as a reference for "present".
 #'
 #' @return A \code{buddPhylo} with the time adjusted accordingly.
 #'
-#' @author Matheus Januario
+#' @author Matheus Januario and Bruno do Rosario Petrucci
 #' 
 #' @export
 #'
 
-read.nexus.buddPhylo <- function(file, treeNumbers = NULL, timeFromRoot = FALSE) {
+read.nexus.buddPhylo <- function(file, treeNumbers = NULL, 
+                                 timeFromRoot = FALSE) {
+  # read the entire file
   full_text <- readLines(file)
   
-  # parse file info & build buddPhylo:
+  # parse file
   txt <- parse.nexus(text = full_text, treeNumbers = treeNumbers)
   
+  # get translate block
   translate_block <- extract.translate.block.nexus(text = full_text)
+  
+  # parse newick annotations
   branches <- lapply(txt, parse.newick.annotations, 
                      taxonDiction = translate_block)
   
+  # start list of trees
   res <- list()
+  
+  # iterate through trees in the file
   for (i in 1:length(txt)) {
-    phy <- build.buddPhylo(newick = txt[[i]], parsedTxt = branches[[i]])
-    res[[i]] <- adjust.timescale.buddPhylo(phy)
+    # build this tree
+    phy <- build.buddPhylo(newick = txt[[i]], parsedTxt = branches[[i]],
+                           taxonDiction = translate_block)
+
+    # adjust the timescale
+    res[[i]] <- adjust.timescale.buddPhylo(phy, timeFromRoot = timeFromRoot)
   }
   
+  # if we only have one tree, just take the first element
   if (length(res) == 1) {
     res <- res[[1]]
   } else {
+    # otherwise, set class
     class(res) <- "multi.buddPhylo"
   }
   
@@ -405,38 +439,56 @@ read.nexus.buddPhylo <- function(file, treeNumbers = NULL, timeFromRoot = FALSE)
 #'
 #' This function reads one or several trees in Newick file.
 #'
-#' @param file 	A character containing a nexus file name.
+#' @param file A character containing a Newick file name.
+#' 
+#' @param text A string with one or several trees in Newick format, separated
+#' by newlines (\code{\\n}). \code{NULL} by default. If not \code{NULL}, the 
+#' argument \code{file} is ignored.
 #'
-#' @param treeNumbers A numeric vector containing which trees should be read.
-#' If \code{NULL} (default), the function reads all trees within \code{file}.
-#'
-#' @param timeFromRoot A logical indicating whether time should be expressed as
-#' time since the root (\code{timeFromRoot=TRUE}). If set to \code{FALSE}
-#' (default), time is expressed as millions of years ago (Mya), taking the tip extant tip that is further from the root as a reference for "present".
+#' @inheritParams read.nexus.buddPhylo
 #'
 #' @return A \code{buddPhylo} with the time adjusted accordingly.
 #'
-#' @author Bruno do Rosario Petrucci
+#' @author Bruno do Rosario Petrucci.
 #' 
 #' @export
 #'
 
-read.trees.buddPhylo <- function(file, treeNumbers = NULL, timeFromRoot = FALSE) {
-  txt <- readLines(file)
+read.trees.buddPhylo <- function(file, text = NULL, treeNumbers = NULL, 
+                                 timeFromRoot = FALSE) {
+  # check if text is null
+  if (is.null(text)) {
+    # if so, read from file
+    txt <- readLines(file)
+  } else {
+    # otherwise, just use text
+    txt <- text
+  }
   
-  # parse file info & build buddPhylo:
+  # take just the treeNumbers supplied
+  if (!is.null(treeNumbers)) txt <- txt[treeNumbers]
+  
+  # parse newick annotations
   branches <- lapply(txt, parse.newick.annotations, 
                      taxonDiction = NULL)
   
+  # start list of trees
   res <- list()
+  
+  # iterate through trees in the file
   for (i in 1:length(txt)) {
+    # build this tree
     phy <- build.buddPhylo(newick = txt[[i]], parsedTxt = branches[[i]])
-    res[[i]] <- adjust.timescale.buddPhylo(phy)
+    
+    # adjust the timescale
+    res[[i]] <- adjust.timescale.buddPhylo(phy, timeFromRoot = timeFromRoot)
   }
   
+  # if we only have one tree, just take the first element
   if (length(res) == 1) {
     res <- res[[1]]
   } else {
+    # otherwise, set class
     class(res) <- "multi.buddPhylo"
   }
   

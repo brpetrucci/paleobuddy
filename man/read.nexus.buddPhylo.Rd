@@ -2,26 +2,28 @@
 % Please edit documentation in R/buddPhylo_reader.R
 \name{read.nexus.buddPhylo}
 \alias{read.nexus.buddPhylo}
-\title{Read a buddPhylo tree from a file in nexus format}
+\title{Read a buddPhylo tree from a file in Nexus format}
 \usage{
 read.nexus.buddPhylo(file, treeNumbers = NULL, timeFromRoot = FALSE)
 }
 \arguments{
-\item{file}{A character containing a nexus file name.}
+\item{file}{A character containing a Nexus filename. Optional, but at least
+one of \code{text} or \code{file} must be not \code{NULL}.}
 
 \item{treeNumbers}{A numeric vector containing which trees should be read.
 If \code{NULL} (default), the function reads all trees within \code{file}.}
 
 \item{timeFromRoot}{A logical indicating whether time should be expressed as
-time since the root (\code{timeFromRoot=TRUE}). If set to \code{FALSE}
-(default), time is expressed as millions of years ago (Mya), taking the tip extant tip that is further from the root as a reference for "present".}
+time since the root (\code{TRUE}). If set to \code{FALSE} (default), time is 
+expressed as millions of years ago (Mya), taking the tip extant tip that is 
+further from the root as a reference for "present".}
 }
 \value{
 A \code{buddPhylo} with the time adjusted accordingly.
 }
 \description{
-This function reads one or several trees in a NEXUS file.
+This function reads one or several trees in a Nexus file.
 }
 \author{
-Matheus Januario
+Matheus Januario and Bruno do Rosario Petrucci
 }
